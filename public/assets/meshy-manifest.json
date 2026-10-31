@@ -1,0 +1,22 @@
+[
+  {
+    "id": "lantern_fox",
+    "file": "lantern_fox.glb",
+    "source": "Official Meshy MCP; Blender normalization and 512px texture preparation",
+    "height": 1.9,
+    "triangles": 4193,
+    "sha256": "69f4caf932e2d14c7935c0a8f79e310ffce02c548fb9d2dccd727eddb09ca70f",
+    "preview_task": "01a1923c-9afd-7489-868b-11ad6a8f8262",
+    "refine_task": "01a1923d-6bdd-752d-947c-af7cf78431fc"
+  },
+  {
+    "id": "astral_beacon",
+    "file": "astral_beacon.glb",
+    "source": "Official Meshy MCP; Blender normalization and 512px texture preparation",
+    "height": 4.2,
+    "triangles": 4065,
+    "sha256": "90b8522dbd4528753c2ff2f39cd9760a921613c0798406695663d72234e3a2cd",
+    "preview_task": "01a1923c-a625-76d9-bb9f-d2a4e4ab31ba",
+    "refine_task": "01a1923e-12fd-75ec-abc4-d5aa7a845004"
+  }
+]

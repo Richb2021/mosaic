@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "id": "fractions-and-proportion",
+  "title": "The Broken Measure",
+  "subtitle": "Fractions · equivalence · fair allocation",
+  "intro": "The guild’s measuring instruments have lost their markings. Bridges, gardens and lantern lenses no longer agree on what a whole means. Mira and Ivo must rebuild four seals using parts of the same whole. The adventure and battles stay the same; the clues now concern fractions and proportion.",
+  "ending": "The guild’s measures agree again. You ordered fractions of the same whole, shared a fixed total, matched equivalent values and combined parts. The beacon shines because different ways of writing a quantity can still name the same amount.",
+  "dialogue": {
+    "quay": "Aster: “A fraction only makes sense when we know the whole. All the gate’s bars are equal in length. Speak to the keepers and restore the four seals. You can explore in any order.”",
+    "woods": "Tala: “The four bars represent one quarter, one half, three quarters and one whole of the same bar. Put them in increasing order. Two quarters cover exactly the same length as one half.”",
+    "mill": "Rook: “Our tank holds two litres, split into eight quarter-litre units. The workshop needs three quarters of a litre; the garden receives what remains. Share all eight units.”",
+    "quarry": "Nim: “Three quarters and six eighths name the same amount when the whole is unchanged. Doubling both numerator and denominator changes the number of pieces, not the total fraction. This creature is weak to gale.”",
+    "forge": "Jori: “A quarter plus a quarter is two quarters, or a half. Add parts measured in the same units. My cinder sentinel is weak to tide; guard to recover MP.”",
+    "observatory": "Edda: “The lenses use three values: one quarter, one half and three quarters. Work out each small expression, then turn its dial to the equivalent value.”",
+    "archive": "Sable: “Two eighths equal one quarter. Four eighths equal one half. Six eighths equal three quarters. Match equal quantities, not merely similar-looking numerals.”",
+    "beacon": "Teacher: “A whole can be divided in many ways. Your four seals show that you can compare, allocate and recombine parts. The Warden is weak to tide magic; watch for its heavy third-round attack.”"
+  },
+  "puzzles": {
+    "sequence": {
+      "title": "The measure gate",
+      "prompt": "All four fractions refer to the same whole. Arrange them from smallest to largest.",
+      "hint": "Imagine a bar cut into four equal parts: one part, two, three, then four.",
+      "explanation": "1/4 < 1/2 < 3/4 < 1. Comparing fractions requires a shared whole.",
+      "cards": [
+        "3/4",
+        "1",
+        "1/4",
+        "1/2"
+      ],
+      "solution": [
+        2,
+        3,
+        0,
+        1
+      ]
+    },
+    "allocation": {
+      "title": "A tank in quarters",
+      "prompt": "The tank contains 2 litres: eight quarter-litre units. Give the workshop 3/4 litre and the garden the rest. Each click moves one quarter-litre unit.",
+      "hint": "Three quarter-litre units make 3/4 litre. Five units remain.",
+      "explanation": "3/4 + 5/4 = 8/4 = 2 litres. The garden gets 5/4 litres, which is 1 1/4 litres.",
+      "total": 8,
+      "solution": 3,
+      "labels": [
+        "Workshop",
+        "Garden"
+      ],
+      "unit": "quarter-litre units"
+    },
+    "matching": {
+      "title": "Equivalent measures",
+      "prompt": "Connect fractions representing equal amounts of the same whole.",
+      "hint": "Divide both numerator and denominator by the same nonzero number.",
+      "explanation": "2/8 = 1/4; 4/8 = 1/2; 6/8 = 3/4. Equivalent fractions name the same quantity.",
+      "left": [
+        "2/8",
+        "4/8",
+        "6/8"
+      ],
+      "right": [
+        "3/4",
+        "1/4",
+        "1/2"
+      ],
+      "solution": [
+        1,
+        2,
+        0
+      ]
+    },
+    "dials": {
+      "title": "The lens sums",
+      "prompt": "Turn each lens to the value of its expression. All fractions use the same whole.",
+      "hint": "Two eighths are a quarter. Two quarters are a half. Removing one quarter from a whole leaves three quarters.",
+      "explanation": "1/8 + 1/8 = 1/4; 1/4 + 1/4 = 1/2; 1 − 1/4 = 3/4.",
+      "labels": [
+        "1/8 + 1/8",
+        "1/4 + 1/4",
+        "1 − 1/4"
+      ],
+      "options": [
+        "1/4",
+        "1/2",
+        "3/4"
+      ],
+      "solution": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "sources": [
+    {
+      "title": "OpenStax Prealgebra — Visualize fractions",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/4-1-visualize-fractions"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+[
+  {
+    "id": "tree",
+    "file": "tree.glb",
+    "source": "Blender procedural original",
+    "triangles": 128
+  },
+  {
+    "id": "pine",
+    "file": "pine.glb",
+    "source": "Blender procedural original",
+    "triangles": 70
+  },
+  {
+    "id": "palm",
+    "file": "palm.glb",
+    "source": "Blender procedural original",
+    "triangles": 176
+  },
+  {
+    "id": "rock",
+    "file": "rock.glb",
+    "source": "Blender procedural original",
+    "triangles": 40
+  },
+  {
+    "id": "house",
+    "file": "house.glb",
+    "source": "Blender procedural original",
+    "triangles": 128
+  },
+  {
+    "id": "stall",
+    "file": "stall.glb",
+    "source": "Blender procedural original",
+    "triangles": 168
+  },
+  {
+    "id": "arch",
+    "file": "arch.glb",
+    "source": "Blender procedural original",
+    "triangles": 80
+  },
+  {
+    "id": "chest",
+    "file": "chest.glb",
+    "source": "Blender procedural original",
+    "triangles": 60
+  },
+  {
+    "id": "lamp",
+    "file": "lamp.glb",
+    "source": "Blender procedural original",
+    "triangles": 54
+  },
+  {
+    "id": "bridge",
+    "file": "bridge.glb",
+    "source": "Blender procedural original",
+    "triangles": 180
+  },
+  {
+    "id": "crystal",
+    "file": "crystal.glb",
+    "source": "Blender procedural original",
+    "triangles": 100
+  },
+  {
+    "id": "pedestal",
+    "file": "pedestal.glb",
+    "source": "Blender procedural original",
+    "triangles": 104
+  },
+  {
+    "id": "shelf",
+    "file": "shelf.glb",
+    "source": "Blender procedural original",
+    "triangles": 264
+  },
+  {
+    "id": "forge",
+    "file": "forge.glb",
+    "source": "Blender procedural original",
+    "triangles": 60
+  },
+  {
+    "id": "waterwheel",
+    "file": "waterwheel.glb",
+    "source": "Blender procedural original",
+    "triangles": 216
+  },
+  {
+    "id": "telescope",
+    "file": "telescope.glb",
+    "source": "Blender procedural original",
+    "triangles": 108
+  },
+  {
+    "id": "dome",
+    "file": "dome.glb",
+    "source": "Blender procedural original",
+    "triangles": 164
+  },
+  {
+    "id": "pillar",
+    "file": "pillar.glb",
+    "source": "Blender procedural original",
+    "triangles": 84
+  },
+  {
+    "id": "bed",
+    "file": "bed.glb",
+    "source": "Blender procedural original",
+    "triangles": 36
+  },
+  {
+    "id": "flowers",
+    "file": "flowers.glb",
+    "source": "Blender procedural original",
+    "triangles": 192
+  },
+  {
+    "id": "sign",
+    "file": "sign.glb",
+    "source": "Blender procedural original",
+    "triangles": 24
+  },
+  {
+    "id": "fountain",
+    "file": "fountain.glb",
+    "source": "Blender procedural original",
+    "triangles": 136
+  }
+]

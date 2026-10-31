@@ -1,0 +1,10 @@
+export class Music {
+ constructor(onStatus){this.enabled=false;this.volume=.35;this.current=null;this.track='journey';this.onStatus=onStatus;this.error=null;this.instances=new Set();this.sequence=0;this.fadeFrame=0;document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const a of this.instances)a.pause()}else if(this.enabled)this.current?.play().catch(()=>{})});}
+ stopOthers(keep=null){for(const a of this.instances)if(a!==keep){a.pause();this.instances.delete(a)}}
+ async toggle(){this.enabled=!this.enabled;if(this.enabled)await this.set(this.track,true);else{this.sequence++;cancelAnimationFrame(this.fadeFrame);this.stopOthers();this.current=null;}this.onStatus?.();}
+ async set(track,force=false){if(track===this.track&&this.current&&!force)return;this.track=track;const id=++this.sequence;cancelAnimationFrame(this.fadeFrame);if(!this.enabled){this.stopOthers();this.current=null;return}const old=[...this.instances].map(a=>({a,volume:a.volume}));const a=new Audio('/audio/'+track+'.mp3');this.instances.add(a);a.loop=track!=='victory';a.volume=0;a.preload='auto';this.current=a;this.error=null;a.addEventListener('error',()=>{if(this.current===a){this.error='Music could not load. You can keep playing.';this.onStatus?.()}});
+ try{if(!document.hidden)await a.play()}catch{if(id===this.sequence){this.error='Tap Music again to enable playback.';this.enabled=false;this.stopOthers();this.current=null;this.onStatus?.()}return}
+ if(id!==this.sequence){a.pause();this.instances.delete(a);return}const started=performance.now();const fade=()=>{if(id!==this.sequence)return;const t=Math.min(1,(performance.now()-started)/750);a.volume=this.volume*t;for(const v of old)v.a.volume=v.volume*(1-t);if(t<1)this.fadeFrame=requestAnimationFrame(fade);else this.stopOthers(a)};fade();}
+ setVolume(v){this.volume=Math.max(0,Math.min(1,v));if(this.current)this.current.volume=this.volume;}
+ status(){return {enabled:this.enabled,track:this.track,paused:this.current?.paused??true,time:this.current?.currentTime??0,error:this.error,active:[...this.instances].filter(a=>!a.paused).length}}
+}

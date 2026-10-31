@@ -1,0 +1,113 @@
+{
+  "retrieved": "2026-10-31",
+  "usage": "Embedded in Lanternbound game only; no standalone asset redistribution",
+  "assets": [
+    {
+      "id": "polyfork_barrel",
+      "file": "polyfork_barrel.glb",
+      "provider": "Polyfork",
+      "source_id": "barrel-aadc94",
+      "source": "https://polyfork.dev/asset/barrel-aadc94",
+      "kit": "medieval-village-kit-ca0b43",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 0.89,
+        "y": 0.92,
+        "z": 0.89
+      },
+      "triangles": 564,
+      "sha256": "69a553f3598b7005957b18de39c3abb1e5f044aba768162cc98be6ae6278ac00"
+    },
+    {
+      "id": "polyfork_cart",
+      "file": "polyfork_cart.glb",
+      "provider": "Polyfork",
+      "source_id": "wooden-cart-bf83d8",
+      "source": "https://polyfork.dev/asset/wooden-cart-bf83d8",
+      "kit": "medieval-village-kit-ca0b43",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 1.57,
+        "y": 1.39,
+        "z": 2.52
+      },
+      "triangles": 1746,
+      "sha256": "cba8a07478ed7af57d5c53d19b3660c75705e51b1c5b4d1f233fbed784853d78"
+    },
+    {
+      "id": "polyfork_cottage",
+      "file": "polyfork_cottage.glb",
+      "provider": "Polyfork",
+      "source_id": "thatched-cottage-0e63f5",
+      "source": "https://polyfork.dev/asset/thatched-cottage-0e63f5",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 6,
+        "y": 5.06,
+        "z": 3.97
+      },
+      "triangles": 1764,
+      "sha256": "f34857a8e3e3e796480ba83c936e3a25a50a882f5311929cdaf840f63d5abbf3"
+    },
+    {
+      "id": "polyfork_townhouse",
+      "file": "polyfork_townhouse.glb",
+      "provider": "Polyfork",
+      "source_id": "two-story-house-40f6dc",
+      "source": "https://polyfork.dev/asset/two-story-house-40f6dc",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 5.7,
+        "y": 8.37,
+        "z": 7.66
+      },
+      "triangles": 1554,
+      "sha256": "71fb1590a2ac01270617504a15976912bebd3c672577c4ed8e0dcc9e6f7f6d78"
+    },
+    {
+      "id": "polyfork_maple",
+      "file": "polyfork_maple.glb",
+      "provider": "Polyfork",
+      "source_id": "maple-tree-65fa12",
+      "source": "https://polyfork.dev/asset/maple-tree-65fa12",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.29,
+        "y": 6.43,
+        "z": 3.21
+      },
+      "triangles": 422,
+      "sha256": "48f06cd8437151e1d50fc37f2e3d2b5ab98f2665ce0d03b3a56294e9ff30231e"
+    },
+    {
+      "id": "polyfork_pine",
+      "file": "polyfork_pine.glb",
+      "provider": "Polyfork",
+      "source_id": "tall-pine-tree-ab4108",
+      "source": "https://polyfork.dev/asset/tall-pine-tree-ab4108",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.67,
+        "y": 9,
+        "z": 3.56
+      },
+      "triangles": 350,
+      "sha256": "7f170b5f1abf6257cd22d2654743e0442b2a12b3453320f43f713877d336a9cd"
+    },
+    {
+      "id": "polyfork_birch",
+      "file": "polyfork_birch.glb",
+      "provider": "Polyfork",
+      "source_id": "birch-tree-181b33",
+      "source": "https://polyfork.dev/asset/birch-tree-181b33",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.01,
+        "y": 6.49,
+        "z": 2.1
+      },
+      "triangles": 619,
+      "sha256": "7a676f59c617785c2fc757a6bd9b86fcc6aa79dbae43b8f452b6ad2cdc0684f8"
+    }
+  ]
+}

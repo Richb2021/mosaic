@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "id": "evidence-and-arguments",
+  "title": "The Missing Lantern Log",
+  "subtitle": "Observation · inference · corroboration",
+  "intro": "Someone says a storm destroyed the beacon, but the surviving records do not all agree. Mira and Ivo must reconstruct what can be supported, what remains uncertain and what should be questioned. Every witness and document in this story is fictional. The reasoning habits can travel to real essays, assignments and investigations.",
+  "ending": "The beacon shines, and the repaired log separates observations from interpretations. You kept claims supported by the records, qualified uncertainty and rejected a contradicted statement. You have a better account of this fictional event—not proof that any one witness is always reliable.",
+  "dialogue": {
+    "quay": "Aster: “The story that travels fastest is not always the best supported. The harbour log records a power failure at noon. A later rumour blames lightning. We need to inspect where those claims came from.”",
+    "woods": "Tala: “First identify a source and its context. Then record what it actually says or shows. Compare it with other evidence. Finally decide how strongly the claim is supported. You can revisit earlier steps.”",
+    "mill": "Rook: “We have eight inspection hours. The plan requires five hours examining the physical switch and three comparing the records. Allocate the hours exactly. These numbers are a fictional project constraint.”",
+    "quarry": "Nim: “Two copies of one rumour are not independent witnesses. Ask whether accounts share a source. A confident tone does not make an inference an observation. The prowler is weak to gale magic.”",
+    "forge": "Jori: “A broken switch was found after the outage. That alone does not prove when it broke or that it caused the outage. We need more evidence. My sentinel is weak to tide.”",
+    "observatory": "Edda: “Here is our fictional record: the log says the light went out at noon; the weather register says no storm that day; a damaged switch was found later. Keep the noon claim, qualify the cause claim and reject the storm claim as contradicted by these records.”",
+    "archive": "Sable: “An observation records something seen or recorded. An inference interprets it. A question identifies what we still need to find out. Our labels describe the role of each sentence, not its guaranteed truth.”",
+    "beacon": "Teacher: “The available records support an outage at noon. They do not establish the cause. You can tell an honest story without filling every gap. The Warden is vulnerable to tide; brace for its heavy attack.”"
+  },
+  "puzzles": {
+    "sequence": {
+      "title": "Rebuild the investigation",
+      "prompt": "Arrange this useful investigation workflow. In real research you may loop back when new evidence appears.",
+      "hint": "Identify the source before describing it. Compare before deciding the strength of a claim.",
+      "explanation": "A useful sequence is source/context → observations → comparison → qualified conclusion. It is a working method, not an inflexible law.",
+      "cards": [
+        "Compare other evidence",
+        "Qualify the conclusion",
+        "Identify source and context",
+        "Record observations"
+      ],
+      "solution": [
+        2,
+        3,
+        0,
+        1
+      ]
+    },
+    "allocation": {
+      "title": "An investigation budget",
+      "prompt": "Allocate eight inspection hours: five for the physical switch and three for comparing records.",
+      "hint": "There are eight hours total. Give the switch five and the records three.",
+      "explanation": "The allocation follows the stated fictional investigation plan. It does not measure the reliability of either evidence source.",
+      "total": 8,
+      "solution": 5,
+      "labels": [
+        "Switch inspection",
+        "Record comparison"
+      ],
+      "unit": "hours"
+    },
+    "matching": {
+      "title": "What kind of statement?",
+      "prompt": "Match each sentence with its role in an investigation.",
+      "hint": "“Shows” describes a record. “Probably” offers an interpretation. A question asks what is missing.",
+      "explanation": "Observation: the log shows noon. Inference: a suggested explanation. Question: a gap to investigate. An observation still needs source checking.",
+      "left": [
+        "The log shows “outage: noon”.",
+        "The switch probably caused it.",
+        "When was the switch damaged?"
+      ],
+      "right": [
+        "Question",
+        "Observation",
+        "Inference"
+      ],
+      "solution": [
+        1,
+        2,
+        0
+      ]
+    },
+    "dials": {
+      "title": "Claims at the beacon",
+      "prompt": "Fictional records: the log places the outage at noon; the weather register reports no storm; a damaged switch was found later. Keep supported claims, qualify an unproven cause, and reject a claim contradicted by these records.",
+      "hint": "The time is recorded. The switch’s role is not established. A storm is contradicted by the weather record.",
+      "explanation": "Keep the recorded time; qualify the proposed cause; reject the storm claim against this evidence set. New reliable evidence could change the conclusion.",
+      "labels": [
+        "The outage was at noon",
+        "The switch caused the outage",
+        "A storm struck that day"
+      ],
+      "options": [
+        "Keep",
+        "Qualify",
+        "Reject"
+      ],
+      "solution": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "sources": [
+    {
+      "title": "Library of Congress — Primary source analysis guides",
+      "url": "https://www.loc.gov/programs/teachers/getting-started-with-primary-sources/guides/"
+    }
+  ]
+}

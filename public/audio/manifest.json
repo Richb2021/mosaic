@@ -1,0 +1,58 @@
+[
+  {
+    "id": "journey",
+    "title": "Lanternbound - Roads of Amber",
+    "file": "journey.mp3",
+    "duration_seconds": 108.06,
+    "generator": "Suno v6 via official MCP on Baldur",
+    "clip_id": "8b204937-62c6-4c75-829f-002b1431b412",
+    "song_url": "https://suno.com/song/8b204937-62c6-4c75-829f-002b1431b412",
+    "loop": true,
+    "preparation": "-18 LUFS target / -2 dBTP; 1.5 s boundary crossfade for ambient/battle loops",
+    "peak_dbfs": -6.08,
+    "rms_dbfs": -20.19,
+    "sha256": "adc300adff74490184b1ff73532b7c63c791aeefbc7f1fa06b62ba566d9c90dd"
+  },
+  {
+    "id": "discovery",
+    "title": "Lanternbound - Quiet Constellations",
+    "file": "discovery.mp3",
+    "duration_seconds": 107.26,
+    "generator": "Suno v6 via official MCP on Baldur",
+    "clip_id": "15997f91-36c3-478c-802e-238345142ff6",
+    "song_url": "https://suno.com/song/15997f91-36c3-478c-802e-238345142ff6",
+    "loop": true,
+    "preparation": "-18 LUFS target / -2 dBTP; 1.5 s boundary crossfade for ambient/battle loops",
+    "peak_dbfs": -5.54,
+    "rms_dbfs": -20.2,
+    "sha256": "f04d2e4cfc1dde5f4b42cc4f498d27246c7eff9ae89a691d089c90cc962d3465"
+  },
+  {
+    "id": "battle",
+    "title": "Lanternbound - Courage in the Clockwork",
+    "file": "battle.mp3",
+    "duration_seconds": 108.06,
+    "generator": "Suno v6 via official MCP on Baldur",
+    "clip_id": "f24d0a6f-9209-4976-8d64-45227926cc9e",
+    "song_url": "https://suno.com/song/f24d0a6f-9209-4976-8d64-45227926cc9e",
+    "loop": true,
+    "preparation": "-18 LUFS target / -2 dBTP; 1.5 s boundary crossfade for ambient/battle loops",
+    "peak_dbfs": -4.44,
+    "rms_dbfs": -19.51,
+    "sha256": "26b7ac5da4b20bd666cce355521638d13db5dcfe796748a7f1e37d8806edcf41"
+  },
+  {
+    "id": "victory",
+    "title": "Lanternbound - A Light Restored",
+    "file": "victory.mp3",
+    "duration_seconds": 18.0,
+    "generator": "Suno v6 via official MCP on Baldur",
+    "clip_id": "f8dd50f3-611d-409c-a269-abc75b34a11d",
+    "song_url": "https://suno.com/song/f8dd50f3-611d-409c-a269-abc75b34a11d",
+    "loop": false,
+    "preparation": "-18 LUFS target / -2 dBTP; one-shot fanfare",
+    "peak_dbfs": -6.24,
+    "rms_dbfs": -21.36,
+    "sha256": "7bce3c8d2b8f1139109f4a7074c1b2826f4520a8bf3b0c6687c5214dc343327d"
+  }
+]

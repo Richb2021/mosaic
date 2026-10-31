@@ -1,0 +1,449 @@
+{
+  "version": 4,
+  "active_assets": 37,
+  "assets": [
+    {
+      "id": "tree",
+      "file": "tree.glb",
+      "source": "Blender procedural original",
+      "triangles": 128,
+      "provider": "Blender",
+      "sha256": "e69099e025726d4f6c677a2c78ab1883b48b9f776907a95f83ad3b63005f0e59",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "pine",
+      "file": "pine.glb",
+      "source": "Blender procedural original",
+      "triangles": 70,
+      "provider": "Blender",
+      "sha256": "aeb0a8a396fc9251f9add6f5c7b7f199591a85af654a559ada5fdfbad0f500f2",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "palm",
+      "file": "palm.glb",
+      "source": "Blender procedural original",
+      "triangles": 176,
+      "provider": "Blender",
+      "sha256": "741fa5ce5df4957aefbc9cf34edd1206f0a573e44800a499e440c8290bc0dcc2",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "rock",
+      "file": "rock.glb",
+      "source": "Blender procedural original",
+      "triangles": 40,
+      "provider": "Blender",
+      "sha256": "9ef75e13635c9d3fc3ae4b7dcd6ff03fbafcfa0ccbba101a6a04988b6618b8fb",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "house",
+      "file": "house.glb",
+      "source": "Blender procedural original",
+      "triangles": 128,
+      "provider": "Blender",
+      "sha256": "e46cef0e6c555ad5ed23f95486f4a7820a9d0fdceb08f6d716a9dd519f9a6282",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "stall",
+      "file": "stall.glb",
+      "source": "Blender procedural original",
+      "triangles": 168,
+      "provider": "Blender",
+      "sha256": "a88e395e73f2edef6390eeebf98b28c10db43b3fdcb165d839601e002020a675",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "arch",
+      "file": "arch.glb",
+      "source": "Blender procedural original",
+      "triangles": 80,
+      "provider": "Blender",
+      "sha256": "e910725587460a372540419e416b1c77f4dab16491fdddd3979dc5b91071e339",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "chest",
+      "file": "chest.glb",
+      "source": "Blender procedural original",
+      "triangles": 60,
+      "provider": "Blender",
+      "sha256": "a42feff6bb1b4c979abef0d2d878724d5c133efee8f9a566127c07a9bf0b0588",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "lamp",
+      "file": "lamp.glb",
+      "source": "Blender procedural original",
+      "triangles": 54,
+      "provider": "Blender",
+      "sha256": "fef38a41baf1dfdd6691d34de5e33d1ff393cc4dbf13af9b275b852d6f8193df",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "bridge",
+      "file": "bridge.glb",
+      "source": "Blender procedural original",
+      "triangles": 180,
+      "provider": "Blender",
+      "sha256": "83844f0de98b97d1e4d1b4677a59088c2b99188b37054b96e955f62c844dcafd",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "crystal",
+      "file": "crystal.glb",
+      "source": "Blender procedural original",
+      "triangles": 100,
+      "provider": "Blender",
+      "sha256": "6309215e5ac4115a8f242f55a62ed66137671a432d3816a05ec8232aab0b5e72",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "pedestal",
+      "file": "pedestal.glb",
+      "source": "Blender procedural original",
+      "triangles": 104,
+      "provider": "Blender",
+      "sha256": "4dbe205e9effcf85ccd4d3327b308dfcb8e526052817283b51b0ee9427b893f8",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "shelf",
+      "file": "shelf.glb",
+      "source": "Blender procedural original",
+      "triangles": 264,
+      "provider": "Blender",
+      "sha256": "535630910f19d21b27e2b98513ad64f428037488dd4436d26b970483724a942e",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "forge",
+      "file": "forge.glb",
+      "source": "Blender procedural original",
+      "triangles": 60,
+      "provider": "Blender",
+      "sha256": "d8b7cd15a24dc20e85eaea0c726db781d5e802ff507eb7baba1ea2ca13b4d02a",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "waterwheel",
+      "file": "waterwheel.glb",
+      "source": "Blender procedural original",
+      "triangles": 216,
+      "provider": "Blender",
+      "sha256": "a8bfac7995ff596cce7246edbd62d900e739527d576b0b6c7b819bcfdc49bf0f",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "telescope",
+      "file": "telescope.glb",
+      "source": "Blender procedural original",
+      "triangles": 108,
+      "provider": "Blender",
+      "sha256": "63faf1cd08a51ed360cce7ccb3fd3b7b843c4af934be11f1d3dbf2c83b191c96",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "dome",
+      "file": "dome.glb",
+      "source": "Blender procedural original",
+      "triangles": 164,
+      "provider": "Blender",
+      "sha256": "c54c9092da2a21ee765d75f19829570d5cab017137fc06f78239db801ce49f61",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "pillar",
+      "file": "pillar.glb",
+      "source": "Blender procedural original",
+      "triangles": 84,
+      "provider": "Blender",
+      "sha256": "df1b8edca9929d721a92ddd6f3b72773587f6ff0ef35cba7b8a26437ffc8ded8",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "bed",
+      "file": "bed.glb",
+      "source": "Blender procedural original",
+      "triangles": 36,
+      "provider": "Blender",
+      "sha256": "e7e96d24516a632ac08ce43d5206a82f4aa9f71f7f7b717aed3e5590c65434d7",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "file": "hero_female.glb",
+      "height": 2.2,
+      "clips": [
+        "Attack",
+        "Block1",
+        "Casual_Walk",
+        "Hit_Reaction_to_Waist",
+        "Idle",
+        "mage_soell_cast"
+      ],
+      "bones": 24,
+      "triangles": 4372,
+      "sha256": "e13624f27724e2b9307566720672d6c140359db0dfc4ee835aaf5f1a855bec0e",
+      "source": "Meshy 7.1 image-to-3D, approved T-pose source, auto-rig and six animation clips; Blender preparation",
+      "id": "hero_female",
+      "provider": "Meshy + Blender",
+      "forward": "+Z",
+      "up": "Y",
+      "source_sha256": "59f84577bb7de2fe0a5aef71d273f119295010b51b612e4eb9a260a4ab4322c9",
+      "animated_source_sha256": "4c68793e0ccf87467e8d457969d4fcaffef8db6a8f030d02ee0b71b4c9beb8cc",
+      "animation_task_id": "01a1927b-1ff6-718d-a66e-339dc78a491a",
+      "model": "meshy-7.1",
+      "style": "Polyfork Medieval Village Kit"
+    },
+    {
+      "file": "hero_male.glb",
+      "height": 2.2,
+      "clips": [
+        "Attack",
+        "Block1",
+        "Casual_Walk",
+        "Hit_Reaction_to_Waist",
+        "Idle",
+        "mage_soell_cast"
+      ],
+      "bones": 24,
+      "triangles": 4391,
+      "sha256": "88144862586eff2eeac048102148616a79069835d58b6fca9a9b07767e5f46bd",
+      "source": "Meshy 7.1 image-to-3D, approved T-pose source, auto-rig and six animation clips; Blender preparation",
+      "id": "hero_male",
+      "provider": "Meshy + Blender",
+      "forward": "+Z",
+      "up": "Y",
+      "source_sha256": "40590c616b828530f2cd0172661740ad4ef658743e81bd79bd3fbbf5cb6c9e9b",
+      "animated_source_sha256": "bd54b5115af52a26d6d71bedf088b6a945f1f67922d456eed0519492dda17ccc",
+      "animation_task_id": "01a1927b-2015-7177-b31e-15da9ae29d06",
+      "model": "meshy-7.1",
+      "style": "Polyfork Medieval Village Kit"
+    },
+    {
+      "file": "ivo_rigged.glb",
+      "height": 2.2,
+      "clips": [
+        "Attack",
+        "Block1",
+        "Casual_Walk",
+        "Hit_Reaction_to_Waist",
+        "Idle",
+        "mage_soell_cast"
+      ],
+      "bones": 24,
+      "triangles": 4383,
+      "sha256": "b0dc166da1e4b685500be1dfd8841ef9afb9847396c98117ae452f94b7a0afc0",
+      "source": "Meshy 7.1 image-to-3D, approved T-pose source, auto-rig and six animation clips; Blender preparation",
+      "id": "ivo_rigged",
+      "provider": "Meshy + Blender",
+      "forward": "+Z",
+      "up": "Y",
+      "source_sha256": "2048a45c17097896d1c34050dad6b2fba4d7371c184a3556b569053465e686ba",
+      "animated_source_sha256": "49dc1ff5c7c0ee257ce411dc8014af4d144e364f586795d90c9b0b2d20b15ffe",
+      "animation_task_id": "01a1927b-ae08-7591-89b5-e64ce384f81b",
+      "model": "meshy-7.1",
+      "style": "Polyfork Medieval Village Kit"
+    },
+    {
+      "file": "guardian_rigged.glb",
+      "height": 3.2,
+      "clips": [
+        "Attack",
+        "Block1",
+        "Casual_Walk",
+        "Hit_Reaction_to_Waist",
+        "Idle",
+        "mage_soell_cast"
+      ],
+      "bones": 24,
+      "triangles": 4518,
+      "sha256": "02fe30b2ca94067102a0db5b690b88c5ec9e9ec2281d687b3492f7acb3aff005",
+      "source": "Meshy 7.1 image-to-3D, approved T-pose source, auto-rig and six animation clips; Blender preparation",
+      "id": "guardian_rigged",
+      "provider": "Meshy + Blender",
+      "forward": "+Z",
+      "up": "Y",
+      "source_sha256": "aa66c26ba280105b69a9c10547d8cd1dca7a191d517b46f31f63af73be3ebe59",
+      "animated_source_sha256": "2a2aec21802f45976734696ed91302d9eba07d75828321ca0864a77a093e113d",
+      "animation_task_id": "01a1927b-1fee-7692-97ab-951899d1ce1f",
+      "model": "meshy-7.1",
+      "style": "Polyfork Medieval Village Kit"
+    },
+    {
+      "id": "flowers",
+      "file": "flowers.glb",
+      "source": "Blender procedural original",
+      "triangles": 192,
+      "provider": "Blender",
+      "sha256": "c26f619a3eaa6004084d37a81e257211fc93c243b09aa450ebb348fef2fd8400",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "sign",
+      "file": "sign.glb",
+      "source": "Blender procedural original",
+      "triangles": 24,
+      "provider": "Blender",
+      "sha256": "73f41ecf459c63146d02be71291dc8db0da00ae55c2fd5dcf67bcec30c0a40ec",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "fountain",
+      "file": "fountain.glb",
+      "source": "Blender procedural original",
+      "triangles": 136,
+      "provider": "Blender",
+      "sha256": "5184d98baac89351fc4d941cf30f314ad41e5ce09c639eff2b82215408a39e69",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "lantern_fox",
+      "file": "lantern_fox.glb",
+      "source": "Official Meshy MCP; Blender normalization and 512px texture preparation",
+      "height": 1.9,
+      "triangles": 4193,
+      "sha256": "69f4caf932e2d14c7935c0a8f79e310ffce02c548fb9d2dccd727eddb09ca70f",
+      "preview_task": "01a1923c-9afd-7489-868b-11ad6a8f8262",
+      "refine_task": "01a1923d-6bdd-752d-947c-af7cf78431fc",
+      "provider": "Meshy MCP + Blender"
+    },
+    {
+      "id": "astral_beacon",
+      "file": "astral_beacon.glb",
+      "source": "Official Meshy MCP; Blender normalization and 512px texture preparation",
+      "height": 4.2,
+      "triangles": 4065,
+      "sha256": "90b8522dbd4528753c2ff2f39cd9760a921613c0798406695663d72234e3a2cd",
+      "preview_task": "01a1923c-a625-76d9-bb9f-d2a4e4ab31ba",
+      "refine_task": "01a1923e-12fd-75ec-abc4-d5aa7a845004",
+      "provider": "Meshy MCP + Blender"
+    },
+    {
+      "id": "courier_sword",
+      "file": "courier_sword.glb",
+      "source": "Original Blender weapon",
+      "provider": "Blender",
+      "sha256": "d82876765315587b06490b3e08eab5f34a7990a1ba1b86cda97b6a95e9a162b8",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "keeper_staff",
+      "file": "keeper_staff.glb",
+      "source": "Original Blender weapon",
+      "provider": "Blender",
+      "sha256": "77611112867748ca752c14a9c5aeb14d38b5661cf45da2ead9d57e5453a3c524",
+      "style": "Polyfork-aligned muted palette, matte solid materials, clean planar forms"
+    },
+    {
+      "id": "polyfork_barrel",
+      "file": "polyfork_barrel.glb",
+      "provider": "Polyfork",
+      "source_id": "barrel-aadc94",
+      "source": "https://polyfork.dev/asset/barrel-aadc94",
+      "kit": "medieval-village-kit-ca0b43",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 0.89,
+        "y": 0.92,
+        "z": 0.89
+      },
+      "triangles": 564,
+      "sha256": "69a553f3598b7005957b18de39c3abb1e5f044aba768162cc98be6ae6278ac00"
+    },
+    {
+      "id": "polyfork_cart",
+      "file": "polyfork_cart.glb",
+      "provider": "Polyfork",
+      "source_id": "wooden-cart-bf83d8",
+      "source": "https://polyfork.dev/asset/wooden-cart-bf83d8",
+      "kit": "medieval-village-kit-ca0b43",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 1.57,
+        "y": 1.39,
+        "z": 2.52
+      },
+      "triangles": 1746,
+      "sha256": "cba8a07478ed7af57d5c53d19b3660c75705e51b1c5b4d1f233fbed784853d78"
+    },
+    {
+      "id": "polyfork_cottage",
+      "file": "polyfork_cottage.glb",
+      "provider": "Polyfork",
+      "source_id": "thatched-cottage-0e63f5",
+      "source": "https://polyfork.dev/asset/thatched-cottage-0e63f5",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 6,
+        "y": 5.06,
+        "z": 3.97
+      },
+      "triangles": 1764,
+      "sha256": "f34857a8e3e3e796480ba83c936e3a25a50a882f5311929cdaf840f63d5abbf3"
+    },
+    {
+      "id": "polyfork_townhouse",
+      "file": "polyfork_townhouse.glb",
+      "provider": "Polyfork",
+      "source_id": "two-story-house-40f6dc",
+      "source": "https://polyfork.dev/asset/two-story-house-40f6dc",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 5.7,
+        "y": 8.37,
+        "z": 7.66
+      },
+      "triangles": 1554,
+      "sha256": "71fb1590a2ac01270617504a15976912bebd3c672577c4ed8e0dcc9e6f7f6d78"
+    },
+    {
+      "id": "polyfork_maple",
+      "file": "polyfork_maple.glb",
+      "provider": "Polyfork",
+      "source_id": "maple-tree-65fa12",
+      "source": "https://polyfork.dev/asset/maple-tree-65fa12",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.29,
+        "y": 6.43,
+        "z": 3.21
+      },
+      "triangles": 422,
+      "sha256": "48f06cd8437151e1d50fc37f2e3d2b5ab98f2665ce0d03b3a56294e9ff30231e"
+    },
+    {
+      "id": "polyfork_pine",
+      "file": "polyfork_pine.glb",
+      "provider": "Polyfork",
+      "source_id": "tall-pine-tree-ab4108",
+      "source": "https://polyfork.dev/asset/tall-pine-tree-ab4108",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.67,
+        "y": 9,
+        "z": 3.56
+      },
+      "triangles": 350,
+      "sha256": "7f170b5f1abf6257cd22d2654743e0442b2a12b3453320f43f713877d336a9cd"
+    },
+    {
+      "id": "polyfork_birch",
+      "file": "polyfork_birch.glb",
+      "provider": "Polyfork",
+      "source_id": "birch-tree-181b33",
+      "source": "https://polyfork.dev/asset/birch-tree-181b33",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "size_m": {
+        "x": 3.01,
+        "y": 6.49,
+        "z": 2.1
+      },
+      "triangles": 619,
+      "sha256": "7a676f59c617785c2fc757a6bd9b86fcc6aa79dbae43b8f452b6ad2cdc0684f8"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+import {WORLD_BOUNDS,MAPS} from './maps.js';
+export const AREA_IDS=['quay','woods','mill','quarry','forge','observatory','archive','beacon'];
+export const PUZZLE_IDS=['sequence','allocation','matching','dials'];
+export const ENEMIES={bramble:{name:'Bramble sentinel',hp:42,attack:7,weakness:'flare',xp:18},shard:{name:'Prism prowler',hp:50,attack:8,weakness:'gale',xp:22},cinder:{name:'Cinder sentinel',hp:54,attack:9,weakness:'tide',xp:25},guardian:{name:'The Hollow Warden',hp:138,attack:11,weakness:'tide',xp:60}};
+export const copy=x=>JSON.parse(JSON.stringify(x));
+export function hashPack(p){let h=2166136261;for(const c of JSON.stringify(p))h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0).toString(36)}
+export function validatePack(raw){
+ if(typeof raw==='string'){if(new TextEncoder().encode(raw).length>262144)throw Error('Topic file must be smaller than 256 KB.');raw=JSON.parse(raw)}
+ const p=copy(raw);let nodes=0;
+ function scan(o,depth=0){if(depth>10||++nodes>3000)throw Error('Topic structure is too complex.');if(typeof o==='string'&&o.length>6000)throw Error('A passage is too long.');if(o&&typeof o==='object')for(const k of Object.keys(o)){if(['__proto__','constructor','prototype'].includes(k))throw Error('Unsafe topic field.');scan(o[k],depth+1)}}scan(p);
+ const str=(x,n=1000)=>typeof x==='string'&&x.trim().length>0&&x.length<=n;
+ if(p.version!==1||!str(p.id,50)||!/^[a-z0-9-]+$/.test(p.id)||!str(p.title,80)||!str(p.subtitle,160)||!str(p.intro,1600)||!str(p.ending,1600))throw Error('Topic needs version 1, a lowercase id, title, subtitle, intro and ending.');
+ if(!p.dialogue||AREA_IDS.some(a=>!str(p.dialogue[a],1600)))throw Error('Add dialogue for all eight areas.');
+ if(!p.puzzles||PUZZLE_IDS.some(k=>!p.puzzles[k]))throw Error('All four puzzle types are required.');
+ for(const [key,q] of Object.entries(p.puzzles)){if(!PUZZLE_IDS.includes(key)||!str(q.title,100)||!str(q.prompt,1800)||!str(q.hint,1000)||!str(q.explanation,1600))throw Error('Every mechanism needs a title, prompt, hint and explanation.');}
+ const seq=p.puzzles.sequence;if(!Array.isArray(seq.cards)||seq.cards.length!==4||seq.cards.some(c=>!str(c,100))||!Array.isArray(seq.solution)||seq.solution.length!==4||new Set(seq.solution).size!==4||seq.solution.some(i=>!Number.isInteger(i)||i<0||i>3))throw Error('Sequence needs four cards and a permutation of 0,1,2,3.');
+ const a=p.puzzles.allocation;if(!Number.isInteger(a.total)||a.total<2||a.total>20||!Number.isInteger(a.solution)||a.solution<0||a.solution>a.total||!Array.isArray(a.labels)||a.labels.length!==2||a.labels.some(c=>!str(c,60))||!str(a.unit,50))throw Error('Allocation needs two labels, a unit, total 2–20 and a valid left amount.');
+ const m=p.puzzles.matching;if(!Array.isArray(m.left)||!Array.isArray(m.right)||m.left.length!==3||m.right.length!==3||[...m.left,...m.right].some(c=>!str(c,180))||!Array.isArray(m.solution)||m.solution.length!==3||new Set(m.solution).size!==3||m.solution.some(i=>!Number.isInteger(i)||i<0||i>2))throw Error('Matching needs three unique pairs.');
+ const d=p.puzzles.dials;if(!Array.isArray(d.labels)||d.labels.length!==3||d.labels.some(c=>!str(c,80))||!Array.isArray(d.options)||d.options.length!==3||d.options.some(c=>!str(c,80))||!Array.isArray(d.solution)||d.solution.length!==3||d.solution.some(i=>!Number.isInteger(i)||i<0||i>2))throw Error('Dials need three labels, three choices and three solution indices.');
+ if(!Array.isArray(p.sources)||p.sources.length>12||p.sources.some(s=>!str(s.title,160)||!str(s.url,500)||!/^https:\/\//.test(s.url)))throw Error('Sources must have titles and https links.');
+ return p;
+}
+export function initialState(p){return {version:1,pack:hashPack(p),area:'quay',pos:{x:0,z:4},visited:['quay'],seals:[],notes:[],chests:[],defeated:[],attempts:{},hints:[],xp:0,potions:3,party:[{name:'Mira',hp:64,mp:16},{name:'Ivo',hp:54,mp:24}],battle:null,ended:false,started:false,hero:'female'}}
+export const maxHP=(s,i)=>(i?54:64)+Math.floor(s.xp/40)*6;
+export const maxMP=(s,i)=>(i?24:16)+Math.floor(s.xp/40)*2;
+export function restore(s){s.party.forEach((p,i)=>{p.hp=maxHP(s,i);p.mp=maxMP(s,i)});s.battle=null;return s}
+export function validSave(raw,p){
+ try{const n=initialState(p);if(raw.version!==1||raw.pack!==n.pack||!AREA_IDS.includes(raw.area))return null;
+ const finite=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
+ if(!raw.pos||!finite(raw.pos.x,-WORLD_BOUNDS.x,WORLD_BOUNDS.x)||!finite(raw.pos.z,-WORLD_BOUNDS.z,WORLD_BOUNDS.z)||!Number.isInteger(raw.xp)||!finite(raw.xp,0,10000)||!Number.isInteger(raw.potions)||!finite(raw.potions,0,99))return null;
+ const list=(v,allowed)=>Array.isArray(v)&&v.length<=30&&v.every(x=>typeof x==='string'&&(!allowed||allowed.includes(x)))&&new Set(v).size===v.length;
+ if(!list(raw.visited,AREA_IDS)||!raw.visited.includes(raw.area)||!list(raw.seals,PUZZLE_IDS)||!list(raw.notes,AREA_IDS)||!list(raw.chests,AREA_IDS)||!list(raw.defeated,Object.keys(ENEMIES))||!list(raw.hints,PUZZLE_IDS))return null;
+ if(!Array.isArray(raw.party)||raw.party.length!==2||raw.party.some((h,i)=>!finite(h.hp,0,maxHP(raw,i))||!finite(h.mp,0,maxMP(raw,i))))return null;
+ for(const k of ['area','pos','visited','seals','notes','chests','defeated','hints','xp','potions','party'])n[k]=copy(raw[k]);
+ n.hero=['male','female'].includes(raw.hero)?raw.hero:'female';n.party.forEach((h,i)=>h.name=i?'Ivo':n.hero==='male'?'Ren':'Mira');n.ended=raw.ended===true&&n.defeated.includes('guardian');n.started=raw.started===true;
+ for(const k of PUZZLE_IDS)n.attempts[k]=Number.isInteger(raw.attempts?.[k])&&finite(raw.attempts[k],0,100000)?raw.attempts[k]:0;
+ if(raw.battle){const b=raw.battle,e=ENEMIES[b.id];if(!e||n.defeated.includes(b.id)||!finite(b.hp,1,e.hp)||![0,1].includes(b.actor)||!Number.isInteger(b.round)||!finite(b.round,1,1000)||!Array.isArray(b.guards)||b.guards.length!==2||b.guards.some(x=>typeof x!=='boolean'))return null;n.battle={id:b.id,hp:b.hp,actor:b.actor,round:b.round,guards:b.guards,inspected:b.inspected===true,log:Array.isArray(b.log)?b.log.filter(x=>typeof x==='string').slice(-5).map(x=>x.slice(0,200)):[]};if(n.party[b.actor].hp<=0)return null}
+ else if(n.party.every(h=>h.hp<=0))restore(n);
+ return n}catch{return null}
+}
+export function beginBattle(s,id){if(!ENEMIES[id]||s.battle||s.defeated.includes(id))return s;if(id==='guardian'&&s.seals.length<4)return s;s.battle={id,hp:ENEMIES[id].hp,actor:s.party[0].hp>0?0:1,round:1,guards:[false,false],inspected:false,log:[`${ENEMIES[id].name} approaches. Watch its next move.`]};return s}
+export function battleAction(state,action){
+ const s=copy(state),b=s.battle;if(!b)return {state:s,result:'none'};const e=ENEMIES[b.id],i=b.actor,h=s.party[i],level=Math.floor(s.xp/40);let message='';
+ if(action==='retreat'){s.battle=null;return {state:s,result:'retreat',message:'You withdraw safely. The path remains open.'}}
+ if(action==='attack'){const damage=10+level*2+(i===0?3:0);b.hp-=damage;message=`${h.name} strikes for ${damage}.`}
+ else if(['flare','tide','gale'].includes(action)){if(h.mp<4)return {state:s,result:'invalid',message:'Not enough MP. Guard to recover 3 MP.'};h.mp-=4;const weak=action===e.weakness,damage=(weak?25:15)+level*2;b.hp-=damage;message=`${h.name} uses ${action}: ${damage}${weak?' — a weakness!':''}.`}
+ else if(action==='guard'){b.guards[i]=true;h.mp=Math.min(maxMP(s,i),h.mp+3);message=`${h.name} braces and recovers 3 MP.`}
+ else if(action==='inspect'){b.inspected=true;message=`${e.name} is vulnerable to ${e.weakness}. A heavy attack comes every third round.`}
+ else if(action==='potion'){if(!s.potions)return {state:s,result:'invalid',message:'No tonics remain. Rest at Sunward Quay.'};s.potions--;const target=s.party[0].hp/maxHP(s,0)<=s.party[1].hp/maxHP(s,1)?0:1;s.party[target].hp=Math.min(maxHP(s,target),s.party[target].hp+36);message=`${h.name} restores 36 HP to ${s.party[target].name}.`}
+ else return {state:s,result:'invalid'};
+ b.log.push(message);
+ if(b.hp<=0){const oldLevel=Math.floor(s.xp/40);s.xp+=e.xp;s.defeated.push(b.id);s.potions=Math.min(99,s.potions+1);s.ended=b.id==='guardian';s.battle=null;if(Math.floor(s.xp/40)>oldLevel)restore(s);return {state:s,result:s.ended?'ending':'victory',message:`${e.name} rests. +${e.xp} XP · +1 tonic${Math.floor(s.xp/40)>oldLevel?' · Level up! HP and MP restored.':''}`}}
+ if(i===0&&s.party[1].hp>0)b.actor=1;
+ else{
+  const heavy=b.round%3===0;const targets=heavy?[0,1]:[b.round%2];for(let target of targets){if(s.party[target].hp<=0)target=1-target;const damage=Math.max(1,Math.round(e.attack*(heavy?1.6:1)*(b.guards[target]?.35:1)));s.party[target].hp=Math.max(0,s.party[target].hp-damage);b.log.push(`${heavy?'Crushing wave':'Stone strike'}: ${s.party[target].name} loses ${damage} HP.`)}
+  if(s.party.every(p=>p.hp<=0)){restore(s);s.area='quay';s.pos={x:0,z:3};return {state:s,result:'defeat',message:'The lantern carries you home. Your restored seals are safe. Rest, then try a different tactic.'}}
+  b.round++;b.actor=s.party[0].hp>0?0:1;b.guards=[false,false];
+ }
+ b.log=b.log.slice(-5);return {state:s,result:'turn',message};
+}
+export function checkPuzzle(p,id,value){const q=p.puzzles[id];if(id==='allocation')return Number.isInteger(value)&&value===q.solution;return Array.isArray(value)&&value.length===q.solution.length&&value.every((v,i)=>v===q.solution[i])}
+export function solvePuzzle(s,p,id,value){s.attempts[id]=(s.attempts[id]||0)+1;if(checkPuzzle(p,id,value)){if(!s.seals.includes(id))s.seals.push(id);return true}return false}
+export function travel(s,area,viaRoad=false){if(!AREA_IDS.includes(area)||s.battle)return false;const entry=viaRoad?MAPS[area].entities.find(e=>e.kind==='exit'&&e.to===s.area):null;s.area=area;s.pos=entry?{x:entry.x-Math.sign(entry.x)*2.5,z:entry.z-Math.sign(entry.z)*2.5}:{x:0,z:4};if(!s.visited.includes(area))s.visited.push(area);return true}
