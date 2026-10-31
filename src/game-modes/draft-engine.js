@@ -27,6 +27,22 @@ export function draftReflectionOptions(pack,state,index=state.scenarioIndex){
  }
  return orders[index];
 }
+export function draftReflectionText(pack,state,text,index=state.scenarioIndex){
+ const shown=draftReflectionOptions(pack,state,index);
+ if(!shown.length||typeof text!=='string')return text;
+ const ordinals={first:0,second:1,third:2,'1st':0,'2nd':1,'3rd':2};
+ // One replacement pass prevents a newly displayed letter being mapped again.
+ // Restrict the rewrite to explicit answer/option references, never story order.
+ return text.replace(/\b(?:(?:the\s+)?(first|second|third|1st|2nd|3rd)\s+(answer|option)|(answer|option)\s+([ABC]|[1-3]))\b/gi,(match,ordinal,before,after,label)=>{
+  // Lowercase "a" can be an article ("give each option a consequence").
+  if(label&&!/^[ABC1-3]$/.test(label))return match;
+  const canonical=ordinal?ordinals[ordinal.toLowerCase()]:/^[1-3]$/.test(label)?Number(label)-1:label.charCodeAt(0)-65;
+  const position=shown.findIndex(option=>option.canonicalIndex===canonical);
+  if(position<0)return match;
+  let noun=(before||after).toLowerCase();if(/^[A-Z]/.test(match))noun=noun[0].toUpperCase()+noun.slice(1);
+  return `${noun} ${String.fromCharCode(65+position)}`;
+ });
+}
 export function pickDraftCard(pack,state,id){need(draftPhase(state)==='draft','The draft is already complete.');need(draftHand(pack,state).some(c=>c.id===id),'Choose one of the cards in this hand.');return {...state,picks:[...state.picks,id]}}
 export function redrawDraft(pack,state){need(draftPhase(state)==='draft'&&state.redrawRound===-1,'The redraw has already been used.');return {...state,redrawRound:state.picks.length}}
 export function draftTotals(pack,state){return state.picks.reduce((out,id)=>{const c=pack.cards.find(c=>c.id===id);return out.map((n,i)=>n+c.scores[i])},[0,0,0])}

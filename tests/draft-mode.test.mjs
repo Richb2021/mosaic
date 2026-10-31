@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DRAFT_PACKS,DRAFT_SCHEMA,DRAFT_PROMPT,validateDraftContent,getDraftReferences,DRAFT_SOURCE_LINKS,getDraftSourceLink} from '../src/game-modes/draft-content.js';
-import {newDraft,draftPhase,draftHand,draftReflectionOptions,pickDraftCard,redrawDraft,draftTotals,draftOutcome,answerDraft,nextDraftScenario,validateDraftState,draftSaveKey,loadDraft,saveDraft} from '../src/game-modes/draft-engine.js';
+import {newDraft,draftPhase,draftHand,draftReflectionOptions,draftReflectionText,pickDraftCard,redrawDraft,draftTotals,draftOutcome,answerDraft,nextDraftScenario,validateDraftState,draftSaveKey,loadDraft,saveDraft} from '../src/game-modes/draft-engine.js';
 const clone=v=>structuredClone(v);
 const [industry,eco]=DRAFT_PACKS;
 const finishDraft=(pack,seed=11)=>{let s=newDraft(pack,seed);for(let i=0;i<5;i++)s=pickDraftCard(pack,s,draftHand(pack,s)[0].id);return s};
@@ -70,6 +70,19 @@ test('displayed choices preserve canonical reducer answers and remain stable aft
   assert.deepEqual(state.reflections[i],[wrong.canonicalIndex,p.scenarios[i].solution]);assert.deepEqual(draftReflectionOptions(p,state),shown);
   state=nextDraftScenario(p,state);
  }assert.equal(draftPhase(state),'complete')}
+});
+test('feedback maps explicit canonical answer references through all display permutations without rewriting story order',()=>{
+ const before=JSON.stringify(industry),permutations=new Set();
+ for(let seed=1;seed<=64;seed++)for(let i=0;i<4;i++){
+  const state=finishDraft(industry,seed),shown=draftReflectionOptions(industry,state,i),letter=n=>String.fromCharCode(65+shown.findIndex(o=>o.canonicalIndex===n));
+  permutations.add(shown.map(o=>o.canonicalIndex).join(''));
+  const original='The first answer is supported. Only the second option connects them. The third answer fails. Compare option B with answer A, then answer C. Answer 2 differs from the 1st option.';
+  assert.equal(draftReflectionText(industry,state,original,i),`Answer ${letter(0)} is supported. Only option ${letter(1)} connects them. Answer ${letter(2)} fails. Compare option ${letter(1)} with answer ${letter(0)}, then answer ${letter(2)}. Answer ${letter(1)} differs from option ${letter(0)}.`);
+  const factual='The first factory used water; a second worker joined. Give each option a consequence. The first choice in your draft was power.';
+  assert.equal(draftReflectionText(industry,state,factual,i),factual);
+ }
+ assert.equal(permutations.size,6);assert.equal(JSON.stringify(industry),before);
+ assert.match(DRAFT_PROMPT,/Avoid positional answer references/);
 });
 test('wrong reflection records feedback path without changing draft outcome',()=>{let s=finishDraft(industry);const outcome=draftOutcome(industry,s,0),correct=industry.scenarios[0].solution;s=answerDraft(industry,s,(correct+1)%3);assert.throws(()=>nextDraftScenario(industry,s),/Reflect/);assert.deepEqual(draftOutcome(industry,s,0),outcome);s=answerDraft(industry,s,correct);assert.equal(s.reflections[0].length,2);assert.equal(nextDraftScenario(industry,s).scenarioIndex,1)});
 test('complete journey can finish regardless of scenario outcome; answers persist separately',()=>{for(const p of DRAFT_PACKS){let s=finishDraft(p,22);for(let i=0;i<4;i++){s=answerDraft(p,s,(p.scenarios[i].solution+1)%3);s=answerDraft(p,s,p.scenarios[i].solution);s=nextDraftScenario(p,s)}assert.equal(draftPhase(s),'complete');assert.equal(s.reflections.flat().length,8);assert.deepEqual(validateDraftState(JSON.parse(JSON.stringify(s)),p),s)}});
