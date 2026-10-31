@@ -1,3 +1,4 @@
+import {DISCOVERIES} from './scenes.js';
 import {makeInteriors,BUILDINGS} from './interiors.js';
 const prop=(asset,x,z,scale=1,rotation=0)=>({asset,x,z,scale,rotation});
 const npc=(name,x,z)=>({id:'npc',kind:'npc',name,x,z,asset:'ivo'});
@@ -54,6 +55,7 @@ for(const [id,m] of Object.entries(MAPS)){
  for(const z of [-18.2,18.2])for(let x=-22;x<=22;x+=2){if(gap(x,z))continue;m.boundaries.push([x,z,2.1,1]);}
  m.obstacles.push(...m.boundaries);
 }
+for(const [id,d] of Object.entries(DISCOVERIES))MAPS[d.area].entities.push({id,kind:'discovery',name:'Inspect '+d.title,asset:'crystal',x:d.x,z:d.z});
 export const INTERIORS=makeInteriors(MAPS);
 export {BUILDINGS};
 export const getMap=s=>s.interior?INTERIORS[s.interior]:MAPS[s.area];

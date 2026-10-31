@@ -76,3 +76,7 @@ Shops buy and sell tonics and ether. The outfitter sells two permanent party cha
 The content contract and room identifiers are documented in [SETTLEMENTS.md](docs/SETTLEMENTS.md). Companion stories live in `public/settlements/`. Exports include the editable `settlement` section; older custom topics receive a household request using their own allocation task. Unchanged custom export/import retains its save. Built-in story wording edits retain request progress; structural edits reset unfinished requests but preserve completed rewards.
 
 `tests/settlement.test.mjs` covers room reachability, save migration, shops, healing, all nine quest chains and malformed content. `tests/resident.test.mjs` parses all four GLBs and checks animation/clone isolation. The parent `scripts/check_rpg_interiors.py` walks all eighteen interiors, completes five quest chains across the three topics, checks commerce, inn recovery, persistence, keyboard focus, mobile layouts and imports through the real UI.
+
+### JRPG depth release
+
+Individual equipment and permanent AP techniques, support ability budgets, distinct hero roles, enemy tactics, Rally abilities, eight companion scenes, six exploration rewards, practice battles and directed battle/victory presentation are now available. Existing topic saves migrate additively. See [the comparison, controls and remaining production gaps](docs/JRPG-GAP-REVIEW.md).
