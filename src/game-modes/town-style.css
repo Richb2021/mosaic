@@ -8,3 +8,4 @@
 /* Match the map's camera ratio to available height so the art stays continuous. */
 @media(min-width:761px){.living-town{max-width:min(1680px,max(1000px,calc(180dvh - 281px)))}.town-map{max-height:none}.town-map-scroll{background-image:none!important}}
 .living-town .town-restart{display:block;font-size:11px;color:#a9bbb6;padding-top:0}
+.town-tools button>span:not(.town-tool-symbol){max-width:100%;overflow:hidden;text-overflow:ellipsis}

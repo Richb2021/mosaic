@@ -17,13 +17,13 @@ Only orthogonal roads linked to the hall activate adjoining facilities. Schools 
 
 ## Dynamic content contract
 
-The existing upload→source review→Wonder generation→content review→publish→play workflow accepts `town-v1`. The server pins identity, exact arrays, source IDs and canonical excerpt text. The model supplies names, purpose, story, four ordered two-choice events and a debrief. It cannot change formulas, effects, assets, map, costs, goals or JavaScript. A reviewer must check semantic fit as well as source support; a valid citation does not itself prove that prose is correct. An unrelated subject may be unsuitable for this format.
+The existing upload→source review→Wonder generation→content review→publish→play workflow accepts `town-v1`. The server pins identity, exact arrays, source IDs and canonical excerpt text. The model supplies names, purpose, story, four ordered two-choice events and a debrief. The template supplies ending narration and authoritative goals; model-authored ending text is discarded. Review normalizes this representation, and publishing persists the validated canonical pack. It cannot change formulas, effects, assets, map, costs, goals or JavaScript. A reviewer must check semantic fit as well as source support; a valid citation does not itself prove that prose is correct. An unrelated subject may be unsuitable for this format.
 
 Generation uses `muse-wonder-1.0`, with the existing server-only credential and owner-scoped resource/job storage. No new API, database migration, account flow or audience change. Upload remains UTF-8 TXT/Markdown,64KB maximum; PDF/Word extraction is not connected. Generated and imported packs can be downloaded/reused. Browser progress is local; cross-device progress is not implemented.
 
 ## Save and accessibility
 
-Saves contain bounded action history, content fingerprint and version, not trusted balances. Restore replays every legal action; forged balances and impossible histories cannot become a valid state. Future economic rule changes require an engine/save format revision. Board keyboard navigation uses arrows and Enter/Space; build controls retain focus, dialogs trap and restore focus, reduced motion disables ambient smoke. Mobile contains horizontal map and palette scrolling rather than overflowing the page.
+Saves contain bounded action history, content fingerprint and version, not trusted balances. Construction stops at480actions, leaving20entries to finish remaining turns and decisions; restart is always available. Restore replays every legal action; forged balances and impossible histories cannot become a valid state. Future economic rule changes require an engine/save format revision. Board keyboard navigation uses arrows and Enter/Space; build controls retain focus, dialogs trap and restore focus, reduced motion disables ambient smoke. Mobile contains horizontal map and palette scrolling rather than overflowing the page.
 
 ## Asset provenance and design evidence
 
