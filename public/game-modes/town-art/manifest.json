@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "status": "ready",
+  "provider": "Sorceress",
+  "style": "Painterly late-1990s isometric adventure town; slate, warm stone, brass, moss",
+  "projection": {
+    "type": "orthographic-isometric",
+    "view": "southeast",
+    "groundAngleDegrees": 30
+  },
+  "buildings": {
+    "hall": {
+      "url": "/game-modes/town-art/hall.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        124,
+        153,
+        596,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "294971bb-6991-4a9b-85fc-5cf3e8efae08"
+    },
+    "home": {
+      "url": "/game-modes/town-art/home.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        180,
+        229,
+        539,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "da5ebc26-99da-4010-8d6d-5eaab6cf4651"
+    },
+    "workshop": {
+      "url": "/game-modes/town-art/workshop.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        105,
+        139,
+        614,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "2ef1b30e-3c69-4ed9-91a3-7a907347f30e"
+    },
+    "market": {
+      "url": "/game-modes/town-art/market.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        92,
+        175,
+        627,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "43ff54ac-aaa9-48af-8b11-d3ebce6b51ef"
+    },
+    "warehouse": {
+      "url": "/game-modes/town-art/warehouse.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        127,
+        168,
+        592,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "1e12dba6-b9a6-4450-bfde-97d8c4dcc73f"
+    },
+    "school": {
+      "url": "/game-modes/town-art/school.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        112,
+        196,
+        607,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "fbec33ad-6858-4091-b69e-0e58afd6bce3"
+    },
+    "clinic": {
+      "url": "/game-modes/town-art/clinic.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        139,
+        233,
+        581,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "de0f1725-3d7a-423b-9ed1-6e8da3d30814"
+    },
+    "garden": {
+      "url": "/game-modes/town-art/garden.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        48,
+        272,
+        672,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "e8d5d6b1-87c2-49fc-a8d9-7f8e1001f7f0"
+    },
+    "power": {
+      "url": "/game-modes/town-art/power.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        142,
+        182,
+        577,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "757253ef-d76c-4fc6-a0e9-404a2c45b376"
+    },
+    "water": {
+      "url": "/game-modes/town-art/water.webp",
+      "width": 720,
+      "height": 720,
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "contentBounds": [
+        172,
+        182,
+        547,
+        677
+      ],
+      "sourceJobId": "bcbccd3e-00c4-4771-9bf1-6b1273a6da1f",
+      "keyJobId": "d1dfa92f-fb84-4b75-ae58-012b441b736f"
+    }
+  },
+  "backdrop": "/game-modes/town-art/backdrop.webp"
+}
