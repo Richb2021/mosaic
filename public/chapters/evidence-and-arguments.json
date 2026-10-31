@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "template": "underlight-v1",
+  "id": "underlight-evidence-and-arguments",
+  "topicId": "evidence-and-arguments",
+  "revision": 1,
+  "title": "The record that kept the lights on",
+  "hook": "Two maintenance records disagree about the shutdown. Nessa refuses to blame the newest apprentice without checking what the records can actually support.",
+  "sources": [
+    {
+      "id": "workshop-notes",
+      "title": "Nessa\u2019s maintenance handbook",
+      "locator": "Underlight Works \u00b7 authored teaching note 1",
+      "excerpt": "Inspect an original record and its context before comparing independent accounts. A conclusion should acknowledge what the available evidence cannot establish. Copies of one report are repeated evidence, not new independent observations. A claim that goes beyond the measurements is an unsupported inference."
+    }
+  ],
+  "aftermath": {
+    "gardens": "The first current reaches the community gardens. New green shoots appear around Tidewheel Mill. Nessa stays to teach the gardeners how to maintain their share.",
+    "homes": "Warm lanterns return to the mill cottages. Families leave lamps in their windows, and Nessa begins a rota so everyone can help maintain the Works."
+  },
+  "challenges": {
+    "route": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "sequence",
+      "title": "The routing engine",
+      "prompt": "Route the inspection through the original record, a comparison with independent accounts, and a conclusion that respects uncertainty.",
+      "labels": [
+        "Compare independent accounts",
+        "Record a qualified conclusion",
+        "Inspect the original record"
+      ],
+      "solution": [
+        2,
+        0,
+        1
+      ],
+      "objective": "Order a process and explain why one stage depends on another.",
+      "explanation": "The machine settles. Inspect an original record and its context before comparing independent accounts. A conclusion should acknowledge what the available evidence cannot establish. Copies of one report are repeated evidence, not new independent observations. A claim that goes beyond the measurements is an unsupported inference."
+    },
+    "balance": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "allocation",
+      "title": "The counterweight regulator",
+      "prompt": "Eight archive slots are available. Six records come from independent observations; two copy the same original. Allocate the slots accurately before the machine counts the evidence.",
+      "labels": [
+        "Independent checks",
+        "Repeated copies"
+      ],
+      "solution": 6,
+      "objective": "Apply a quantitative constraint while preserving the total.",
+      "explanation": "The machine settles. Inspect an original record and its context before comparing independent accounts. A conclusion should acknowledge what the available evidence cannot establish. Copies of one report are repeated evidence, not new independent observations. A claim that goes beyond the measurements is an unsupported inference.",
+      "total": 8
+    },
+    "transfer": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "dials",
+      "title": "A different load",
+      "prompt": "A second incident has arrived. Label the new records by what they provide. Repetition is not independence, and a confident sentence is not a measurement.",
+      "labels": [
+        "A dated direct observation",
+        "Five copies of one report",
+        "A claim beyond the measurements"
+      ],
+      "solution": [
+        0,
+        1,
+        2
+      ],
+      "objective": "Apply the same idea to a new representation or situation.",
+      "explanation": "The machine settles. Inspect an original record and its context before comparing independent accounts. A conclusion should acknowledge what the available evidence cannot establish. Copies of one report are repeated evidence, not new independent observations. A claim that goes beyond the measurements is an unsupported inference.",
+      "options": [
+        "Independent evidence",
+        "Repeated evidence",
+        "Unsupported inference"
+      ]
+    }
+  }
+}

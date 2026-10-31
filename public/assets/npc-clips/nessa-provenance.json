@@ -1,0 +1,28 @@
+{
+  "provider": "Polyfork",
+  "library": "Quaternius UAL",
+  "license": "CC0 as identified by official Polyfork clips.mjs",
+  "adapter": "Native Mixamo-named T-pose skeleton; rotation tracks with scaled vertical hip motion; no re-rigging",
+  "files": [
+    {
+      "file": "anim-arms-folded.json",
+      "source": "https://polyfork.dev/cdn/anim-arms-folded.json",
+      "sha256": "abaf9a7a54d1c1ccb74d05f4754e3a7aa547a2122bb99ad6fff6e0ece2452f1b"
+    },
+    {
+      "file": "anim-walk-formal.json",
+      "source": "https://polyfork.dev/cdn/anim-walk-formal.json",
+      "sha256": "32ada74a8f84685454b33d36b460ff1e9290308c6b1b73d68d49b56d2375bbf1"
+    },
+    {
+      "file": "anim-interact.json",
+      "source": "https://polyfork.dev/cdn/anim-interact.json",
+      "sha256": "0787561c759497f94bee6a27db7a060bc5e057119df5954b98ce56fea9a1cfb3"
+    },
+    {
+      "file": "anim-fixing.json",
+      "source": "https://polyfork.dev/cdn/anim-fixing.json",
+      "sha256": "275dc10fe054e98c73f9034826a1c90fbd249431695382f37f236ebbee9691fe"
+    }
+  ]
+}

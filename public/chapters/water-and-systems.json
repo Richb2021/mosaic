@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "template": "underlight-v1",
+  "id": "underlight-water-and-systems",
+  "topicId": "water-and-systems",
+  "revision": 1,
+  "title": "The current beneath our feet",
+  "hook": "The town\u2019s old waterworks has lost its rhythm. Nessa\u2019s machines still follow instructions, but somebody has put the stages in the wrong order.",
+  "sources": [
+    {
+      "id": "workshop-notes",
+      "title": "Nessa\u2019s maintenance handbook",
+      "locator": "Underlight Works \u00b7 authored teaching note 1",
+      "excerpt": "Heating liquid water can produce water vapour, a gas. Cooling vapour can form liquid droplets. Water collected in a tank is liquid. A supply divided in a 1:2 ratio has three equal shares; the first destination gets one share and the second gets two."
+    }
+  ],
+  "aftermath": {
+    "gardens": "The first current reaches the community gardens. New green shoots appear around Tidewheel Mill. Nessa stays to teach the gardeners how to maintain their share.",
+    "homes": "Warm lanterns return to the mill cottages. Families leave lamps in their windows, and Nessa begins a rota so everyone can help maintain the Works."
+  },
+  "challenges": {
+    "route": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "sequence",
+      "title": "The routing engine",
+      "prompt": "Connect the evaporator to the cooling chamber, then the storage tank. Follow the movement of water, not the positions of the switches.",
+      "labels": [
+        "Storage",
+        "Evaporation",
+        "Condensation"
+      ],
+      "solution": [
+        1,
+        2,
+        0
+      ],
+      "objective": "Order a process and explain why one stage depends on another.",
+      "explanation": "The machine settles. Heating liquid water can produce water vapour, a gas. Cooling vapour can form liquid droplets. Water collected in a tank is liquid. A supply divided in a 1:2 ratio has three equal shares; the first destination gets one share and the second gets two."
+    },
+    "balance": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "allocation",
+      "title": "The counterweight regulator",
+      "prompt": "Twelve measures arrive each cycle. Homes need twice as much as the gardens. Move the counterweight until both branches receive their share.",
+      "labels": [
+        "Gardens",
+        "Homes"
+      ],
+      "solution": 4,
+      "objective": "Apply a quantitative constraint while preserving the total.",
+      "explanation": "The machine settles. Heating liquid water can produce water vapour, a gas. Cooling vapour can form liquid droplets. Water collected in a tank is liquid. A supply divided in a 1:2 ratio has three equal shares; the first destination gets one share and the second gets two.",
+      "total": 12
+    },
+    "transfer": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "dials",
+      "title": "A different load",
+      "prompt": "A new cooling loop is connected. Set the state of the water at each station: rising vapour, droplets in a cloud, and the collected water.",
+      "labels": [
+        "Rising vapour",
+        "Cloud chamber",
+        "Water collected"
+      ],
+      "solution": [
+        1,
+        0,
+        0
+      ],
+      "objective": "Apply the same idea to a new representation or situation.",
+      "explanation": "The machine settles. Heating liquid water can produce water vapour, a gas. Cooling vapour can form liquid droplets. Water collected in a tank is liquid. A supply divided in a 1:2 ratio has three equal shares; the first destination gets one share and the second gets two.",
+      "options": [
+        "Liquid",
+        "Gas",
+        "Solid"
+      ]
+    }
+  }
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "works_beetle",
+    "file": "works_beetle.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "0498acdc07aa2d23c2485702e9ba4af933cf36eb3772a3992894c17aedd47452",
+    "triangles": 476,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_moth",
+    "file": "works_moth.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "96db74d646d2770b8cc429033ed84781b70a520b8aa6e2fd665210f72e148891",
+    "triangles": 88,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_sentry",
+    "file": "works_sentry.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "c2db8d0d870cc9f4bc97a289eb1bd00f184df6c46520413bd5f80007a436919f",
+    "triangles": 364,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_heart",
+    "file": "works_heart.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "cc81680229e005a951599de7f0bb10b19ba3eca84ea6e8bc9ad6ca0c047b36b9",
+    "triangles": 776,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_turbine",
+    "file": "works_turbine.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "ef7d586975bb47dd6425f29e6c1d34b34076721991eeb13e621170105d7df7e4",
+    "triangles": 528,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_pipe",
+    "file": "works_pipe.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "6b48663ecf91b64f8ed62f10fb756691274053f0bde3f524532ee4d66c83808c",
+    "triangles": 112,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_pillar",
+    "file": "works_pillar.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "932d9c07a000c307dcdd45feff8ef58d7142715e811cf8c86304e027af3ae5b0",
+    "triangles": 144,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_console",
+    "file": "works_console.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "9afd767c302b57f994da59ffe2e89ba9b14ba0d0572092e6d59c18c9e2b5d400",
+    "triangles": 220,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_tank",
+    "file": "works_tank.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "6b01773c0c9aec323ab4d05a085f5759fb73bcbb1e8c14553e917795cad82c0e",
+    "triangles": 232,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  },
+  {
+    "id": "works_bridge",
+    "file": "works_bridge.glb",
+    "provider": "Blender",
+    "source": "Original Underlight Works kit",
+    "sha256": "e09cac61372fb1d26ffd35e8e87c914b815b7000e2716f2084ebfdb4c51b616e",
+    "triangles": 612,
+    "style": "Polyfork-aligned matte brass / muted stone / wood; rigid nonhumanoid articulation"
+  }
+]

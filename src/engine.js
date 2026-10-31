@@ -1,3 +1,4 @@
+import {initialChapter,validChapter} from './chapter.js';
 import {initialChronicle,validChronicle} from './scenes.js';
 import {initialGrowth,validGrowth,ABILITIES,hasAbility,hasSupport,bonus,awardAP} from './progression.js';
 import {validateSettlement} from './quests.js';
@@ -24,7 +25,7 @@ export function validatePack(raw){
  if(p.settlement!==undefined)p.settlement=validateSettlement(p.settlement);
  return p;
 }
-export function initialState(p){return {version:1,pack:hashPack(p),area:'quay',pos:{x:0,z:4},visited:['quay'],seals:[],notes:[],chests:[],defeated:[],attempts:{},hints:[],xp:0,potions:3,party:[{name:'Mira',hp:64,mp:16},{name:'Ivo',hp:54,mp:24}],battle:null,ended:false,started:false,hero:'female',interior:null,visitedInteriors:[],gold:40,ether:0,gear:[],quests:{},questContent:null,trackedQuest:null,growth:initialGrowth(),chronicle:initialChronicle()}}
+export function initialState(p){return {version:1,pack:hashPack(p),area:'quay',pos:{x:0,z:4},visited:['quay'],seals:[],notes:[],chests:[],defeated:[],attempts:{},hints:[],xp:0,potions:3,party:[{name:'Mira',hp:64,mp:16},{name:'Ivo',hp:54,mp:24}],battle:null,ended:false,started:false,hero:'female',interior:null,visitedInteriors:[],gold:40,ether:0,gear:[],quests:{},questContent:null,trackedQuest:null,growth:initialGrowth(),chronicle:initialChronicle(),chapter:initialChapter()}}
 export const maxHP=(s,i)=>(i?54:64)+Math.floor(s.xp/40)*6+(s.gear?.includes('brass-pin')?6:0);
 export const maxMP=(s,i)=>(i?24:16)+Math.floor(s.xp/40)*2+(s.gear?.includes('focus-clasp')?3:0);
 export function restore(s){s.party.forEach((p,i)=>{p.hp=maxHP(s,i);p.mp=maxMP(s,i)});s.battle=null;return s}
@@ -33,7 +34,7 @@ export function validSave(raw,p){
  const finite=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  n.growth=validGrowth(raw.growth);n.chronicle=validChronicle(raw.chronicle);if(!n.growth||!n.chronicle)return null;
  if(raw.interior!==undefined&&raw.interior!==null&&(!BUILDINGS[raw.interior]||BUILDINGS[raw.interior].area!==raw.area||raw.battle))return null;
- n.interior=raw.interior||null;const bounds=getMap(n).bounds;
+ n.interior=raw.interior||null;n.chapter=validChapter(raw.chapter);if(!n.chapter||n.chapter.room&&(raw.area!=='mill'||n.interior||raw.battle))return null;const bounds=getMap(n).bounds;
  if(raw.gear!==undefined&&(!Array.isArray(raw.gear)||raw.gear.length>2||new Set(raw.gear).size!==raw.gear.length||raw.gear.some(g=>!['brass-pin','focus-clasp'].includes(g))))return null;
  n.gear=raw.gear||[];
  for(const [key,limit] of [['gold',9999],['ether',99]]){if(raw[key]!==undefined&&(!Number.isInteger(raw[key])||!finite(raw[key],0,limit)))return null;n[key]=raw[key]??n[key];}

@@ -80,3 +80,11 @@ The content contract and room identifiers are documented in [SETTLEMENTS.md](doc
 ### JRPG depth release
 
 Individual equipment and permanent AP techniques, support ability budgets, distinct hero roles, enemy tactics, Rally abilities, eight companion scenes, six exploration rewards, practice battles and directed battle/victory presentation are now available. Existing topic saves migrate additively. See [the comparison, controls and remaining production gaps](docs/JRPG-GAP-REVIEW.md).
+
+## Underlight Works chapter
+
+From Tidewheel Mill, open **Menu → Underlight Works** in the destination list. Recruit Nessa in the concourse, restore the gallery and reservoir, repair the workshop shortcut, then configure and confront the Unwinding Heart. Three topic-specific versions share the five-room world and its rules. The chapter includes group battles, a third companion, machine intentions, a boss phase change, a persistent town decision and Lantern Lines.
+
+**Menu → Save journal** provides manual slots and portable backups. **Player settings** provides remapping, text size, graphics, gentler chapter combat and sound effects. **Chapter workshop** stages edited topic content for review before activation.
+
+See [the chapter guide](docs/UNDERLIGHT-WORKS.md) and [dynamic content / ownership contract](docs/DYNAMIC-OWNERSHIP.md). This is still an owner-private static preview with browser saves. Authenticated workspaces, uploaded-resource retrieval, cross-device sessions and live Muse Wonder calls are not yet connected.

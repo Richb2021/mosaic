@@ -1,3 +1,4 @@
+import {worksMap} from './chapter-maps.js';
 import {DISCOVERIES} from './scenes.js';
 import {makeInteriors,BUILDINGS} from './interiors.js';
 const prop=(asset,x,z,scale=1,rotation=0)=>({asset,x,z,scale,rotation});
@@ -56,9 +57,10 @@ for(const [id,m] of Object.entries(MAPS)){
  m.obstacles.push(...m.boundaries);
 }
 for(const [id,d] of Object.entries(DISCOVERIES))MAPS[d.area].entities.push({id,kind:'discovery',name:'Inspect '+d.title,asset:'crystal',x:d.x,z:d.z});
+MAPS.mill.entities.push({id:'works-entrance',kind:'works-entrance',name:'Underlight Works',asset:'arch',x:4,z:8});
 export const INTERIORS=makeInteriors(MAPS);
 export {BUILDINGS};
-export const getMap=s=>s.interior?INTERIORS[s.interior]:MAPS[s.area];
+export const getMap=s=>s.chapter?.room?worksMap(s):s.interior?INTERIORS[s.interior]:MAPS[s.area];
 export const blocked=(map,x,z)=>Math.abs(x)>map.bounds.x||Math.abs(z)>map.bounds.z||map.obstacles.some(([cx,cz,w,h])=>Math.abs(x-cx)<w/2+.25&&Math.abs(z-cz)<h/2+.25);
 export function findPath(map,start,end){
  const step=.5,key=(x,z)=>`${x},${z}`,grid=p=>[Math.round(p.x/step),Math.round(p.z/step)];const [sx,sz]=grid(start),[ex,ez]=grid(end);const queue=[[sx,sz]],seen=new Set([key(sx,sz)]),parents=new Map();let found=null;

@@ -61,3 +61,9 @@ These are substantial remaining production steps. This release is a deeper worki
 ## Screenshots
 
 Release screenshots are retained in the parent project’s `output/rpg/screenshots` with the `depth-` prefix. The acceptance and visual review records identify the tested bundle; screenshots are actual gameplay, not concept renders.
+
+## Underlight implementation follow-through
+
+The next-chapter milestone is implemented in the working game: five authored machinery rooms, raised catwalks, a branching route with a repairable shortcut, native Polyfork companion Nessa, group targeting, enemy support/charge roles, an interruptible boss shield and overdrive, a finite territory side-game, a persistent town choice, source-referenced transferable mechanisms, manual save slots and import/export, remapping, text/graphics/difficulty options and controller input mapping. Ten Blender assets extend the established palette. Existing adventure and character rigs are preserved.
+
+This closes those gaps at chapter scale. It does not close campaign-scale writing, many hours of bespoke environments, a large cast, relationship arcs, varied equipment appearance or formal educational evaluation. The exact implemented scope and remaining ownership/backend boundary are in `UNDERLIGHT-WORKS.md` and `DYNAMIC-OWNERSHIP.md`; real UI, asset and audit evidence is kept in the parent `output/rpg` directory.

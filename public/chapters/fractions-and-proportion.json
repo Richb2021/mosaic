@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "template": "underlight-v1",
+  "id": "underlight-fractions-and-proportion",
+  "topicId": "fractions-and-proportion",
+  "revision": 1,
+  "title": "A fair share of the light",
+  "hook": "The Works can power every district, but its dials were copied from a smaller machine. Nessa needs a team who can preserve proportions when the scale changes.",
+  "sources": [
+    {
+      "id": "workshop-notes",
+      "title": "Nessa\u2019s maintenance handbook",
+      "locator": "Underlight Works \u00b7 authored teaching note 1",
+      "excerpt": "For a ratio 1:2, count three shares, divide the total by three to find one share, then scale each part. One quarter is 25%, two quarters are 50%, and three quarters are 75%. Equivalent fractions and percentages describe the same proportion of a whole."
+    }
+  ],
+  "aftermath": {
+    "gardens": "The first current reaches the community gardens. New green shoots appear around Tidewheel Mill. Nessa stays to teach the gardeners how to maintain their share.",
+    "homes": "Warm lanterns return to the mill cottages. Families leave lamps in their windows, and Nessa begins a rota so everyone can help maintain the Works."
+  },
+  "challenges": {
+    "route": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "sequence",
+      "title": "The routing engine",
+      "prompt": "The old supply was shared in the ratio 1:2. Connect the planning stations in an order that lets you calculate a new total without guessing.",
+      "labels": [
+        "Scale both parts",
+        "Find one share",
+        "Count the shares"
+      ],
+      "solution": [
+        2,
+        1,
+        0
+      ],
+      "objective": "Order a process and explain why one stage depends on another.",
+      "explanation": "The machine settles. For a ratio 1:2, count three shares, divide the total by three to find one share, then scale each part. One quarter is 25%, two quarters are 50%, and three quarters are 75%. Equivalent fractions and percentages describe the same proportion of a whole."
+    },
+    "balance": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "allocation",
+      "title": "The counterweight regulator",
+      "prompt": "The large wheel needs twice the current of the small wheel. Split fifteen units without changing that relationship.",
+      "labels": [
+        "Small wheel",
+        "Large wheel"
+      ],
+      "solution": 5,
+      "objective": "Apply a quantitative constraint while preserving the total.",
+      "explanation": "The machine settles. For a ratio 1:2, count three shares, divide the total by three to find one share, then scale each part. One quarter is 25%, two quarters are 50%, and three quarters are 75%. Equivalent fractions and percentages describe the same proportion of a whole.",
+      "total": 15
+    },
+    "transfer": {
+      "sourceRefs": [
+        "workshop-notes"
+      ],
+      "hint": "Read Nessa\u2019s maintenance notes below, then trace what each station needs before moving the controls.",
+      "feedback": "The indicators do not agree yet. Nothing is lost: compare the route or amounts with the maintenance notes and adjust them.",
+      "type": "dials",
+      "title": "A different load",
+      "prompt": "The Heart now uses percentage gauges. Calibrate three new gauges from their share descriptions. The amount available has changed, but each fraction still describes the same part of its whole.",
+      "labels": [
+        "One of four equal shares",
+        "Two of four equal shares",
+        "Three of four equal shares"
+      ],
+      "solution": [
+        0,
+        1,
+        2
+      ],
+      "objective": "Apply the same idea to a new representation or situation.",
+      "explanation": "The machine settles. For a ratio 1:2, count three shares, divide the total by three to find one share, then scale each part. One quarter is 25%, two quarters are 50%, and three quarters are 75%. Equivalent fractions and percentages describe the same proportion of a whole.",
+      "options": [
+        "25%",
+        "50%",
+        "75%"
+      ]
+    }
+  }
+}
