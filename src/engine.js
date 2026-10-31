@@ -1,4 +1,5 @@
-import {WORLD_BOUNDS,MAPS} from './maps.js';
+import {validateSettlement} from './quests.js';
+import {WORLD_BOUNDS,MAPS,INTERIORS,BUILDINGS,getMap} from './maps.js';
 export const AREA_IDS=['quay','woods','mill','quarry','forge','observatory','archive','beacon'];
 export const PUZZLE_IDS=['sequence','allocation','matching','dials'];
 export const ENEMIES={bramble:{name:'Bramble sentinel',hp:42,attack:7,weakness:'flare',xp:18},shard:{name:'Prism prowler',hp:50,attack:8,weakness:'gale',xp:22},cinder:{name:'Cinder sentinel',hp:54,attack:9,weakness:'tide',xp:25},guardian:{name:'The Hollow Warden',hp:138,attack:11,weakness:'tide',xp:60}};
@@ -18,16 +19,31 @@ export function validatePack(raw){
  const m=p.puzzles.matching;if(!Array.isArray(m.left)||!Array.isArray(m.right)||m.left.length!==3||m.right.length!==3||[...m.left,...m.right].some(c=>!str(c,180))||!Array.isArray(m.solution)||m.solution.length!==3||new Set(m.solution).size!==3||m.solution.some(i=>!Number.isInteger(i)||i<0||i>2))throw Error('Matching needs three unique pairs.');
  const d=p.puzzles.dials;if(!Array.isArray(d.labels)||d.labels.length!==3||d.labels.some(c=>!str(c,80))||!Array.isArray(d.options)||d.options.length!==3||d.options.some(c=>!str(c,80))||!Array.isArray(d.solution)||d.solution.length!==3||d.solution.some(i=>!Number.isInteger(i)||i<0||i>2))throw Error('Dials need three labels, three choices and three solution indices.');
  if(!Array.isArray(p.sources)||p.sources.length>12||p.sources.some(s=>!str(s.title,160)||!str(s.url,500)||!/^https:\/\//.test(s.url)))throw Error('Sources must have titles and https links.');
+ if(p.settlement!==undefined)p.settlement=validateSettlement(p.settlement);
  return p;
 }
-export function initialState(p){return {version:1,pack:hashPack(p),area:'quay',pos:{x:0,z:4},visited:['quay'],seals:[],notes:[],chests:[],defeated:[],attempts:{},hints:[],xp:0,potions:3,party:[{name:'Mira',hp:64,mp:16},{name:'Ivo',hp:54,mp:24}],battle:null,ended:false,started:false,hero:'female'}}
-export const maxHP=(s,i)=>(i?54:64)+Math.floor(s.xp/40)*6;
-export const maxMP=(s,i)=>(i?24:16)+Math.floor(s.xp/40)*2;
+export function initialState(p){return {version:1,pack:hashPack(p),area:'quay',pos:{x:0,z:4},visited:['quay'],seals:[],notes:[],chests:[],defeated:[],attempts:{},hints:[],xp:0,potions:3,party:[{name:'Mira',hp:64,mp:16},{name:'Ivo',hp:54,mp:24}],battle:null,ended:false,started:false,hero:'female',interior:null,visitedInteriors:[],gold:40,ether:0,gear:[],quests:{},questContent:null,trackedQuest:null}}
+export const maxHP=(s,i)=>(i?54:64)+Math.floor(s.xp/40)*6+(s.gear?.includes('brass-pin')?6:0);
+export const maxMP=(s,i)=>(i?24:16)+Math.floor(s.xp/40)*2+(s.gear?.includes('focus-clasp')?3:0);
 export function restore(s){s.party.forEach((p,i)=>{p.hp=maxHP(s,i);p.mp=maxMP(s,i)});s.battle=null;return s}
 export function validSave(raw,p){
  try{const n=initialState(p);if(raw.version!==1||raw.pack!==n.pack||!AREA_IDS.includes(raw.area))return null;
  const finite=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
- if(!raw.pos||!finite(raw.pos.x,-WORLD_BOUNDS.x,WORLD_BOUNDS.x)||!finite(raw.pos.z,-WORLD_BOUNDS.z,WORLD_BOUNDS.z)||!Number.isInteger(raw.xp)||!finite(raw.xp,0,10000)||!Number.isInteger(raw.potions)||!finite(raw.potions,0,99))return null;
+ if(raw.interior!==undefined&&raw.interior!==null&&(!BUILDINGS[raw.interior]||BUILDINGS[raw.interior].area!==raw.area||raw.battle))return null;
+ n.interior=raw.interior||null;const bounds=getMap(n).bounds;
+ if(raw.gear!==undefined&&(!Array.isArray(raw.gear)||raw.gear.length>2||new Set(raw.gear).size!==raw.gear.length||raw.gear.some(g=>!['brass-pin','focus-clasp'].includes(g))))return null;
+ n.gear=raw.gear||[];
+ for(const [key,limit] of [['gold',9999],['ether',99]]){if(raw[key]!==undefined&&(!Number.isInteger(raw[key])||!finite(raw[key],0,limit)))return null;n[key]=raw[key]??n[key];}
+ if(raw.visitedInteriors!==undefined&&(!Array.isArray(raw.visitedInteriors)||raw.visitedInteriors.length>18||new Set(raw.visitedInteriors).size!==raw.visitedInteriors.length||raw.visitedInteriors.some(id=>!BUILDINGS[id])))return null;
+ n.visitedInteriors=raw.visitedInteriors||[];if(n.interior&&!n.visitedInteriors.includes(n.interior))return null;
+ if(raw.quests!==undefined){if(!raw.quests||typeof raw.quests!=='object'||Array.isArray(raw.quests)||Object.keys(raw.quests).length>6)return null;
+  for(const [id,v] of Object.entries(raw.quests)){if(['constructor','prototype','__proto__'].includes(id)||!/^[a-z][a-z0-9-]{0,39}$/.test(id)||!v||!Number.isInteger(v.step)||!finite(v.step,0,8)||typeof v.completed!=='boolean'||typeof v.rewarded!=='boolean'||v.completed!==v.rewarded||!Number.isInteger(v.attempts)||!finite(v.attempts,0,100000))return null;}
+  n.quests=Object.fromEntries(Object.entries(raw.quests).map(([id,v])=>[id,{step:v.step,completed:v.completed,rewarded:v.rewarded,attempts:v.attempts}]));
+ }
+ n.questContent=typeof raw.questContent==='string'&&raw.questContent.length<=30?raw.questContent:null;
+ n.trackedQuest=typeof raw.trackedQuest==='string'&&Object.hasOwn(n.quests,raw.trackedQuest)?raw.trackedQuest:null;
+
+ if(!raw.pos||!finite(raw.pos.x,-bounds.x,bounds.x)||!finite(raw.pos.z,-bounds.z,bounds.z)||!Number.isInteger(raw.xp)||!finite(raw.xp,0,10000)||!Number.isInteger(raw.potions)||!finite(raw.potions,0,99))return null;
  const list=(v,allowed)=>Array.isArray(v)&&v.length<=30&&v.every(x=>typeof x==='string'&&(!allowed||allowed.includes(x)))&&new Set(v).size===v.length;
  if(!list(raw.visited,AREA_IDS)||!raw.visited.includes(raw.area)||!list(raw.seals,PUZZLE_IDS)||!list(raw.notes,AREA_IDS)||!list(raw.chests,AREA_IDS)||!list(raw.defeated,Object.keys(ENEMIES))||!list(raw.hints,PUZZLE_IDS))return null;
  if(!Array.isArray(raw.party)||raw.party.length!==2||raw.party.some((h,i)=>!finite(h.hp,0,maxHP(raw,i))||!finite(h.mp,0,maxMP(raw,i))))return null;
@@ -38,7 +54,7 @@ export function validSave(raw,p){
  else if(n.party.every(h=>h.hp<=0))restore(n);
  return n}catch{return null}
 }
-export function beginBattle(s,id){if(!ENEMIES[id]||s.battle||s.defeated.includes(id))return s;if(id==='guardian'&&s.seals.length<4)return s;s.battle={id,hp:ENEMIES[id].hp,actor:s.party[0].hp>0?0:1,round:1,guards:[false,false],inspected:false,log:[`${ENEMIES[id].name} approaches. Watch its next move.`]};return s}
+export function beginBattle(s,id){if(!ENEMIES[id]||s.interior||s.battle||s.defeated.includes(id))return s;if(id==='guardian'&&s.seals.length<4)return s;s.battle={id,hp:ENEMIES[id].hp,actor:s.party[0].hp>0?0:1,round:1,guards:[false,false],inspected:false,log:[`${ENEMIES[id].name} approaches. Watch its next move.`]};return s}
 export function battleAction(state,action){
  const s=copy(state),b=s.battle;if(!b)return {state:s,result:'none'};const e=ENEMIES[b.id],i=b.actor,h=s.party[i],level=Math.floor(s.xp/40);let message='';
  if(action==='retreat'){s.battle=null;return {state:s,result:'retreat',message:'You withdraw safely. The path remains open.'}}
@@ -49,15 +65,34 @@ export function battleAction(state,action){
  else if(action==='potion'){if(!s.potions)return {state:s,result:'invalid',message:'No tonics remain. Rest at Sunward Quay.'};s.potions--;const target=s.party[0].hp/maxHP(s,0)<=s.party[1].hp/maxHP(s,1)?0:1;s.party[target].hp=Math.min(maxHP(s,target),s.party[target].hp+36);message=`${h.name} restores 36 HP to ${s.party[target].name}.`}
  else return {state:s,result:'invalid'};
  b.log.push(message);
- if(b.hp<=0){const oldLevel=Math.floor(s.xp/40);s.xp+=e.xp;s.defeated.push(b.id);s.potions=Math.min(99,s.potions+1);s.ended=b.id==='guardian';s.battle=null;if(Math.floor(s.xp/40)>oldLevel)restore(s);return {state:s,result:s.ended?'ending':'victory',message:`${e.name} rests. +${e.xp} XP · +1 tonic${Math.floor(s.xp/40)>oldLevel?' · Level up! HP and MP restored.':''}`}}
+ if(b.hp<=0){const oldLevel=Math.floor(s.xp/40);s.xp+=e.xp;s.gold=Math.min(9999,s.gold+e.xp);s.defeated.push(b.id);s.potions=Math.min(99,s.potions+1);s.ended=b.id==='guardian';s.battle=null;if(Math.floor(s.xp/40)>oldLevel)restore(s);return {state:s,result:s.ended?'ending':'victory',message:`${e.name} rests. +${e.xp} XP · +1 tonic${Math.floor(s.xp/40)>oldLevel?' · Level up! HP and MP restored.':''}`}}
  if(i===0&&s.party[1].hp>0)b.actor=1;
  else{
   const heavy=b.round%3===0;const targets=heavy?[0,1]:[b.round%2];for(let target of targets){if(s.party[target].hp<=0)target=1-target;const damage=Math.max(1,Math.round(e.attack*(heavy?1.6:1)*(b.guards[target]?.35:1)));s.party[target].hp=Math.max(0,s.party[target].hp-damage);b.log.push(`${heavy?'Crushing wave':'Stone strike'}: ${s.party[target].name} loses ${damage} HP.`)}
-  if(s.party.every(p=>p.hp<=0)){restore(s);s.area='quay';s.pos={x:0,z:3};return {state:s,result:'defeat',message:'The lantern carries you home. Your restored seals are safe. Rest, then try a different tactic.'}}
+  if(s.party.every(p=>p.hp<=0)){restore(s);s.area='quay';s.interior=null;s.pos={x:0,z:3};return {state:s,result:'defeat',message:'The lantern carries you home. Your restored seals are safe. Rest, then try a different tactic.'}}
   b.round++;b.actor=s.party[0].hp>0?0:1;b.guards=[false,false];
  }
  b.log=b.log.slice(-5);return {state:s,result:'turn',message};
 }
 export function checkPuzzle(p,id,value){const q=p.puzzles[id];if(id==='allocation')return Number.isInteger(value)&&value===q.solution;return Array.isArray(value)&&value.length===q.solution.length&&value.every((v,i)=>v===q.solution[i])}
 export function solvePuzzle(s,p,id,value){s.attempts[id]=(s.attempts[id]||0)+1;if(checkPuzzle(p,id,value)){if(!s.seals.includes(id))s.seals.push(id);return true}return false}
-export function travel(s,area,viaRoad=false){if(!AREA_IDS.includes(area)||s.battle)return false;const entry=viaRoad?MAPS[area].entities.find(e=>e.kind==='exit'&&e.to===s.area):null;s.area=area;s.pos=entry?{x:entry.x-Math.sign(entry.x)*2.5,z:entry.z-Math.sign(entry.z)*2.5}:{x:0,z:4};if(!s.visited.includes(area))s.visited.push(area);return true}
+export function travel(s,area,viaRoad=false){if(!AREA_IDS.includes(area)||s.battle)return false;const entry=viaRoad?MAPS[area].entities.find(e=>e.kind==='exit'&&e.to===s.area):null;s.area=area;s.interior=null;s.pos=entry?{x:entry.x-Math.sign(entry.x)*2.5,z:entry.z-Math.sign(entry.z)*2.5}:{x:0,z:4};if(!s.visited.includes(area))s.visited.push(area);return true}
+
+export function enterBuilding(s,id){const b=BUILDINGS[id];if(!b||s.battle||s.interior||s.area!==b.area)return false;s.interior=id;s.pos={x:0,z:3.5};if(!s.visitedInteriors.includes(id))s.visitedInteriors.push(id);return true}
+export function leaveBuilding(s){const b=BUILDINGS[s.interior];if(!b||s.battle)return false;s.interior=null;s.area=b.area;s.pos={x:b.door.x,z:b.door.z+.75};return true}
+export const GOODS={tonic:{name:'Tonic',price:12,sell:5,description:'Restores 36 HP to the most injured hero.'},ether:{name:'Ether',price:18,sell:7,description:'Restores 10 MP to the hero who needs it most.'},'brass-pin':{name:'Brass pin',price:35,description:'A shared party charm: maximum HP +6.'},'focus-clasp':{name:'Focus clasp',price:40,description:'A shared party charm: maximum MP +3.'}};
+export const SHOP_STOCK={provisions:['tonic','ether'],outfitter:['brass-pin','focus-clasp','tonic'],apothecary:['ether','tonic']};
+export function trade(s,item,sell=false){
+ const shop=BUILDINGS[s.interior]?.shop,g=GOODS[item];if(!g||!shop||s.battle||!SHOP_STOCK[shop].includes(item))return {ok:false,message:'This trader does not stock that item.'};
+ const count=item==='tonic'?'potions':item==='ether'?'ether':null;
+ if(sell){if(!count||!s[count])return {ok:false,message:'You have none to sell.'};s[count]--;s.gold=Math.min(9999,s.gold+g.sell);return {ok:true,message:`Sold one ${g.name.toLowerCase()} for ${g.sell} coins.`};}
+ if(s.gold<g.price)return {ok:false,message:'Not enough coins.'};
+ if(count&&s[count]>=99||!count&&s.gear.includes(item))return {ok:false,message:count?'Your satchel is full.':'You already own this charm.'};
+ s.gold-=g.price;if(count)s[count]++;else s.gear.push(item);return {ok:true,message:`Bought ${g.name.toLowerCase()} for ${g.price} coins.`};
+}
+export function useFieldItem(s,item){
+ if(s.battle||!['tonic','ether'].includes(item))return false;const key=item==='tonic'?'potions':'ether',stat=item==='tonic'?'hp':'mp',max=item==='tonic'?maxHP:maxMP;
+ if(!s[key])return false;const target=s.party[0][stat]/max(s,0)<=s.party[1][stat]/max(s,1)?0:1;if(s.party[target][stat]>=max(s,target))return false;
+ s[key]--;s.party[target][stat]=Math.min(max(s,target),s.party[target][stat]+(item==='tonic'?36:10));return true;
+}
+export function restAtInn(s){if(s.interior!=='inn'||s.battle||s.gold<8||s.party.every((h,i)=>h.hp===maxHP(s,i)&&h.mp===maxMP(s,i)))return false;s.gold-=8;restore(s);return true}

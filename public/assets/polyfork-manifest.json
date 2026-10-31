@@ -108,6 +108,54 @@
       },
       "triangles": 619,
       "sha256": "7a676f59c617785c2fc757a6bd9b86fcc6aa79dbae43b8f452b6ad2cdc0684f8"
+    },
+    {
+      "id": "polyfork_villager",
+      "file": "polyfork_villager.glb",
+      "provider": "Polyfork",
+      "source_id": "villager-40255c",
+      "source": "https://polyfork.dev/asset/villager-40255c",
+      "triangles": 3735,
+      "sha256": "4327bf7620e3e6a1c34633b6186602c9a221041ee9caefbe7069a9e0a6eb669d",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "rest_pose": "Native T-pose; original Polyfork skeleton; no Meshy retarget"
+    },
+    {
+      "id": "polyfork_merchant",
+      "file": "polyfork_merchant.glb",
+      "provider": "Polyfork",
+      "source_id": "merchant-6f606b",
+      "source": "https://polyfork.dev/asset/merchant-6f606b",
+      "triangles": 4007,
+      "sha256": "43f8cc9813d312bb14471f0d9b5ca74654230866519f8be35741101eecdbda70",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "rest_pose": "Native T-pose; original Polyfork skeleton; no Meshy retarget"
+    },
+    {
+      "id": "polyfork_tradesman",
+      "file": "polyfork_tradesman.glb",
+      "provider": "Polyfork",
+      "source_id": "tradesman-1707b9",
+      "source": "https://polyfork.dev/asset/tradesman-1707b9",
+      "triangles": 3919,
+      "sha256": "a59f9d8785e3564c26cb3eaceb34dc70c19a2ce977498b3d5847d07e0b1186e5",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "rest_pose": "Native T-pose; original Polyfork skeleton; no Meshy retarget"
+    },
+    {
+      "id": "polyfork_villager_female",
+      "file": "polyfork_villager_female.glb",
+      "provider": "Polyfork",
+      "source_id": "villager-40255c",
+      "source": "https://polyfork.dev/asset/villager-40255c",
+      "variant": {
+        "figure": "feminine",
+        "expression": "warm"
+      },
+      "variant_note": "GLB includes geometry changes; provider default colours retained.",
+      "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
+      "sha256": "fd42a31905bd2a0f3dcff8a844b841a61313d193113093ff73426970d13ee04a",
+      "rest_pose": "Native T-pose with original skeleton"
     }
   ]
 }

@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "community",
+      "title": "A whole supper to share",
+      "giver": "inn",
+      "offer": "Maren has one large loaf cut into twelve equal slices. Three quarters was promised to the mill crew, and the rest to the courtyard helpers. The neighbours are already arriving. “Can you make the promise visible on the table?”",
+      "done": "Nine slices go to the mill crew and three to the courtyard helpers. Maren leaves the four-group sketch beside the laid table. “Nobody had to settle for a guess,” she says.",
+      "reward": {
+        "gold": 40,
+        "xp": 12
+      },
+      "steps": [
+        {
+          "location": "millhouse",
+          "target": "resident",
+          "title": "Ask Rook at the millhouse",
+          "text": "Rook’s order is for three quarters of the one loaf, not three slices. “All twelve slices came from the same loaf and are equal. One quarter must be one of four equal groups.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Copper Oven."
+        },
+        {
+          "location": "bakery",
+          "target": "ledger",
+          "title": "Examine the household ledger",
+          "text": "Pell has drawn twelve equal slices in four groups of three. Three of those groups belong to the mill crew; one belongs to the courtyard helpers.",
+          "after": "You now have both pieces of evidence. Return to the Amber Lantern supper table."
+        },
+        {
+          "location": "inn",
+          "target": "workbench",
+          "title": "Prepare the household plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "Three quarters of twelve is nine; one quarter is three. The groups refer to the same whole, and nine plus three accounts for every slice.",
+          "challenge": {
+            "type": "allocation",
+            "prompt": "Lay out twelve equal slices from the same loaf. Give the mill crew three quarters and the courtyard helpers the rest.",
+            "total": 12,
+            "solution": 9,
+            "labels": [
+              "Mill crew",
+              "Courtyard"
+            ],
+            "unit": "equal slices",
+            "hint": "One quarter of twelve is three. Three quarters is three groups of three.",
+            "explanation": "Three quarters of twelve is nine; one quarter is three. The groups refer to the same whole, and nine plus three accounts for every slice."
+          }
+        },
+        {
+          "location": "inn",
+          "target": "resident",
+          "title": "Return to Maren",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "signal",
+      "title": "The lantern’s missing measure",
+      "giver": "workshop",
+      "offer": "Jori needs a half-metre strip for the lantern frame. The supplier’s labels use eighths, while his drawing uses halves. “There is no room for almost right. Will you find the matching length?”",
+      "done": "The strip fits the frame. Jori lights the repaired lantern and labels the spare stock in both halves and eighths. The apprentices now have a comparison they can hold in their hands.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "star-room",
+          "target": "resident",
+          "title": "Visit Edda inside the observatory",
+          "text": "Edda lays eight equal marks along a one-metre rule. “Four eighths reach the midpoint. Multiplying or dividing the top and bottom by the same nonzero number keeps the fraction’s value.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Chart House."
+        },
+        {
+          "location": "navigator",
+          "target": "ledger",
+          "title": "Examine the navigator’s chart",
+          "text": "Orin’s chart shows every offered strip measured against the same one-metre whole: two eighths, four eighths and six eighths. The frame needs one half of that metre.",
+          "after": "You now have both pieces of evidence. Return to Jori’s repair bench."
+        },
+        {
+          "location": "workshop",
+          "target": "workbench",
+          "title": "Repair the signal plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "4/8 = 1/2. Both measurements describe the same length because the whole is one metre in each case.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Choose the strip that fits Jori’s half-metre frame.",
+            "options": [
+              "Use 2/8 of a metre.",
+              "Use 4/8 of a metre.",
+              "Use 6/8 of a metre."
+            ],
+            "solution": 1,
+            "hint": "Four of eight equal parts reach the same point as one of two equal parts.",
+            "explanation": "4/8 = 1/2. Both measurements describe the same length because the whole is one metre in each case."
+          }
+        },
+        {
+          "location": "workshop",
+          "target": "resident",
+          "title": "Return to Jori",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "records",
+      "title": "Two labels, one delivery",
+      "giver": "library",
+      "offer": "Sable has found a suspicious pair of entries: one half of a crate and two quarters of a crate. Were there two deliveries, or two descriptions of one? Iris remembers the morning. “Please check before I charge the household twice.”",
+      "done": "Sable crosses out the duplicate charge and pins up the corrected record. The household keeps its coins. Iris adds a shared crate sketch to tomorrow’s forms.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "scribe",
+          "target": "resident",
+          "title": "Hear Iris’s account",
+          "text": "Iris saw one crate divided into four equal compartments. Two compartments were delivered together. “I wrote two quarters. The courier called the same delivery one half.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Record House."
+        },
+        {
+          "location": "records",
+          "target": "ledger",
+          "title": "Examine the original records",
+          "text": "The delivery time, crate number and recipient match. Both entries refer to the same whole crate and the same delivered compartments, not to two different crates.",
+          "after": "You now have both pieces of evidence. Return to the reading room planning table."
+        },
+        {
+          "location": "library",
+          "target": "workbench",
+          "title": "Write the public notice",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "2/4 = 1/2 when they refer to the same whole. Matching crate, time and recipient show these are duplicate descriptions, not quantities to add.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Write the corrected record.",
+            "options": [
+              "Charge for two deliveries because the fractions look different.",
+              "Record one delivery: 2/4 and 1/2 name the same amount of this crate.",
+              "Record a whole crate because two entries must add to one."
+            ],
+            "solution": 1,
+            "hint": "Check both the quantity and the record identity. These entries describe the same event.",
+            "explanation": "2/4 = 1/2 when they refer to the same whole. Matching crate, time and recipient show these are duplicate descriptions, not quantities to add."
+          }
+        },
+        {
+          "location": "library",
+          "target": "resident",
+          "title": "Return to Sable",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    }
+  ],
+  "residentLines": {
+    "inn": "Maren wants every guest to see that a share is fair. She has kept the loaf whole until the plan is ready.",
+    "workshop": "Jori’s ruler is sound; it is the labels that disagree. A fitting part will settle the argument.",
+    "library": "Sable would rather correct one line today than explain an unfair bill tomorrow."
+  },
+  "clues": {
+    "bakery": "Pell has drawn twelve equal slices in four groups of three. Three of those groups belong to the mill crew; one belongs to the courtyard helpers.",
+    "navigator": "Orin’s chart shows every offered strip measured against the same one-metre whole: two eighths, four eighths and six eighths. The frame needs one half of that metre.",
+    "records": "The delivery time, crate number and recipient match. Both entries refer to the same whole crate and the same delivered compartments, not to two different crates."
+  }
+}

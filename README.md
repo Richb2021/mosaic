@@ -38,7 +38,7 @@ The demo does not call Muse Wonder or claim to generate arbitrary curriculum con
 
 ## Art and animation
 
-The active asset set has 37 GLBs, combining original modular Blender scenery and weapons, Meshy creatures/landmark, four rigged Meshy 7.1 characters, and seven licensed Polyfork buildings, trees, cart and barrel models. The four humanoids use new Polyfork-style references, Meshy 7.1 image-to-3D with T-pose control, reviewed source hashes and six skeletal clips: idle, walk, strike, casting, guard and hit reaction. Blender preserves the skeletons and clips, normalizes exports and prepares portraits. The former guardian rig has been rejected and removed. Completed combat actions fade out correctly rather than remaining blended into idle.
+The active asset set has 47 GLBs, combining original modular Blender scenery and weapons, Meshy creatures/landmark, four rigged Meshy 7.1 characters, and eleven licensed Polyfork buildings, trees, props and resident models. The four humanoids use new Polyfork-style references, Meshy 7.1 image-to-3D with T-pose control, reviewed source hashes and six skeletal clips: idle, walk, strike, casting, guard and hit reaction. Blender preserves the skeletons and clips, normalizes exports and prepares portraits. The former guardian rig has been rejected and removed. Completed combat actions fade out correctly rather than remaining blended into idle.
 
 [Art direction and character acceptance](docs/ART-DIRECTION.md) defines the shared Polyfork palette, shape language, T-pose requirement, deformation review and explicit Meshy 7.1 production rule. The two original non-humanoid Meshy assets are historical T2.5 outputs; provenance is retained accurately. The fox remains unrigged.
 
@@ -46,7 +46,7 @@ Source-generation scripts and editable Blender files are retained in the parent 
 
 ## Add another asset provider
 
-Use GLB with Y up, a ground-level origin and +Z forward for characters. Keep semantic role names stable (for example `house`, `tree`, `hero_female`), then replace their mapped file or add a role to the asset catalog. Animated replacements need equivalent named clips or a mapping in `character.js`; root travel belongs to the controller. Keep collision and interaction anchors in `maps.js`, independent of visual meshes. Record provider, original asset id, licence, dimensions and any conversion in the asset manifest. Polyfork is connected through Baldur and its first two props are embedded in this build. Its models are licensed for use inside the game, not redistribution as a standalone asset pack.
+Use GLB with Y up, a ground-level origin and +Z forward for characters. Keep semantic role names stable (for example `house`, `tree`, `hero_female`), then replace their mapped file or add a role to the asset catalog. Animated replacements need equivalent named clips or a mapping in `character.js`; root travel belongs to the controller. Keep collision and interaction anchors in `maps.js`, independent of visual meshes. Record provider, original asset id, licence, dimensions and any conversion in the asset manifest. Polyfork is connected through Baldur; its scenery and four native resident variants are embedded in this build. Its models are licensed for use inside the game, not redistribution as a standalone asset pack.
 
 ## Verification
 
@@ -63,4 +63,16 @@ This is a single-player demo, not the full school platform. It has no school acc
 
 All eight regions use larger 44 × 36 walkable maps, continuous surrounding terrain and a close orthographic camera that follows the party. Forest belts and quarry rocks block the edges; Polyfork cottages and two-storey buildings enclose streets. Roads connect cardinal neighbours and arrive on the matching side. Walk to a road end to travel, or select its sign from the menu. Foreground buildings fade when they hide the party. Fast travel still returns to the town centre. Existing version-1 saves remain compatible.
 
-The regions are connected scenes, with a transition between them; this is not a streamed open world. Buildings currently provide scenery and collision, without explorable interiors.
+The regions are connected scenes, with a transition between them; this is not a streamed open world. Eighteen buildings now have explorable interiors, residents and persistent story interactions.
+
+## Enter the towns
+
+Click a building or choose its entrance under **Menu → Go to**. Walk through the doorway, speak to the resident, inspect ledgers and use work tables. Select the exit or walk to the open south doorway to leave. The world contains an inn, homes, shops, a bakery, workshops, a millhouse, reading rooms and an observatory study. Native Polyfork residents use a separate skeletal adapter with a CC0 Quaternius talking clip; four source variants retain their T-pose rest skeletons.
+
+Start a request with Maren at **The Amber Lantern** in Sunward Quay, Jori at **Jori’s Workshop** in Cinder Workshop, or Sable at **Cloudscript Reading Room** in the Archive. Each of the three topics has three distinct four-step stories. Find clues in other households, make a practical decision, then return to the resident. Hints explain the reasoning; an unsuccessful plan preserves progress. Completed requests change resident dialogue and add a small visible room consequence. **Menu → Requests** tracks the next lead and keeps collected clues.
+
+Shops buy and sell tonics and ether. The outfitter sells two permanent party charms. The inn costs eight coins and restores HP/MP. **Menu → Satchel** uses supplies outside battle. Coins come from encounters, supply chests and completed requests. Rewards are granted once per request, and a room, inventory and request progress survive reloads. Original version-1 adventure saves retain their progress.
+
+The content contract and room identifiers are documented in [SETTLEMENTS.md](docs/SETTLEMENTS.md). Companion stories live in `public/settlements/`. Exports include the editable `settlement` section; older custom topics receive a household request using their own allocation task. Unchanged custom export/import retains its save. Built-in story wording edits retain request progress; structural edits reset unfinished requests but preserve completed rewards.
+
+`tests/settlement.test.mjs` covers room reachability, save migration, shops, healing, all nine quest chains and malformed content. `tests/resident.test.mjs` parses all four GLBs and checks animation/clone isolation. The parent `scripts/check_rpg_interiors.py` walks all eighteen interiors, completes five quest chains across the three topics, checks commerce, inn recovery, persistence, keyboard focus, mobile layouts and imports through the real UI.

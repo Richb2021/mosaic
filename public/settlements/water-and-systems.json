@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "community",
+      "title": "The supper that almost wasn’t",
+      "giver": "inn",
+      "offer": "Maren has promised supper to the mill workers, but the kitchen and the courtyard garden share one delivery. She refuses to solve one problem by quietly passing it to a neighbour. “Would you help us make a fair plan?”",
+      "done": "Maren puts your plan beside the kitchen door. The courtyard gets its share, the supper table is laid, and nobody has to guess what remains. “Tomorrow we will count first,” she says. The inn’s gathering table is now ready.",
+      "reward": {
+        "gold": 40,
+        "xp": 12
+      },
+      "steps": [
+        {
+          "location": "millhouse",
+          "target": "resident",
+          "title": "Ask Rook at the millhouse",
+          "text": "Rook checks the millhouse board. “Today’s delivery is twelve equal buckets. The kitchen needs eight for its planned jobs. The courtyard beds need four. We cannot promise more water than we actually have.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Copper Oven."
+        },
+        {
+          "location": "bakery",
+          "target": "ledger",
+          "title": "Examine the household ledger",
+          "text": "Pell’s ledger confirms the same day and the same bucket size: kitchen, eight buckets; courtyard, four. A crossed-out draft promised ten to the kitchen and six to the garden. There were never sixteen buckets to share.",
+          "after": "You now have both pieces of evidence. Return to the Amber Lantern supper table."
+        },
+        {
+          "location": "inn",
+          "target": "workbench",
+          "title": "Prepare the household plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "Eight plus four uses all twelve buckets. A plan for a shared resource must respect both the available total and the stated needs.",
+          "challenge": {
+            "type": "allocation",
+            "prompt": "Set aside the twelve delivered buckets. Meet the kitchen’s eight-bucket plan and the garden’s four-bucket plan without creating or losing any.",
+            "total": 12,
+            "solution": 8,
+            "labels": [
+              "Kitchen",
+              "Courtyard"
+            ],
+            "unit": "equal buckets",
+            "hint": "The two allocations must add to twelve. The kitchen’s plan calls for eight.",
+            "explanation": "Eight plus four uses all twelve buckets. A plan for a shared resource must respect both the available total and the stated needs."
+          }
+        },
+        {
+          "location": "inn",
+          "target": "resident",
+          "title": "Return to Maren",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "signal",
+      "title": "The fog-bell lantern",
+      "giver": "workshop",
+      "offer": "Jori’s harbour signal has been giving the wrong message on cold mornings. “The glass clouds over. The apprentice keeps calling it smoke. I need a repair note that explains what is actually happening.”",
+      "done": "Jori hangs your diagnosis above the bench and fits a wipe-clean access panel. The signal lantern glows again. The apprentice adds “look for the change of state” to the maintenance book.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "star-room",
+          "target": "resident",
+          "title": "Visit Edda inside the observatory",
+          "text": "Edda shows you a cold pane in the Star Room. “Air contains water vapour. When moist air cools against a cold surface, liquid droplets can form. That change from gas to liquid is condensation.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Chart House."
+        },
+        {
+          "location": "navigator",
+          "target": "ledger",
+          "title": "Examine the navigator’s chart",
+          "text": "Orin’s chart notes that the bell glass is clear when warm and beaded with water when cold. There is no fire in the lantern housing. The droplets are liquid water on the glass, not smoke.",
+          "after": "You now have both pieces of evidence. Return to Jori’s repair bench."
+        },
+        {
+          "location": "workshop",
+          "target": "workbench",
+          "title": "Repair the signal plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "Condensation changes water vapour into liquid. The repair note follows the observed droplets and cold surface, rather than the apprentice’s first guess.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Write the diagnosis Jori should use for the cold, wet glass.",
+            "options": [
+              "Condensation: water vapour becomes liquid on the cold glass.",
+              "Evaporation: liquid water becomes invisible vapour on the glass.",
+              "Runoff: water flows across the ground into the lantern."
+            ],
+            "solution": 0,
+            "hint": "Match the observed change: water vapour in the air becomes liquid droplets.",
+            "explanation": "Condensation changes water vapour into liquid. The repair note follows the observed droplets and cold surface, rather than the apprentice’s first guess."
+          }
+        },
+        {
+          "location": "workshop",
+          "target": "resident",
+          "title": "Return to Jori",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "records",
+      "title": "The missing water in the ledger",
+      "giver": "library",
+      "offer": "Sable is about to accuse a courier of losing water from a courtyard tray. Iris thinks the ledger leaves out something important. “Before I print a notice,” Sable says, “will you check what our records can actually support?”",
+      "done": "Sable replaces the accusation with your careful account. The courier stays to help set up another trial. A corrected notice now stands beside the reading-room table.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "scribe",
+          "target": "resident",
+          "title": "Hear Iris’s account",
+          "text": "Iris describes the trial: two identical trays started with equal water. One was covered and one was open, in the same place for the same length of time. The open tray ended with less liquid water. Nobody measured water vapour in the air.",
+          "after": "You write the account in your quest journal. Follow the next lead at the Record House."
+        },
+        {
+          "location": "records",
+          "target": "ledger",
+          "title": "Examine the original records",
+          "text": "The original sheet records the cover as the deliberate difference. There is no record of a courier touching either tray. It supports investigating evaporation; it does not support naming a thief.",
+          "after": "You now have both pieces of evidence. Return to the reading room planning table."
+        },
+        {
+          "location": "library",
+          "target": "workbench",
+          "title": "Write the public notice",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "Evaporation transfers liquid water into the air as vapour. The trial suggests an explanation for the difference, while the records provide no evidence for accusing the courier.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Choose the notice Sable can responsibly publish.",
+            "options": [
+              "The courier stole the missing water.",
+              "The open tray lost more liquid; evaporation is a plausible explanation to investigate.",
+              "Water disappears forever when a tray is left open."
+            ],
+            "solution": 1,
+            "hint": "Separate the observation from an accusation. Liquid water can become water vapour.",
+            "explanation": "Evaporation transfers liquid water into the air as vapour. The trial suggests an explanation for the difference, while the records provide no evidence for accusing the courier."
+          }
+        },
+        {
+          "location": "library",
+          "target": "resident",
+          "title": "Return to Sable",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    }
+  ],
+  "residentLines": {
+    "inn": "Maren is setting places for neighbours who rarely agree. An empty table can be the beginning of a conversation.",
+    "workshop": "Jori has stopped guessing at the fog-bell fault. He wants an explanation the next apprentice can use.",
+    "library": "Sable has a printing deadline, but a wrong accusation would outlast any delay."
+  },
+  "clues": {
+    "bakery": "Pell’s ledger confirms the same day and the same bucket size: kitchen, eight buckets; courtyard, four. A crossed-out draft promised ten to the kitchen and six to the garden. There were never sixteen buckets to share.",
+    "navigator": "Orin’s chart notes that the bell glass is clear when warm and beaded with water when cold. There is no fire in the lantern housing. The droplets are liquid water on the glass, not smoke.",
+    "records": "The original sheet records the cover as the deliberate difference. There is no record of a courier touching either tray. It supports investigating evaporation; it does not support naming a thief."
+  }
+}

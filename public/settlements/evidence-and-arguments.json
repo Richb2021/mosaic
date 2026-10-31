@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "quests": [
+    {
+      "id": "community",
+      "title": "A rumour at supper",
+      "giver": "inn",
+      "offer": "Maren hears a rumour that the mill has stopped delivering supplies. If she cancels tonight, the neighbourhood gathering will fall apart. “I need more than the loudest voice in the room. Will you find out what we know?”",
+      "done": "Maren keeps the gathering on and explains exactly what the two records support. The supper table is laid. The neighbours agree to bring dated examples when they raise tomorrow’s concerns.",
+      "reward": {
+        "gold": 40,
+        "xp": 12
+      },
+      "steps": [
+        {
+          "location": "millhouse",
+          "target": "resident",
+          "title": "Ask Rook at the millhouse",
+          "text": "Rook shows you today’s signed dispatch entry: one delivery left the mill at noon. “That tells you it left here. It does not, by itself, prove it arrived.”",
+          "after": "You write the account in your quest journal. Follow the next lead at the Copper Oven."
+        },
+        {
+          "location": "bakery",
+          "target": "ledger",
+          "title": "Examine the household ledger",
+          "text": "Pell’s household ledger records the same delivery arriving at the Copper Oven at one. The recipient signed beside the matching delivery number. An unsigned margin note says “nothing ever arrives”, without a date or event.",
+          "after": "You now have both pieces of evidence. Return to the Amber Lantern supper table."
+        },
+        {
+          "location": "inn",
+          "target": "workbench",
+          "title": "Prepare the household plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "The matching dispatch and receipt support the claim about today’s delivery. They do not establish a universal claim about every delivery.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Choose the update Maren can give the guests.",
+            "options": [
+              "Cancel: an unsigned complaint outweighs the dated records.",
+              "Say today’s delivery is recorded at dispatch and receipt; do not claim every delivery is reliable.",
+              "Promise that the mill can never miss a delivery."
+            ],
+            "solution": 1,
+            "hint": "Use the dated records for the event they describe. One confirmed case cannot prove “always”.",
+            "explanation": "The matching dispatch and receipt support the claim about today’s delivery. They do not establish a universal claim about every delivery."
+          }
+        },
+        {
+          "location": "inn",
+          "target": "resident",
+          "title": "Return to Maren",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "signal",
+      "title": "One rumour, three witnesses",
+      "giver": "workshop",
+      "offer": "Jori has received three reports that the harbour signal flashed red at dawn. He wants to replace the mechanism, but the accounts sound strangely alike. “Are these three observations, or one story passed around?”",
+      "done": "Jori opens the housing for an inspection and starts an observation log instead of discarding the mechanism. The lantern is returned to service with a check sheet. His apprentices now record where each report came from.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "star-room",
+          "target": "resident",
+          "title": "Visit Edda inside the observatory",
+          "text": "Edda says she saw a red flash herself from the Star Room. Her note gives a time and location. She cannot see the mechanism inside the housing from there.",
+          "after": "You write the account in your quest journal. Follow the next lead at the Chart House."
+        },
+        {
+          "location": "navigator",
+          "target": "ledger",
+          "title": "Examine the navigator’s chart",
+          "text": "Orin’s chart includes two other reports. Both explicitly say they heard the story from Edda. Neither person saw the signal. The three reports trace back to one direct observation.",
+          "after": "You now have both pieces of evidence. Return to Jori’s repair bench."
+        },
+        {
+          "location": "workshop",
+          "target": "workbench",
+          "title": "Repair the signal plan",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "There is one direct observation repeated in three reports. It is worth investigating, but counting the repeats as independent confirmation would overstate the evidence.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Choose Jori’s next step.",
+            "options": [
+              "Treat the reports as three independent observations and replace the mechanism immediately.",
+              "Ignore Edda because only one person saw the flash.",
+              "Treat Edda’s account as one observation and seek an independent observation or inspection."
+            ],
+            "solution": 2,
+            "hint": "Trace where each report obtained its information. Repetition does not make sources independent.",
+            "explanation": "There is one direct observation repeated in three reports. It is worth investigating, but counting the repeats as independent confirmation would overstate the evidence."
+          }
+        },
+        {
+          "location": "workshop",
+          "target": "resident",
+          "title": "Return to Jori",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    },
+    {
+      "id": "records",
+      "title": "The notice that named a culprit",
+      "giver": "library",
+      "offer": "Sable’s draft says a new blue lantern caused the late deliveries because both appeared in the same week. Iris is uneasy. “A notice can make a neighbour into a culprit. Please check the link before I print it.”",
+      "done": "Sable prints your qualified notice. No neighbour is blamed without support, and the next meeting considers the bridge repairs as well. The corrected notice is displayed in the reading room.",
+      "reward": {
+        "gold": 45,
+        "xp": 15
+      },
+      "steps": [
+        {
+          "location": "scribe",
+          "target": "resident",
+          "title": "Hear Iris’s account",
+          "text": "Iris confirms that the blue lantern was installed in the week deliveries became late. She also notes that bridge repairs started then. She has no comparison showing what would have happened without either change.",
+          "after": "You write the account in your quest journal. Follow the next lead at the Record House."
+        },
+        {
+          "location": "records",
+          "target": "ledger",
+          "title": "Examine the original records",
+          "text": "The original records show timing, not a test of causes. They do not rule out the bridge repairs, bad weather or other explanations. The draft’s word “caused” is stronger than the evidence.",
+          "after": "You now have both pieces of evidence. Return to the reading room planning table."
+        },
+        {
+          "location": "library",
+          "target": "workbench",
+          "title": "Write the public notice",
+          "text": "You lay the notes beside each other. The neighbours are waiting for a plan they can use.",
+          "after": "Correlation alone does not establish causation. The records justify reporting the timing and investigating alternatives, not confidently naming the lantern as the cause.",
+          "challenge": {
+            "type": "choice",
+            "prompt": "Choose the public notice.",
+            "options": [
+              "The blue lantern caused the delays because it came first.",
+              "Delays and the new lantern occurred in the same week; the cause remains uncertain and needs investigation.",
+              "Nothing can ever be learned from delivery records."
+            ],
+            "solution": 1,
+            "hint": "A shared timing is an observation. A causal conclusion needs more support and attention to alternatives.",
+            "explanation": "Correlation alone does not establish causation. The records justify reporting the timing and investigating alternatives, not confidently naming the lantern as the cause."
+          }
+        },
+        {
+          "location": "library",
+          "target": "resident",
+          "title": "Return to Sable",
+          "text": "Your work is ready. Explain the plan and let the household put it into practice.",
+          "after": "The neighbours can carry on."
+        }
+      ]
+    }
+  ],
+  "residentLines": {
+    "inn": "Maren wants a gathering where people can change their minds without losing face.",
+    "workshop": "Jori repairs lanterns for a living. He is learning that a report can need repair as well.",
+    "library": "Sable knows a printed sentence travels further than its author. She wants the wording to earn that reach."
+  },
+  "clues": {
+    "bakery": "Pell’s household ledger records the same delivery arriving at the Copper Oven at one. The recipient signed beside the matching delivery number. An unsigned margin note says “nothing ever arrives”, without a date or event.",
+    "navigator": "Orin’s chart includes two other reports. Both explicitly say they heard the story from Edda. Neither person saw the signal. The three reports trace back to one direct observation.",
+    "records": "The original records show timing, not a test of causes. They do not rule out the bridge repairs, bad weather or other explanations. The draft’s word “caused” is stronger than the evidence."
+  }
+}

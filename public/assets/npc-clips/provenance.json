@@ -1,0 +1,8 @@
+{
+  "clip": "Talking",
+  "source": "https://polyfork.dev/cdn/anim-talking.json",
+  "library": "Quaternius Universal Animation Library",
+  "license": "CC0 (identified by Polyfork clips.mjs for its UAL clips)",
+  "sha256": "254f62e0a07e2a347b258d7a217530061747ee6a0a6ae59dbd194d84e6bca9b4",
+  "notes": "Native Polyfork skeletal data; separate adapter from Meshy. Only the CC0 UAL clip is embedded; no Mixamo source clip files are packaged."
+}

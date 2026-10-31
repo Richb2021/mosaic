@@ -1,3 +1,4 @@
+import {makeInteriors,BUILDINGS} from './interiors.js';
 const prop=(asset,x,z,scale=1,rotation=0)=>({asset,x,z,scale,rotation});
 const npc=(name,x,z)=>({id:'npc',kind:'npc',name,x,z,asset:'ivo'});
 const exit=(to,x,z)=>({id:'exit-'+to,kind:'exit',to,name:to,x,z,asset:'arch'});
@@ -53,6 +54,9 @@ for(const [id,m] of Object.entries(MAPS)){
  for(const z of [-18.2,18.2])for(let x=-22;x<=22;x+=2){if(gap(x,z))continue;m.boundaries.push([x,z,2.1,1]);}
  m.obstacles.push(...m.boundaries);
 }
+export const INTERIORS=makeInteriors(MAPS);
+export {BUILDINGS};
+export const getMap=s=>s.interior?INTERIORS[s.interior]:MAPS[s.area];
 export const blocked=(map,x,z)=>Math.abs(x)>map.bounds.x||Math.abs(z)>map.bounds.z||map.obstacles.some(([cx,cz,w,h])=>Math.abs(x-cx)<w/2+.25&&Math.abs(z-cz)<h/2+.25);
 export function findPath(map,start,end){
  const step=.5,key=(x,z)=>`${x},${z}`,grid=p=>[Math.round(p.x/step),Math.round(p.z/step)];const [sx,sz]=grid(start),[ex,ez]=grid(end);const queue=[[sx,sz]],seen=new Set([key(sx,sz)]),parents=new Map();let found=null;

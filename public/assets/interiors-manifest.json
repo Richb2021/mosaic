@@ -1,0 +1,56 @@
+[
+  {
+    "id": "room_table",
+    "file": "room_table.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 60,
+    "sha256": "b943f93ef4c383e5f3f2680a4c4c104f8cfd0ec8fb58097299b9e967b476caf0",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  },
+  {
+    "id": "room_chair",
+    "file": "room_chair.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 72,
+    "sha256": "efb4a2a8edd0deaca8ed5a39163b17e114a3ffc0501aa99d6a40f3d99b823aab",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  },
+  {
+    "id": "room_counter",
+    "file": "room_counter.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 60,
+    "sha256": "38d54d71ad4916842565f0e53e09d109be2ccae1683c85fd2c162a0f7b1c4e16",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  },
+  {
+    "id": "room_hearth",
+    "file": "room_hearth.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 72,
+    "sha256": "863b85359877e1d88ea59b16b37daab003c163fe20dc0737f80e7aa069c6fd23",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  },
+  {
+    "id": "room_ledger",
+    "file": "room_ledger.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 72,
+    "sha256": "f6fea429052dab4fbb3572608347c8e58407ebbb4e42a8cc758f9fc0610ed1cc",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  },
+  {
+    "id": "room_crate",
+    "file": "room_crate.glb",
+    "provider": "Blender",
+    "source": "Original modular interior kit",
+    "triangles": 72,
+    "sha256": "0cb5d1cd79bcd32e89e3abb82699f841c0d6e70d4887614eca3756876394582d",
+    "style": "Polyfork-aligned matte wood, stone, cream and brass"
+  }
+]
