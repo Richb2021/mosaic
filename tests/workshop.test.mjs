@@ -38,7 +38,7 @@ test('fabricated citations or impossible mechanics never reach review',async()=>
 const completeResponse=j=>({id:'resp_test',model:MODEL,status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text:JSON.stringify(fixture(j))}]}]});
 test('Wonder uses background Responses, the required model and constrained source-only JSON',async()=>{
  const resource=await extractResource({title:'Notes',text:notes}),j={chapterId:'generated-test',topicId:template.topicId,goal:'Explain water',level:'Beginner',evidence:resource.units};let count=0;
- const result=await callWonder(j,'test-key',async(url,options)=>{count++;assert.equal(url,'https://api.meta.ai/v1/responses');assert.equal(options.redirect,'error');const body=JSON.parse(options.body);assert.equal(body.model,MODEL);assert.equal(body.background,true);assert.equal(body.store,true);assert.equal(body.text.format.type,'json_schema');assert.ok(body.input[0].content.includes('untrusted DATA'));return Response.json(completeResponse(j))});
+ const result=await callWonder(j,'test-key',async(url,options)=>{count++;assert.equal(url,'https://api.meta.ai/v1/responses');assert.equal(options.redirect,'manual');const body=JSON.parse(options.body);assert.equal(body.model,MODEL);assert.equal(body.background,true);assert.equal(body.store,true);assert.equal(body.text.format.type,'json_schema');assert.ok(body.input[0].content.includes('untrusted DATA'));return Response.json(completeResponse(j))});
  assert.equal(count,1);assert.equal(result.providerId,'resp_test');assert.equal(result.content.id,j.chapterId);
 });
 test('background response identity survives reconnect and is retrieved without another paid POST',async()=>{

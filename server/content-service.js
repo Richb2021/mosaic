@@ -44,7 +44,9 @@ export function validateGenerated(raw,job){
 }
 async function metaRequest(path,key,options,fetcher){
  requireValue(key,'Muse Wonder is not connected. Configure the server’s META_API_KEY first.',503);
- const response=await fetcher('https://api.meta.ai/v1/responses'+path,{...options,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),redirect:'error'});
+ // Workers supports manual/follow only. Reject all non-2xx responses below;
+ // never forward the credential to a redirect destination.
+ const response=await fetcher('https://api.meta.ai/v1/responses'+path,{...options,headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),redirect:'manual'});
  if(!response.ok){const status=response.status;if(status===404)throw new WorkshopError('The stored Meta response is no longer available. No automatic retry was sent.',410);throw new WorkshopError(status===401||status===403?'Meta rejected the credential or this account lacks Wonder access.':status===429?'Meta is rate limiting this account. Check this same request again later.':`Meta request failed (HTTP ${status}). No chapter was activated.`,502)}
  const reader=response.body.getReader();let bytes=0,chunks=[];try{for(;;){const {done,value}=await reader.read();if(done)break;bytes+=value.length;requireValue(bytes<=262144,'The model response exceeded the allowed size.',502);chunks.push(value)}}finally{await reader.cancel().catch(()=>{})}
  const buffer=new Uint8Array(bytes);let offset=0;for(const x of chunks){buffer.set(x,offset);offset+=x.length}
