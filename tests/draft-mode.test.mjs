@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DRAFT_PACKS,DRAFT_SCHEMA,DRAFT_PROMPT,validateDraftContent,getDraftReferences,DRAFT_SOURCE_LINKS,getDraftSourceLink} from '../src/game-modes/draft-content.js';
-import {newDraft,draftPhase,draftHand,pickDraftCard,redrawDraft,draftTotals,draftOutcome,answerDraft,nextDraftScenario,validateDraftState,draftSaveKey,loadDraft,saveDraft} from '../src/game-modes/draft-engine.js';
+import {newDraft,draftPhase,draftHand,draftReflectionOptions,pickDraftCard,redrawDraft,draftTotals,draftOutcome,answerDraft,nextDraftScenario,validateDraftState,draftSaveKey,loadDraft,saveDraft} from '../src/game-modes/draft-engine.js';
 const clone=v=>structuredClone(v);
 const [industry,eco]=DRAFT_PACKS;
 const finishDraft=(pack,seed=11)=>{let s=newDraft(pack,seed);for(let i=0;i<5;i++)s=pickDraftCard(pack,s,draftHand(pack,s)[0].id);return s};
@@ -43,6 +43,34 @@ test('redraw introduces exactly one unseen choice and can happen only once',()=>
 test('off-hand picks are rejected and five legal picks cover all five roles',()=>{let s=newDraft(industry,8);const hand=draftHand(industry,s).map(c=>c.id),unseen=industry.cards.find(c=>c.roleId===industry.roles[0].id&&!hand.includes(c.id));assert.throws(()=>pickDraftCard(industry,s,unseen.id),/hand/);s=finishDraft(industry);assert.equal(s.picks.length,5);assert.equal(new Set(s.picks).size,5);assert.deepEqual(s.picks.map(id=>industry.cards.find(c=>c.id===id).roleId),industry.roles.map(r=>r.id));assert.equal(draftPhase(s),'scenario');assert.throws(()=>pickDraftCard(industry,s,s.picks[0]),/complete/)});
 test('all seeded hands remain playable for both topics',()=>{for(const p of DRAFT_PACKS)for(let seed=1;seed<=64;seed++){let s=newDraft(p,seed);for(let round=0;round<5;round++){if(round===seed%5)s=redrawDraft(p,s);assert.equal(draftHand(p,s).length,3);s=pickDraftCard(p,s,draftHand(p,s)[seed%3].id)}assert.deepEqual(validateDraftState(s,p),s)}});
 test('scenario outcome is transparent and deterministic',()=>{const s=finishDraft(industry);const totals=draftTotals(industry,s);assert.deepEqual(totals,s.picks.reduce((a,id)=>a.map((n,i)=>n+industry.cards.find(c=>c.id===id).scores[i]),[0,0,0]));assert.deepEqual(draftOutcome(industry,s,0),draftOutcome(industry,clone(s),0));assert.equal(draftOutcome(industry,s,0).passed,totals[0]>=8)});
+test('reflection display order is a stable per-seed permutation with canonical option text',()=>{
+ const before=JSON.stringify(industry),orders=new Set();
+ for(let seed=1;seed<=64;seed++)for(let i=0;i<4;i++){
+  const state=finishDraft(industry,seed),shown=draftReflectionOptions(industry,state,i);
+  assert.deepEqual(shown,draftReflectionOptions(industry,clone(state),i));
+  assert.deepEqual(shown.map(o=>o.canonicalIndex).sort(),[0,1,2]);
+  for(const o of shown)assert.equal(o.text,industry.scenarios[i].options[o.canonicalIndex]);
+  orders.add(shown.map(o=>o.canonicalIndex).join(''));
+ }
+ assert.equal(orders.size,6);assert.equal(JSON.stringify(industry),before);
+ assert.deepEqual(draftReflectionOptions(industry,finishDraft(industry),4),[]);
+});
+test('even a generated pack with all canonical answers first does not make one display letter correct throughout',()=>{
+ const p=clone(industry);p.scenarios.forEach(s=>{[s.options[0],s.options[s.solution]]=[s.options[s.solution],s.options[0]];s.solution=0});
+ for(let seed=1;seed<=128;seed++){
+  const state=finishDraft(p,seed),positions=p.scenarios.map((s,i)=>draftReflectionOptions(p,state,i).findIndex(o=>o.canonicalIndex===s.solution));
+  assert.ok(new Set(positions).size>1,`seed ${seed} repeats one correct letter`);
+ }
+});
+test('displayed choices preserve canonical reducer answers and remain stable after feedback and save reload',()=>{
+ for(const p of DRAFT_PACKS){let state=finishDraft(p,37);for(let i=0;i<4;i++){
+  const shown=draftReflectionOptions(p,state),correct=shown.find(o=>o.canonicalIndex===p.scenarios[i].solution),wrong=shown.find(o=>o.canonicalIndex!==correct.canonicalIndex);
+  state=answerDraft(p,state,wrong.canonicalIndex);assert.deepEqual(draftReflectionOptions(p,state),shown);
+  state=answerDraft(p,state,correct.canonicalIndex);state=validateDraftState(JSON.parse(JSON.stringify(state)),p);
+  assert.deepEqual(state.reflections[i],[wrong.canonicalIndex,p.scenarios[i].solution]);assert.deepEqual(draftReflectionOptions(p,state),shown);
+  state=nextDraftScenario(p,state);
+ }assert.equal(draftPhase(state),'complete')}
+});
 test('wrong reflection records feedback path without changing draft outcome',()=>{let s=finishDraft(industry);const outcome=draftOutcome(industry,s,0),correct=industry.scenarios[0].solution;s=answerDraft(industry,s,(correct+1)%3);assert.throws(()=>nextDraftScenario(industry,s),/Reflect/);assert.deepEqual(draftOutcome(industry,s,0),outcome);s=answerDraft(industry,s,correct);assert.equal(s.reflections[0].length,2);assert.equal(nextDraftScenario(industry,s).scenarioIndex,1)});
 test('complete journey can finish regardless of scenario outcome; answers persist separately',()=>{for(const p of DRAFT_PACKS){let s=finishDraft(p,22);for(let i=0;i<4;i++){s=answerDraft(p,s,(p.scenarios[i].solution+1)%3);s=answerDraft(p,s,p.scenarios[i].solution);s=nextDraftScenario(p,s)}assert.equal(draftPhase(s),'complete');assert.equal(s.reflections.flat().length,8);assert.deepEqual(validateDraftState(JSON.parse(JSON.stringify(s)),p),s)}});
 test('saves reject forged picks, premature answers and skipped reflections',()=>{let s=finishDraft(industry);s.picks[0]='unlisted';assert.throws(()=>validateDraftState(s,industry),/hand/);s=newDraft(industry);s.reflections[0]=[0];assert.throws(()=>validateDraftState(s,industry),/before/);s=finishDraft(industry);s.scenarioIndex=2;assert.throws(()=>validateDraftState(s,industry),/previous/)});

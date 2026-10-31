@@ -10,6 +10,23 @@ export function draftHand(pack,state,round=state.picks.length){
  for(let i=cards.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]]}
  return state.redrawRound===round?[cards[0],cards[1],cards[3]]:cards.slice(0,3);
 }
+export function draftReflectionOptions(pack,state,index=state.scenarioIndex){
+ if(!Number.isInteger(index)||index<0||index>=pack.scenarios.length)return [];
+ const orders=pack.scenarios.map((scenario,i)=>{
+  const options=scenario.options.map((text,canonicalIndex)=>({text,canonicalIndex}));
+  const salt=parseInt(draftHash(['reflection',pack.id,pack.revision,scenario.id,i]),36);
+  const rng=random((state.seed^salt)>>>0);
+  for(let j=options.length-1;j>0;j--){const k=Math.floor(rng()*(j+1));[options[j],options[k]]=[options[k],options[j]]}
+  return options;
+ });
+ // Keep independent seeded shuffles, except the degenerate run where every
+ // correct answer lands under the same letter. The final question breaks it.
+ const positions=orders.map((options,i)=>options.findIndex(o=>o.canonicalIndex===pack.scenarios[i].solution));
+ if(positions.length>1&&positions.every(p=>p===positions[0])){
+  const last=orders.at(-1),offset=1+(state.seed%2);last.push(...last.splice(0,offset));
+ }
+ return orders[index];
+}
 export function pickDraftCard(pack,state,id){need(draftPhase(state)==='draft','The draft is already complete.');need(draftHand(pack,state).some(c=>c.id===id),'Choose one of the cards in this hand.');return {...state,picks:[...state.picks,id]}}
 export function redrawDraft(pack,state){need(draftPhase(state)==='draft'&&state.redrawRound===-1,'The redraw has already been used.');return {...state,redrawRound:state.picks.length}}
 export function draftTotals(pack,state){return state.picks.reduce((out,id)=>{const c=pack.cards.find(c=>c.id===id);return out.map((n,i)=>n+c.scores[i])},[0,0,0])}
