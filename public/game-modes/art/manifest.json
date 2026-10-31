@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "status": "ready",
+  "rooms": {
+    "workshop": "/game-modes/art/room-workshop.webp",
+    "woods": "/game-modes/art/room-woods.webp",
+    "archive": "/game-modes/art/room-archive.webp"
+  },
+  "heroes": {
+    "male": {
+      "walk": {
+        "url": "/game-modes/art/hero-male-walk.webp",
+        "columns": 7,
+        "rows": 1,
+        "frames": 7,
+        "fps": 7.5,
+        "frameW": 512,
+        "frameH": 512,
+        "sourceAssetId": "023d7c5f-aeb5-4b21-801a-a779235eed05",
+        "sourceFrames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      },
+      "idle": {
+        "url": "/game-modes/art/hero-male-idle.webp",
+        "columns": 5,
+        "rows": 3,
+        "frames": 15,
+        "fps": 7.5,
+        "frameW": 512,
+        "frameH": 512,
+        "sourceAssetId": "aaa1d920-611e-406c-8057-0cb3c8a407f9",
+        "sourceFrames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      }
+    },
+    "female": {
+      "walk": {
+        "url": "/game-modes/art/hero-female-walk.webp",
+        "columns": 5,
+        "rows": 2,
+        "frames": 9,
+        "fps": 7.5,
+        "frameW": 512,
+        "frameH": 512,
+        "sourceAssetId": "4fe03ff5-0c82-4780-b193-9134127d5b9e",
+        "sourceFrames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      },
+      "idle": {
+        "url": "/game-modes/art/hero-female-idle.webp",
+        "columns": 5,
+        "rows": 3,
+        "frames": 15,
+        "fps": 7.5,
+        "frameW": 512,
+        "frameH": 512,
+        "sourceAssetId": "6359416c-a3f4-4688-b29d-760380016bf6",
+        "sourceFrames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ]
+      }
+    }
+  },
+  "icons": {
+    "gear": "/game-modes/art/icon-gear.png",
+    "map": "/game-modes/art/icon-map.png",
+    "book": "/game-modes/art/icon-book.png",
+    "thread": "/game-modes/art/icon-thread.png",
+    "lever": "/game-modes/art/icon-lever.png",
+    "key": "/game-modes/art/icon-key.png",
+    "leaf": "/game-modes/art/icon-leaf.png",
+    "water": "/game-modes/art/icon-water.png",
+    "coal": "/game-modes/art/icon-coal.png",
+    "rail": "/game-modes/art/icon-rail.png",
+    "loom": "/game-modes/art/icon-loom.png",
+    "inspector": "/game-modes/art/icon-inspector.png",
+    "compass": "/game-modes/art/icon-compass.png",
+    "magnifier": "/game-modes/art/icon-magnifier.png",
+    "seed": "/game-modes/art/icon-seed.png",
+    "letter": "/game-modes/art/icon-letter.png"
+  },
+  "cards": {
+    "steam": "/game-modes/art/card-steam.webp",
+    "waterwheel": "/game-modes/art/card-waterwheel.webp",
+    "canal": "/game-modes/art/card-canal.webp",
+    "rail": "/game-modes/art/card-rail.webp",
+    "loom": "/game-modes/art/card-loom.webp",
+    "iron": "/game-modes/art/card-iron.webp",
+    "workers": "/game-modes/art/card-workers.webp",
+    "school": "/game-modes/art/card-school.webp",
+    "inspector": "/game-modes/art/card-inspector.webp",
+    "trees": "/game-modes/art/card-trees.webp",
+    "water": "/game-modes/art/card-water.webp",
+    "soil": "/game-modes/art/card-soil.webp",
+    "geology": "/game-modes/art/card-geology.webp",
+    "river": "/game-modes/art/card-river.webp",
+    "library": "/game-modes/art/card-library.webp",
+    "forge": "/game-modes/art/card-forge.webp"
+  },
+  "npc": {
+    "keeper": "/game-modes/art/npc-keeper.webp"
+  },
+  "tables": {
+    "draft": "/game-modes/art/table-draft.webp"
+  },
+  "artDirection": "Painterly late-1990s adventure; navy, slate, brass and moss.",
+  "provenance": "Generated for this project using the connected Sorceress account; retain generation provenance."
+}

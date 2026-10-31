@@ -1,0 +1,29 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import {readFileSync,readdirSync} from 'node:fs';
+import {ADVENTURE_PACKS} from '../src/game-modes/adventure-content.js';
+import {DRAFT_PACKS} from '../src/game-modes/draft-content.js';
+import {generationRequest,bindGeneratedEvidence,validateGenerated,collectSourceReferences,MODEL} from '../server/content-service.js';
+import {workshopAPI} from '../server/workshop-api.js';
+import {validatePlayableContent} from '../src/game-modes/content-registry.js';
+const packs=[ADVENTURE_PACKS[0],DRAFT_PACKS[0]];
+function jobFor(pack){return {template:pack.template,chapterId:'generated-game',topicId:'test-topic',goal:'Understand the concepts and apply the evidence',level:'Beginner',evidence:structuredClone(pack.sources)}}
+function output(pack,job){return {...structuredClone(pack),id:job.chapterId,topicId:job.topicId,revision:1}}
+for(const pack of packs){
+ test(`${pack.template}: schema pins identity and every nested citation; binding ignores invented excerpt text`,()=>{const job=jobFor(pack),request=generationRequest(job);assert.equal(request.model,MODEL);assert.equal(request.text.format.strict,true);assert.deepEqual(request.text.format.schema.properties.template.enum,[pack.template]);assert.deepEqual(request.text.format.schema.properties.id.enum,[job.chapterId]);let count=0;function walk(n){if(!n||typeof n!=='object')return;if(n.properties?.sourceRefs){count++;assert.deepEqual(n.properties.sourceRefs.items.enum,job.evidence.map(s=>s.id));if(pack.template==='adventure-v1'){assert.equal(n.properties.sourceRefs.minItems,1);assert.equal(n.properties.sourceRefs.maxItems,4)}}for(const v of Object.values(n))if(v&&typeof v==='object')walk(v)}walk(request.text.format.schema);assert.ok(count>=2);assert.equal(request.text.format.schema.properties.title.enum,undefined);const raw=output(pack,job);raw.sources[0].excerpt='Invented quotation';const bound=bindGeneratedEvidence(raw,job);assert.deepEqual([...bound.sources].sort((a,b)=>a.id.localeCompare(b.id)),job.evidence.filter(s=>collectSourceReferences(raw).includes(s.id)).sort((a,b)=>a.id.localeCompare(b.id)));assert.equal(validatePlayableContent(bound).template,pack.template)});
+ test(`${pack.template}: unknown citation, changed identity and cross-format results fail closed`,()=>{const job=jobFor(pack),raw=output(pack,job);const target=pack.template==='draft-v1'?raw.cards[0]:raw.rooms.workshop.clue;target.sourceRefs=['outside-source'];assert.throws(()=>bindGeneratedEvidence(raw,job),/outside/);const c=output(pack,job);c.id='changed';assert.throws(()=>validateGenerated(c,job),/identity/);assert.throws(()=>validateGenerated(output(pack,job),{...job,template:'underlight-v1'}));assert.throws(()=>generationRequest({...job,template:'unknown'}),/format/)});
+}
+class DB {
+ constructor(){this.db=new DatabaseSync(':memory:');for(const f of readdirSync(new URL('../drizzle/',import.meta.url)).filter(f=>f.endsWith('.sql')))this.db.exec(readFileSync(new URL('../drizzle/'+f,import.meta.url),'utf8'))}
+ prepare(sql){
+  const db=this.db;
+  return {bind(...v){return {
+   async first(){return db.prepare(sql).get(...v)||null},
+   async all(){return {results:db.prepare(sql).all(...v)}},
+   async run(){return {meta:{changes:Number(db.prepare(sql).run(...v).changes)}}}
+  }}}
+ }
+}
+function remapRefs(raw,id){if(!raw||typeof raw!=='object')return;for(const [key,v]of Object.entries(raw)){if(key==='sourceRefs')raw[key]=[id];else if(key!=='sources'&&v&&typeof v==='object')remapRefs(v,id)}}
+test('same source supports separate draft and adventure jobs; templates participate in request identity and owner scope',async()=>{const env={DB:new DB(),META_API_KEY:'fixture-only'},calls=[];const provider=async j=>{calls.push(j.template);const base=packs.find(p=>p.template===j.template),c=output(base,j);c.sources=structuredClone(j.evidence);remapRefs(c,j.evidence[0].id);return {status:'review',content:c,providerId:'resp_fixture'}};const call=async(path,data,owner='alice')=>{const response=await workshopAPI(new Request('https://game.test/api/workshop/'+path,{method:data?'POST':'GET',headers:{'oai-authenticated-user-id':owner,...(data?{Origin:'https://game.test','Content-Type':'application/json','X-Lanternbound-Workshop':'1'}:{})},...(data?{body:JSON.stringify(data)}:{})}),env,{provider});return {status:response.status,...await response.json()}};const r=(await call('resources',{title:'Allowed test notes',text:'This is an explicitly synthetic source for an API isolation test. It is not a claim about real learning or history. The test never contacts Meta.'})).resource;await call('resources/'+r.id+'/review',{checksum:r.checksum,confirmed:true});const body={topicId:'test-topic',goal:'Apply a source in a fictional learning scenario',level:'Beginner',resourceIds:[r.id],requestKey:'same-key',template:'adventure-v1'};const a=await call('jobs',body);assert.equal(a.status,201);assert.equal(a.job.template,'adventure-v1');assert.equal((await call('jobs',{...body,template:'draft-v1'})).status,409);const d=await call('jobs',{...body,template:'draft-v1',requestKey:'draft-key'});for(const j of[a.job,d.job]){const run=await call('jobs/'+j.id+'/run',{});assert.equal(run.job.status,'review');assert.equal(run.job.draft.template,j.template);const pub=await call('jobs/'+j.id+'/publish',{confirmed:true,draftHash:run.job.draftHash});assert.equal(pub.job.status,'published');assert.equal((await call('jobs/'+j.id,null,'bob')).status,404)}assert.deepEqual(calls,['adventure-v1','draft-v1']);assert.equal((await call('jobs',{...body,template:'unknown',requestKey:'bad-format'})).status,400)});

@@ -1,5 +1,7 @@
 # From learning material to a playable chapter
 
+The Resource Library now supports three explicit formats: the original Underlight RPG, the Thread Atlas 2D adventure and the Turning Points subject draft. See [game modes](GAME-MODES.md) for the new contracts, art pipeline and play flows. The Underlight-specific details below remain applicable to that template.
+
 The user clarified on 31 October 2026 that “dynamic ownership” means **dynamic game content**. This implementation makes the existing Underlight chapter reusable from uploaded learning material. It does not generate executable code, new geometry, an entire campaign or arbitrary game rules.
 
 ## Learner journey

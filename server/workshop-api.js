@@ -1,16 +1,16 @@
-import {WorkshopError,requireValue,boundedText,safeId,digest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL} from './content-service.js';
+import {WorkshopError,requireValue,boundedText,safeId,digest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function body(req){const reader=req.body?.getReader();requireValue(reader,'A request body is required.');let size=0,parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;requireValue(size<=100000,'The upload exceeds 100 KB.',413);parts.push(value)}}finally{await reader.cancel().catch(()=>{})}const data=new Uint8Array(size);let at=0;for(const p of parts){data.set(p,at);at+=p.length}try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(data))}catch{throw new WorkshopError('Send a valid UTF-8 JSON request.')}}
 const publicResource=r=>({id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:JSON.parse(r.payload).units});
 const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
-const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,model:MODEL,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
+const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',model:MODEL,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now()}={}){
  try{
   const url=new URL(req.url),path=url.pathname.replace(/^\/api\/workshop\/?/,'').split('/').filter(Boolean),method=req.method;
-  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md'],maxBytes:65536});
+  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md'],templates:TEMPLATE_IDS,maxBytes:65536});
   const owner=req.headers.get('oai-authenticated-user-id');requireValue(owner&&owner.length<=200,'Sign in with ChatGPT to use your resource library.',401);
   requireValue(env.DB,'Resource storage is not configured.',503);
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
@@ -43,7 +43,8 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    const input=await body(req);requireValue(boundedText(input.requestKey,80)&&/^[a-z0-9-]+$/.test(input.requestKey),'A valid request identity is required.');
    requireValue(safeId(input.topicId)&&boundedText(input.goal,1200,10)&&boundedText(input.level,240),'Choose a goal and describe the learner’s level.');
    requireValue(Array.isArray(input.resourceIds)&&input.resourceIds.length>0&&input.resourceIds.length<=3&&input.resourceIds.every(safeId)&&new Set(input.resourceIds).size===input.resourceIds.length,'Select one to three different reviewed resources.');
-   const normalized={topicId:input.topicId,goal:input.goal.trim(),level:input.level.trim(),resourceIds:input.resourceIds.slice().sort()},requestHash=await digest(JSON.stringify(normalized)),existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
+   const template=input.template||'underlight-v1';requireValue(TEMPLATE_IDS.includes(template),'Choose a supported game format.');
+   const normalized={...(template==='underlight-v1'?{}:{template}),topicId:input.topicId,goal:input.goal.trim(),level:input.level.trim(),resourceIds:input.resourceIds.slice().sort()},requestHash=await digest(JSON.stringify(normalized)),existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
    if(existing){requireValue(existing.request_hash===requestHash,'This request identity belongs to different inputs.',409);return json({job:await publicJob(existing,now())})}
    requireValue(env.META_API_KEY,'Muse Wonder is not connected. Configure the server’s META_API_KEY first.',503);
    requireValue((await one('SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND created>?',owner,now()-86400000)).n<10,'Today’s workshop limit is ten draft requests. Try again tomorrow.',429);
