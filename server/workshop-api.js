@@ -25,7 +25,9 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    return job(j.id);
   };
   const syncJob=async j=>{
-   if(!['running','interrupted'].includes(j.status)||!j.provider_id)return j;
+   // A manual check can revalidate an existing provider response after an
+   // adapter repair. It never creates a new inference request.
+   if(!['running','interrupted','failed'].includes(j.status)||!j.provider_id)return j;
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
    catch(e){if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
