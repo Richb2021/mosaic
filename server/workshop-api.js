@@ -72,7 +72,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    if(method==='POST'&&path[2]==='publish'&&path.length===3){
     const input=await body(req);requireValue(['review','published'].includes(j.status)&&j.draft,'This draft is not ready for review.',409);requireValue(input.confirmed===true&&input.draftHash===await digest(j.draft),'Review the current draft and confirm its sources first.',409);
     const payload=JSON.parse(j.payload);for(const binding of payload.resourceVersions){const r=await resource(binding.id);requireValue(r.status==='reviewed'&&r.checksum===binding.checksum,'A source changed or is no longer reviewed.',409)}
-    validateGenerated(JSON.parse(j.draft),payload);await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=?','published',now(),j.id,owner,'review');return json({job:await publicJob(await job(j.id),now())});
+    const validated=validateGenerated(JSON.parse(j.draft),payload);await run('UPDATE workshop_jobs SET status=?,draft=?,updated=? WHERE id=? AND owner=? AND status=?','published',JSON.stringify(validated),now(),j.id,owner,'review');return json({job:await publicJob(await job(j.id),now())});
    }
   }
   return json({error:'Workshop route not found.'},404);

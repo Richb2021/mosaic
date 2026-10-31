@@ -7,3 +7,4 @@
 .town-map-scroll{background-color:#6d8062;background-position:center;background-size:cover}.town-map{background:transparent}.map-caption,.map-subcaption{paint-order:stroke;stroke:#d9d5ac88;stroke-width:3px}
 /* Match the map's camera ratio to available height so the art stays continuous. */
 @media(min-width:761px){.living-town{max-width:min(1680px,max(1000px,calc(180dvh - 281px)))}.town-map{max-height:none}.town-map-scroll{background-image:none!important}}
+.living-town .town-restart{display:block;font-size:11px;color:#a9bbb6;padding-top:0}
