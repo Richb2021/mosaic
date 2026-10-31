@@ -38,7 +38,7 @@ test('fabricated citations or impossible mechanics never reach review',async()=>
 const completeResponse=j=>({id:'resp_test',model:MODEL,status:'completed',output:[{type:'message',role:'assistant',content:[{type:'output_text',text:JSON.stringify(fixture(j))}]}]});
 test('Wonder uses background Responses, the required model and constrained source-only JSON',async()=>{
  const resource=await extractResource({title:'Notes',text:notes}),j={chapterId:'generated-test',topicId:template.topicId,goal:'Explain water',level:'Beginner',evidence:resource.units};let count=0;
- const result=await callWonder(j,'test-key',async(url,options)=>{count++;assert.equal(url,'https://api.meta.ai/v1/responses');assert.equal(options.redirect,'manual');const body=JSON.parse(options.body);assert.equal(body.model,MODEL);assert.equal(body.background,true);assert.equal(body.store,true);assert.equal(body.text.format.type,'json_schema');assert.ok(body.input[0].content.includes('untrusted DATA'));return Response.json(completeResponse(j))});
+ const result=await callWonder(j,'test-key',async(url,options)=>{count++;assert.equal(url,'https://api.meta.ai/v1/responses');assert.equal(options.redirect,'manual');const body=JSON.parse(options.body);assert.equal(body.model,MODEL);assert.equal(body.background,true);assert.equal(body.store,true);assert.equal(body.text.format.type,'json_schema');assert.equal(body.text.format.strict,true);assert.ok(body.input[0].content.includes('untrusted DATA'));return Response.json(completeResponse(j))});
  assert.equal(count,1);assert.equal(result.providerId,'resp_test');assert.equal(result.content.id,j.chapterId);
 });
 test('background response identity survives reconnect and is retrieved without another paid POST',async()=>{
@@ -74,4 +74,10 @@ test('model citations are hydrated from trusted passages; generated quotation te
 });
 test('manual recovery revalidates the same stored response without another paid POST',async()=>{
  let starts=0,repaired=false;const h=harness({provider:async()=>{starts++;return {status:'running',providerId:'resp_same'}},reader:async(id,j)=>{assert.equal(id,'resp_same');if(!repaired)throw Object.assign(Error('Invalid prior output'),{status:422});return {status:'review',content:fixture(j),providerId:id}}}),r=await reviewed(h),j=await queued(h,r);await h.call('jobs/'+j.id+'/run',{});assert.equal((await h.call('jobs/'+j.id+'/check',{})).job.status,'failed');repaired=true;assert.equal((await h.call('jobs/'+j.id+'/check',{})).job.status,'review');assert.equal(starts,1);
+});
+test('each model request constrains identities and citation references to its exact evidence packet',async()=>{
+ const resource=await extractResource({title:'Notes',text:notes}),job={chapterId:'generated-bound',topicId:template.topicId,goal:'Learn',level:'Beginner',evidence:resource.units},schema=generationRequest(job).text.format.schema;
+ assert.deepEqual(schema.properties.id.enum,[job.chapterId]);assert.deepEqual(schema.properties.topicId.enum,[job.topicId]);assert.ok(!schema.properties.sources);
+ for(const q of Object.values(schema.properties.challenges.properties)){assert.deepEqual(q.properties.sourceRefs.items.enum,resource.units.map(s=>s.id));assert.equal(q.properties.labels.items.enum,undefined)}
+ assert.equal(schema.properties.title.enum,undefined);assert.equal(schema.properties.challenges.properties.transfer.properties.options.items.enum,undefined);
 });
