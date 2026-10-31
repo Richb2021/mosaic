@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {DRAFT_PACKS,DRAFT_SCHEMA,validateDraftContent,getDraftReferences,DRAFT_SOURCE_LINKS,getDraftSourceLink} from '../src/game-modes/draft-content.js';
+import {DRAFT_PACKS,DRAFT_SCHEMA,DRAFT_PROMPT,validateDraftContent,getDraftReferences,DRAFT_SOURCE_LINKS,getDraftSourceLink} from '../src/game-modes/draft-content.js';
 import {newDraft,draftPhase,draftHand,pickDraftCard,redrawDraft,draftTotals,draftOutcome,answerDraft,nextDraftScenario,validateDraftState,draftSaveKey,loadDraft,saveDraft} from '../src/game-modes/draft-engine.js';
 const clone=v=>structuredClone(v);
 const [industry,eco]=DRAFT_PACKS;
@@ -8,6 +8,22 @@ const finishDraft=(pack,seed=11)=>{let s=newDraft(pack,seed);for(let i=0;i<5;i++
 test('both authored packs are valid, bounded, distinct and fully cited',()=>{assert.notEqual(industry.topicId,eco.topicId);for(const p of DRAFT_PACKS){assert.deepEqual(validateDraftContent(p),p);assert.equal(p.cards.length,20);assert.equal(p.scenarios.length,4);assert.ok(JSON.stringify(p).length<102400);assert.ok(getDraftReferences(p).every(id=>p.sources.some(s=>s.id===id)))}});
 test('every exact-source citation maps to a reviewed primary URL; no page exceeds 25 quoted words',()=>{const words={};for(const p of DRAFT_PACKS)for(const s of p.sources){const u=DRAFT_SOURCE_LINKS[s.id];assert.match(u,/^https:\/\//);words[u]=(words[u]||0)+s.excerpt.trim().split(/\s+/).length}for(const [url,n]of Object.entries(words))assert.ok(n<=25,`${url}: ${n} words`)});
 test('source-less model schema remains strict and asset bounded',()=>{assert.equal(DRAFT_SCHEMA.additionalProperties,false);assert.equal(DRAFT_SCHEMA.properties.sources,undefined);assert.ok(DRAFT_SCHEMA.properties.cards.items.properties.asset.enum.includes('steam'))});
+test('generation schema requires the complete draft and nonempty evidence on every card and scenario',()=>{
+ const p=DRAFT_SCHEMA.properties;
+ for(const [key,count]of [['metrics',3],['roles',5],['cards',20],['scenarios',4]])assert.deepEqual([p[key].minItems,p[key].maxItems],[count,count],key);
+ const card=p.cards.items.properties,scenario=p.scenarios.items.properties;
+ for(const field of [card.scores,scenario.requirements,scenario.options])assert.deepEqual([field.minItems,field.maxItems],[3,3]);
+ for(const field of [card.sourceRefs,scenario.sourceRefs])assert.deepEqual([field.minItems,field.maxItems],[1,12]);
+ for(const [field,max]of [[card.scores.items,4],[scenario.requirements.items,20],[scenario.solution,2]])assert.deepEqual([field.type,field.minimum,field.maximum],['integer',0,max]);
+ assert.match(DRAFT_PROMPT,/Exactly 3 metrics, exactly 5 roles, exactly 4 cards for each role \(20 cards total\), and exactly 4 scenarios/);
+ assert.match(DRAFT_PROMPT,/3 integer scores 0\.\.4/);assert.match(DRAFT_PROMPT,/3 integer capability requirements 0\.\.20/);assert.match(DRAFT_PROMPT,/solution index 0\.\.2/);assert.match(DRAFT_PROMPT,/nonempty sourceRefs array of 1–12 exact packet IDs/);
+});
+test('generation schema bounds identity and prose to the runtime contract',()=>{
+ const p=DRAFT_SCHEMA.properties,card=p.cards.items.properties,scenario=p.scenarios.items.properties;
+ assert.deepEqual(p.schemaVersion.enum,[1]);assert.deepEqual([p.revision.minimum,p.revision.maximum],[1,100000]);
+ for(const field of [p.id,p.topicId,p.metrics.items.properties.id,p.roles.items.properties.id,card.id,card.roleId,scenario.id,card.sourceRefs.items]){assert.equal(field.maxLength,80);assert.equal(field.pattern,'^[a-z][a-z0-9-]*$')}
+ for(const [field,max]of [[p.title,100],[p.hook,1000],[p.subtitle,100],[p.ending,1000],[p.metrics.items.properties.label,30],[p.roles.items.properties.label,40],[p.roles.items.properties.prompt,180],[card.title,80],[card.description,260],[card.tradeoff,180],[scenario.title,80],[scenario.prompt,360],[scenario.question,240],[scenario.options.items,180],[scenario.explanation,500],[scenario.feedback,500]])assert.deepEqual([field.minLength,field.maxLength],[1,max]);
+});
 test('reviewed source fields retain leading and trailing whitespace verbatim',()=>{
  const p=clone(industry);for(const field of ['title','locator','excerpt'])p.sources[0][field]=' \t'+p.sources[0][field]+'\n ';
  const clean=validateDraftContent(JSON.stringify(p));assert.deepEqual(clean.sources,p.sources);assert.deepEqual(validateDraftContent(clean).sources,p.sources);
