@@ -16,7 +16,7 @@ The final decision sends the first restored current to gardens or homes. The cho
 
 ## Player tools
 
-Three manual save slots per topic revision, a portable JSON backup, staged import and a recovery copy before loading. Changed chapter content requires a new revision, a review screen and explicit activation. Original adventure progress is preserved when a chapter revision changes. Recovery copies are retained locally; cloud sync is not implemented.
+Three manual save slots per topic revision, a portable JSON backup, staged import and a recovery copy before loading. Changed chapter content requires a new revision, a review screen and explicit activation. Original adventure progress is preserved when a chapter revision changes. The three slots and exported backups are the supported restore interface. Automatic recovery copies are retained locally for manual recovery; backups require the matching chapter revision. Cloud sync and a version rollback interface are not implemented.
 
 Letter-key remapping, permanent arrow-key movement, 100/115/130% dialog text, optional shadows, story combat and separate procedural sound effects. Original Suno music remains. Standard gamepad bindings support walking, interacting and menu focus; physical controller hardware verification is recorded separately from automated input checks. Reduced motion follows the device preference.
 
