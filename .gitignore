@@ -4,3 +4,13 @@ dist/
 *.log
 .env*
 .openai/*.local.*
+
+.wrangler/
+.vinext/
+.next/
+.sites-runtime/
+.dev.vars*
+*.tsbuildinfo
+public/game.js*
+public/game.css*
+public/index.html

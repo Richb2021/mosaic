@@ -88,3 +88,6 @@ From Tidewheel Mill, open **Menu → Underlight Works** in the destination list.
 **Menu → Save journal** provides manual slots and portable backups. **Player settings** provides remapping, text size, graphics, gentler chapter combat and sound effects. **Chapter workshop** stages edited topic content for review before activation.
 
 See [the chapter guide](docs/UNDERLIGHT-WORKS.md) and [dynamic content / ownership contract](docs/DYNAMIC-OWNERSHIP.md). This is still an owner-private static preview with browser saves. Authenticated workspaces, uploaded-resource retrieval, cross-device sessions and live Muse Wonder calls are not yet connected.
+
+
+Resource workshop: see [Dynamic game content](docs/DYNAMIC-CONTENT.md). The private site now has a server-backed resource and chapter library; existing game saves remain browser-local.

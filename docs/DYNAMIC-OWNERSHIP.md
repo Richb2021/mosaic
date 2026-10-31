@@ -1,5 +1,7 @@
 # Dynamic content and ownership integration
 
+**Scope clarification, 31 October 2026:** the user means dynamic game content. The implemented resource-to-chapter workflow and its current boundaries are in [DYNAMIC-CONTENT.md](DYNAMIC-CONTENT.md). Workspace administration and transfers below are retained as later architecture, not the current implementation priority.
+
 The game is prepared for both content generated from uploaded learning resources and ownership by individuals, teachers and institutions. The deployed preview still stores authored content and saves in the browser. Browser labels and imported JSON never authorize access to a school, class or another person’s resources.
 
 ## Implemented boundary
