@@ -24,3 +24,19 @@ test('device progress ahead of a stale journal is preserved before cloud restora
 test('unreadable shared journal is preserved instead of overwritten by another tab',t=>{
  const data=storage(t),j=new LearningJournal();data.set(RUNS,'broken');j.records=[record(sports,newJourney(sports,1),1)];j.storeRecords();assert.equal(data.get(RUNS),'broken');assert.match(j.notice,/preserved/);
 });
+test('one invalid journal row is backed up while valid progress continues saving',t=>{
+ const data=storage(t),old=record(sports,newJourney(sports,1),1);data.set(RUNS,JSON.stringify([old,{broken:true}]));const j=new LearningJournal();
+ j.records=[record(sports,actJourney(sports,old.snapshot,{type:'formation',style:'balanced'}),2)];j.storeRecords();
+ assert.equal(JSON.parse(data.get(RUNS)).length,1);assert.equal(JSON.parse(data.get(RUNS))[0].updated,2);assert.equal(JSON.parse(data.get(RUNS+':recovery')).length,2);
+});
+test('a corrupt device save is backed up before valid cloud progress is restored',async t=>{
+ storage(t);const j=new LearningJournal();j.user={id:'alice'};j.loadLocal();const r=record(sports,newJourney(sports,1),1);j.storage.setItem(gameSaveKey(sports,'journey'),'{broken');j.request=async()=>({save:r});
+ await j.prepare(sports,'journey');assert.deepEqual(JSON.parse(j.storage.getItem(gameSaveKey(sports,'journey'))),r.snapshot);assert.equal(j.storage.getItem(gameSaveKey(sports,'journey')+':recovery'),'{broken');
+});
+test('an explicit cloud choice survives a stale tab writing another game',async t=>{
+ storage(t);const a=new LearningJournal(),b=new LearningJournal();a.user=b.user={id:'alice'};a.loadLocal();b.loadLocal();
+ const cloud=record(sports,newJourney(sports,1),1,3),device=record(sports,actJourney(sports,cloud.snapshot,{type:'formation',style:'balanced'}),Date.now(),0);device.conflict=true;
+ a.records=[device];a.storeRecords();b.records=[structuredClone(device)];a.request=async()=>({save:cloud});await a.resolveSave(sports,'journey',true);
+ b.records.unshift(record(merge,newJourney(merge,2),Date.now()+1));b.storeRecords();const result=JSON.parse(a.storage.getItem(RUNS)).find(r=>r.key===cloud.key);
+ assert.equal(result.version,3);assert.equal(result.pending,false);assert.deepEqual(result.snapshot,cloud.snapshot);assert.equal(b.records.length,2);
+});
