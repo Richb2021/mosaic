@@ -8,7 +8,7 @@ export class NCBStore{
   if(!this.env.NCB_INSTANCE||!this.env.NCB_SECRET_KEY)throw new StoreError('Cloud progress is not connected.');
   const url=new URL('https://eu-api.nocodebackend.com/'+action+'/'+table);url.searchParams.set('Instance',this.env.NCB_INSTANCE);
   for(const [k,v] of Object.entries(params))url.searchParams.set(k,String(v));
-  const res=await this.fetcher(url,{method:action==='read'?'GET':action.startsWith('delete/')?'DELETE':'POST',headers:{Authorization:'Bearer '+this.env.NCB_SECRET_KEY,'Content-Type':'application/json','Cache-Control':'no-cache, no-store'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(12000),cache:'no-store'});
+  const res=await this.fetcher(url,{method:action==='read'?'GET':(action.startsWith('delete/')||action==='bulk/delete')?'DELETE':'POST',headers:{Authorization:'Bearer '+this.env.NCB_SECRET_KEY,'Content-Type':'application/json','Cache-Control':'no-cache, no-store'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(12000),cache:'no-store'});
   const data=await res.json().catch(()=>null);if(!res.ok||data?.status!=='success')throw new StoreError('Cloud progress could not be saved. Your device save is safe.');return data;
  }
  async rows(table,owner,extra={}){const d=await this.request(table,'read',{owner_key:owner,...extra});if(!Array.isArray(d.data)||d.data.some(r=>r.owner_key!==owner))throw new StoreError('Cloud progress could not be verified.');return d;}
@@ -23,6 +23,17 @@ export class NCBStore{
   for(const row of d.data){if((heads.size<100&&!heads.has(row.slot_key))||(heads.has(row.slot_key)&&heads.get(row.slot_key).version<row.version))heads.set(row.slot_key,row);}
   if(d.metadata?.hasMore===false||d.metadata?.hasMore===undefined&&d.data.length<50)return [...heads.values()];
  }throw new StoreError('The cloud journal needs maintenance before it can be loaded.');}
+ async allRows(table,owner){
+  const rows=[];for(let page=1;page<=200;page++){const d=await this.rows(table,owner,{page,limit:50,sort:'id',order:'asc'});rows.push(...d.data);if(d.metadata?.hasMore===false||d.metadata?.hasMore===undefined&&d.data.length<50)return rows;}
+  throw new StoreError('This export is too large for one request. No records were removed.',413);
+ }
+ async deleteRows(table,owner,ids){
+  if(!ids.length)return;
+  const current=await this.allRows(table,owner),wanted=new Set(ids),owned=current.filter(r=>wanted.has(r.id));
+  for(let start=0;start<owned.length;start+=500)await this.request(table,'bulk/delete',{}, {ids:owned.slice(start,start+500).map(r=>r.id)});
+  for(const delay of [0,200,500,1000,2000]){if(delay)await new Promise(r=>setTimeout(r,delay));const after=await this.allRows(table,owner);if(!after.some(r=>wanted.has(r.id)))return;}
+  throw new StoreError('Deletion was submitted, but confirmation is delayed. Resume cleanup to verify it. No duplicate content was created.');
+ }
  async write(table,owner,slot,expected,payload,now=Date.now()){
   const latest=await this.latest(table,owner,slot),serialized=JSON.stringify(payload);
   // Recover a successful write whose acknowledgement was lost.

@@ -8,6 +8,34 @@
       "when": 1793479477760,
       "tag": "0000_glamorous_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793562656329,
+      "tag": "0001_quick_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793562904477,
+      "tag": "0002_bent_puck",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793563832795,
+      "tag": "0003_dazzling_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793563889680,
+      "tag": "0004_cooing_gargoyle",
+      "breakpoints": true
     }
   ]
 }

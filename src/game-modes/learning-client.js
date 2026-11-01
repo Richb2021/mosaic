@@ -16,10 +16,20 @@ export class LearningJournal{
   try{const raw=this.storage.getItem(RUNS)||'[]',records=JSON.parse(raw);if(!Array.isArray(records)||records.length>100)throw Error();this.records=records.filter(validPracticeRecord);if(this.records.length!==records.length){this.storage.setItem(RUNS+':recovery',raw);this.notice='Some journal entries could not be read; a recovery copy is kept on this device.';}}
   catch{this.notice='The practice journal could not be read. Existing game saves are unchanged.';try{const raw=this.storage.getItem(RUNS);if(raw)this.storage.setItem(RUNS+':recovery',raw);}catch{this.keepCorrupt=true;}}
  }
- async request(path,body){const r=await fetch('/api/learning/'+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'X-Mosaic-Learner':this.user?.id||'',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Object.assign(Error(d.error||'Cloud progress is unavailable.'),{status:r.status});return d;}
+ async request(path,body){const r=await fetch('/api/learning/'+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'X-Mosaic-Learner':this.user?.id||'','X-Mosaic-Data-Epoch':this.dataEpoch||'0:0',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json();if(r.ok&&!body){this.dataEpoch=r.headers.get('X-Mosaic-Data-Epoch')||this.dataEpoch;this.applyDataReset(Number(r.headers.get('X-Mosaic-Data-Reset')||0),r.headers.get('X-Mosaic-Data-Reset-Kind'));}if(!r.ok)throw Object.assign(Error(d.error||'Cloud progress is unavailable.'),{status:r.status});return d;}
+ applyDataReset(stamp,kind='all'){
+  if(!this.user||!stamp)return;const key=this.prefix+'mosaic:data-reset';if(Number(localStorage.getItem(key)||0)>=stamp)return;
+  for(const timer of this.timers.values())clearTimeout(timer);this.timers.clear();
+  if(kind==='expired'){
+   this.records=this.records.map(r=>({...r,pending:false,conflict:true,error:'Account retention removed old records. This device copy is preserved; choose explicitly before syncing it again.'}));
+   this.profilePending=false;this.storage.setItem(RUNS,JSON.stringify(this.records));this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion,pending:false}));localStorage.setItem(key,String(stamp));this.dataResetNotice='Account retention ran. Unsynced device copies are preserved for review, not automatically uploaded again.';this.notice=this.dataResetNotice;return;
+  }
+  for(const k of Object.keys(localStorage))if(k.startsWith(this.prefix))localStorage.removeItem(k);
+  localStorage.setItem(key,String(stamp));this.loadLocal();
+ }
  async connect(){this.connected=false;try{const response=await fetch('/api/auth/get-session',{credentials:'include',cache:'no-store'});if(!response.ok)throw Error('Account service is unavailable. Device saves are still available.');const {user}=await response.json();this.user=user||null;this.loadLocal();if(!user){this.connected=true;return;}const d=await this.request('journal');if(d.profile&&this.profilePending){this.profileConflict=d.profileVersion!==this.profileVersion;}else if(d.profile){this.profile=normaliseProfile(d.profile);this.profileVersion=d.profileVersion;this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion}));}
   for(const cloud of d.records.filter(validPracticeRecord)){const local=this.records.find(r=>r.key===cloud.key);if(!local)this.records.push(cloud);else if(local.version!==cloud.version){local.conflict=true;local.cloudVersion=cloud.version;}}
-  if(!d.profile&&!this.profilePending)this.profileVersion=d.profileVersion;this.storeRecords();this.connected=true;this.notice=d.warning||'Signed in. Your learner account stores preferences and supported game progress.';
+  if(!d.profile&&!this.profilePending)this.profileVersion=d.profileVersion;this.storeRecords();this.connected=true;this.notice=d.warning||this.dataResetNotice||'Signed in. Your learner account stores preferences and supported game progress.';
  }catch(e){this.notice=e.message;}this.changed();}
  storeRecords(authoritative=[]){if(this.keepCorrupt)return;try{
   const raw=this.storage.getItem(RUNS)||'[]',stored=JSON.parse(raw);if(!Array.isArray(stored)||stored.length>100)throw Error('Unreadable journal');

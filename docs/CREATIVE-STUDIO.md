@@ -10,9 +10,9 @@ The server supplies source excerpts. Generated media can only reference packet I
 
 ## Lifecycle and allowance
 
-Create reserves one request from the existing configurable workshop allowance. Run submits once; check resumes the retained Meta response ID. Ambiguous submission failures stay interrupted and never trigger automatic replacement inference. Manual script edits and local integrity scaffolds do not use allowance. Each new speech clip reserves one request; loaded clips are reused in browser memory. Reloading clears that audio cache, so another recording uses another request. Audio bytes are not persisted on the server. Provider credit and this app admission allowance are distinct.
+Create reserves one request from the existing configurable workshop allowance. Run submits once; check resumes the retained Meta response ID. Ambiguous submission failures stay interrupted and never trigger automatic replacement inference. Manual script edits and local integrity scaffolds do not use allowance. Each new speech clip reserves one request and is saved in private R2 storage. Playback after reload checks the approved-script/voice/model cache before budget admission, so a saved clip uses no new inference request. Provider credit and this app admission allowance are distinct.
 
-Media scripts and tutor text are retained in the existing private workshop store; removing a programme does not erase those generation records. Full account deletion, retention schedules and provider deletion remain outstanding work. The UI shows the latest forty creative requests for each exact programme version.
+Media scripts and tutor text are retained in the existing private workshop store; removing a programme does not erase those generation records. The Your data screen now exports and deletes learning records, creative content and saved audio, with configurable on-access retention and retryable deletion of known Meta responses. Sign-in account deletion and provider/infrastructure backups are outside this control; see MEDIA-LIFECYCLE.md. The UI shows the latest forty creative requests for each exact programme version.
 
 ## Narration and export
 

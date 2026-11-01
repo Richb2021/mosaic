@@ -6,6 +6,7 @@ import {validateUnit,applyUnitAction} from '../src/studio/programme.js';
 import {creativeContext,validateCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
 import {submitCreative,checkCreative} from './creative-provider.js';
 import {synthesizeSpeech,speechConfiguration} from './media-audio.js';
+import {persistentAudio} from './persistent-audio.js';
 
 const need=(ok,message,status=400)=>{if(!ok)throw new StoreError(message,status)};
 const keyOK=x=>typeof x==='string'&&/^[a-z0-9-]{1,80}$/.test(x);
@@ -27,7 +28,7 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  };
  const load=async id=>{need(typeof id==='string'&&id.length<=100,'Choose a saved request.');const j=await one(`SELECT * FROM workshop_jobs WHERE id=? AND owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=?`,id,siteOwner,'creative',owner,input.packId,input.contentHash);need(j,'Creative request not found.',404);return j;};
  const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};
- const result=async extra=>noStore({jobs:await Promise.all((await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash)).map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:speechConfiguration(env),...extra});
+ const result=async extra=>noStore({jobs:await Promise.all((await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash)).map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:!!env.BUCKET,...extra});
  const reserve=async(payload,requestKey,requestHash,status)=>{
   const budget=await generationBudget(one,siteOwner,env,now());need(!budget.configurationError,budgetMessage(budget),503);need(budget.remaining>0,budgetMessage(budget),429);
   await run(`INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>? AND ${GENERATION_ROWS})<?`,payload.id,siteOwner,requestKey,requestHash,status,JSON.stringify(payload),now(),now(),siteOwner,now()-GENERATION_WINDOW_MS,budget.limit);
@@ -37,13 +38,9 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  need(req.method==='POST','Creative route not found.',404);
  if(new URL(req.url).pathname.endsWith('/audio')){
   const j=await load(input.id);need(j.status==='creative-published'&&j.draft,'Review this exact script before creating narration.',409);need(input.draftHash===await digest(j.draft),'This script changed. Reload before creating narration.',409);
-  const p=JSON.parse(j.payload);need(p.kind!=='tutor','Tutor replies are not narration scripts.');const draft=validateCreative(JSON.parse(j.draft),p);need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose an episode segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');need(speechConfiguration(env),'Narration is not connected yet. Your transcript remains available.',503);
+  const p=JSON.parse(j.payload);need(p.kind!=='tutor','Tutor replies are not narration scripts.');const draft=validateCreative(JSON.parse(j.draft),p);need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose an episode segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');
   const requestKey='audio-'+input.requestKey,requestHash=await digest(JSON.stringify({owner,id:j.id,hash:input.draftHash,index:input.index}));
-  const existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);
-  if(existing){need(existing.request_hash===requestHash,'This narration identity belongs to different input.',409);throw new StoreError('This narration request was already submitted. No automatic repeat was sent; explicitly retry playback to request another recording.',409)}
-  const audioId='audio-'+crypto.randomUUID(),audio=await reserve({id:audioId,recordType:'creative-audio',learnerOwner:owner,packId:input.packId,contentHash:input.contentHash,scriptId:j.id,index:input.index},requestKey,requestHash,'audio-queued');
-  const lock=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=?','audio-starting',now(),audio.id,siteOwner,'audio-queued');need(lock.meta.changes===1,'This narration request is already being rendered.',409);
-  try{const rendered=await speech(draft.segments[input.index],env);await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=?','audio-complete',now(),audio.id,siteOwner);return new Response(rendered.bytes,{headers:{'Content-Type':rendered.contentType,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})}catch(e){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=?','audio-failed','Narration did not finish; no automatic retry was sent.',now(),audio.id,siteOwner);throw e}
+  return persistentAudio({env,siteOwner,owner,j,draft,index:input.index,requestKey,requestHash,reserve,speech,now});
  }
  if(input.action==='create'){
   need(keyOK(input.requestKey)&&CREATIVE_KINDS.includes(input.kind),'Choose a learning format and request identity.');need(input.kind!=='tutor'||typeof input.question==='string'&&input.question.trim().length>0&&input.question.length<=1200,'Write a short question or your reasoning.');

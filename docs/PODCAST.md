@@ -8,7 +8,7 @@ The podcast component reads a reviewed script in two original synthetic voices, 
 
 The player supports pause/resume, previous/next passage, keyboard-operable seeking within a passage, four playback rates, visible full transcript, source excerpts, a voluntary explanation reveal, and assembled mono PCM WAV download. The transcript download includes the source excerpts and review question. Preparing a complete download intentionally requests every missing passage. The UI states that pausing playback does not cancel a provider request already in flight.
 
-One media element and one object URL are used at a time. In-flight promises and completed blobs are cached for this mounted episode. Navigation between passages cannot let a late response replace the current audio. Unmount disposes the media element and object URL; changing the script resets the episode. This is not a claim of provider-side deletion or durable audio caching. A reload can require rendering again under the server's budget.
+One media element and one object URL are used at a time. In-flight promises and completed blobs are cached for this mounted episode. Navigation between passages cannot let a late response replace the current audio. Unmount disposes the media element and object URL; changing the script resets the episode. The server now stores approved narration privately across sessions. A reload fetches the exact saved clip without another provider call. Failed or missing recordings need explicit cleanup before regeneration; see MEDIA-LIFECYCLE.md.
 
 ## Speech adapter
 

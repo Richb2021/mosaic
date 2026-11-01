@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {Bucket} from './helpers/media-storage.mjs';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,readdirSync} from 'node:fs';
@@ -17,7 +18,7 @@ class D1{
  prepare(sql){return {bind:(...v)=>({first:async()=>this.db.prepare(sql).get(...v)||null,all:async()=>({results:this.db.prepare(sql).all(...v)}),run:async()=>({meta:{changes:Number(this.db.prepare(sql).run(...v).changes)}})})}}
 }
 function harness(extra={}){
- const env={DB:new D1(),META_API_KEY:'fixture-only',WORKSHOP_GENERATION_LIMIT:'50',FISH_AUDIO_API_KEY:'fixture-only',FISH_AUDIO_GUIDE_VOICE:'a'.repeat(32),FISH_AUDIO_LEARNER_VOICE:'b'.repeat(32)},calls=[];
+ const env={DB:new D1(),BUCKET:new Bucket(),META_API_KEY:'fixture-only',WORKSHOP_GENERATION_LIMIT:'50',FISH_AUDIO_API_KEY:'fixture-only',FISH_AUDIO_GUIDE_VOICE:'a'.repeat(32),FISH_AUDIO_LEARNER_VOICE:'b'.repeat(32)},calls=[];
  let savedStudio={schemaVersion:1,active:unit.id,units:[unit]},version=1;const store={latest:async()=>({version,payload:JSON.stringify({studio:savedStudio})}),write:async(table,owner,slot,expected,value)=>{assert.equal(expected,version);savedStudio=value.studio;return {version:++version}}};
  const dependencies={store,owner:'learner-a',resolve:async(id,hash)=>{assert.equal(id,identity.packId);assert.equal(hash,identity.contentHash);return pack},provider:async j=>{calls.push(j);return {status:'review',providerId:'resp_fixture',content:validateCreative(j.kind==='tutor'?{status:'hint',message:'Find the relationship in the source.',question:'What changes?',sourceRefs:[j.context.evidence[0].id]}:script(j),j)}},speech:async s=>{calls.push(s);return {bytes:new Uint8Array([73,68,51,0]),contentType:'audio/mpeg'}},...extra};
  const call=async(body,changes={})=>{
@@ -46,7 +47,7 @@ test('real SQL create, run, exact-hash review and narration use one shared admis
  assert.equal((await h.call({action:'review',id:j.id,draftHash:'stale',confirmed:true})).status,409);
  let r=await h.call({action:'review',id:j.id,draftHash:j.draftHash,confirmed:true});assert.equal(r.jobs[0].status,'published');
  r=await h.call({id:j.id,index:0,draftHash:j.draftHash,requestKey:'audio-one'},{audio:true});assert.equal(r.status,200);assert.equal(r.audio.byteLength,4);assert.equal((await h.call()).budget.used,2);
- assert.equal((await h.call({id:j.id,index:0,draftHash:j.draftHash,requestKey:'audio-one'},{audio:true})).status,409);assert.equal(h.calls.length,2);
+ assert.equal((await h.call({id:j.id,index:0,draftHash:j.draftHash,requestKey:'audio-one'},{audio:true})).status,200);assert.equal(h.calls.length,2);assert.equal((await h.call()).budget.used,2);
 });
 test('free edits invalidate approval, reject stale writers and never change canonical citations',async()=>{
  const h=harness(),j=await generate(h),edited={...j.draft,title:'My revised episode'};let r=await h.call({action:'edit',id:j.id,draftHash:j.draftHash,draft:edited});assert.equal(r.status,200);assert.equal(r.budget.used,1);const next=r.jobs[0];assert.notEqual(next.draftHash,j.draftHash);assert.equal((await h.call({action:'edit',id:j.id,draftHash:j.draftHash,draft:edited})).status,409);

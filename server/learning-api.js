@@ -1,4 +1,6 @@
 import {studioAPI} from './studio-api.js';
+import {withDataGuard} from './data-control.js';
+import {dataAPI,enforceRetention} from './data-lifecycle.js';
 import {creativeAPI} from './creative-api.js';
 import {RPG_PACKS,bundlePublishedChapter} from './rpg-catalog.js';
 import {ncbSession,noStore,checkOrigin,readJSON} from './ncb-auth.js';
@@ -23,6 +25,10 @@ const unpack=row=>row?{version:row.version,updated:Number(row.updated_ms),...JSO
 export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore(env),resolve=canonicalPack,now=()=>Date.now()}={}){try{
  checkOrigin(req);const user=await session(req,env);need(user,'Sign in to your learner account to save across devices.',401);need(req.headers.get('x-mosaic-learner')===user.id,'Your signed-in account changed. Reload this page before syncing progress.',401);
  const owner=await digest('mosaic-learner:'+user.id),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
+ const siteOwner=req.headers.get('oai-authenticated-user-id');
+ if(path==='data')return await dataAPI(req,env,{owner,siteOwner,store,now});
+ if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
+ return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
  if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,resolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,resolve,included:packs,now});
  if(req.method==='GET'&&path==='journal'){
@@ -43,4 +49,5 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
   const clean=observeProgress(pack,input.kind,input.snapshot),row=await store.write('learner_saves',owner,slot,input.expectedVersion,{key,...clean},now());return noStore({save:unpack(row)});
  }
  return noStore({error:'Learning route not found.'},404);
+ });
  }catch(e){return noStore({error:e instanceof StoreError?e.message:e.status?e.message:'The learning record could not be validated. Your device save is unchanged.'},e.status||400)}}

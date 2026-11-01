@@ -1,0 +1,1 @@
+ALTER TABLE `data_controls` ADD `reset_ms` integer DEFAULT 0 NOT NULL;
