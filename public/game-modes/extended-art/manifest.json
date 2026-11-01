@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "status": "ready",
+  "provider": "Sorceress",
+  "style": "Original painterly late-1990s JRPG; slate, cream stone, navy, brass, moss",
+  "backgrounds": {
+    "vn": {
+      "url": "/game-modes/extended-art/backgrounds/vn.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "sourceJobId": "fff726fd-9a42-4542-9309-de80c6ed6899"
+    },
+    "quiz": {
+      "url": "/game-modes/extended-art/backgrounds/quiz.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "sourceJobId": "edc64356-4137-4e07-b70b-13ad86b0e51f"
+    },
+    "sports": {
+      "url": "/game-modes/extended-art/backgrounds/sports.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "sourceJobId": "75245208-e2be-4978-b929-b45c147ea260",
+      "fieldBounds": {
+        "left": 0.134,
+        "top": 0.18,
+        "right": 0.867,
+        "bottom": 0.78
+      }
+    },
+    "merge": {
+      "url": "/game-modes/extended-art/backgrounds/merge.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "sourceJobId": "3e28422d-7673-46e9-97c7-05ab84868092",
+      "safeArea": {
+        "left": 0.25,
+        "top": 0.25,
+        "right": 0.75,
+        "bottom": 0.84
+      }
+    }
+  },
+  "portraits": {
+    "engineer": {
+      "url": "/game-modes/extended-art/portraits/engineer.webp",
+      "width": 720,
+      "height": 960,
+      "alpha": true,
+      "anchor": [
+        0.5,
+        0.9833333333333333
+      ],
+      "keyJobId": "bbe7bc75-4b17-4930-9df4-f492823404d6"
+    },
+    "archivist": {
+      "url": "/game-modes/extended-art/portraits/archivist.webp",
+      "width": 720,
+      "height": 960,
+      "alpha": true,
+      "anchor": [
+        0.5,
+        0.9833333333333333
+      ],
+      "keyJobId": "bfda6a58-46d8-4972-8f33-fc813401d5a5"
+    },
+    "captain": {
+      "url": "/game-modes/extended-art/portraits/captain.webp",
+      "width": 720,
+      "height": 960,
+      "alpha": true,
+      "anchor": [
+        0.5,
+        0.9833333333333333
+      ],
+      "keyJobId": "303896f2-0755-4899-8646-af92bb8e1d70"
+    }
+  },
+  "icons": {
+    "seed": {
+      "url": "/game-modes/extended-art/icons/seed.png",
+      "width": 256,
+      "height": 256,
+      "alpha": true,
+      "reusedFrom": "/game-modes/art/icon-seed.png"
+    },
+    "sapling": {
+      "url": "/game-modes/extended-art/icons/sapling.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "06cc4cb0-b71b-41b6-b3c3-11f114e16692"
+    },
+    "tree": {
+      "url": "/game-modes/extended-art/icons/tree.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "f29f570a-6224-458a-b3b0-2c1f0277a245"
+    },
+    "fibre": {
+      "url": "/game-modes/extended-art/icons/fibre.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "ddb59195-5938-45c3-8aa5-d3cb2bd428fc"
+    },
+    "spool": {
+      "url": "/game-modes/extended-art/icons/spool.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "11c77cdb-56bb-4530-91e9-9ddf85c2b5a7"
+    },
+    "cloth": {
+      "url": "/game-modes/extended-art/icons/cloth.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "47b43580-0c6d-462f-bc62-5a198f3e8952"
+    },
+    "gear": {
+      "url": "/game-modes/extended-art/icons/gear.png",
+      "width": 256,
+      "height": 256,
+      "alpha": true,
+      "reusedFrom": "/game-modes/art/icon-gear.png"
+    },
+    "mechanism": {
+      "url": "/game-modes/extended-art/icons/mechanism.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "keyJobId": "21f1e6df-8aa3-4f99-a5b9-d664fe858213"
+    }
+  }
+}
