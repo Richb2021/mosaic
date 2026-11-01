@@ -35,7 +35,7 @@ From a stored chapter, choose **Revise a copy**. The structured editor changes n
 
 Saving creates a separate, unpublished draft with a new content identity and a link to the original. The server checks the original hash, source bindings, owner and complete game validator. An idempotency key avoids duplicate copies after a lost acknowledgement. The original chapter and its saves remain usable. The new copy must pass the existing exact-hash publication review before it can be used as canonical cloud content.
 
-A revised copy does not call Meta. It shares the existing ten stored-draft requests per day; no quota was increased and no D1 migration was added. This workflow is for factual or teaching corrections within a reviewed packet. New sources require the normal source review and generation flow.
+A revised copy does not call Meta. Manual revisions are now excluded from AI generation allowance; see DYNAMIC-CONTENT.md for the configurable generation limit. No D1 migration was added. This workflow is for factual or teaching corrections within a reviewed packet. New sources require the normal source review and generation flow.
 
 ## Verification and remaining work
 

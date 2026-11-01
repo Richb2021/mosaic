@@ -1,3 +1,4 @@
+import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
 import {WorkshopError,requireValue,boundedText,safeId,digest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
 
@@ -11,7 +12,7 @@ const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now()}={}){
  try{
   const url=new URL(req.url),path=url.pathname.replace(/^\/api\/workshop\/?/,'').split('/').filter(Boolean),method=req.method;
-  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt'],extraction:'browser-text-only',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536});
+  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt'],extraction:'browser-text-only',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
   const owner=req.headers.get('oai-authenticated-user-id');requireValue(owner&&owner.length<=200,'Sign in with ChatGPT to use your resource library.',401);
   requireValue(env.DB,'Resource storage is not configured.',503);
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
@@ -32,7 +33,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
    catch(e){if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
-  if(method==='GET'&&path.join('/')==='library')return json({resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all('SELECT * FROM workshop_jobs WHERE owner=? ORDER BY created DESC LIMIT 30',owner)).map(r=>publicJob(r,now())))});
+  if(method==='GET'&&path.join('/')==='library')return json({generationBudget:await generationBudget(one,owner,env,now()),resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all('SELECT * FROM workshop_jobs WHERE owner=? ORDER BY created DESC LIMIT 30',owner)).map(r=>publicJob(r,now())))});
   if(method==='POST'&&path.join('/')==='resources'){
    const input=await body(req),r=await extractResource(input),existing=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);if(existing)return json({resource:publicResource(existing),duplicate:true});
    requireValue((await one('SELECT COUNT(*) AS n FROM workshop_resources WHERE owner=?',owner)).n<40,'This workshop holds 40 resources. Reuse an existing source for now.',409);
@@ -49,12 +50,12 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    const normalized={...(input.evidenceIds!==undefined?{evidenceIds:input.evidenceIds.slice().sort()}:{}),...(template==='underlight-v1'?{}:{template}),topicId:input.topicId,goal:input.goal.trim(),level:input.level.trim(),resourceIds:input.resourceIds.slice().sort()},requestHash=await digest(JSON.stringify(normalized)),existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
    if(existing){requireValue(existing.request_hash===requestHash,'This request identity belongs to different inputs.',409);return json({job:await publicJob(existing,now())})}
    requireValue(env.META_API_KEY,'Muse Wonder is not connected. Configure the server’s META_API_KEY first.',503);
-   requireValue((await one('SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND created>?',owner,now()-86400000)).n<10,'Today’s workshop limit is ten draft requests. Try again tomorrow.',429);
+   const budget=await generationBudget(one,owner,env,now());requireValue(!budget.configurationError,budgetMessage(budget),503);requireValue(budget.remaining>0,budgetMessage(budget),429);
    const resources=await Promise.all(normalized.resourceIds.map(resource));requireValue(resources.every(r=>r.status==='reviewed'),'Review all selected sources first.');
    let selected;try{selected=evidencePacket(resources.map(publicResource),normalized.goal,input.evidenceIds)}catch(e){throw new WorkshopError(e.message)}
    const id='job-'+crypto.randomUUID(),payload={...normalized,chapterId:'generated-'+crypto.randomUUID(),evidence:selected.evidence,coverage:selected.coverage,resourceVersions:resources.map(r=>({id:r.id,checksum:r.checksum}))};
-   await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>?)<10',id,owner,input.requestKey,requestHash,'queued',JSON.stringify(payload),now(),now(),owner,now()-86400000);
-   const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);requireValue(saved,'Today’s draft limit has been reached.',429);requireValue(saved.request_hash===requestHash,'This request identity belongs to different inputs.',409);return json({job:await publicJob(saved,now())},201);
+   await run(`INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>? AND ${GENERATION_ROWS})<?`,id,owner,input.requestKey,requestHash,'queued',JSON.stringify(payload),now(),now(),owner,now()-GENERATION_WINDOW_MS,budget.limit);
+   const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);if(!saved)throw new WorkshopError(budgetMessage(await generationBudget(one,owner,env,now())),429);requireValue(saved.request_hash===requestHash,'This request identity belongs to different inputs.',409);return json({job:await publicJob(saved,now())},201);
   }
   if(path[0]==='jobs'&&path.length>=2){
    let j=await job(path[1]);
@@ -70,10 +71,10 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
     if(existing){requireValue(existing.request_hash===requestHash,'This revision identity belongs to different edits.',409);return json({job:await publicJob(existing,now())})}
     const id='job-'+crypto.randomUUID(),chapterId='generated-'+crypto.randomUUID();
     const payload={...originalPayload,chapterId,revisionOf:{jobId:j.id,draftHash:input.draftHash}},copy=validateGenerated({...edited,id:chapterId},payload);
-    // A revised copy is a new stored draft, within the existing ten-draft limit.
+    // Manual revisions are stored copies, independent of AI admission allowance.
     // It never submits inference or mutates the original canonical content.
-    await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) SELECT ?,?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>?)<10',id,owner,input.requestKey,requestHash,'review',JSON.stringify(payload),JSON.stringify(copy),now(),now(),owner,now()-86400000);
-    const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);requireValue(saved,'Today’s workshop limit is ten stored drafts, including revised copies. Your edits remain in this window.',429);requireValue(saved.request_hash===requestHash,'This revision identity belongs to different edits.',409);
+    await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)',id,owner,input.requestKey,requestHash,'review',JSON.stringify(payload),JSON.stringify(copy),now(),now());
+    const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);requireValue(saved,'The revised copy could not be saved. Your edits remain in this window.',409);requireValue(saved.request_hash===requestHash,'This revision identity belongs to different edits.',409);
     return json({job:await publicJob(saved,now())},201);
    }
    if(method==='POST'&&path[2]==='check'&&path.length===3){await body(req);await sweepStarting();return json({job:await publicJob(await syncJob(await job(j.id)),now())})}

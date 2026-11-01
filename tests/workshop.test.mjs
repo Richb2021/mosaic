@@ -103,11 +103,53 @@ test('revision writes reject foreign owners, changed identities, forged citation
  for(const alter of [d=>d.id='foreign-chapter',d=>d.sources[0].excerpt='Invented quotation',d=>d.challenges.balance.solution=999]){const draft=structuredClone(original.draft);alter(draft);const result=await h.call('jobs/'+j.id+'/revise',{...input,draft});assert.ok(result.status>=400);assert.ok(!result.job)}
  assert.equal((await h.call('library')).jobs.length,1);assert.equal(h.calls.length,1);
 });
-test('manual revisions retain the ten-draft cap and work without a provider key',async()=>{
+test('manual revisions do not consume AI allowance, including legacy copies, and need no provider key',async()=>{
  const h=harness(),resource=await reviewed(h),j=await queued(h,resource),original=(await h.call('jobs/'+j.id+'/run',{})).job;
- h.env.META_API_KEY='';for(let i=0;i<9;i++)assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:{...original.draft,title:'Revision '+i},requestKey:'rev-'+i})).status,201);
- assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:original.draft,requestKey:'rev-over-limit'})).status,429);assert.equal(h.calls.length,1);
+ h.env.META_API_KEY='';h.env.WORKSHOP_GENERATION_LIMIT='0';
+ for(let i=0;i<12;i++)assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:{...original.draft,title:'Revision '+i},requestKey:'rev-'+i})).status,201);
+ let b=(await h.call('library')).generationBudget;assert.equal(b.used,1);assert.equal(b.limit,0);assert.equal(b.remaining,0);assert.equal(h.calls.length,1);
+ // Existing revisionOf metadata also excludes pre-change copies, without migration.
+ h.env.META_API_KEY='test-secret';h.env.WORKSHOP_GENERATION_LIMIT='2';
+ assert((await queued(h,resource,'one-more')).id);assert.equal((await h.call('library')).generationBudget.used,2);
+ assert.equal((await h.call('jobs',{topicId:template.topicId,goal:'Explain the town water changes',level:'Beginner',resourceIds:[resource.id],requestKey:'over-two'})).status,429);
 });
+test('AI admission uses configured limits, owner scope and an exact rolling window',async()=>{
+ let time=100000000;const h=harness({now:()=>time}),r=await reviewed(h);h.env.WORKSHOP_GENERATION_LIMIT='2';
+ const a=await queued(h,r,'first');time+=100;const b=await queued(h,r,'second');let usage=(await h.call('library')).generationBudget;
+ assert.equal(usage.used,2);assert.equal(usage.remaining,0);assert.equal(usage.nextAvailableAt,100000000+86400000);
+ assert.equal((await h.call('library',null,'bob')).generationBudget.used,0);
+ const input={topicId:template.topicId,goal:'Explain water changes and allocate the town supply',level:'New to water systems',resourceIds:[r.id],requestKey:'third'};
+ const denied=await h.call('jobs',input);assert.equal(denied.status,429);assert.match(denied.error,/This app’s limit of 2/);assert.match(denied.error,/not a Meta API quota/);
+ assert.equal((await queued(h,r,'first')).id,a.id); // idempotent at the limit
+ time=100000000+86400000;usage=(await h.call('library')).generationBudget;assert.equal(usage.used,1);assert.equal(usage.remaining,1);assert.equal(usage.nextAvailableAt,null);
+ assert.equal((await h.call('jobs',input)).status,201);assert.equal(h.calls.length,0);
+});
+test('default is ten AI reservations; configured development allowance permits more and lowering computes the correct next slot',async()=>{
+ let time=100000000;const h=harness({now:()=>time}),r=await reviewed(h);
+ assert.equal((await h.call('health')).generationLimit,10);
+ for(let i=0;i<10;i++){assert((await queued(h,r,'default-'+i)).id);time+=100;}
+ const input={topicId:template.topicId,goal:'Explain water changes in the town',level:'Beginner',resourceIds:[r.id],requestKey:'eleventh'};
+ assert.equal((await h.call('jobs',input)).status,429);h.env.WORKSHOP_GENERATION_LIMIT='50';assert.equal((await h.call('jobs',input)).status,201);
+ h.env.WORKSHOP_GENERATION_LIMIT='2';const b=(await h.call('library')).generationBudget;assert.equal(b.used,11);assert.equal(b.remaining,0);assert.equal(b.nextAvailableAt,100000900+86400000);
+});
+test('malformed limit disables new AI admission but does not block edits or library reads',async()=>{
+ const h=harness(),r=await reviewed(h),j=await queued(h,r),original=(await h.call('jobs/'+j.id+'/run',{})).job;
+ for(const limit of ['', '-1','2.5','Infinity','1001','10oops']){
+  h.env.WORKSHOP_GENERATION_LIMIT=limit;const lib=await h.call('library');assert.equal(lib.status,200);assert(lib.generationBudget.configurationError);
+  const res=await h.call('jobs',{topicId:template.topicId,goal:'Explain the water changes',level:'Beginner',resourceIds:[r.id],requestKey:'bad-limit'});assert.equal(res.status,503);
+ }
+ assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:original.draft,requestKey:'free-with-bad-config'})).status,201);assert.equal(h.calls.length,1);
+});
+test('atomic admission reserves the final slot once under concurrent requests',async()=>{
+ const h=harness(),r=await reviewed(h);h.env.WORKSHOP_GENERATION_LIMIT='1';const base={topicId:template.topicId,goal:'Explain the water changes',level:'Beginner',resourceIds:[r.id]};
+ const results=await Promise.all(['race-a','race-b','race-c'].map(requestKey=>h.call('jobs',{...base,requestKey})));assert.deepEqual(results.map(x=>x.status).sort(),[201,429,429]);assert.equal((await h.call('library')).generationBudget.used,1);assert.equal(h.calls.length,0);
+});
+test('failed and interrupted generation keep reservations; client revisionOf cannot bypass quota',async()=>{
+ const h=harness({provider:async()=>{throw TypeError('ack lost')}}),r=await reviewed(h);h.env.WORKSHOP_GENERATION_LIMIT='1';const j=await queued(h,r);await h.call('jobs/'+j.id+'/run',{});
+ assert.equal((await h.call('library')).generationBudget.used,1);
+ assert.equal((await h.call('jobs',{topicId:template.topicId,goal:'Explain water changes',level:'Beginner',resourceIds:[r.id],requestKey:'forged-revision',revisionOf:{jobId:j.id}})).status,429);
+});
+
 
 test('explicit evidence is owner-bound, confirmed, stable across click order and preserved in the provider packet',async()=>{
  const h=harness(),r=await reviewed(h),base={topicId:template.topicId,goal:'Explain water changes and allocate supply',level:'Beginner',resourceIds:[r.id],requestKey:'explicit-evidence',evidenceIds:[r.units[2].id,r.units[0].id],evidenceConfirmed:true};
