@@ -20,7 +20,7 @@ class D1{
 function harness(extra={}){
  const env={DB:new D1(),BUCKET:new Bucket(),META_API_KEY:'fixture-only',WORKSHOP_GENERATION_LIMIT:'50',FISH_AUDIO_API_KEY:'fixture-only',FISH_AUDIO_GUIDE_VOICE:'a'.repeat(32),FISH_AUDIO_LEARNER_VOICE:'b'.repeat(32)},calls=[];
  let savedStudio={schemaVersion:1,active:unit.id,units:[unit]},version=1;const store={latest:async()=>({version,payload:JSON.stringify({studio:savedStudio})}),write:async(table,owner,slot,expected,value)=>{assert.equal(expected,version);savedStudio=value.studio;return {version:++version}}};
- const dependencies={store,owner:'learner-a',resolve:async(id,hash)=>{assert.equal(id,identity.packId);assert.equal(hash,identity.contentHash);return pack},provider:async j=>{calls.push(j);return {status:'review',providerId:'resp_fixture',content:validateCreative(j.kind==='tutor'?{status:'hint',message:'Find the relationship in the source.',question:'What changes?',sourceRefs:[j.context.evidence[0].id]}:script(j),j)}},speech:async s=>{calls.push(s);return {bytes:new Uint8Array([73,68,51,0]),contentType:'audio/mpeg'}},...extra};
+ const dependencies={store,siteOwner:'site-owner',owner:'learner-a',resolve:async(id,hash)=>{assert.equal(id,identity.packId);assert.equal(hash,identity.contentHash);return pack},provider:async j=>{calls.push(j);return {status:'review',providerId:'resp_fixture',content:validateCreative(j.kind==='tutor'?{status:'hint',message:'Find the relationship in the source.',question:'What changes?',sourceRefs:[j.context.evidence[0].id]}:script(j),j)}},speech:async s=>{calls.push(s);return {bytes:new Uint8Array([73,68,51,0]),contentType:'audio/mpeg'}},...extra};
  const call=async(body,changes={})=>{
   const req=new Request('https://game.test/api/learning/creative'+(changes.audio?'/audio':'')+(body?'':'?'+new URLSearchParams(identity)),{method:body?'POST':'GET',headers:{'oai-authenticated-user-id':changes.siteOwner||'site-owner',Origin:'https://game.test','Content-Type':'application/json'},...(body?{body:JSON.stringify({...identity,...body})}:{})});
   try{const r=await creativeAPI(req,env,{...dependencies,...changes});return {status:r.status,...(r.headers.get('content-type').startsWith('audio/')?{audio:await r.arrayBuffer()}:await r.json())}}catch(e){return {status:e.status||400,error:e.message}}
@@ -56,8 +56,8 @@ test('free edits invalidate approval, reject stale writers and never change cano
 });
 test('learner isolation, source identity and old game endpoint cannot expose creative records',async()=>{
  const h=harness(),j=await generate(h);assert.equal((await h.call(null,{owner:'learner-b'})).jobs.length,0);assert.equal((await h.call({action:'run',id:j.id},{owner:'learner-b'})).status,404);assert.equal((await h.call({action:'run',id:j.id},{siteOwner:'other-site'})).status,404);
- const library=await workshopAPI(new Request('https://game.test/api/workshop/library',{headers:{'oai-authenticated-user-id':'site-owner'}}),h.env);assert.equal((await library.json()).jobs.length,0);
- const direct=await workshopAPI(new Request('https://game.test/api/workshop/jobs/'+j.id,{headers:{'oai-authenticated-user-id':'site-owner'}}),h.env);assert.equal(direct.status,404);
+ const library=await workshopAPI(new Request('https://game.test/api/workshop/library',{headers:{'oai-authenticated-user-id':'site-owner'}}),h.env,{owner:'site-owner'});assert.equal((await library.json()).jobs.length,0);
+ const direct=await workshopAPI(new Request('https://game.test/api/workshop/jobs/'+j.id,{headers:{'oai-authenticated-user-id':'site-owner'}}),h.env,{owner:'site-owner'});assert.equal(direct.status,404);
  assert.equal((await h.call({action:'create',requestKey:'untrusted',kind:'podcast'},{resolve:async()=>{throw Object.assign(Error('Unavailable content'),{status:422})}})).status,422);
 });
 test('same-key retries never repeat inference; polling uses saved provider ID; submission timeout stays interrupted',async()=>{

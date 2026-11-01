@@ -1,5 +1,4 @@
 import {costSummary} from './cost-ledger.js';
-import {maintenanceStatus} from './background-retention.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {digest} from './content-service.js';
 import {need,sqlDB,readControls,auditEvent,parse,DAY} from './data-control.js';
@@ -139,7 +138,7 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
    db.all('SELECT id,title,status,created FROM workshop_resources WHERE owner=? ORDER BY created DESC',siteOwner),
    db.all("SELECT id,status,plan,created FROM data_operations WHERE site_owner=? AND (learner_owner=? OR id IN (SELECT operation FROM data_controls WHERE scope=?)) ORDER BY created DESC LIMIT 30",siteOwner,owner,state.scopes.workspace),
    db.all('SELECT action,detail,created FROM data_events WHERE scope IN (?,?) AND created>? ORDER BY created DESC LIMIT 30',state.scopes.learner,state.scopes.workspace,now()-30*DAY)
-  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||'Tutor conversation',kind:parse(j.payload).kind,status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()}),maintenance:await maintenanceStatus(env)};
+  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||'Tutor conversation',kind:parse(j.payload).kind,status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()}),maintenance:{enabled:env.RETENTION_BACKGROUND_ENABLED==='true'}};
  };
  if(req.method==='GET'){await enforceRetention(env,ctx,{force:true});state=await readControls(env,siteOwner,owner,now());return noStore(await inventory());}
  need(req.method==='POST','Data action not found.',404);

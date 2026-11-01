@@ -30,7 +30,7 @@ export async function persistentAudio({env,siteOwner,owner,j,draft,index,request
  let audio;
  try{
   audio=await reserve({id:'audio-'+crypto.randomUUID(),recordType:'creative-audio',learnerOwner:owner,packId:parse(j.payload).packId,contentHash:parse(j.payload).contentHash,scriptId:j.id,index,mediaId:id},requestKey,requestHash,'audio-starting');
-  await startCost(env,{id:audio.id,siteOwner,learnerOwner:owner,model:SPEECH_MODEL,now:now()});
+  await startCost(env,{id:audio.id,siteOwner,learnerOwner:owner,model:SPEECH_MODEL,request:{inputBytes:new TextEncoder().encode(segment.text).length},now:now()});
   const rendered=await speech(segment,env);
   await finishCost(env,{id:audio.id,siteOwner,usage:{inputBytes:new TextEncoder().encode(segment.text).length,outputBytes:rendered.bytes.byteLength},now:now()});
   // Deletion and policy changes hold the same workspace/learner guard as this request.

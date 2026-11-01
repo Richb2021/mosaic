@@ -5,7 +5,7 @@ import {digest,MODEL} from './content-service.js';
 import {generationBudget,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {validateUnit,applyUnitAction} from '../src/studio/programme.js';
 import {creativeContext,validateCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
-import {submitCreative,checkCreative} from './creative-provider.js';
+import {submitCreative,checkCreative,creativeRequest} from './creative-provider.js';
 import {synthesizeSpeech,speechConfiguration} from './media-audio.js';
 import {persistentAudio} from './persistent-audio.js';
 
@@ -15,9 +15,9 @@ const KIND="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' EN
 const LEARNER="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.learnerOwner')";
 const PACK="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.packId')";
 const HASH="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.contentHash')";
-export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(),provider=submitCreative,reader=checkCreative,speech=synthesizeSpeech}){
- const input=req.method==='GET'?Object.fromEntries(new URL(req.url).searchParams):await readJSON(req,60000),siteOwner=req.headers.get('oai-authenticated-user-id');
- need(siteOwner&&siteOwner.length<=200,'Open your private Sites workspace to use the creative studio.',401);need(env.DB,'Creative storage is not connected.',503);
+export async function creativeAPI(req,env,{store,owner,siteOwner,resolve,now=()=>Date.now(),provider=submitCreative,reader=checkCreative,speech=synthesizeSpeech}){
+ const input=req.method==='GET'?Object.fromEntries(new URL(req.url).searchParams):await readJSON(req,60000);
+ need(siteOwner&&siteOwner.length<=200,'Sign in to your personal library to use the creative studio.',401);need(env.DB,'Creative storage is not connected.',503);
  need(typeof input.packId==='string'&&input.packId.length<=100&&typeof input.contentHash==='string'&&input.contentHash.length<=100,'Choose an exact reviewed programme.');
  const pack=await resolve(input.packId,input.contentHash,req,env),row=await store.latest('learner_profiles',owner,'studio');
  let unit;try{unit=validateUnit(JSON.parse(row.payload).studio.units.find(u=>u.packId===input.packId&&u.contentHash===input.contentHash),pack)}catch{throw new StoreError('Create or reopen the saved programme before using creative learning.',409)}
@@ -66,7 +66,7 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
   if(j.status!=='creative-queued')return result();
   if(p.kind==='tutor')await recordAssistance(p.activityKey);
   const lock=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=?','creative-starting',now(),j.id,siteOwner,'creative-queued');if(!lock.meta.changes)return result();
-  try{await startCost(env,{id:j.id,siteOwner,learnerOwner:owner,model:MODEL,now:now()});await settle(await provider(p,env.META_API_KEY),'creative-starting')}catch(e){await fail(e,'creative-starting')}return result();
+  try{await startCost(env,{id:j.id,siteOwner,learnerOwner:owner,model:MODEL,request:creativeRequest(p),now:now()});await settle(await provider(p,env.META_API_KEY),'creative-starting')}catch(e){await fail(e,'creative-starting')}return result();
  }
  if(input.action==='check'){
   if(j.status==='creative-starting'&&now()-j.updated>60000){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-interrupted','The submission acknowledgement was lost. No automatic repeat was sent.',now(),j.id,siteOwner,j.status);return result()}

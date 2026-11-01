@@ -60,7 +60,7 @@ test('studio POST rejects foreign origins and unknown focus IDs; no provider inv
 });
 test('catalogue adds only owner-scoped published valid packs and preserves exact revisions',async()=>{
  let bound;const DB={prepare:sql=>{assert.match(sql,/owner=\? AND status=\?/);return {bind:(...v)=>{bound=v;return {all:async()=>({results:[{id:'job-valid',draft:JSON.stringify({...domains[0],id:'generated-example'})},{id:'job-bad',draft:'broken'}]})}}}}};
- const result=await studioCatalog(new Request('https://game.test',{headers:{'oai-authenticated-user-id':'alice'}}),{DB},domains);assert.deepEqual(bound,['alice','published']);assert.equal(result.length,4);assert.equal(result.at(-1).jobId,'job-valid');
+ const result=await studioCatalog(new Request('https://game.test',{headers:{'oai-authenticated-user-id':'alice'}}),{DB},domains,'alice');assert.deepEqual(bound,['alice','published']);assert.equal(result.length,4);assert.equal(result.at(-1).jobId,'job-valid');
 });
 test('practice keeps a wrong attempt and a correction distinct and never changes the initial answer',()=>{
  const p=domains[0],q=questionsOf(p)[0];let u=newUnit(p,{},activitiesOf(p).map(a=>a.key));u=applyUnitAction(u,p,{type:'answer',key:q.key,answer:null,confidence:'not-sure'});

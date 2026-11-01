@@ -8,7 +8,7 @@ export async function ncbSession(req,env,fetcher=fetch){
  if(!env.NCB_INSTANCE||!env.NCB_SECRET_KEY||!authCookies(req))return null;
  const res=await fetcher(BASE+'/get-session?instance='+encodeURIComponent(env.NCB_INSTANCE)+'&disableCookieCache=true',{headers:ncbHeaders(req,env),cache:'no-store',signal:AbortSignal.timeout(12000)});
  if(!res.ok){if(res.status===401)return null;throw Object.assign(Error('Account service is unavailable. Your device save is safe.'),{status:503});}
- const data=await res.json();return data?.user&&typeof data.user.id==='string'?{id:data.user.id,name:String(data.user.name||''),email:String(data.user.email||'')}:null;
+ const data=await res.json();return data?.user&&typeof data.user.id==='string'?{id:data.user.id,name:String(data.user.name||''),email:String(data.user.email||''),emailVerified:data.user.emailVerified===true||data.user.emailverified===true||data.user.emailverified===1}:null;
 }
 const GET_PATHS=new Set(['get-session','providers']);
 const POST_PATHS=new Set(['sign-in/email','sign-up/email','request-password-reset','reset-password','email-otp/send-verification-otp','sign-in/email-otp','sign-in/social','sign-out']);
@@ -29,6 +29,7 @@ export async function authAPI(req,env,fetcher=fetch){try{
  }
  const upstream=await fetcher(BASE+'/'+path+'?instance='+encodeURIComponent(env.NCB_INSTANCE)+(path==='get-session'?'&disableCookieCache=true':''),{method:req.method,headers:ncbHeaders(req,env),body:body?JSON.stringify(body):undefined,cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(15000)});
  const headers=new Headers({'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
+ const retryAfter=upstream.headers.get('retry-after');if(retryAfter&&/^\d{1,6}$/.test(retryAfter))headers.set('Retry-After',retryAfter);
  for(const cookie of upstream.headers.getSetCookie?.()||[]){const parts=cookie.split(';').map(s=>s.trim());parts[0]=parts[0].replace(/^(?:__Secure-|__Host-)/,'');const attrs=parts.slice(1).filter(s=>!/^domain=|^samesite=|^secure$/i.test(s));headers.append('Set-Cookie',[parts[0],...attrs,'SameSite=Lax',...(url.protocol==='https:'?['Secure']:[])].join('; '));}
  if(path==='sign-out'){const names=new Set(['better-auth.session_token','better-auth.session_data','better-auth.dont_remember','better-auth.account_data',...authCookies(req).split(';').map(s=>s.trim().split('=')[0]).filter(Boolean)]);for(const name of names)headers.append('Set-Cookie',`${name}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${url.protocol==='https:'?'; Secure':''}`);}
  // This lightweight app identity route omits session tokens. The maintained

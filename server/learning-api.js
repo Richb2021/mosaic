@@ -1,3 +1,5 @@
+import {assignedChapters} from './assignments.js';
+import {workspaceIdentity,requireAdmission,admission} from './pilot-access.js';
 import {registerRetentionSubject} from './background-retention.js';
 import {learningLoopAPI} from './learning-loop-api.js';
 import {studioAPI} from './studio-api.js';
@@ -17,24 +19,27 @@ import {digest} from './content-service.js';
 import {draftHash} from '../src/game-modes/draft-engine.js';
 const packs=[...RPG_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS];
 const need=(x,m,status=400)=>{if(!x)throw new StoreError(m,status)};
-export async function canonicalPack(id,hash,req,env){
+export async function canonicalPack(id,hash,req,env,workspace,learner){
  let pack=packs.find(p=>p.id===id&&draftHash(p)===hash);
  // Generated content is accepted only after the existing source-review/publish gate.
- if(!pack&&env.DB){const owner=req.headers.get('oai-authenticated-user-id');need(owner,'Open your private resource library to sync this game.',403);const result=await env.DB.prepare("SELECT draft FROM workshop_jobs WHERE owner=? AND status=? AND json_extract(CASE WHEN json_valid(draft) THEN draft ELSE '{}' END,'$.id')=? ORDER BY updated DESC LIMIT 1").bind(owner,'published',id.startsWith('rpg-')?id.slice(4):id).all();pack=result.results.map(r=>{try{const p=validatePlayableContent(JSON.parse(r.draft));return id.startsWith('rpg-')&&p.template==='underlight-v1'?bundlePublishedChapter(p):p}catch{return null}}).find(p=>p&&p.id===id&&draftHash(p)===hash);}
+ if(!pack&&env.DB){const owner=workspace;need(owner,'Open your private resource library to sync this game.',403);const result=await env.DB.prepare("SELECT draft FROM workshop_jobs WHERE owner=? AND status=? AND json_extract(CASE WHEN json_valid(draft) THEN draft ELSE '{}' END,'$.id')=? ORDER BY updated DESC LIMIT 1").bind(owner,'published',id.startsWith('rpg-')?id.slice(4):id).all();pack=result.results.map(r=>{try{const p=validatePlayableContent(JSON.parse(r.draft));return id.startsWith('rpg-')&&p.template==='underlight-v1'?bundlePublishedChapter(p):p}catch{return null}}).find(p=>p&&p.id===id&&draftHash(p)===hash);}
+ if(!pack)for(const row of await assignedChapters(env,learner)){try{let p=validatePlayableContent(JSON.parse(row.draft));if(p.template==='underlight-v1')p=bundlePublishedChapter(p);if(p.id===id&&draftHash(p)===hash)pack=p;}catch{}}
  need(pack,'This game is available on this device only. Publish its reviewed source in the Resource Library to enable cloud progress.',422);return pack;
 }
 const unpack=row=>row?{version:row.version,updated:Number(row.updated_ms),...JSON.parse(row.payload)}:null;
 export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore(env),resolve=canonicalPack,now=()=>Date.now()}={}){try{
  checkOrigin(req);const user=await session(req,env);need(user,'Sign in to your learner account to save across devices.',401);need(req.headers.get('x-mosaic-learner')===user.id,'Your signed-in account changed. Reload this page before syncing progress.',401);
- const owner=await digest('mosaic-learner:'+user.id),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
- const siteOwner=req.headers.get('oai-authenticated-user-id');
+ const {owner,principal,siteOwner}=await workspaceIdentity(user,env),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
+ const scopedResolve=(id,hash,r,e)=>resolve(id,hash,r,e,siteOwner,owner);
+ if(path==='data'){const access=await admission(env,principal);need(access.admitted||['active','revoked','closing'].includes(access.status),'Accept your invitation before using account data controls.',403);return await dataAPI(req,env,{owner,siteOwner,store,now});}
+ const access=await requireAdmission(env,principal,{store,onboarding:true,storageOwner:owner});
+ if(req.method==='POST'&&path.startsWith('creative')&&env.PILOT_ENABLED==='true'&&(!access.canAuthor||access.ageBand!=='18plus'))return noStore({error:'Ask your organiser to prepare and review new AI learning material. Your assigned games and learning record remain available.'},403);
  await registerRetentionSubject(env,{siteOwner,owner,now:now()});
- if(path==='data')return await dataAPI(req,env,{owner,siteOwner,store,now});
  if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
  return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
- if(path==='loop')return await learningLoopAPI(req,env,{store,owner,siteOwner,resolve,now});
- if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,resolve,now});
- if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,resolve,included:packs,now});
+ if(path==='loop')return await learningLoopAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
+ if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
+ if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,siteOwner,resolve:scopedResolve,included:packs,now});
  if(req.method==='GET'&&path==='journal'){
   const [p,rows]=await Promise.all([store.latest('learner_profiles',owner,'profile'),store.list(owner)]);let profile=null,unreadable=0;
   if(p)try{profile=normaliseProfile(JSON.parse(p.payload).profile)}catch{unreadable++;}
@@ -47,7 +52,7 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  if(path==='save'&&['GET','POST'].includes(req.method)){
   const input=req.method==='POST'?await readJSON(req):Object.fromEntries(url.searchParams);
   need(typeof input.packId==='string'&&input.packId.length<=100&&typeof input.contentHash==='string'&&input.contentHash.length<=100&&['classic','journey','rpg'].includes(input.kind),'Choose a valid game save.');
-  const pack=await resolve(input.packId,input.contentHash,req,env),key=progressIdentity(pack,input.kind),slot=await digest(key);
+  const pack=await scopedResolve(input.packId,input.contentHash,req,env),key=progressIdentity(pack,input.kind),slot=await digest(key);
   if(req.method==='GET'){const value=unpack(await store.latest('learner_saves',owner,slot));if(value){const clean=observeProgress(pack,input.kind,value.snapshot);value.snapshot=clean.snapshot;value.summary=clean.summary;value.key=key;}return noStore({save:value,...(input.kind==='rpg'?{content:pack}:{})});}
   need(Number.isInteger(input.expectedVersion)&&input.expectedVersion>=0&&input.expectedVersion<2147483646,'Invalid save version.');
   const clean=observeProgress(pack,input.kind,input.snapshot),row=await store.write('learner_saves',owner,slot,input.expectedVersion,{key,...clean},now());return noStore({save:unpack(row)});

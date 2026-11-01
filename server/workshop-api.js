@@ -1,7 +1,7 @@
 import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
-import {WorkshopError,requireValue,boundedText,safeId,digest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
+import {WorkshopError,requireValue,boundedText,safeId,digest,generationRequest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function body(req){const reader=req.body?.getReader();requireValue(reader,'A request body is required.');let size=0,parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;requireValue(size<=100000,'The upload exceeds 100 KB.',413);parts.push(value)}}finally{await reader.cancel().catch(()=>{})}const data=new Uint8Array(size);let at=0;for(const p of parts){data.set(p,at);at+=p.length}try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(data))}catch{throw new WorkshopError('Send a valid UTF-8 JSON request.')}}
@@ -10,11 +10,11 @@ const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
 const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
-export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now()}={}){
+export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null}={}){
  try{
   const url=new URL(req.url),path=url.pathname.replace(/^\/api\/workshop\/?/,'').split('/').filter(Boolean),method=req.method;
   if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt'],extraction:'browser-text-only',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
-  const owner=req.headers.get('oai-authenticated-user-id');requireValue(owner&&owner.length<=200,'Sign in with ChatGPT to use your resource library.',401);
+  requireValue(owner&&owner.length<=200,'Sign in to your learner account to use your resource library.',401);
   requireValue(env.DB,'Resource storage is not configured.',503);
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
   const db=env.DB,one=(sql,...v)=>db.prepare(sql).bind(...v).first(),all=async(sql,...v)=>(await db.prepare(sql).bind(...v).all()).results,run=(sql,...v)=>db.prepare(sql).bind(...v).run();
@@ -87,8 +87,8 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
     const lock=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=? AND NOT EXISTS (SELECT 1 FROM workshop_jobs WHERE owner=? AND status IN (?,?))','starting',now(),j.id,owner,'queued',owner,'starting','running');
     if(!lock.meta.changes)return json({job:await publicJob(await job(j.id),now()),message:'Another request is already running.'},409);
     const work=(async()=>{
-     try{await startCost(env,{id:j.id,siteOwner:owner,model:MODEL,now:now()});await settle(j,await provider(JSON.parse(j.payload),env.META_API_KEY),'starting')}
-     catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});const uncertain=['TimeoutError','TypeError','AbortError'].includes(e.name),message=e instanceof WorkshopError?e.message:uncertain?'The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.':'The generated draft could not be validated. No chapter was activated.';await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'interrupted':'failed',message,e.providerId||j.provider_id,now(),j.id,owner,'starting')}
+     try{await startCost(env,{id:j.id,siteOwner:owner,learnerOwner,model:MODEL,request:generationRequest(JSON.parse(j.payload)),now:now()});await settle(j,await provider(JSON.parse(j.payload),env.META_API_KEY),'starting')}
+     catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});const uncertain=['TimeoutError','TypeError','AbortError'].includes(e.name),message=e.status?e.message:uncertain?'The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.':'The generated draft could not be validated. No chapter was activated.';await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'interrupted':'failed',message,e.providerId||j.provider_id,now(),j.id,owner,'starting')}
     })();
     defer(work);await work;return json({job:await publicJob(await job(j.id),now())});
    }
@@ -99,5 +99,5 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    }
   }
   return json({error:'Workshop route not found.'},404);
- }catch(e){return json({error:e instanceof WorkshopError?e.message:'The workshop could not complete this request. Your current game is unchanged.'},e.status||500)}
+ }catch(e){return json({error:e.status?e.message:'The workshop could not complete this request. Your current game is unchanged.'},e.status||500)}
 }

@@ -60,5 +60,5 @@ test('older published chapters remain canonical after more than thirty newer cop
  insert.run('alice','published','invalid-json',100);insert.run('bob','published',JSON.stringify({...source,title:'Foreign copy'}),101);
  const DB={prepare:sql=>({bind:(...values)=>({all:async()=>({results:db.prepare(sql).all(...values)})})})};
  const request=new Request('https://game.test/api/learning/save',{headers:{'oai-authenticated-user-id':'alice'}});
- assert.equal((await canonicalPack(source.id,draftHash(source),request,{DB})).title,source.title);db.close();
+ assert.equal((await canonicalPack(source.id,draftHash(source),request,{DB},'alice')).title,source.title);db.close();
 });

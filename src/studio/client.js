@@ -32,6 +32,6 @@ export class StudioClient{
 }
 let workshopEpoch='0:0';
 export async function workshopRequest(path,body){
- const r=await fetch('/api/workshop/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json','X-Lanternbound-Workshop':'1','X-Mosaic-Data-Epoch':workshopEpoch}:{},body:body?JSON.stringify(body):undefined});const data=await r.json();if(r.ok&&!body)workshopEpoch=r.headers.get('X-Mosaic-Data-Epoch')||workshopEpoch;if(!r.ok)throw Error(data.error||'The resource library is unavailable.');return data;
+ const r=await fetch('/api/workshop/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{'X-Mosaic-Learner':learningJournal.user?.id||'',...(body?{'Content-Type':'application/json','X-Lanternbound-Workshop':'1','X-Mosaic-Data-Epoch':workshopEpoch}:{})},body:body?JSON.stringify(body):undefined});const data=await r.json();if(r.ok&&!body)workshopEpoch=r.headers.get('X-Mosaic-Data-Epoch')||workshopEpoch;if(!r.ok)throw Error(data.error||'The resource library is unavailable.');return data;
 }
 export function gameURL(item){const p=item.pack;if(p.template==='underlight-v1')return '/?'+new URLSearchParams({rpg:p.id,hash:unitKey(p).slice(p.id.length+1)});return '/modes.html?'+new URLSearchParams(item.jobId?{job:item.jobId}:{game:p.id});}
