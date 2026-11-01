@@ -16,6 +16,7 @@ export function creativeEvidence(pack,activityKeys){
 }
 export function creativeContext(pack,unit,kind,key){
  need(CREATIVE_KINDS.includes(kind),'Choose a supported learning format.');
+ need(kind!=='tutor'||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
  const keys=kind==='tutor'?[key]:unit.activityKeys;
  const evidence=creativeEvidence(pack,keys),profile=unit.profile;
  return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests:profile.interests.slice(0,2),focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500)}};

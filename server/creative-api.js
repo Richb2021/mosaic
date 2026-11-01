@@ -59,7 +59,7 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  }
  let j=await load(input.id),p=JSON.parse(j.payload);
  const settle=async(out,from)=>{
-  const content=out.content?validateCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed'].includes(status),'Invalid Muse result.',502);
+  const content=out.content?validateCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);
   await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-'+status,content?JSON.stringify(content):null,out.providerId||j.provider_id,out.error||null,now(),j.id,siteOwner,from);
  };
  const fail=async(error,from)=>{const uncertain=['TypeError','TimeoutError','AbortError'].includes(error.name);await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'creative-interrupted':'creative-failed',uncertain?'The submission acknowledgement was lost. No automatic repeat was sent.':error.status?error.message:'The request could not be completed. No automatic repeat was sent.',error.providerId||j.provider_id,now(),j.id,siteOwner,from)};
@@ -71,7 +71,7 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  }
  if(input.action==='check'){
   if(j.status==='creative-starting'&&now()-j.updated>60000){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-interrupted','The submission acknowledgement was lost. No automatic repeat was sent.',now(),j.id,siteOwner,j.status);return result()}
-  if(['creative-running','creative-interrupted','creative-failed'].includes(j.status)&&j.provider_id)try{await settle(await reader(j.provider_id,p,env.META_API_KEY),j.status)}catch(e){if([410,422].includes(e.status))await fail(e,j.status);else throw e}return result();
+  if(['creative-running','creative-interrupted','creative-failed'].includes(j.status)&&j.provider_id)try{const out=await reader(j.provider_id,p,env.META_API_KEY);if(out.status==='running'&&now()-j.created>30*60*1000){out.status='interrupted';out.error='This request has taken more than 30 minutes. Automatic checking has stopped. Check this saved request later; no replacement was sent.';}await settle(out,j.status)}catch(e){if([410,422].includes(e.status))await fail(e,j.status);else throw e}return result();
  }
  need(p.kind!=='tutor'&&!p.local,'Tutor replies cannot be edited or approved as reviewed content.');need(j.draft&&input.draftHash===await digest(j.draft),'The script changed. Reload before making this change.',409);
  if(input.action==='edit'){

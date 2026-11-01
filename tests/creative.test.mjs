@@ -74,3 +74,10 @@ test('creative routes inherit real learner authentication, origin checks and acc
 test('AI assistance cannot turn a later starting answer into an unaided result',()=>{
  let u=applyUnitAction(unit,pack,{type:'support-ai',key:unit.activityKeys[0]},50);u=applyUnitAction(u,pack,{type:'answer',key:unit.activityKeys[0],answer:0,confidence:'confident'},51);assert.equal(u.answers[0].assisted,true);assert.equal(makeProgramme(pack,u).support[0].ai,true);assert.equal(unit.answers.length,0);
 });
+
+test('overdue creative jobs stop automatic polling but retain their original provider identity',async()=>{
+ let time=1000,ids=[];const h=harness({now:()=>time,provider:async()=>({status:'running',providerId:'resp_delayed'}),reader:async id=>{ids.push(id);return {status:'running',providerId:id}}});const j=await generate(h);time+=31*60*1000;let result=await h.call({action:'check',id:j.id});assert.equal(result.jobs[0].status,'interrupted');assert.match(result.jobs[0].error,/Automatic checking has stopped/);await h.call({action:'check',id:j.id});assert.deepEqual(ids,['resp_delayed','resp_delayed']);assert.equal(result.budget.used,1);
+});
+test('tutor cannot widen a narrowed programme focus via a hand-crafted activity key',()=>{
+ const narrowed=newUnit(pack,{},[unit.activityKeys[0]]);assert.throws(()=>creativeContext(pack,narrowed,'tutor',unit.activityKeys[1]),/programme focus/);
+});
