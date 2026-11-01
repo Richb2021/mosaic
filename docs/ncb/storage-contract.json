@@ -85,6 +85,13 @@
     "removal": "Explicit programme removal writes a new studio version; old versions pruned best-effort. Does not remove profile, game saves, source resources or the NCB account.",
     "export": "Browser export includes current profile and programmes; existing resource and game exports remain separate.",
     "privacy": "Deterministic planner; learner profile is not submitted to a model. Existing generation requires an explicit workshop action.",
-    "identity": "No new auth scope, tenant membership, sharing, tables, model changes or quota overrides."
+    "identity": "No new auth scope, tenant membership, sharing, tables, model changes or quota overrides.",
+    "guidedSupport": {
+      "storage": "Optional support array in the existing versioned programme JSON; no table, column, route or migration added. Legacy records default to [].",
+      "limits": "32 unique activities per programme; first thought <=1200 characters; teach-back <=1600; at most 20 exact canonical source IDs; self-check enum.",
+      "binding": "Pack ID/hash + activity key; server derives allowed passages and reviewed hint/explanation. Learner writing is stored literally, not sent to a provider.",
+      "integrity": "First thought is immutable; support needs a thought or explicit Not sure; explanation/teach-back needs a source; self-check needs a teach-back. Answer assistance derives server-side at attempt time; prior answers stay unchanged.",
+      "removalAndExport": "Included in existing programme export/removal, CAS and owner isolation. Game snapshots do not prove unaided performance."
+    }
   }
 }

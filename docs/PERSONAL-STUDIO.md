@@ -24,3 +24,13 @@ The private Sites resource identity and the NoCodeBackend learner identity are s
 ## Acceptance evidence
 
 Root workspace `output/personal-studio/evidence/` contains the unit-test output, real API acceptance, independent audit and browser screenshots. Real NCB checks use synthetic learner accounts, preserve no credentials in artifacts, and verify isolation and stale-write rejection. Browser checks cover profile reload, source review, a starting check, practice correction, a saved reflection, an actual game run, save recovery and its return to the trail. See the final acceptance JSON for the exact tested scope and any environmental limits.
+
+## Guided support (1 Nov 2026)
+
+“Work through an idea” opens a source-bound notebook. Its sequence is an immutable first thought (or explicit uncertainty), an optional reviewed hint, exact activity source passages, an explicitly revealed reviewed explanation when available, an ungraded teach-back, and a learner self-check. Formats without a reviewed explanation remain source-only. The learner's writing is stored literally; no model generates a response or evaluates it. This is structured reviewed help, not live AI conversation.
+
+All eight game formats link to the exact pack ID and content hash. Questions, draft scenarios, town council meetings and Underlight mechanisms select their current activity; general game navigation allows choosing an activity. Help opens in a new tab so the original game remains available. An unavailable or unpublished revision cannot silently resolve to a different chapter. A new programme still requires an explicit source review. Existing programmes resume their saved support.
+
+Support is an optional bounded field in the existing NoCodeBackend `learner_profiles` studio slot, covered by the same verified learner identity, expectedVersion/CAS, export and programme removal. No database migration, additional endpoint or provider call was introduced. See `docs/ncb/storage-contract.json` for limits. Old programmes default to no guided support. A starting/practice answer submitted after using a clue/source/explanation is marked assisted by the server; later help does not rewrite a previous answer. First recorded game attempts do not establish unaided performance. Self-checks and completed text are never grades, mastery estimates or access gates.
+
+Validation: `tests/guided-support.test.mjs`, real NCB API acceptance in `../scripts/check_guided_support_api.mjs`, and browser evidence in `../output/guided-support/evidence/`. These checks use synthetic learners; they do not establish production readiness for school accounts, retention/consent or an unrestricted AI tutor.
