@@ -1,3 +1,4 @@
+import {profileContext} from '../studio/profile.js';
 import {validateRPGSave} from '../rpg-progress.js';
 import {draftHash,draftPhase,validateDraftState} from './draft-engine.js';
 import {validateAdventureSave} from './adventure-engine.js';
@@ -6,7 +7,7 @@ import {validateExtendedState,extendedView} from './extended-engine.js';
 import {validateJourney,journeyLearning} from './journey-engine.js';
 export const LEARNING_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','novel-v1','quiz-v1','sports-v1','merge-v1'];
 const need=(value,message)=>{if(!value)throw Error(message)};
-export function normaliseProfile(raw={}){need(raw&&typeof raw==='object'&&!Array.isArray(raw),'Invalid learning profile.');const text=(v,n)=>{need(typeof v==='string'&&v.length<=n,'Learning profile text is too long.');return v.trim();};const formats=raw.formats??[];need(Array.isArray(formats)&&formats.length<=8&&formats.every(t=>LEARNING_TEMPLATES.includes(t)),'Choose available game formats.');return {goal:text(raw.goal??'',1200),context:text(raw.context??'',240),formats:[...new Set(formats)]};}
+export function normaliseProfile(raw={}){need(raw&&typeof raw==='object'&&!Array.isArray(raw),'Invalid learning profile.');const text=(v,n)=>{need(typeof v==='string'&&v.length<=n,'Learning profile text is too long.');return v.trim();};const formats=raw.formats??[];need(Array.isArray(formats)&&formats.length<=8&&formats.every(t=>LEARNING_TEMPLATES.includes(t)),'Choose available game formats.');return {goal:text(raw.goal??'',1200),context:text(raw.context??'',240),formats:[...new Set(formats)],...profileContext(raw,text,need)};}
 export const sourceIdentity=s=>draftHash([s.title.trim(),s.locator.trim(),s.excerpt.trim()]);
 export const progressIdentity=(pack,kind)=>`${pack.id}:${draftHash(pack)}:${kind}`;
 export function validPracticeRecord(r){

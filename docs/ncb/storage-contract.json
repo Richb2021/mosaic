@@ -36,7 +36,10 @@
     "GET /api/learning/journal",
     "GET /api/learning/save",
     "POST /api/learning/profile",
-    "POST /api/learning/save"
+    "POST /api/learning/save",
+    "GET /api/learning/studio/catalog",
+    "GET /api/learning/studio",
+    "POST /api/learning/studio"
   ],
   "content": "Included authored content or published, reviewed content from the existing private Sites workspace. Existing resource/job rows and quotas unchanged.",
   "audience": "Existing owner-private Sites hosting preserved. NCB learner identity is an additional application account inside that boundary.",
@@ -57,5 +60,31 @@
     "Public multi-tenant release is not part of this change"
   ],
   "superseded": "Earlier proposed D1 learner migration was not implemented. Empty storage-only NCB instance 34968_mosaic_learner_storage retained unused after user requested NCB auth; active instance is mosaic_learning.",
-  "rpgBinding": "Exact bundle hash of included world, settlement and included or owner-published chapter; no new tables"
+  "rpgBinding": "Exact bundle hash of included world, settlement and included or owner-published chapter; no new tables",
+  "personalStudio": {
+    "profileSchema": 2,
+    "profileFields": [
+      "goal",
+      "context",
+      "formats",
+      "stage",
+      "level",
+      "interests",
+      "struggles",
+      "exam",
+      "examDate",
+      "minutes",
+      "access"
+    ],
+    "storage": "Existing learner_profiles table: profile slot plus studio slot. No migration.",
+    "studioSchema": 1,
+    "programmeLimit": 12,
+    "binding": "Exact canonical pack ID and hash, reviewed activity keys, server-loaded profile snapshot. Published content also requires the existing Sites resource owner.",
+    "observations": "At most 3 immutable starting answers and 80 practice attempts per programme, confidence and uncertainty separate; reflection at most 2000 characters, ungraded.",
+    "concurrency": "All programme mutations use expectedVersion and the existing append/confirm/prune NCB store.",
+    "removal": "Explicit programme removal writes a new studio version; old versions pruned best-effort. Does not remove profile, game saves, source resources or the NCB account.",
+    "export": "Browser export includes current profile and programmes; existing resource and game exports remain separate.",
+    "privacy": "Deterministic planner; learner profile is not submitted to a model. Existing generation requires an explicit workshop action.",
+    "identity": "No new auth scope, tenant membership, sharing, tables, model changes or quota overrides."
+  }
 }

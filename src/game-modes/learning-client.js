@@ -17,14 +17,27 @@ export class LearningJournal{
   catch{this.notice='The practice journal could not be read. Existing game saves are unchanged.';try{const raw=this.storage.getItem(RUNS);if(raw)this.storage.setItem(RUNS+':recovery',raw);}catch{this.keepCorrupt=true;}}
  }
  async request(path,body){const r=await fetch('/api/learning/'+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'X-Mosaic-Learner':this.user?.id||'',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Object.assign(Error(d.error||'Cloud progress is unavailable.'),{status:r.status});return d;}
- async connect(){try{const response=await fetch('/api/auth/get-session',{credentials:'include',cache:'no-store'});if(!response.ok)throw Error('Account service is unavailable. Device saves are still available.');const {user}=await response.json();this.user=user||null;this.loadLocal();if(!user)return;const d=await this.request('journal');if(d.profile&&this.profilePending){this.profileConflict=d.profileVersion!==this.profileVersion;}else if(d.profile){this.profile=normaliseProfile(d.profile);this.profileVersion=d.profileVersion;this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion}));}
+ async connect(){this.connected=false;try{const response=await fetch('/api/auth/get-session',{credentials:'include',cache:'no-store'});if(!response.ok)throw Error('Account service is unavailable. Device saves are still available.');const {user}=await response.json();this.user=user||null;this.loadLocal();if(!user){this.connected=true;return;}const d=await this.request('journal');if(d.profile&&this.profilePending){this.profileConflict=d.profileVersion!==this.profileVersion;}else if(d.profile){this.profile=normaliseProfile(d.profile);this.profileVersion=d.profileVersion;this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion}));}
   for(const cloud of d.records.filter(validPracticeRecord)){const local=this.records.find(r=>r.key===cloud.key);if(!local)this.records.push(cloud);else if(local.version!==cloud.version){local.conflict=true;local.cloudVersion=cloud.version;}}
-  if(!d.profile&&!this.profilePending)this.profileVersion=d.profileVersion;this.storeRecords();this.notice=d.warning||'Signed in. Your learner account stores preferences and supported game progress.';
+  if(!d.profile&&!this.profilePending)this.profileVersion=d.profileVersion;this.storeRecords();this.connected=true;this.notice=d.warning||'Signed in. Your learner account stores preferences and supported game progress.';
  }catch(e){this.notice=e.message;}this.changed();}
  storeRecords(){if(this.keepCorrupt)return;try{this.storage.setItem(RUNS,JSON.stringify(this.records.slice(0,100)))}catch{this.notice='Journal storage is full on this device. Existing game saves are separate.';}}
- async saveProfile(raw){if(this.profileSaving)throw Error('Preferences are still saving. Please wait a moment.');const profile=normaliseProfile(raw);this.profileSaving=true;this.profile=profile;this.profilePending=!!this.user;try{this.storage.setItem(PROFILE,JSON.stringify({profile,version:this.profileVersion,pending:this.profilePending}));}catch{this.notice='Preferences are available for this visit only.';}
-  if(this.user){try{const result=await this.request('profile',{profile,expectedVersion:this.profileVersion});this.profileVersion=result.version;this.profileConflict=false;this.profilePending=false;this.storage.setItem(PROFILE,JSON.stringify({profile,version:result.version}));this.notice='Preferences saved to your learner account.';}catch(e){this.profileConflict=e.status===409;this.notice=e.message+' Your edited preferences remain on this device.';}}
-  else this.notice='Preferences saved on this device. Sign in to save across devices.';this.profileSaving=false;this.changed();}
+ async saveProfile(raw){
+  if(this.profileSaving)throw Error('Preferences are still saving. Please wait a moment.');
+  const profile=normaliseProfile(raw);this.profileSaving=true;this.profile=profile;this.profilePending=!!this.user;
+  let savedOnDevice=false,savedToAccount=false;
+  try{
+   try{this.storage.setItem(PROFILE,JSON.stringify({profile,version:this.profileVersion,pending:this.profilePending}));savedOnDevice=true;}catch{}
+   if(this.user){
+    try{
+     const result=await this.request('profile',{profile,expectedVersion:this.profileVersion});this.profileVersion=result.version;this.profileConflict=false;this.profilePending=false;savedToAccount=true;
+     try{this.storage.setItem(PROFILE,JSON.stringify({profile,version:result.version}));savedOnDevice=true;}catch{savedOnDevice=false;}
+     this.notice=savedOnDevice?'Preferences saved to your learner account.':'Preferences saved to your learner account. Device storage is unavailable.';
+    }catch(e){this.profileConflict=e.status===409;this.notice=e.message+(savedOnDevice?' Your edited preferences remain on this device.':' Keep this page open; your edited preferences are available for this visit only.');}
+   }else this.notice=savedOnDevice?'Preferences saved on this device. Sign in to save across devices.':'Device storage is unavailable. Preferences are available for this visit only.';
+   return {savedOnDevice,savedToAccount,notice:this.notice};
+  }finally{this.profileSaving=false;this.changed();}
+ }
  async reloadProfile(){const d=await this.request('journal');this.profile=normaliseProfile(d.profile||{});this.profileVersion=d.profileVersion;this.profileConflict=false;this.profilePending=false;this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion}));this.notice='Loaded your cloud preferences.';this.changed();}
  observe({pack,record,kind='classic'}){try{const {snapshot,summary}=observeProgress(pack,kind,record),key=progressIdentity(pack,kind),previous=this.records.find(r=>r.key===key);if(previous&&JSON.stringify(previous.snapshot)===JSON.stringify(snapshot))return;
   const next={key,summary,snapshot,updated:Date.now(),version:previous?.version||0,pending:!!this.user,conflict:previous?.conflict||false};this.records=[next,...this.records.filter(r=>r.key!==key)].slice(0,100);this.storeRecords();this.changed();

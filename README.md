@@ -91,3 +91,7 @@ See [the chapter guide](docs/UNDERLIGHT-WORKS.md) and [dynamic content / ownersh
 
 
 Resource workshop: see [Dynamic game content](docs/DYNAMIC-CONTENT.md). The private site now has a server-backed resource and chapter library; existing game saves remain browser-local.
+
+## Personal learning studio
+
+Open `/studio.html` for saved learner preferences, reviewed topics, starting checks, explainable programmes and a shared practice trail. See [the implementation scope](docs/PERSONAL-STUDIO.md) for behavior, storage and tested limits.
