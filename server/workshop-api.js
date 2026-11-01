@@ -5,7 +5,7 @@ async function body(req){const reader=req.body?.getReader();requireValue(reader,
 const publicResource=r=>({id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:JSON.parse(r.payload).units});
 const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
-const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',model:MODEL,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
+const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now()}={}){
  try{
@@ -56,6 +56,23 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   if(path[0]==='jobs'&&path.length>=2){
    let j=await job(path[1]);
    if(method==='GET'&&path.length===2)return json({job:await publicJob(j,now())});
+   if(method==='POST'&&path[2]==='revise'&&path.length===3){
+    const input=await body(req);requireValue(['review','published'].includes(j.status)&&j.draft,'This chapter is not ready to revise.',409);
+    requireValue(input.draftHash===await digest(j.draft),'The original chapter changed. Reopen it before revising.',409);
+    requireValue(boundedText(input.requestKey,80)&&/^[a-z0-9-]+$/.test(input.requestKey),'A valid revision identity is required.');
+    const originalPayload=JSON.parse(j.payload);let edited;try{edited=validateGenerated(input.draft,originalPayload)}catch(e){throw new WorkshopError(e instanceof TypeError||e instanceof SyntaxError?'The edited chapter could not be validated. Check its fields and source references.':e.message)}
+    for(const binding of originalPayload.resourceVersions){const r=await resource(binding.id);requireValue(r.status==='reviewed'&&r.checksum===binding.checksum,'A source changed or is no longer reviewed.',409)}
+    const requestHash=await digest(JSON.stringify({revisionOf:j.id,sourceHash:input.draftHash,draft:edited}));
+    const existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
+    if(existing){requireValue(existing.request_hash===requestHash,'This revision identity belongs to different edits.',409);return json({job:await publicJob(existing,now())})}
+    const id='job-'+crypto.randomUUID(),chapterId='generated-'+crypto.randomUUID();
+    const payload={...originalPayload,chapterId,revisionOf:{jobId:j.id,draftHash:input.draftHash}},copy=validateGenerated({...edited,id:chapterId},payload);
+    // A revised copy is a new stored draft, within the existing ten-draft limit.
+    // It never submits inference or mutates the original canonical content.
+    await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) SELECT ?,?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>?)<10',id,owner,input.requestKey,requestHash,'review',JSON.stringify(payload),JSON.stringify(copy),now(),now(),owner,now()-86400000);
+    const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);requireValue(saved,'Today’s workshop limit is ten stored drafts, including revised copies. Your edits remain in this window.',429);requireValue(saved.request_hash===requestHash,'This revision identity belongs to different edits.',409);
+    return json({job:await publicJob(saved,now())},201);
+   }
    if(method==='POST'&&path[2]==='check'&&path.length===3){await body(req);await sweepStarting();return json({job:await publicJob(await syncJob(await job(j.id)),now())})}
    if(method==='POST'&&path[2]==='run'&&path.length===3){
     await body(req);await sweepStarting();j=await job(j.id);if(j.status!=='queued')return json({job:await publicJob(j,now())});requireValue(env.META_API_KEY,'Muse Wonder is not connected.',503);

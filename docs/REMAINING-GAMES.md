@@ -1,5 +1,7 @@
 # Four further game formats
 
+The default play experience has since been expanded. See [Game depth and accounts](GAME-DEPTH-AND-ACCOUNTS.md) for the current journeys, cloud progress and chapter revision workflow. The mechanics below describe the retained classic engines.
+
 The library now contains eight formats: the existing 3D RPG, 2D adventure,
 subject draft and town simulation, plus these four bounded engines. Each new
 engine has two playable authored subjects and uses the existing private source
@@ -56,12 +58,11 @@ All eight formats are explicitly dispatched in generation, validation, review,
 library selection and mounting; no unsupported template falls through to another
 game.
 
-Saves are browser-local action histories bound to identity, revision, seed and
+Classic saves are action histories bound to identity, revision, seed and
 content hash. Loading replays legal transitions to reconstruct scores, inventory
 and progress. Saved balances or completion flags are never trusted. Restart is
 confirmed in the game; changing source content gives it a different save key.
-Storage failure is visible without preventing play. This is progress storage for
-the local game, not a trusted assessment record.
+Storage failure is visible without preventing play. Signed-in illustrated games now sync validated snapshots through NoCodeBackend; guest games and the 3D RPG remain device-local. These records are not trusted assessments.
 
 Teacher/creator review remains necessary for factual accuracy, meaningful
 questions, branch coherence and recipe analogies. Structural validation is not

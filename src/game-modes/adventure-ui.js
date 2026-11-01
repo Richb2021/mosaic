@@ -8,11 +8,11 @@ const safeURL=u=>typeof u==='string'&&/^\/game-modes\/art\/[a-zA-Z0-9_./-]+$/.te
 const roomNames={workshop:'Workshop',woods:'Woodland path',archive:'Archive'};
 const button=(label,action,extra='',className='')=>`<button type="button" class="${className}" data-adventure="${action}" ${extra}>${label}</button>`;
 
-export function mountAdventure(container,{pack:raw,assets={},onExit=()=>{},onLibrary=()=>{}}={}){
+export function mountAdventure(container,{pack:raw,assets={},onExit=()=>{},onLibrary=()=>{},onProgress=()=>{},storage=localStorage}={}){
  const pack=validateAdventureContent(raw),saveKey=adventureSaveKey(pack);let state=initialAdventureState(pack),storageNotice='',panel=null,selectedItem=null,destination=null,arrival=null,verb='look',raf=0,last=performance.now(),animation='idle',animationTime=0,moving=false,disposed=false,saveDue=0,feedback='',previousFocus=null;
  const keys=new Set(),reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
- try{const stored=localStorage.getItem(saveKey);if(stored){const valid=validateAdventureSave(stored,pack);if(valid)state=valid;else storageNotice='An incompatible save was ignored. A new adventure is ready.'}}catch{storageNotice='Saving is unavailable. This adventure will last for this visit.'}
- function persist(){try{localStorage.setItem(saveKey,JSON.stringify(state));if(storageNotice.startsWith('Saving'))storageNotice='';}catch{storageNotice='Saving is unavailable. Keep this page open to retain your adventure.'}}
+ try{const stored=storage.getItem(saveKey);if(stored){const valid=validateAdventureSave(stored,pack);if(valid)state=valid;else storageNotice='An incompatible save was ignored. A new adventure is ready.'}}catch{storageNotice='Saving is unavailable. This adventure will last for this visit.'}
+ function persist(){try{storage.setItem(saveKey,JSON.stringify(state));if(storageNotice.startsWith('Saving'))storageNotice='';}catch{storageNotice='Saving is unavailable. Keep this page open to retain your adventure.'}onProgress({pack,record:state,kind:'classic'});}
  function icon(key,alt=''){const url=safeURL(assets.icons?.[key]);return url?`<img src="${esc(url)}" alt="${esc(alt)}" draggable="false">`:''}
  function refs(ids){return ids?.length?`<details class="atlas-evidence"><summary>Read the source</summary>${ids.map(id=>{const s=pack.sources.find(x=>x.id===id);return s?`<article><h4>${esc(s.title)}</h4><small>${esc(s.locator)}</small><p>${esc(s.excerpt)}</p></article>`:''}).join('')}</details>`:''}
  function stop(){destination=null;arrival=null;moving=false;keys.clear();}
@@ -118,7 +118,7 @@ export function mountAdventure(container,{pack:raw,assets={},onExit=()=>{},onLib
   if(a==='run-sequence'){const r=apply({type:'sequence'});if(state.solved)message(r,'decision');else{feedback=r.message;render();container.querySelector('.atlas-feedback')?.scrollIntoView({block:'nearest'})}return}
   if(a==='hint'){const r=apply({type:'hint',which:b.dataset.which});message(r);return}if(a==='decision'){open({type:'decision'});return}
   if(a==='choose-ending'){apply({type:'choice',id:b.dataset.choice});showEnding();return}
-  if(a==='replay-prompt'){open({type:'replay'});return}if(a==='restart'){try{localStorage.setItem(saveKey+':previous',JSON.stringify(state))}catch{}state=initialAdventureState(pack);persist();selectedItem=null;open({type:'intro'});return}
+  if(a==='replay-prompt'){open({type:'replay'});return}if(a==='restart'){try{storage.setItem(saveKey+':previous',JSON.stringify(state))}catch{}state=initialAdventureState(pack);persist();selectedItem=null;open({type:'intro'});return}
   if(a==='exit'){stop();persist();onExit();return}if(a==='library'){close();stop();persist();onLibrary();return}
  }
  function pointer(event){if(event.target.closest('button,summary,a,input,select,textarea')||!event.target.closest('.atlas-scene')||panel)return;const rect=container.querySelector('.atlas-scene').getBoundingClientRect();walk((event.clientX-rect.left)/rect.width*100,(event.clientY-rect.top)/rect.height*100);container.querySelector('.atlas-scene')?.focus()}

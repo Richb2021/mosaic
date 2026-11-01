@@ -7,8 +7,8 @@ const ART={'novel-v1':'vn','quiz-v1':'quiz','sports-v1':'sports','merge-v1':'mer
 const NAMES={engineer:'The engineer',archivist:'The archivist',captain:'The captain'};
 const LANES=['Left wing','Centre','Right wing'];
 const seed=()=>{try{return crypto.getRandomValues(new Uint32Array(1))[0]||1}catch{return Date.now()%4294967295||1}};
-export function mountExtended(container,{pack:input,assets={},onExit=()=>{},onLibrary=()=>{}}={}){
- const pack=validateExtendedContent(input),kind=pack.template.split('-')[0];let storage;try{storage=window.localStorage}catch{storage={getItem(){throw Error()},setItem(){throw Error()}}}
+export function mountExtended(container,{pack:input,assets={},onExit=()=>{},onLibrary=()=>{},onProgress=()=>{},storage=localStorage}={}){
+ const pack=validateExtendedContent(input),kind=pack.template.split('-')[0];
  const restored=loadExtended(storage,pack,seed());let record=restored.record,notice=restored.notice,v=extendedView(pack,record),modal=null,returnFocus=null,selected=null,combine=null,alive=true;
  const art=assets.extended||{};
  const url=value=>{const path=typeof value==='string'?value:value?.url;return typeof path==='string'&&/^\/game-modes\/extended-art\/[a-zA-Z0-9_./-]+\.(webp|png|jpg)$/.test(path)?path:''};
@@ -36,7 +36,7 @@ export function mountExtended(container,{pack:input,assets={},onExit=()=>{},onLi
   if(modal)container.querySelector('.rx-modal-close')?.focus();else if(focus==='heading')container.querySelector('[data-rx-heading]')?.focus({preventScroll:true});else if(focus==='feedback')container.querySelector('[data-rx-feedback]')?.focus({preventScroll:true});else if(focus){const target=container.querySelector(focus);(target&&!target.disabled?target:container.querySelector('[data-rx-heading]'))?.focus({preventScroll:true});}
   if(kind==='sports'&&previous&&v.last&&['play','result'].includes(v.phase)&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){const from=ballPosition(previous.zone,previous.lane),to=ballPosition(v.zone,v.lane);container.querySelector('.rx-ball')?.animate([{transform:`translate(${from.x}px,${from.y}px)`},{transform:`translate(${to.x}px,${to.y}px)`}],{duration:420,easing:'ease-out'})}
  }
- function commit(action,focus='heading'){const previous=v;record=actExtended(pack,record,action);notice=saveExtended(storage,pack,record);selected=null;combine=null;render(focus,previous)}
+ function commit(action,focus='heading'){const previous=v;record=actExtended(pack,record,action);notice=saveExtended(storage,pack,record);onProgress({pack,record,kind:'classic'});selected=null;combine=null;render(focus,previous)}
  function open(m,b){returnFocus=b?`[data-rx="${b.dataset.rx}"]${b.dataset.refs?`[data-refs="${CSS.escape(b.dataset.refs)}"]`:''}`:null;modal=m;render(null)}
  function close(){if(modal?.kind==='craft')combine=null;modal=null;render(returnFocus||'heading')}
  function click(event){const b=event.target.closest('[data-rx]');if(!b||!container.contains(b)||b.disabled)return;const a=b.dataset.rx;try{

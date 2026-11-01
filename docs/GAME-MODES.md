@@ -1,6 +1,6 @@
 # The Thread Atlas and Turning Points
 
-The game library at `/modes.html` shares Lanternbound’s private Resource Library and Muse Wonder connection. The existing 3D RPG remains at `/`. Both entry points link to the library. No new account, key or public sharing setting is required.
+The game library at `/modes.html` shares Lanternbound’s private Resource Library and Muse Wonder connection. The existing 3D RPG remains at `/`. Both entry points link to the library. Included games can be played as a guest. NoCodeBackend sign-in now connects learner progress and the private resource workshop; see [Game depth and accounts](GAME-DEPTH-AND-ACCOUNTS.md). The existing private hosting audience is unchanged.
 
 ## The Thread Atlas
 
@@ -26,7 +26,7 @@ Review the full narrative, solutions, game trade-offs and sources before publish
 
 ## Saves and imported packs
 
-Each mode validates its saved state against the pack’s identity, revision and content fingerprint. A source/content change cannot silently reuse incompatible progress. Browser storage failures are reported while allowing the current session to continue. Game state remains device-local. Generated resource/job records remain in the private server library.
+Each mode validates its saved state against the pack’s identity, revision and content fingerprint. A source/content change cannot silently reuse incompatible progress. Browser storage failures are reported while allowing the current session to continue. Signed-in illustrated game state now syncs to the learner account; guest runs and the 3D RPG remain device-local. Generated resource/job records remain in the private server library.
 
 Imported JSON passes the same mode validator and a review gate. A reviewed custom version with an included pack’s ID takes precedence consistently in the library and after reload. It does not overwrite the built-in source file. Imports are capped and rendered as text, never HTML or scripts.
 
@@ -46,4 +46,4 @@ The frontend-design skill guided the shared palette, restrained chrome, game-spe
 
 ## Next extensions
 
-More room plates and event types can expand the vocabulary without adding executable model output. Wider curricula need subject-specific review and live trials. PDF/Word extraction, OCR, semantic retrieval, teacher assignment flows, online progress and an inline editor for stored generated revisions remain separate work. The three existing formats provide reusable game loops; additional formats should be added only when they teach something these loops do not cover well.
+More room plates and event types can expand the vocabulary without adding executable model output. Wider curricula need subject-specific review and live trials. PDF/Word extraction, OCR, semantic retrieval and teacher assignment flows remain separate work. Cloud progress and structured editing of stored chapter copies are now implemented in the accounts phase. The three existing formats provide reusable game loops; additional formats should be added only when they teach something these loops do not cover well.

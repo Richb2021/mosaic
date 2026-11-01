@@ -10,3 +10,21 @@ test('review acknowledgement does not steal focus back from the world',async()=>
 test('activation validates the generated chapter and its target topic in the handler',async()=>{const {g,w,opened}=ui();g.pack.id='different-topic';g.modal={kind:'resource-job',job:{status:'published',draft}};await w.act('resource-use',{});assert.equal(opened.length,0);assert.match(g.modal.feedback,/Switch to the story/);g.pack.id=draft.topicId;g.modal.job.draft={...draft,sources:[]};await w.act('resource-use',{});assert.equal(opened.length,0)});
 test('temporary polling failure schedules another retrieval without starting generation',async t=>{const {g,w}=ui();g.modal={kind:'resource-job',job:{id:'job-one',status:'running'}};const scheduled=[];const oldSet=setTimeout,oldClear=clearTimeout;globalThis.setTimeout=(callback,delay)=>{scheduled.push({callback,delay});return 1};globalThis.clearTimeout=()=>{};t.after(()=>{globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear});let calls=0;w.request=async path=>{assert.equal(path,'jobs/job-one/check');if(++calls===1)throw Error('Temporary outage');return {job:{id:'job-one',status:'review'}}};w.poll('job-one');await scheduled[0].callback();assert.equal(scheduled[1].delay,15000);await scheduled[1].callback();assert.equal(g.modal.job.status,'review')});
 test('saved request can be opened without contacting the model provider',async()=>{const {w,g}=ui();w.request=async(path,body)=>{assert.equal(path,'jobs/job-one');assert.equal(body,undefined);return {job:{id:'job-one',status:'interrupted'}}};await w.showJob('job-one');assert.equal(g.modal.job.status,'interrupted')});
+
+test('revision editor locks identity and evidence, validates fields, and keeps the original untouched',async()=>{
+ const {revisionFields,editRevisionField}=await import('../src/revision-editor.js');const original=structuredClone(draft),copy=structuredClone(draft),fields=revisionFields(copy);
+ assert.ok(fields.some(f=>f.path==='challenges/route/prompt'));assert.ok(!fields.some(f=>f.path==='id'||f.path.startsWith('sources/')||f.path.includes('/sourceRefs/')));
+ editRevisionField(copy,'challenges/route/prompt','A revised question');assert.equal(copy.challenges.route.prompt,'A revised question');assert.deepEqual(draft,original);
+ assert.throws(()=>editRevisionField(copy,'sources/0/excerpt','fake'));assert.throws(()=>editRevisionField(copy,'__proto__/polluted','yes'));assert.throws(()=>editRevisionField(copy,'challenges/balance/solution',''));
+});
+
+
+test('editor preserves invalid raw input with an inline error and never offers the fixed town ending',async()=>{
+ const {revisionFields,revisionEditorHTML}=await import('../src/revision-editor.js'),{TOWN_PACKS}=await import('../src/game-modes/town-packs.js');
+ assert.ok(!revisionFields(TOWN_PACKS[0]).some(f=>f.path==='ending'));
+ const {g,w}=ui();g.modal={kind:'resource-revision',edited:structuredClone(draft),job:{draft},requestKey:'test'};
+ await w.change({target:{dataset:{revisionPath:'challenges/balance/solution'},value:''}});
+ await w.act('resource-revision-review',{});assert.equal(g.modal.kind,'resource-revision');assert.equal(g.modal.rawValues['challenges/balance/solution'],'');
+ const html=revisionEditorHTML(g.modal.edited,String,g.modal);assert.match(html,/aria-invalid="true" type="number" step="1" value=""/);assert.match(html,/Balance · Solution: use a whole number/);
+ await w.change({target:{dataset:{revisionPath:'challenges/balance/solution'},value:'4'}});await w.act('resource-revision-review',{});assert.equal(g.modal.kind,'resource-revision-review');
+});

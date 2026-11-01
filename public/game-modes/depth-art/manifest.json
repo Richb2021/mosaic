@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "status": "ready",
+  "scenes": {
+    "harbour": {
+      "url": "/game-modes/depth-art/scene-harbour.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "reusedFrom": "/game-modes/art/room-workshop.webp"
+    },
+    "workshop": {
+      "url": "/game-modes/depth-art/scene-workshop.webp",
+      "width": 2736,
+      "height": 1536,
+      "alpha": false,
+      "sourceJobId": "c60d0a71-20e5-4366-8e95-81c0a590333b"
+    }
+  },
+  "players": {
+    "male": {
+      "idle": {
+        "columns": 5,
+        "rows": 3,
+        "frames": 15,
+        "fps": 7.5,
+        "sourceAssetId": "aaa1d920-611e-406c-8057-0cb3c8a407f9",
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ],
+        "url": "/game-modes/depth-art/player-male-idle.webp",
+        "frameW": 256,
+        "frameH": 256,
+        "width": 1280,
+        "height": 768,
+        "alpha": true,
+        "authoredMotion": "idle",
+        "reusedFrom": "/game-modes/art/hero-male-idle.webp"
+      },
+      "walk": {
+        "columns": 7,
+        "rows": 1,
+        "frames": 7,
+        "fps": 7.5,
+        "sourceAssetId": "023d7c5f-aeb5-4b21-801a-a779235eed05",
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ],
+        "url": "/game-modes/depth-art/player-male-walk.webp",
+        "frameW": 256,
+        "frameH": 256,
+        "width": 1792,
+        "height": 256,
+        "alpha": true,
+        "authoredMotion": "walk",
+        "reusedFrom": "/game-modes/art/hero-male-walk.webp"
+      }
+    },
+    "female": {
+      "idle": {
+        "columns": 5,
+        "rows": 3,
+        "frames": 15,
+        "fps": 7.5,
+        "sourceAssetId": "6359416c-a3f4-4688-b29d-760380016bf6",
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ],
+        "url": "/game-modes/depth-art/player-female-idle.webp",
+        "frameW": 256,
+        "frameH": 256,
+        "width": 1280,
+        "height": 768,
+        "alpha": true,
+        "authoredMotion": "idle",
+        "reusedFrom": "/game-modes/art/hero-female-idle.webp"
+      },
+      "walk": {
+        "columns": 5,
+        "rows": 2,
+        "frames": 9,
+        "fps": 7.5,
+        "sourceAssetId": "4fe03ff5-0c82-4780-b193-9134127d5b9e",
+        "loop": true,
+        "facing": "right",
+        "anchor": [
+          0.5,
+          0.96
+        ],
+        "url": "/game-modes/depth-art/player-female-walk.webp",
+        "frameW": 256,
+        "frameH": 256,
+        "width": 1280,
+        "height": 512,
+        "alpha": true,
+        "authoredMotion": "walk",
+        "reusedFrom": "/game-modes/art/hero-female-walk.webp"
+      }
+    }
+  },
+  "motionNotes": [
+    "Existing side-view adventurers reused as animated football board units. Outfits remain original navy coats.",
+    "Walk cycles are real frame animation. There is no newly authored running or kicking animation in this asset kit.",
+    "Face right normally; mirror horizontally for left travel. Retain last horizontal facing on purely vertical movement."
+  ]
+}

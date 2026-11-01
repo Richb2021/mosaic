@@ -1,0 +1,359 @@
+{
+  "instance": "34968_mosaic_learning",
+  "generatedAt": "2026-11-01T08:59:05.558Z",
+  "tables": {
+    "learner_profiles": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "integer",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        "owner_key": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "slot_key": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "version": {
+          "type": "integer",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "payload": {
+          "type": "string",
+          "nullable": false
+        },
+        "updated_ms": {
+          "type": "integer",
+          "nullable": false
+        },
+        "user_id": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL",
+          "indexed": true,
+          "foreignKey": {
+            "table": "ncba_user",
+            "column": "id",
+            "onDelete": "cascade",
+            "onUpdate": "cascade"
+          }
+        }
+      }
+    },
+    "learner_saves": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "integer",
+          "nullable": false,
+          "autoIncrement": true
+        },
+        "owner_key": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "slot_key": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "version": {
+          "type": "integer",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "payload": {
+          "type": "string",
+          "nullable": false
+        },
+        "updated_ms": {
+          "type": "integer",
+          "nullable": false
+        },
+        "user_id": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL",
+          "indexed": true,
+          "foreignKey": {
+            "table": "ncba_user",
+            "column": "id",
+            "onDelete": "cascade",
+            "onUpdate": "cascade"
+          }
+        }
+      }
+    },
+    "ncba_account": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "string",
+          "nullable": false
+        },
+        "user_id": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "foreignKey": {
+            "table": "ncba_user",
+            "column": "id",
+            "onDelete": "cascade",
+            "onUpdate": "cascade"
+          }
+        },
+        "accountid": {
+          "type": "string",
+          "nullable": false
+        },
+        "providerid": {
+          "type": "string",
+          "nullable": false
+        },
+        "accesstoken": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "refreshtoken": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "accesstokenexpiresat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "refreshtokenexpiresat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "scope": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "idtoken": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "password": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "createdat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        },
+        "updatedat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        }
+      }
+    },
+    "ncba_config": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "string",
+          "nullable": false
+        },
+        "provider": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "enabled": {
+          "type": "integer",
+          "nullable": true,
+          "default": 0
+        },
+        "client_id": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "client_secret": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "extra_config": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "created_at": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        },
+        "updated_at": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        }
+      }
+    },
+    "ncba_rls_config": {
+      "primaryKey": "table_name",
+      "columns": {
+        "table_name": {
+          "type": "string",
+          "nullable": false
+        },
+        "policy": {
+          "type": "string",
+          "nullable": false
+        }
+      }
+    },
+    "ncba_session": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "string",
+          "nullable": false
+        },
+        "user_id": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "foreignKey": {
+            "table": "ncba_user",
+            "column": "id",
+            "onDelete": "cascade",
+            "onUpdate": "cascade"
+          }
+        },
+        "expiresat": {
+          "type": "datetime",
+          "nullable": false
+        },
+        "token": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "ipaddress": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "useragent": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "createdat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        },
+        "updatedat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        }
+      }
+    },
+    "ncba_user": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "string",
+          "nullable": false
+        },
+        "name": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "email": {
+          "type": "string",
+          "nullable": false,
+          "indexed": true,
+          "unique": true
+        },
+        "emailverified": {
+          "type": "integer",
+          "nullable": true,
+          "default": 0
+        },
+        "image": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "role": {
+          "type": "string",
+          "nullable": true,
+          "default": "NULL"
+        },
+        "createdat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        },
+        "updatedat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        }
+      }
+    },
+    "ncba_verification": {
+      "primaryKey": "id",
+      "columns": {
+        "id": {
+          "type": "string",
+          "nullable": false
+        },
+        "identifier": {
+          "type": "string",
+          "nullable": false
+        },
+        "value": {
+          "type": "string",
+          "nullable": false
+        },
+        "expiresat": {
+          "type": "datetime",
+          "nullable": false
+        },
+        "createdat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        },
+        "updatedat": {
+          "type": "datetime",
+          "nullable": true,
+          "default": "current_timestamp()"
+        }
+      }
+    }
+  }
+}

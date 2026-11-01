@@ -5,8 +5,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const freshSeed=()=>{try{return crypto.getRandomValues(new Uint32Array(1))[0]||1}catch{return Date.now()%4294967295||1}};
 const assetUrl=v=>typeof v==='string'?v:typeof v?.url==='string'?v.url:'';
 const safeAsset=v=>{const url=assetUrl(v);return /^(?:\/(?!\/)|https:\/\/)/.test(url)?url:''};
-export function mountDraft(container,{pack:input,assets={},onExit=()=>{},onLibrary=()=>{}}={}){
- const pack=validateDraftContent(input);let store;try{store=window.localStorage}catch{store={getItem(){throw Error('storage')},setItem(){throw Error('storage')}}}
+export function mountDraft(container,{pack:input,assets={},onExit=()=>{},onLibrary=()=>{},onProgress=()=>{},storage=localStorage}={}){
+ const pack=validateDraftContent(input);const store=storage;
  const restored=loadDraft(store,pack,freshSeed());let state=restored.state,notice=restored.notice,modal=null,focusReturn=null,alive=true;
  const art=(key,alt,cls='')=>{const src=safeAsset(assets.cards?.[key]);return src?`<img class="${cls}" src="${esc(src)}" alt="${esc(alt)}" draggable="false">`:`<div class="tp-art-unavailable ${cls}" role="img" aria-label="Illustration unavailable"><span>Illustration unavailable</span></div>`};
  const button=(name,action,extra='',cls='')=>`<button type="button" class="tp-button ${cls}" data-tp-action="${action}" ${extra}>${name}</button>`;
@@ -25,7 +25,7 @@ export function mountDraft(container,{pack:input,assets={},onExit=()=>{},onLibra
  const table=safeAsset(assets.tables?.draft);if(table){const game=container.querySelector('.tp-game');game.style.backgroundImage=`linear-gradient(#172e3dbf,#172e3de8),url(${JSON.stringify(table)})`;game.style.backgroundSize='cover';game.style.backgroundAttachment='fixed'}
  if(modal)container.querySelector('.tp-modal-close')?.focus();else if(focus)container.querySelector('[data-tp-heading]')?.focus();
  }
- function commit(next,focus=true){state=next;notice=saveDraft(store,pack,state);render(focus)}
+ function commit(next,focus=true){state=next;notice=saveDraft(store,pack,state);onProgress({pack,record:state,kind:'classic'});render(focus)}
  function open(value,trigger){focusReturn=trigger?.dataset?.tpAction==='card'?`[data-tp-action="card"][data-id="${trigger.dataset.id}"]`:trigger?.dataset?.tpAction?`[data-tp-action="${trigger.dataset.tpAction}"]${trigger.dataset.index!==undefined?`[data-index="${trigger.dataset.index}"]`:''}`:null;modal=value;render()}
  function close(){modal=null;render();if(focusReturn)container.querySelector(focusReturn)?.focus()}
  function click(event){const b=event.target.closest('[data-tp-action]');if(!b||!container.contains(b)||b.disabled)return;const action=b.dataset.tpAction;

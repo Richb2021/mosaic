@@ -81,3 +81,30 @@ test('each model request constrains identities and citation references to its ex
  for(const q of Object.values(schema.properties.challenges.properties)){assert.deepEqual(q.properties.sourceRefs.items.enum,resource.units.map(s=>s.id));assert.equal(q.properties.labels.items.enum,undefined)}
  assert.equal(schema.properties.title.enum,undefined);assert.equal(schema.properties.challenges.properties.transfer.properties.options.items.enum,undefined);
 });
+
+test('revised copies preserve original content, require review, and never call Muse again',async()=>{
+ const h=harness(),resource=await reviewed(h),j=await queued(h,resource),generated=await h.call('jobs/'+j.id+'/run',{});
+ const original=(await h.call('jobs/'+j.id+'/publish',{confirmed:true,draftHash:generated.job.draftHash})).job;
+ const draft=structuredClone(original.draft);draft.title='A clearer waterwork lesson';draft.challenges.route.prompt='Put the reviewed changes in order, then explain why they follow that order.';
+ const input={draftHash:original.draftHash,draft,requestKey:'revision-one'};
+ const revised=await h.call('jobs/'+j.id+'/revise',input);assert.equal(revised.status,201);assert.equal(revised.job.status,'review');assert.notEqual(revised.job.draft.id,original.draft.id);assert.equal(revised.job.draft.title,draft.title);assert.deepEqual(revised.job.draft.sources,original.draft.sources);assert.equal(revised.job.revisionOf.jobId,j.id);
+ assert.deepEqual((await h.call('jobs/'+j.id)).job,original);assert.equal(h.calls.length,1);
+ assert.equal((await h.call('jobs/'+j.id+'/revise',input)).job.id,revised.job.id);
+ assert.equal((await h.call('jobs/'+j.id+'/revise',{...input,draft:{...draft,title:'Conflicting edit'}})).status,409);
+ assert.equal((await h.call('jobs/'+revised.job.id+'/publish',{confirmed:true,draftHash:original.draftHash})).status,409);
+ assert.equal((await h.call('jobs/'+revised.job.id+'/publish',{confirmed:true,draftHash:revised.job.draftHash})).job.status,'published');
+ await h.call('jobs/'+revised.job.id+'/run',{});assert.equal(h.calls.length,1);
+});
+test('revision writes reject foreign owners, changed identities, forged citations and stale bases',async()=>{
+ const h=harness(),resource=await reviewed(h),j=await queued(h,resource),original=(await h.call('jobs/'+j.id+'/run',{})).job;
+ const input={draftHash:original.draftHash,draft:original.draft,requestKey:'revision-two'};
+ assert.equal((await h.call('jobs/'+j.id+'/revise',input,'bob')).status,404);
+ assert.equal((await h.call('jobs/'+j.id+'/revise',{...input,draftHash:'stale'})).status,409);
+ for(const alter of [d=>d.id='foreign-chapter',d=>d.sources[0].excerpt='Invented quotation',d=>d.challenges.balance.solution=999]){const draft=structuredClone(original.draft);alter(draft);const result=await h.call('jobs/'+j.id+'/revise',{...input,draft});assert.ok(result.status>=400);assert.ok(!result.job)}
+ assert.equal((await h.call('library')).jobs.length,1);assert.equal(h.calls.length,1);
+});
+test('manual revisions retain the ten-draft cap and work without a provider key',async()=>{
+ const h=harness(),resource=await reviewed(h),j=await queued(h,resource),original=(await h.call('jobs/'+j.id+'/run',{})).job;
+ h.env.META_API_KEY='';for(let i=0;i<9;i++)assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:{...original.draft,title:'Revision '+i},requestKey:'rev-'+i})).status,201);
+ assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:original.draft,requestKey:'rev-over-limit'})).status,429);assert.equal(h.calls.length,1);
+});

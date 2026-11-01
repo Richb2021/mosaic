@@ -1,0 +1,59 @@
+{
+  "purpose": "Private learner accounts, preferences and validated progress using NoCodeBackend.",
+  "site": "appgprj_6ae5f07049288191992a4c59b11a2bf2",
+  "authorization": [
+    "User approved server storage using NoCodeBackend",
+    "User requested NoCodeBackend sign-in"
+  ],
+  "database": {
+    "instance": "34968_mosaic_learning",
+    "region": "EU",
+    "tables": [
+      "learner_profiles",
+      "learner_saves"
+    ],
+    "identity": "SHA-256 of authenticated NCB user id; client identity header must match the verified session",
+    "uniqueConstraint": "UNIQUE(owner_key, slot_key, version)",
+    "payload": "MEDIUMTEXT; bounded JSON request; canonical game validator/replay before write",
+    "concurrency": "Append immutable expectedVersion+1; unique constraint chooses one writer. Read-after-write confirmation polls without duplicate writes. Older versions pruned only after confirmation; current version is the maximum.",
+    "retention": "Current cloud snapshot per exact content hash and play kind; device recovery copy on explicit cloud restore; journal displays up to 100 slots"
+  },
+  "auth": {
+    "provider": "NoCodeBackend email/password",
+    "component": "@nocodebackend/account-react 0.1.9",
+    "publicSignup": true,
+    "google": false,
+    "apple": false,
+    "emailOTP": false,
+    "billing": "unchanged/off",
+    "routes": [
+      "/api/auth/*",
+      "/api/auth-providers",
+      "/api/ncb/account/*"
+    ]
+  },
+  "storageAPI": [
+    "GET /api/learning/journal",
+    "GET /api/learning/save",
+    "POST /api/learning/profile",
+    "POST /api/learning/save"
+  ],
+  "content": "Included authored content or published, reviewed content from the existing private Sites workspace. Existing resource/job rows and quotas unchanged.",
+  "audience": "Existing owner-private Sites hosting preserved. NCB learner identity is an additional application account inside that boundary.",
+  "formats": [
+    "adventure-v1",
+    "draft-v1",
+    "town-v1",
+    "novel-v1",
+    "quiz-v1",
+    "sports-v1",
+    "merge-v1"
+  ],
+  "limits": [
+    "3D RPG remains device-local",
+    "Learning observations are practice support, not grades or inferred mastery",
+    "No automatic generation on profile changes",
+    "Public multi-tenant release is not part of this change"
+  ],
+  "superseded": "Earlier proposed D1 learner migration was not implemented. Empty storage-only NCB instance 34968_mosaic_learner_storage retained unused after user requested NCB auth; active instance is mosaic_learning."
+}
