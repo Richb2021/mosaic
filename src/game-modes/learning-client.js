@@ -1,3 +1,4 @@
+import {rpgSaveKey} from '../rpg-progress.js';
 import {normaliseProfile,observeProgress,progressIdentity,validPracticeRecord} from './learning-model.js';
 import {journeyKey} from './journey-engine.js';
 import {extendedSaveKey} from './extended-engine.js';
@@ -5,7 +6,7 @@ import {adventureSaveKey} from './adventure-engine.js';
 import {draftSaveKey,draftHash} from './draft-engine.js';
 import {townSaveKey} from './town-engine.js';
 const PROFILE='mosaic:learning-profile:v1',RUNS='mosaic:practice-journal:v1';
-export const gameSaveKey=(pack,kind)=>kind==='journey'?journeyKey(pack):pack.template==='adventure-v1'?adventureSaveKey(pack):pack.template==='draft-v1'?draftSaveKey(pack):pack.template==='town-v1'?townSaveKey(pack):extendedSaveKey(pack);
+export const gameSaveKey=(pack,kind)=>kind==='rpg'?rpgSaveKey(pack):kind==='journey'?journeyKey(pack):pack.template==='adventure-v1'?adventureSaveKey(pack):pack.template==='draft-v1'?draftSaveKey(pack):pack.template==='town-v1'?townSaveKey(pack):extendedSaveKey(pack);
 export class LearningJournal{
  constructor(){this.user=null;this.profile=normaliseProfile();this.profileVersion=0;this.records=[];this.notice='';this.listeners=new Set();this.inflight=new Map();this.timers=new Map();this.loadLocal();}
  get prefix(){return this.user?'mosaic:account:'+this.user.id+':':'';}
@@ -33,9 +34,10 @@ export class LearningJournal{
   const d=await this.request('save',{packId:record.summary.packId,contentHash:record.summary.contentHash,kind:record.summary.kind,snapshot:record.snapshot,expectedVersion:record.version});const current=this.records.find(r=>r.key===key);if(current){current.version=d.save.version;current.pending=JSON.stringify(current.snapshot)!==sent;current.error='';}this.notice='Progress saved to your learner account.';
  }catch(e){const current=this.records.find(r=>r.key===key);if(current){current.conflict=e.status===409;current.error=e.message;}this.notice=e.message;}
  finally{this.inflight.delete(key);this.storeRecords();this.changed();const current=this.records.find(r=>r.key===key);if(current?.pending&&!current.conflict&&!current.error)this.timers.set(key,setTimeout(()=>void this.sync(key),1200));}}
- async prepare(pack,kind){const key=progressIdentity(pack,kind);if(!this.user)return;const local=this.records.find(r=>r.key===key);try{
-  const d=await this.request('save?'+new URLSearchParams({packId:pack.id,contentHash:draftHash(pack),kind}));if(!d.save)return;
-  const clean=observeProgress(pack,kind,d.save.snapshot);if(local?.snapshot&&(local.pending||local.version!==d.save.version)){local.conflict=true;local.cloudVersion=d.save.version;this.notice='A different cloud save is available. Choose a version in your learning journal.';this.storeRecords();return;}
+ async prepare(pack,kind){const key=progressIdentity(pack,kind);if(!this.user)return;try{
+  const d=await this.request('save?'+new URLSearchParams({packId:pack.id,contentHash:draftHash(pack),kind})),local=this.records.find(r=>r.key===key);if(!d.save){if(local?.pending)await this.sync(key);return;}
+  const clean=observeProgress(pack,kind,d.save.snapshot);if(local?.snapshot&&local.version!==d.save.version){local.conflict=true;local.cloudVersion=d.save.version;this.notice='A different cloud save is available. Choose a version in your learning journal.';this.storeRecords();return;}
+  if(local?.snapshot&&local.pending){local.conflict=false;local.error='';this.storage.setItem(gameSaveKey(pack,kind),JSON.stringify(observeProgress(pack,kind,local.snapshot).snapshot));await this.sync(key);return;}
   this.storage.setItem(gameSaveKey(pack,kind),JSON.stringify(clean.snapshot));this.records=[{...d.save,...clean,pending:false},...this.records.filter(r=>r.key!==key)].slice(0,100);this.storeRecords();
  }catch(e){this.notice=e.message;}}
  async resolveSave(pack,kind,useCloud){const key=progressIdentity(pack,kind);if(this.inflight.has(key))throw Error('A save is still being confirmed. Wait a moment, then choose a version.');clearTimeout(this.timers.get(key));const d=await this.request('save?'+new URLSearchParams({packId:pack.id,contentHash:draftHash(pack),kind})),local=this.records.find(r=>r.key===key);if(useCloud){if(!d.save)throw Error('There is no cloud save for this game.');const clean=observeProgress(pack,kind,d.save.snapshot);const previous=this.storage.getItem(gameSaveKey(pack,kind));if(previous)this.storage.setItem(gameSaveKey(pack,kind)+':previous',previous);this.storage.setItem(gameSaveKey(pack,kind),JSON.stringify(clean.snapshot));this.records=[{...d.save,...clean,pending:false},...this.records.filter(r=>r.key!==key)];this.notice='Cloud progress restored. Your earlier device save is kept as a recovery copy.';}else{if(!local?.snapshot)throw Error('There is no device save to use.');local.version=d.save?.version||0;local.conflict=false;local.pending=true;local.error='';await this.sync(key);}this.storeRecords();this.changed();}

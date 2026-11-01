@@ -34,7 +34,7 @@ export function validSave(raw,p){
  const finite=(x,min,max)=>Number.isFinite(x)&&x>=min&&x<=max;
  n.growth=validGrowth(raw.growth);n.chronicle=validChronicle(raw.chronicle);if(!n.growth||!n.chronicle)return null;
  if(raw.interior!==undefined&&raw.interior!==null&&(!BUILDINGS[raw.interior]||BUILDINGS[raw.interior].area!==raw.area||raw.battle))return null;
- n.interior=raw.interior||null;n.chapter=validChapter(raw.chapter);if(!n.chapter||n.chapter.room&&(raw.area!=='mill'||n.interior||raw.battle))return null;const bounds=getMap(n).bounds;
+ n.area=raw.area;n.interior=raw.interior||null;n.chapter=validChapter(raw.chapter);if(!n.chapter||n.chapter.room&&(raw.area!=='mill'||n.interior||raw.battle))return null;const bounds=getMap(n).bounds;
  if(raw.gear!==undefined&&(!Array.isArray(raw.gear)||raw.gear.length>2||new Set(raw.gear).size!==raw.gear.length||raw.gear.some(g=>!['brass-pin','focus-clasp'].includes(g))))return null;
  n.gear=raw.gear||[];
  for(const [key,limit] of [['gold',9999],['ether',99]]){if(raw[key]!==undefined&&(!Number.isInteger(raw[key])||!finite(raw[key],0,limit)))return null;n[key]=raw[key]??n[key];}

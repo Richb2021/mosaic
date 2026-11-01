@@ -14,7 +14,7 @@
     ],
     "identity": "SHA-256 of authenticated NCB user id; client identity header must match the verified session",
     "uniqueConstraint": "UNIQUE(owner_key, slot_key, version)",
-    "payload": "MEDIUMTEXT; bounded JSON request; canonical game validator/replay before write",
+    "payload": "MEDIUMTEXT; bounded JSON request; canonical game replay for illustrated formats, canonical bounded state validation for RPG",
     "concurrency": "Append immutable expectedVersion+1; unique constraint chooses one writer. Read-after-write confirmation polls without duplicate writes. Older versions pruned only after confirmation; current version is the maximum.",
     "retention": "Current cloud snapshot per exact content hash and play kind; device recovery copy on explicit cloud restore; journal displays up to 100 slots"
   },
@@ -47,13 +47,15 @@
     "novel-v1",
     "quiz-v1",
     "sports-v1",
-    "merge-v1"
+    "merge-v1",
+    "underlight-v1"
   ],
   "limits": [
-    "3D RPG remains device-local",
+    "RPG cloud snapshots validate canonical state but are not action-history replay proofs; no RPG mastery observations",
     "Learning observations are practice support, not grades or inferred mastery",
     "No automatic generation on profile changes",
     "Public multi-tenant release is not part of this change"
   ],
-  "superseded": "Earlier proposed D1 learner migration was not implemented. Empty storage-only NCB instance 34968_mosaic_learner_storage retained unused after user requested NCB auth; active instance is mosaic_learning."
+  "superseded": "Earlier proposed D1 learner migration was not implemented. Empty storage-only NCB instance 34968_mosaic_learner_storage retained unused after user requested NCB auth; active instance is mosaic_learning.",
+  "rpgBinding": "Exact bundle hash of included world, settlement and included or owner-published chapter; no new tables"
 }

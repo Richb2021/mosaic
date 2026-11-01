@@ -14,3 +14,4 @@ dist/
 public/game.js*
 public/game.css*
 public/index.html
+public/extraction/

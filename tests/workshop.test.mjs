@@ -23,7 +23,7 @@ async function reviewed(h){const a=await h.call('resources',{title:'Water learni
 async function queued(h,r,key='request-one'){return (await h.call('jobs',{topicId:template.topicId,goal:'Explain water changes and allocate the town supply',level:'New to water systems',resourceIds:[r.id],requestKey:key})).job}
 
 test('text extraction keeps exact paragraph excerpts, stable checksums and bounded long passages',async()=>{const r=await extractResource({title:'Notes',text:notes,filename:'notes.md'});assert.equal(r.units.length,3);assert.equal(r.units[1].locator,'Paragraph 2');assert.equal(r.units[1].excerpt,notes.split('\n\n')[1]);assert.equal((await extractResource({title:'Renamed',text:notes})).checksum,r.checksum);const long=await extractResource({title:'Long',text:'x'.repeat(5000)});assert.equal(long.units.length,3);assert.equal(long.units.map(u=>u.excerpt).join(''),'x'.repeat(5000))});
-test('unsupported files, binary content, tiny notes and oversized uploads are rejected',async()=>{for(const input of [{text:notes,filename:'a.pdf'},{text:notes+'\0'},{text:'short'},{text:'x'.repeat(65537)}])await assert.rejects(extractResource({title:'Material',...input}))});
+test('unsupported files, binary content, tiny notes and oversized uploads are rejected',async()=>{for(const input of [{text:notes,filename:'a.exe'},{text:notes+'\0'},{text:'short'},{text:'x'.repeat(65537)}])await assert.rejects(extractResource({title:'Material',...input}))});
 test('source retrieval prioritises relevant reviewed paragraphs within the fixed evidence budget',async()=>{const r=await extractResource({title:'Notes',text:notes});assert.equal(selectEvidence([r],'town gardens allocation')[0].locator,'Paragraph 2');assert.ok(selectEvidence([r],'water').every(u=>r.units.includes(u)))});
 test('anonymous and cross-origin writes are refused; a body owner cannot confer access',async()=>{const h=harness();assert.equal((await h.call('library',null,null)).status,401);assert.equal((await h.call('resources',{title:'Notes',text:notes},'alice',{Origin:'https://attacker.test'})).status,403);const r=await reviewed(h);assert.equal((await h.call('resources/'+r.id+'/review',{checksum:r.checksum,confirmed:true,owner:'alice'},'bob')).status,404);assert.equal((await h.call('library',null,'bob')).resources.length,0)});
 test('duplicate resource bytes are reused only within the authenticated owner',async()=>{const h=harness(),r=await reviewed(h);const a=await h.call('resources',{title:'Again',text:notes});assert.equal(a.resource.id,r.id);assert.equal(a.duplicate,true);const b=await h.call('resources',{title:'Separate',text:notes},'bob');assert.notEqual(b.resource.id,r.id);assert.equal(b.resource.status,'unreviewed')});
@@ -107,4 +107,14 @@ test('manual revisions retain the ten-draft cap and work without a provider key'
  const h=harness(),resource=await reviewed(h),j=await queued(h,resource),original=(await h.call('jobs/'+j.id+'/run',{})).job;
  h.env.META_API_KEY='';for(let i=0;i<9;i++)assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:{...original.draft,title:'Revision '+i},requestKey:'rev-'+i})).status,201);
  assert.equal((await h.call('jobs/'+j.id+'/revise',{draftHash:original.draftHash,draft:original.draft,requestKey:'rev-over-limit'})).status,429);assert.equal(h.calls.length,1);
+});
+
+test('explicit evidence is owner-bound, confirmed, stable across click order and preserved in the provider packet',async()=>{
+ const h=harness(),r=await reviewed(h),base={topicId:template.topicId,goal:'Explain water changes and allocate supply',level:'Beginner',resourceIds:[r.id],requestKey:'explicit-evidence',evidenceIds:[r.units[2].id,r.units[0].id],evidenceConfirmed:true};
+ assert.equal((await h.call('jobs',{...base,evidenceConfirmed:false})).status,400);
+ assert.equal((await h.call('jobs',{...base,evidenceIds:['foreign-passage']})).status,400);
+ assert.equal((await h.call('jobs',{...base,evidenceIds:[r.units[0].id,r.units[0].id]})).status,400);
+ assert.equal((await h.call('jobs',base,'bob')).status,404);
+ const result=await h.call('jobs',base);assert.equal(result.status,201);assert.equal(result.job.coverage.omittedPassages,1);const retry=await h.call('jobs',{...base,evidenceIds:[...base.evidenceIds].reverse()});assert.equal(retry.job.id,result.job.id);
+ await h.call('jobs/'+result.job.id+'/run',{});assert.deepEqual(new Set(h.calls[0].evidence.map(x=>x.id)),new Set(base.evidenceIds));assert.equal(h.calls.length,1);
 });

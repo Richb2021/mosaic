@@ -1,3 +1,4 @@
+import {withLearningMap} from '../learning-map.js';
 // Text packs configure these four authored games; they never supply executable rules.
 export const EXTENDED_IDS=['novel-v1','quiz-v1','sports-v1','merge-v1'];
 export const PORTRAITS=['engineer','archivist','captain'];
@@ -53,5 +54,5 @@ export function validateExtendedContent(raw){
  }
  need(raw.debrief&&typeof raw.debrief==='object','Provide a debrief.');
  clean.debrief={question:text(raw.debrief.question,250,'debrief question'),explanation:text(raw.debrief.explanation,650,'debrief explanation'),sourceRefs:sourceRefs(raw.debrief.sourceRefs)};clean.sources=sources;
- need(new TextEncoder().encode(JSON.stringify(clean)).length<=90000,'Game packs must be under 90 KB.');return clean;
+ need(new TextEncoder().encode(JSON.stringify(clean)).length<=90000,'Game packs must be under 90 KB.');return withLearningMap(raw,clean);
 }

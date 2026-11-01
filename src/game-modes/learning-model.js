@@ -1,3 +1,4 @@
+import {validateRPGSave} from '../rpg-progress.js';
 import {draftHash,draftPhase,validateDraftState} from './draft-engine.js';
 import {validateAdventureSave} from './adventure-engine.js';
 import {restoreTown,encodeTown} from './town-engine.js';
@@ -10,11 +11,12 @@ export const sourceIdentity=s=>draftHash([s.title.trim(),s.locator.trim(),s.exce
 export const progressIdentity=(pack,kind)=>`${pack.id}:${draftHash(pack)}:${kind}`;
 export function validPracticeRecord(r){
  const s=r?.summary,text=(v,n)=>typeof v==='string'&&v.length<=n;
- return !!(r&&text(r.key,240)&&Number.isFinite(r.updated)&&r.updated>=0&&s&&text(s.packId,100)&&text(s.title,200)&&LEARNING_TEMPLATES.includes(s.template)&&text(s.contentHash,100)&&['classic','journey'].includes(s.kind)&&typeof s.completed==='boolean'&&Number.isInteger(s.engagement)&&s.engagement>=0&&s.engagement<=10000&&Array.isArray(s.observations)&&s.observations.length<=2000&&s.observations.every(o=>o&&text(o.key,100)&&[true,false,null].includes(o.correct)&&Number.isInteger(o.attempts)&&o.attempts>=0&&typeof o.assisted==='boolean'&&Array.isArray(o.sources)&&o.sources.length<=20&&o.sources.every(x=>x&&text(x.key,100)&&text(x.title,240)&&text(x.locator,240))));
+ return !!(r&&text(r.key,240)&&Number.isFinite(r.updated)&&r.updated>=0&&s&&text(s.packId,100)&&text(s.title,200)&&LEARNING_TEMPLATES.includes(s.template)&&text(s.contentHash,100)&&['classic','journey','rpg'].includes(s.kind)&&typeof s.completed==='boolean'&&Number.isInteger(s.engagement)&&s.engagement>=0&&s.engagement<=10000&&Array.isArray(s.observations)&&s.observations.length<=2000&&s.observations.every(o=>o&&text(o.key,100)&&[true,false,null].includes(o.correct)&&Number.isInteger(o.attempts)&&o.attempts>=0&&typeof o.assisted==='boolean'&&Array.isArray(o.sources)&&o.sources.length<=20&&o.sources.every(x=>x&&text(x.key,100)&&text(x.title,240)&&text(x.locator,240))));
 }
 export function observeProgress(pack,kind,raw){
  let snapshot,completed=false,items=[],engagement=0;
- if(kind==='journey'){snapshot=validateJourney(raw,pack);({completed,items,engagement}=journeyLearning(pack,snapshot));}
+ if(kind==='rpg'&&pack.template==='underlight-v1'){snapshot=validateRPGSave(raw,pack);completed=snapshot.ended&&snapshot.chapter.completed;engagement=snapshot.visited.length+snapshot.chapter.visited.length+snapshot.seals.length;/* Restorable personal state, not replay-verified learning evidence. */}
+ else if(kind==='journey'){snapshot=validateJourney(raw,pack);({completed,items,engagement}=journeyLearning(pack,snapshot));}
  else if(kind==='classic'&&['quiz-v1','sports-v1','novel-v1','merge-v1'].includes(pack.template)){
   snapshot=validateExtendedState(raw,pack);const v=extendedView(pack,snapshot);completed=v.phase==='complete';if(v.attempts)items=pack.questions.flatMap((q,i)=>v.attempts[i].length?[{key:`question-${i}`,sourceRefs:q.sourceRefs,attempts:v.attempts[i].length,correct:v.attempts[i].includes(q.solution),assisted:false}]:[]);else if(v.journal)items=v.journal.map(j=>({key:`scene-${j.node}`,sourceRefs:pack.nodes[j.node].sourceRefs,attempts:0,correct:null,assisted:false}));else items=v.discovered.map(i=>({key:`recipe-${i}`,sourceRefs:pack.recipes[i].sourceRefs,attempts:0,correct:null,assisted:false}));engagement=items.length;
  }else if(kind==='classic'&&pack.template==='draft-v1'){

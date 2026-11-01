@@ -1,3 +1,4 @@
+import {withLearningMap} from '../learning-map.js';
 // Authored simulation rules live in town-engine.js. Topic packs supply prose only.
 export const TOWN_ENDING='Your town’s ledger records your choices. Compare the actual results below with the targets, then explain one trade-off using your recorded figures and source notes. These fictional outcomes do not measure mastery.';
 export const TOWN_BUILDINGS=['home','workshop','market','warehouse','school','clinic','garden','water'];
@@ -24,5 +25,5 @@ export function validateTownContent(raw){
  const events=raw.events.map(e=>{need(e&&Array.isArray(e.choices)&&e.choices.length===2,'Each town event needs two decisions.');need(e.choices[0]?.label?.trim().toLowerCase()!==e.choices[1]?.label?.trim().toLowerCase(),'Town choices must be distinct.');return {title:text(e.title,80,'event title'),prompt:text(e.prompt,400,'event prompt'),choices:e.choices.map(c=>({label:text(c.label,70,'decision label'),explanation:text(c.explanation,500,'decision explanation'),sourceRefs:sourceRefs(c.sourceRefs)}))}});
  need(raw.debrief&&typeof raw.debrief==='object','Provide a debrief.');
  const clean={schemaVersion:1,template:'town-v1',id:raw.id,topicId:raw.topicId,revision:raw.revision,title:text(raw.title,100,'title'),subtitle:text(raw.subtitle,100,'subtitle'),hook:text(raw.hook,800,'hook'),ending:TOWN_ENDING,focus:raw.focus,buildings,events,debrief:{question:text(raw.debrief.question,240,'debrief question'),explanation:text(raw.debrief.explanation,500,'debrief explanation'),sourceRefs:sourceRefs(raw.debrief.sourceRefs)},sources};
- need(new TextEncoder().encode(JSON.stringify(clean)).length<=70000,'Town packs must be under 70 KB.');return clean;
+ need(new TextEncoder().encode(JSON.stringify(clean)).length<=70000,'Town packs must be under 70 KB.');return withLearningMap(raw,clean);
 }

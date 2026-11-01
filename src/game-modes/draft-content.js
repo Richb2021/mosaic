@@ -1,3 +1,4 @@
+import {withLearningMap} from '../learning-map.js';
 // Turning Points is a bounded authored rules engine. Topic text never runs as code.
 export const DRAFT_ASSETS=['steam','waterwheel','canal','rail','loom','iron','workers','school','inspector','trees','water','soil'];
 const string=maxLength=>({type:'string',minLength:1,maxLength});
@@ -45,7 +46,7 @@ export function validateDraftContent(raw){
  const feasible=(i,totals)=>i===5?totals.every((v,j)=>v>=target[j]):cards.filter(c=>c.roleId===roles[i].id).some(c=>feasible(i+1,totals.map((v,j)=>v+c.scores[j])));
  need(feasible(0,[0,0,0]),'No valid five-card draft can meet these scenario requirements.');
  const clean={schemaVersion:1,template:'draft-v1',id:raw.id,topicId:raw.topicId,revision:raw.revision,title:cleanText(raw.title,100,'title'),hook:cleanText(raw.hook,1000,'hook'),subtitle:cleanText(raw.subtitle,100,'subtitle'),ending:cleanText(raw.ending,1000,'ending'),metrics,roles,cards,scenarios,sources};
- need(new TextEncoder().encode(JSON.stringify(clean)).length<=102400,'Draft packs must be under 100 KB.');return clean;
+ need(new TextEncoder().encode(JSON.stringify(clean)).length<=102400,'Draft packs must be under 100 KB.');return withLearningMap(raw,clean);
 }
 const source=(id,title,locator,excerpt)=>({id,title,locator,excerpt});
 const H=[

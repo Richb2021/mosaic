@@ -32,3 +32,6 @@
 @media(max-width:600px){.resource-row{align-items:flex-start;gap:8px}.resource-row button{flex-shrink:0}.source-passages{padding:0 10px}.resource-workshop .row{flex-wrap:wrap}}
 
 .mode-library-link{display:block;color:#e6ce91;border:1px solid #a3b8b344;padding:10px 14px;text-decoration:none}.title-foot a{color:#e6ce91;text-decoration:none}.title-foot a:hover,.mode-library-link:hover{text-decoration:underline}
+
+/* Source selection and concept review use the same workshop treatment in the RPG. */
+.evidence-selection{max-height:45vh;overflow:auto;padding-right:12px}.evidence-selection section,.learning-map-review section{padding:18px 0;border-bottom:1px solid #647b84}.evidence-selection section p{white-space:pre-wrap}.concept-editor{margin:20px 0;padding:16px;border-left:3px solid #76a9bb}.learning-map-editor .workshop-check{align-items:flex-start}.learning-map-review h4{font-weight:400;color:#e9c479}

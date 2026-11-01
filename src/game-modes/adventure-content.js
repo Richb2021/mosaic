@@ -1,3 +1,4 @@
+import {withLearningMap} from '../learning-map.js';
 const text=(maxLength=900)=>({type:'string',minLength:1,maxLength});
 const obj=properties=>({type:'object',additionalProperties:false,properties,required:Object.keys(properties)});
 const refs={type:'array',minItems:1,maxItems:4,items:text(100)};
@@ -32,7 +33,7 @@ export function validateAdventureContent(raw){
  let value;try{value=typeof raw==='string'?JSON.parse(raw):JSON.parse(JSON.stringify(raw));}catch{throw Error('Adventure content must be valid JSON.');}
  if(JSON.stringify(value).length>90000)throw Error('Adventure content is too large.');
  const schema=obj({...ADVENTURE_SCHEMA.properties,sources:{type:'array',minItems:1,maxItems:12,items:obj({id:text(100),title:text(240),locator:text(500),excerpt:text(5000)})}});
- check(value,schema,'Adventure');
+ const map=value.learningMap;delete value.learningMap;check(value,schema,'Adventure');if(map!==undefined)withLearningMap({learningMap:map},value);
  for(const key of ['id','topicId'])if(!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$/.test(value[key]))throw Error(`Adventure ${key} must be a safe identifier.`);
  const ids=new Set(value.sources.map(s=>s.id));if(ids.size!==value.sources.length)throw Error('Source IDs must be unique.');
  function visit(v){if(Array.isArray(v)){v.forEach(visit);return}if(!v||typeof v!=='object')return;for(const [k,x] of Object.entries(v)){if(k==='sourceRefs'){if(new Set(x).size!==x.length||x.some(id=>!ids.has(id)))throw Error('Every citation must name a unique supplied source.');}else visit(x)}}visit(value);

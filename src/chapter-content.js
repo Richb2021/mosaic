@@ -1,3 +1,4 @@
+import {withLearningMap} from './learning-map.js';
 const text=(v,n=1600)=>typeof v==='string'&&v.trim().length>0&&v.length<=n;
 const id=v=>text(v,80)&&/^[a-z][a-z0-9-]*$/.test(v);
 export function validateChapterContent(raw){
@@ -13,7 +14,7 @@ export function validateChapterContent(raw){
   if(q.labels.some(v=>!text(v,120)))throw Error('Mechanism labels are too long.');
   challenges[key]={type,title:q.title,prompt:q.prompt,hint:q.hint,explanation:q.explanation,feedback:q.feedback,objective:q.objective,sourceRefs:[...new Set(q.sourceRefs)],labels:[...q.labels],solution:Array.isArray(q.solution)?[...q.solution]:q.solution,...(type==='allocation'?{total:q.total}:{}),...(type==='dials'?{options:[...q.options]}:{})};
  }
- return {schemaVersion:1,template:'underlight-v1',id:raw.id,topicId:raw.topicId,revision:raw.revision,title:raw.title,hook:raw.hook,aftermath:{gardens:raw.aftermath.gardens,homes:raw.aftermath.homes},sources:raw.sources.map(s=>({id:s.id,title:s.title,locator:s.locator,excerpt:s.excerpt})),challenges};
+ return withLearningMap(raw,{schemaVersion:1,template:'underlight-v1',id:raw.id,topicId:raw.topicId,revision:raw.revision,title:raw.title,hook:raw.hook,aftermath:{gardens:raw.aftermath.gardens,homes:raw.aftermath.homes},sources:raw.sources.map(s=>({id:s.id,title:s.title,locator:s.locator,excerpt:s.excerpt})),challenges});
 }
 // This runs in the trusted service, not as browser authorization. Browser ownership
 // labels never confer access. Both operations and source references are scoped.
