@@ -1,4 +1,5 @@
 import {studioAPI} from './studio-api.js';
+import {creativeAPI} from './creative-api.js';
 import {RPG_PACKS,bundlePublishedChapter} from './rpg-catalog.js';
 import {ncbSession,noStore,checkOrigin,readJSON} from './ncb-auth.js';
 import {NCBStore,StoreError} from './ncb-store.js';
@@ -22,6 +23,7 @@ const unpack=row=>row?{version:row.version,updated:Number(row.updated_ms),...JSO
 export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore(env),resolve=canonicalPack,now=()=>Date.now()}={}){try{
  checkOrigin(req);const user=await session(req,env);need(user,'Sign in to your learner account to save across devices.',401);need(req.headers.get('x-mosaic-learner')===user.id,'Your signed-in account changed. Reload this page before syncing progress.',401);
  const owner=await digest('mosaic-learner:'+user.id),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
+ if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,resolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,resolve,included:packs,now});
  if(req.method==='GET'&&path==='journal'){
   const [p,rows]=await Promise.all([store.latest('learner_profiles',owner,'profile'),store.list(owner)]);let profile=null,unreadable=0;

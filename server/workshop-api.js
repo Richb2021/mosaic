@@ -18,7 +18,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
   const db=env.DB,one=(sql,...v)=>db.prepare(sql).bind(...v).first(),all=async(sql,...v)=>(await db.prepare(sql).bind(...v).all()).results,run=(sql,...v)=>db.prepare(sql).bind(...v).run();
   const resource=async id=>{const r=await one('SELECT * FROM workshop_resources WHERE id=? AND owner=?',id,owner);requireValue(r,'Resource not found.',404);return r};
-  const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j,'Draft not found.',404);return j};
+  const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'Draft not found.',404);return j};
   const sweepStarting=()=>run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
   const settle=async(j,result,from)=>{
    const content=result.content?validateGenerated(result.content,JSON.parse(j.payload)):null,status=content?'review':result.status;
@@ -33,7 +33,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
    catch(e){if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
-  if(method==='GET'&&path.join('/')==='library')return json({generationBudget:await generationBudget(one,owner,env,now()),resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all('SELECT * FROM workshop_jobs WHERE owner=? ORDER BY created DESC LIMIT 30',owner)).map(r=>publicJob(r,now())))});
+  if(method==='GET'&&path.join('/')==='library')return json({generationBudget:await generationBudget(one,owner,env,now()),resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all("SELECT * FROM workshop_jobs WHERE owner=? AND json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.recordType') IS NULL ORDER BY created DESC LIMIT 30",owner)).map(r=>publicJob(r,now())))});
   if(method==='POST'&&path.join('/')==='resources'){
    const input=await body(req),r=await extractResource(input),existing=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);if(existing)return json({resource:publicResource(existing),duplicate:true});
    requireValue((await one('SELECT COUNT(*) AS n FROM workshop_resources WHERE owner=?',owner)).n<40,'This workshop holds 40 resources. Reuse an existing source for now.',409);

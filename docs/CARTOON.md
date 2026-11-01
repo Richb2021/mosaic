@@ -1,0 +1,22 @@
+# Mosaic Field Notes cartoon player
+
+`src/studio/media/CartoonPlayer.jsx` takes a canonical reviewed `script`, an `audioFor(segment,index) -> Promise<Blob>` callback, optional `onStatus(text)` and optional `reducedMotion` learner preference. Root media APIs own account authorization, immutable source/version binding, script generation/review and audio admission. The player does not accept arbitrary remote assets, execute generated code, request a microphone, clone voices or create factual graphics.
+
+Four original reusable vector sets (`cartoon-assets.js`) provide an observatory, invention room, glass garden and riverside. Mira and Kit have distinct clothing, faces, gaze, talking mouths and talk/think/celebrate gestures. These are fictional scene framing, not diagrams or claims about the learning topic. Geometry and animation are authored, fixed choices. Their motion is deterministic from narration time. It is deliberately not phoneme lip sync.
+
+Playback prepares the approved scenes' actual narration only after an explicit click, concatenates decoded audio with quarter-second pauses and drives scene transitions from decoded duration. It supports pause/resume, scene navigation, speed, captions, still artwork, per-scene sources, complete transcript, transcript download and an ungraded reflection comparison. Audio clips are cached for the mounted episode, including after a later scene fails. Leaving the episode stops audio/recording and closes its AudioContext. A source/script identity change invalidates pending playback intent. Root must ensure `audioFor` is idempotent and only returns the approved segment's audio.
+
+Canvas captions paginate every approved word; page timing is proportional within a scene, not provider word timestamps. At widths up to 700px a readable DOM caption replaces the canvas caption strip. The complete transcript is available regardless of playback. System and learner reduced-motion preferences initialize still artwork, which can also be chosen manually. This is tested behavior, not a WCAG conformance claim.
+
+“Download narrated video” renders a real 1280×720 WebM with audio and burned-in captions using canvas captureStream + MediaRecorder. It runs at normal speed, regardless of playback speed. Keeping the tab visible is required; hiding it cancels rather than claiming a completed render. Cancellation discards the in-progress file. The WebM is finalized with measured Duration metadata before download; otherwise Chromium exports report Infinity. The finalizer accepts only bounded recorder output, rejects indexed/checksummed shapes it cannot safely amend and preserves encoded audio/video bytes. Metadata follows the [Matroska element specification](https://www.matroska.org/technical/elements.html). Video export support is detected; unsupported browsers retain playback/transcript with a clear message. The browser assembly limit is ten minutes and 128 MiB of encoded video. This is a browser export, not a server render queue, MP4 pipeline or offline background renderer.
+
+## Verification on 1 November 2026
+
+- `node --test tests/cartoon-renderer.test.mjs`: 8 passed (all scenes, deterministic frames, closed asset enums, complete captions, audio timeline/scene gaps, still artwork, export MIME/filename handling and WebM duration repair).
+- Component bundled with the project's existing esbuild; no additional dependency.
+- Isolated CUA browser journey: real Fish Audio guide/learner recordings from the podcast sibling, play, pause, 1.25× speed, scene jump, still artwork, complete playback, cancellation, re-export and standalone downloaded-video playback.
+- Narrow viewport: measured `innerWidth=390`, `scrollWidth=390`; readable DOM captions and controls checked visually. This is one browser/viewport, not low-end device certification.
+- Final exported artifact: 21.432403 seconds, 1280×720, VP9 + Opus. Browser reported finite duration, `readyState=4`, advancing playback and no media error; warning/error log empty.
+- Evidence under `../output/media-studio/cartoon/`: `narrated-cartoon.webm`, `video-probe.json`, `export-playback.json`, `export-playback.jpg`, `mobile-player.jpg`, `browser-state.txt`, `browser-errors.json`, `video-frame-16.png`.
+
+The synthetic QA fixture exercises the player; root integration acceptance separately verifies a live Wonder-generated reviewed script and authenticated audio route. The fixture contains no private learner data and is outside deployed application source.

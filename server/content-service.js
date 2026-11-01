@@ -74,7 +74,7 @@ export function bindGeneratedEvidence(raw,job){
  const sources=ids.map(id=>{const source=job.evidence.find(s=>s.id===id);requireValue(source,'The draft cites a passage outside the reviewed evidence.');return {...source}});
  return validateGenerated({...raw,sources},job);
 }
-async function metaRequest(path,key,options,fetcher){
+export async function metaRequest(path,key,options,fetcher){
  requireValue(key,'Muse Wonder is not connected. Configure the server’s META_API_KEY first.',503);
  // Workers supports manual/follow only. Reject all non-2xx responses below;
  // never forward the credential to a redirect destination.

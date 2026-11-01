@@ -19,7 +19,7 @@ The studio adapts support, order and reflection context. It does not rewrite gam
 
 Programmes are limited to 12; each retains up to 3 starting answers, 80 practice attempts and a 2,000-character reflection. Export downloads the current profile and programmes. Removing a programme leaves its separate game saves and resources intact; older NCB versions are pruned best-effort by the existing adapter. Full account deletion/retention workflows remain separate product work.
 
-The private Sites resource identity and the NoCodeBackend learner identity are separate. This release preserves the owner-private Site audience. It does not create school memberships or sharing. Video, cartoons and podcasts are future adapters; the profile's captions preference is stored for that work.
+The private Sites resource identity and the NoCodeBackend learner identity are separate. This release preserves the owner-private Site audience. It does not create school memberships or sharing. Creative learning adds source-bound Muse conversations, reviewed podcast scripts and captioned cartoons; see CREATIVE-STUDIO.md for exact capabilities and verification limits.
 
 ## Acceptance evidence
 
