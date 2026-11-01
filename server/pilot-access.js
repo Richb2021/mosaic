@@ -133,9 +133,10 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(manages,'Only an authorised organiser can assign learning.',403);
   const member=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+input.accountReference))?.policy);
   need(member.manager===owner&&member.status==='active','Choose an active learner in your group.',403);
-  const job=await db.one('SELECT id FROM workshop_jobs WHERE id=? AND owner=? AND status=?',input.jobId,siteOwner,'published');need(job,'Review and publish the chapter in your library first.',404);
+  const job=await db.one('SELECT id,draft FROM workshop_jobs WHERE id=? AND owner=? AND status=?',input.jobId,siteOwner,'published');need(job,'Review and publish the chapter in your library first.',404);
+  const draftHash=await digest(job.draft);need(input.draftHash===undefined||input.draftHash===draftHash,'This chapter changed. Reopen its review before assigning it.',409);
   const scope='assignment:'+await digest(owner+':'+input.accountReference+':'+job.id);
-  await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) VALUES(?,?,?)',scope,JSON.stringify({manager:owner,learner:input.accountReference,siteOwner,jobId:job.id}),now());return noStore({assigned:true});
+  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',scope,JSON.stringify({manager:owner,learner:input.accountReference,siteOwner,jobId:job.id,draftHash}),now());return noStore({assigned:true});
  }
  throw Object.assign(Error('Pilot action not found.'),{status:404});
 }catch(e){return noStore({error:e.status?e.message:'Account access could not be checked. Please try again.'},e.status||503)}}

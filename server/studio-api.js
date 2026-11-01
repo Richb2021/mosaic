@@ -37,7 +37,11 @@ export async function studioAPI(req,env,{path,store,owner,siteOwner,resolve,incl
   need(typeof input.packId==='string'&&input.packId.length<=100&&typeof input.contentHash==='string'&&input.contentHash.length<=100,'Choose a valid activity.');
   const pack=await resolve(input.packId,input.contentHash,req,env),id=unitKey(pack),existing=state.units.find(u=>u.id===id);
   if(input.type==='create'){
-   need(input.evidenceConfirmed===true,'Review the exact sources before creating a programme.');need(!existing,'A programme for this exact version already exists. Continue or remove it before starting again.',409);need(state.units.length<12,'Keep up to twelve programmes. Remove one before adding another.',409);
+   let organiserReviewed=false;
+   if(input.evidenceConfirmed!==true)for(const row of await assignedChapters(env,owner)){
+    try{const p=validatePlayableContent(JSON.parse(row.draft)),assigned=p.template==='underlight-v1'?bundlePublishedChapter(p):p;if(unitKey(assigned)===id)organiserReviewed=true;}catch{}
+   }
+   need(input.evidenceConfirmed===true||organiserReviewed,'Review the exact sources before creating a programme.');need(!existing,'A programme for this exact version already exists. Continue or remove it before starting again.',409);need(state.units.length<12,'Keep up to twelve programmes. Remove one before adding another.',409);
    const profile=await readProfile();
    state={...state,active:id,units:[newUnit(pack,profile,input.activityKeys,now()),...state.units]};
   }else{
