@@ -40,3 +40,9 @@ test('an explicit cloud choice survives a stale tab writing another game',async 
  b.records.unshift(record(merge,newJourney(merge,2),Date.now()+1));b.storeRecords();const result=JSON.parse(a.storage.getItem(RUNS)).find(r=>r.key===cloud.key);
  assert.equal(result.version,3);assert.equal(result.pending,false);assert.deepEqual(result.snapshot,cloud.snapshot);assert.equal(b.records.length,2);
 });
+test('partial retention preserves newer device progress without silently restoring deleted cloud records',async t=>{
+ storage(t);const j=new LearningJournal();j.user={id:'retention-user'};j.loadLocal();const old=newJourney(sports,1),device=actJourney(sports,old,{type:'formation',style:'balanced'});j.records=[record(sports,old,1)];j.storeRecords();j.storage.setItem(gameSaveKey(sports,'journey'),JSON.stringify(device));j.applyDataReset(Date.now(),'expired');let posts=0;
+ j.request=async(path,body)=>{if(body){posts++;return {save:{version:1}}}return {save:null}};
+ await j.prepare(sports,'journey');assert.equal(posts,0);assert.equal(j.records[0].conflict,true);assert.deepEqual(j.records[0].snapshot,device);assert.deepEqual(JSON.parse(j.storage.getItem(gameSaveKey(sports,'journey'))),device);
+ await j.resolveSave(sports,'journey',false);assert.equal(posts,1);assert.equal(j.records[0].conflict,false);
+});

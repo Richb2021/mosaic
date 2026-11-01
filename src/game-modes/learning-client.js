@@ -68,9 +68,10 @@ export class LearningJournal{
   const deviceRaw=this.storage.getItem(gameSaveKey(pack,kind));let device;
   if(deviceRaw)try{device=observeProgress(pack,kind,JSON.parse(deviceRaw))}catch{this.storage.setItem(gameSaveKey(pack,kind)+':recovery',deviceRaw);this.notice='An unreadable device save was preserved as a recovery copy.';}
   if(device){if(JSON.stringify(device.snapshot)!==JSON.stringify(local?.snapshot)&&JSON.stringify(device.snapshot)!==JSON.stringify(d.save?.snapshot)){
-   local={key,...device,updated:Math.max(Date.now(),(local?.updated||0)+1),version:local?.version||0,pending:true,conflict:!!d.save,cloudVersion:d.save?.version};this.records=[local,...this.records.filter(r=>r.key!==key)];this.storeRecords([key]);
+   local={key,...device,updated:Math.max(Date.now(),(local?.updated||0)+1),version:local?.version||0,pending:true,conflict:!!d.save||!!local?.conflict,cloudVersion:d.save?.version};this.records=[local,...this.records.filter(r=>r.key!==key)];this.storeRecords([key]);
    if(d.save){this.notice='Your device progress differs from the journal and cloud save. It has been preserved. Choose a version in your learning journal.';return;}
   }}
+  if(local?.conflict){this.notice='Your device copy needs review before syncing. Choose a version in your learning journal.';return;}
   if(!d.save){if(local?.pending)await this.sync(key);return;}
   const clean=observeProgress(pack,kind,d.save.snapshot);if(local?.snapshot&&local.version!==d.save.version){local.conflict=true;local.cloudVersion=d.save.version;this.notice='A different cloud save is available. Choose a version in your learning journal.';this.storeRecords([key]);return;}
   if(local?.snapshot&&local.pending){local.conflict=false;local.error='';this.storage.setItem(gameSaveKey(pack,kind),JSON.stringify(observeProgress(pack,kind,local.snapshot).snapshot));await this.sync(key);return;}
