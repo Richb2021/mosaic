@@ -1,3 +1,5 @@
+import {costSummary} from './cost-ledger.js';
+import {maintenanceStatus} from './background-retention.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {digest} from './content-service.js';
 import {need,sqlDB,readControls,auditEvent,parse,DAY} from './data-control.js';
@@ -50,6 +52,7 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
  try{
   if(!plan.localDone){
    for(const id of plan.assets){const row=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);if(!row)continue;need(env.BUCKET,'Private media storage is unavailable; cleanup will resume later.',503);await env.BUCKET.delete(row.object_key);need(!await env.BUCKET.head(row.object_key),'Recording removal has not been confirmed.',503);await db.run('DELETE FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);}
+   if(plan.mode==='learner')await db.run('UPDATE cost_receipts SET learner_owner=NULL WHERE site_owner=? AND learner_owner=?',siteOwner,owner);
    await store.deleteRows('learner_profiles',owner,plan.profiles);await store.deleteRows('learner_saves',owner,plan.saves);
    for(const id of plan.jobs){const j=await db.one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,siteOwner);if(!j)continue;
     // Preserve only a content-free admission receipt until its 24h window ends.
@@ -101,10 +104,12 @@ export async function startDeletion(env,ctx,plan){
  }
  return executeOperation(env,{...ctx,op});
 }
-export async function enforceRetention(env,ctx,{force=false}={}){
+export async function resumeDeletion(env,ctx,op){return executeOperation(env,{...ctx,op:parse(op.plan).localDone?op:await prepareOperation(env,ctx,op)})}
+export async function enforceRetention(env,ctx,{force=false,strict=false}={}){
  if(!env.DB||!ctx.siteOwner)return;
  const db=sqlDB(env.DB),state=await readControls(env,ctx.siteOwner,ctx.owner,ctx.now());
  await db.run('DELETE FROM data_leases WHERE expires<=?',ctx.now());
+ await db.run('DELETE FROM cost_receipts WHERE site_owner=? AND created<?',ctx.siteOwner,ctx.now()-30*DAY);
  await db.run('DELETE FROM workshop_jobs WHERE owner=? AND status=? AND created<=?',ctx.siteOwner,'usage-only',ctx.now()-DAY);
  await db.run('DELETE FROM data_events WHERE scope IN (?,?) AND created<?',state.scopes.learner,state.scopes.workspace,ctx.now()-30*DAY);
  await db.run("DELETE FROM data_operations WHERE site_owner=? AND learner_owner=? AND status IN ('complete','cancelled') AND updated<?",ctx.siteOwner,ctx.owner,ctx.now()-30*DAY);
@@ -114,13 +119,13 @@ export async function enforceRetention(env,ctx,{force=false}={}){
  if(!policies.some(p=>Object.values(p).some(v=>v>0)))return;
  try{
   const plan=await deletionPlan(env,{...ctx,mode:'expired',now:ctx.now()});
-  if(plan.assets.length&&!env.BUCKET)return;
+  if(plan.assets.length&&!env.BUCKET){if(strict)need(false,'Private media storage is unavailable.',503);return;}
   if(plan.assets.length+plan.jobs.length+plan.resources.length+plan.profiles.length+plan.saves.length)await startDeletion(env,ctx,plan);
   await db.run('UPDATE data_controls SET checked_ms=? WHERE scope IN (?,?)',ctx.now(),state.scopes.learner,state.scopes.workspace);
  }catch(e){
   // Background maintenance cannot fail an unrelated read because another tab
   // is saving. Persisted cleanup failures are discoverable in Your data.
-  if(![409,503].includes(e.status))throw e;
+  if(strict||![409,503].includes(e.status))throw e;
  }
 }
 export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),removeProvider=deleteProviderResponse}){
@@ -134,7 +139,7 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
    db.all('SELECT id,title,status,created FROM workshop_resources WHERE owner=? ORDER BY created DESC',siteOwner),
    db.all("SELECT id,status,plan,created FROM data_operations WHERE site_owner=? AND (learner_owner=? OR id IN (SELECT operation FROM data_controls WHERE scope=?)) ORDER BY created DESC LIMIT 30",siteOwner,owner,state.scopes.workspace),
    db.all('SELECT action,detail,created FROM data_events WHERE scope IN (?,?) AND created>? ORDER BY created DESC LIMIT 30',state.scopes.learner,state.scopes.workspace,now()-30*DAY)
-  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||'Tutor conversation',kind:parse(j.payload).kind,status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET};
+  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||'Tutor conversation',kind:parse(j.payload).kind,status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()}),maintenance:await maintenanceStatus(env)};
  };
  if(req.method==='GET'){await enforceRetention(env,ctx,{force:true});state=await readControls(env,siteOwner,owner,now());return noStore(await inventory());}
  need(req.method==='POST','Data action not found.',404);
@@ -159,7 +164,7 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
   const profiles=await store.allRows('learner_profiles',owner),saves=await store.allRows('learner_saves',owner),jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,title,checksum,payload,status,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner);
   const rows=await db.all('SELECT id,script_id,script_hash,segment,status,bytes,created FROM media_assets WHERE site_owner=? AND learner_owner=? ORDER BY id',siteOwner,owner);
   const safeRow=r=>({slot:r.slot_key,version:r.version,updated:Number(r.updated_ms),data:parse(r.payload)});
-  const out={format:'mosaic-data-export',version:1,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),chapters:jobs.filter(j=>!parse(j.payload).recordType).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
+  const out={format:'mosaic-data-export',version:1,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),chapters:jobs.filter(j=>!parse(j.payload).recordType).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
   need(JSON.stringify(out).length<24000000,'This data export exceeds 24 MB. Export a smaller workspace first.',413);await auditEvent(env,state.scopes[input.scope==='workspace'?'workspace':'learner'],'exported',{scope:out.scope},now());return noStore({export:out});
  }
  if(input.action==='download'){

@@ -1,3 +1,4 @@
+import {startCost,finishCost} from './cost-ledger.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {StoreError} from './ncb-store.js';
 import {digest,MODEL} from './content-service.js';
@@ -38,16 +39,16 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  need(req.method==='POST','Creative route not found.',404);
  if(new URL(req.url).pathname.endsWith('/audio')){
   const j=await load(input.id);need(j.status==='creative-published'&&j.draft,'Review this exact script before creating narration.',409);need(input.draftHash===await digest(j.draft),'This script changed. Reload before creating narration.',409);
-  const p=JSON.parse(j.payload);need(p.kind!=='tutor','Tutor replies are not narration scripts.');const draft=validateCreative(JSON.parse(j.draft),p);need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose an episode segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');
+  const p=JSON.parse(j.payload);need(['podcast','cartoon'].includes(p.kind),'Only reviewed podcast and cartoon scripts can be narrated.');const draft=validateCreative(JSON.parse(j.draft),p);need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose an episode segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');
   const requestKey='audio-'+input.requestKey,requestHash=await digest(JSON.stringify({owner,id:j.id,hash:input.draftHash,index:input.index}));
   return persistentAudio({env,siteOwner,owner,j,draft,index:input.index,requestKey,requestHash,reserve,speech,now});
  }
  if(input.action==='create'){
   need(keyOK(input.requestKey)&&CREATIVE_KINDS.includes(input.kind),'Choose a learning format and request identity.');need(input.kind!=='tutor'||typeof input.question==='string'&&input.question.trim().length>0&&input.question.length<=1200,'Write a short question or your reasoning.');
   const context=creativeContext(pack,unit,input.kind,input.activityKey),question=input.kind==='tutor'?input.question.trim():null,requestKey='creative-'+input.requestKey;
-  const requestHash=await digest(JSON.stringify({owner,packId:input.packId,hash:input.contentHash,kind:input.kind,activityKey:input.kind==='tutor'?input.activityKey:null,question}));
+  const requestHash=await digest(JSON.stringify({owner,packId:input.packId,hash:input.contentHash,kind:input.kind,activityKey:['tutor','practice'].includes(input.kind)?input.activityKey:null,question}));
   const existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);if(existing){need(existing.request_hash===requestHash,'This request identity belongs to different input.',409);return result({jobId:existing.id})}
-  const id='creative-'+crypto.randomUUID(),payload={id,recordType:'creative',learnerOwner:owner,packId:input.packId,contentHash:input.contentHash,kind:input.kind,activityKey:input.kind==='tutor'?input.activityKey:null,question,context};
+  const id='creative-'+crypto.randomUUID(),payload={id,recordType:'creative',learnerOwner:owner,packId:input.packId,contentHash:input.contentHash,kind:input.kind,activityKey:['tutor','practice'].includes(input.kind)?input.activityKey:null,question,context};
   const fixed=input.kind==='tutor'?integrityResponse(question):null;
   if(fixed){await recordAssistance(input.activityKey);payload.local=true;payload.revisionOf={localScaffold:true};const reply={...fixed,sources:[]};await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)',id,siteOwner,requestKey,requestHash,'creative-review',JSON.stringify(payload),JSON.stringify(reply),now(),now());const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);need(saved?.request_hash===requestHash,'This request identity belongs to different input.',409);return result({jobId:saved.id})}
   need(env.META_API_KEY,'Muse Wonder is not connected.',503);
@@ -56,15 +57,16 @@ export async function creativeAPI(req,env,{store,owner,resolve,now=()=>Date.now(
  }
  let j=await load(input.id),p=JSON.parse(j.payload);
  const settle=async(out,from)=>{
+  await finishCost(env,{id:j.id,siteOwner,usage:out.usage,status:out.status,now:now()});
   const content=out.content?validateCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);
   await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-'+status,content?JSON.stringify(content):null,out.providerId||j.provider_id,out.error||null,now(),j.id,siteOwner,from);
  };
- const fail=async(error,from)=>{const uncertain=['TypeError','TimeoutError','AbortError'].includes(error.name);await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'creative-interrupted':'creative-failed',uncertain?'The submission acknowledgement was lost. No automatic repeat was sent.':error.status?error.message:'The request could not be completed. No automatic repeat was sent.',error.providerId||j.provider_id,now(),j.id,siteOwner,from)};
+ const fail=async(error,from)=>{await finishCost(env,{id:j.id,siteOwner,usage:error.usage,status:'unknown',now:now()});const uncertain=['TypeError','TimeoutError','AbortError'].includes(error.name);await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'creative-interrupted':'creative-failed',uncertain?'The submission acknowledgement was lost. No automatic repeat was sent.':error.status?error.message:'The request could not be completed. No automatic repeat was sent.',error.providerId||j.provider_id,now(),j.id,siteOwner,from)};
  if(input.action==='run'){
   if(j.status!=='creative-queued')return result();
   if(p.kind==='tutor')await recordAssistance(p.activityKey);
   const lock=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=?','creative-starting',now(),j.id,siteOwner,'creative-queued');if(!lock.meta.changes)return result();
-  try{await settle(await provider(p,env.META_API_KEY),'creative-starting')}catch(e){await fail(e,'creative-starting')}return result();
+  try{await startCost(env,{id:j.id,siteOwner,learnerOwner:owner,model:MODEL,now:now()});await settle(await provider(p,env.META_API_KEY),'creative-starting')}catch(e){await fail(e,'creative-starting')}return result();
  }
  if(input.action==='check'){
   if(j.status==='creative-starting'&&now()-j.updated>60000){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-interrupted','The submission acknowledgement was lost. No automatic repeat was sent.',now(),j.id,siteOwner,j.status);return result()}

@@ -1,3 +1,4 @@
+import {startCost,finishCost} from './cost-ledger.js';
 import {digest} from './content-service.js';
 import {SPEECH_MODEL,speechConfiguration} from './media-audio.js';
 import {need,sqlDB,readControls,parse,DAY} from './data-control.js';
@@ -29,7 +30,9 @@ export async function persistentAudio({env,siteOwner,owner,j,draft,index,request
  let audio;
  try{
   audio=await reserve({id:'audio-'+crypto.randomUUID(),recordType:'creative-audio',learnerOwner:owner,packId:parse(j.payload).packId,contentHash:parse(j.payload).contentHash,scriptId:j.id,index,mediaId:id},requestKey,requestHash,'audio-starting');
+  await startCost(env,{id:audio.id,siteOwner,learnerOwner:owner,model:SPEECH_MODEL,now:now()});
   const rendered=await speech(segment,env);
+  await finishCost(env,{id:audio.id,siteOwner,usage:{inputBytes:new TextEncoder().encode(segment.text).length,outputBytes:rendered.bytes.byteLength},now:now()});
   // Deletion and policy changes hold the same workspace/learner guard as this request.
   await env.BUCKET.put(objectKey,rendered.bytes,{httpMetadata:{contentType:'audio/mpeg'},customMetadata:{scriptHash:hash,recipe:AUDIO_RECIPE}});
   const saved=await db.run('UPDATE media_assets SET status=?,bytes=?,updated=? WHERE id=? AND status=?','ready',rendered.bytes.byteLength,now(),id,'pending');

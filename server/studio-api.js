@@ -1,3 +1,4 @@
+import {learningLoopSummaries} from './learning-loop-api.js';
 import {emptyStudio,unitKey,newUnit,applyUnitAction,makeProgramme,validateStudioShape} from '../src/studio/programme.js';
 import {normaliseProfile,validPracticeRecord} from '../src/game-modes/learning-model.js';
 import {draftHash} from '../src/game-modes/draft-engine.js';
@@ -23,7 +24,7 @@ export async function studioAPI(req,env,{path,store,owner,resolve,included,now})
  const hydrate=async()=>{
   const saved=await store.list(owner),records=[];for(const r of saved)try{const v={...JSON.parse(r.payload),updated:Number(r.updated_ms)};if(validPracticeRecord(v))records.push(v);}catch{}
   const units=[];for(const unit of state.units){let pack;try{pack=await resolve(unit.packId,unit.contentHash,req,env)}catch{units.push({unit:{id:unit.id,packId:unit.packId,contentHash:unit.contentHash},unavailable:true});continue;}try{units.push({unit,programme:makeProgramme(pack,unit,records,now())});}catch{units.push({unit:{id:unit.id,packId:unit.packId,contentHash:unit.contentHash},unreadable:true});}}
-  return {state,version,units};
+  return {state,version,units,cycles:await learningLoopSummaries(env,{siteOwner:req.headers.get('oai-authenticated-user-id'),owner,store,now:now()})};
  };
  if(req.method==='GET'&&path==='studio')return noStore(await hydrate());
  need(req.method==='POST'&&path==='studio','Studio route not found.',404);

@@ -1,3 +1,4 @@
+import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
 import {WorkshopError,requireValue,boundedText,safeId,digest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
@@ -21,6 +22,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'Draft not found.',404);return j};
   const sweepStarting=()=>run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
   const settle=async(j,result,from)=>{
+   await finishCost(env,{id:j.id,siteOwner:owner,usage:result.usage,status:result.status,now:now()});
    const content=result.content?validateGenerated(result.content,JSON.parse(j.payload)):null,status=content?'review':result.status;
    requireValue(['review','running','failed','interrupted'].includes(status),'Invalid generation result.',502);
    await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?',status,content?JSON.stringify(content):null,result.providerId||j.provider_id,result.error||null,now(),j.id,owner,from);
@@ -31,7 +33,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    // adapter repair. It never creates a new inference request.
    if(!['running','interrupted','failed'].includes(j.status)||!j.provider_id)return j;
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
-   catch(e){if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
+   catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
   if(method==='GET'&&path.join('/')==='library')return json({generationBudget:await generationBudget(one,owner,env,now()),resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all("SELECT * FROM workshop_jobs WHERE owner=? AND json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.recordType') IS NULL ORDER BY created DESC LIMIT 30",owner)).map(r=>publicJob(r,now())))});
   if(method==='POST'&&path.join('/')==='resources'){
@@ -85,8 +87,8 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
     const lock=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=? AND NOT EXISTS (SELECT 1 FROM workshop_jobs WHERE owner=? AND status IN (?,?))','starting',now(),j.id,owner,'queued',owner,'starting','running');
     if(!lock.meta.changes)return json({job:await publicJob(await job(j.id),now()),message:'Another request is already running.'},409);
     const work=(async()=>{
-     try{await settle(j,await provider(JSON.parse(j.payload),env.META_API_KEY),'starting')}
-     catch(e){const uncertain=['TimeoutError','TypeError'].includes(e.name),message=e instanceof WorkshopError?e.message:uncertain?'The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.':'The generated draft could not be validated. No chapter was activated.';await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'interrupted':'failed',message,now(),j.id,owner,'starting')}
+     try{await startCost(env,{id:j.id,siteOwner:owner,model:MODEL,now:now()});await settle(j,await provider(JSON.parse(j.payload),env.META_API_KEY),'starting')}
+     catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});const uncertain=['TimeoutError','TypeError','AbortError'].includes(e.name),message=e instanceof WorkshopError?e.message:uncertain?'The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.':'The generated draft could not be validated. No chapter was activated.';await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'interrupted':'failed',message,e.providerId||j.provider_id,now(),j.id,owner,'starting')}
     })();
     defer(work);await work;return json({job:await publicJob(await job(j.id),now())});
    }

@@ -1,7 +1,8 @@
+import {validatePractice,practiceSchema} from './learning-loop.js';
 import {supportActivity} from './support-model.js';
 import {contentOf,activitiesOf} from './programme.js';
 
-export const CREATIVE_KINDS=['tutor','podcast','cartoon'];
+export const CREATIVE_KINDS=['tutor','podcast','cartoon','practice'];
 export const SCENES=['observatory','workshop','garden','city'];
 export const SPEAKERS=['guide','learner'];
 const need=(value,message)=>{if(!value)throw Error(message)};
@@ -16,14 +17,15 @@ export function creativeEvidence(pack,activityKeys){
 }
 export function creativeContext(pack,unit,kind,key){
  need(CREATIVE_KINDS.includes(kind),'Choose a supported learning format.');
- need(kind!=='tutor'||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
- const keys=kind==='tutor'?[key]:unit.activityKeys;
+ need(!['tutor','practice'].includes(kind)||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
+ const keys=['tutor','practice'].includes(kind)?[key]:unit.activityKeys;
  const evidence=creativeEvidence(pack,keys),profile=unit.profile;
  return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests:profile.interests.slice(0,2),focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500)}};
 }
 function references(value,evidence,optional=false){need(Array.isArray(value)&&value.length<=12&&(optional||value.length>0)&&new Set(value).size===value.length&&value.every(id=>evidence.some(s=>s.id===id)),'Every factual passage needs references from this exact source packet.');return [...value];}
 export function validateCreative(raw,job){
  const evidence=job.context.evidence;
+ if(job.kind==='practice')return validatePractice(raw,job);
  if(job.kind==='tutor'){
   only(raw,['status','message','question','sourceRefs','sources']);need(['hint','scaffold','unsupported'].includes(raw.status),'Invalid tutor response type.');
   const refs=references(raw.sourceRefs,evidence,raw.status==='unsupported');need(raw.status!=='unsupported'||refs.length===0,'An unsupported reply cannot claim source support.');
@@ -51,6 +53,7 @@ export function integrityResponse(message){
 }
 const str={type:'string'},arr=items=>({type:'array',items}),obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 export function creativeSchema(job){
+ if(job.kind==='practice')return practiceSchema(job);
  const refs=arr({type:'string',enum:job.context.evidence.map(s=>s.id)});
  if(job.kind==='tutor')return obj({status:{type:'string',enum:['hint','scaffold','unsupported']},message:str,question:str,sourceRefs:refs});
  return obj({schemaVersion:{type:'integer',enum:[1]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:[job.kind]},title:str,summary:str,segments:arr(obj({id:str,speaker:{type:'string',enum:SPEAKERS},text:str,sourceRefs:refs,scene:{type:'string',enum:SCENES},action:{type:'string',enum:['talk','think','celebrate']}})),question:obj({prompt:str,answer:str,sourceRefs:refs})});

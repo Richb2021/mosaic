@@ -1,3 +1,4 @@
+import {metaUsage} from './cost-ledger.js';
 import {LEARNING_MAP_SCHEMA} from '../src/learning-map.js';
 import {evidencePacket} from '../src/evidence-selection.js';
 import {validateChapterContent} from '../src/chapter-content.js';
@@ -84,7 +85,7 @@ export async function metaRequest(path,key,options,fetcher){
  const buffer=new Uint8Array(bytes);let offset=0;for(const x of chunks){buffer.set(x,offset);offset+=x.length}
  try{return JSON.parse(new TextDecoder().decode(buffer))}catch{throw new WorkshopError('Meta returned an unreadable response.',502)}
 }
-function responseResult(data,job){
+function baseResponseResult(data,job){
  requireValue(typeof data.id==='string'&&data.id.length<=200&&/^resp_[a-zA-Z0-9:_-]+$/.test(data.id),'Meta returned no valid response identity.',502);
  requireValue(!data.model||data.model===MODEL,'The response used an unexpected model.',422);
  if(['queued','in_progress'].includes(data.status))return {status:'running',providerId:data.id};
@@ -96,6 +97,7 @@ function responseResult(data,job){
  let raw;try{raw=JSON.parse(text)}catch{throw new WorkshopError('The model returned invalid chapter JSON.',422)}
  try{return {status:'review',content:bindGeneratedEvidence(raw,job),providerId:data.id,model:MODEL}}catch(e){throw new WorkshopError(e.message,422)}
 }
+function responseResult(data,job){try{return {...baseResponseResult(data,job),usage:metaUsage(data.usage)}}catch(e){if(/^resp_[a-zA-Z0-9:_-]{1,195}$/.test(data.id))e.providerId=data.id;e.usage=metaUsage(data.usage);throw e}}
 export async function callWonder(job,key,fetcher=fetch){
  const data=await metaRequest('',key,{method:'POST',body:JSON.stringify(generationRequest(job))},fetcher);
  return responseResult(data,job);
