@@ -11,5 +11,5 @@ export function coursePlanResult(data,job){try{
  const parts=(data.output||[]).filter(x=>x.type==='message'&&x.role==='assistant'&&x.phase!=='commentary').flatMap(x=>x.content||[]);requireValue(!parts.some(p=>p.type==='refusal'),'Muse declined this plan. Check the evidence and goal.',422);
  let content;try{content=validateCoursePlan(JSON.parse(parts.filter(p=>p.type==='output_text').map(p=>p.text).join('')),job)}catch(e){throw new WorkshopError(e instanceof SyntaxError?'Muse returned unreadable plan content.':e.message,422)}return {...base,status:'review',content};
  }catch(e){if(/^resp_[a-zA-Z0-9:_-]{1,195}$/.test(data.id))e.providerId=data.id;e.usage=metaUsage(data.usage);throw e}}
-export async function submitCoursePlan(job,key){return coursePlanResult(await metaRequest('',key,{method:'POST',body:JSON.stringify(coursePlanRequest(job))}),job)}
-export async function checkCoursePlan(id,job,key){requireValue(/^resp_[a-zA-Z0-9:_-]{1,195}$/.test(id),'Invalid saved provider response.');return coursePlanResult(await metaRequest('/'+encodeURIComponent(id),key,{method:'GET'}),job)}
+export async function submitCoursePlan(job,key,fetcher=fetch){return coursePlanResult(await metaRequest('',key,{method:'POST',body:JSON.stringify(coursePlanRequest(job))},fetcher),job)}
+export async function checkCoursePlan(id,job,key,fetcher=fetch){requireValue(/^resp_[a-zA-Z0-9:_-]{1,195}$/.test(id),'Invalid saved provider response.');return coursePlanResult(await metaRequest('/'+encodeURIComponent(id),key,{method:'GET'},fetcher),job)}
