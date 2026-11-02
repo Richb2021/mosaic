@@ -10,6 +10,7 @@ import {coursePlanRequest,coursePlanResult} from '../server/course-plan-provider
 import {unitKey} from '../src/studio/programme.js';
 import {editCourses} from '../src/studio/course-model.js';
 import {deletionPlan,dataAPI} from '../server/data-lifecycle.js';
+import {currentEvidence} from '../src/passage-ranking.js';
 class Store{
  rows=new Map();async latest(t,o,s){return this.rows.get(t+o+s)||null}async allRows(t,o){return [...this.rows.values()].filter(r=>r.table===t&&r.owner_key===o)}async list(){return []}async deleteRows(t,o,ids){for(const [k,r] of this.rows)if(r.table===t&&r.owner_key===o&&ids.includes(r.id))this.rows.delete(k)}
  async write(t,o,s,v,p,n){assert.equal((await this.latest(t,o,s))?.version||0,v);const r={id:'row-'+s,table:t,owner_key:o,slot_key:s,version:v+1,payload:JSON.stringify(p),updated_ms:n};this.rows.set(t+o+s,r);return r}
@@ -35,6 +36,11 @@ test('course plan uses fixed Wonder strict schema and server-attached exact cita
  const forged=validateCoursePlan({...draft,sources:[{excerpt:'fabricated'}]},p);assert.equal(forged.sources[0].excerpt,h.source.units[0].excerpt);
  assert.throws(()=>coursePlanResult({id:'resp_test',model:'another-model',status:'completed'},p),/Unexpected/);
  const unsupported=validateCoursePlan({...draft,steps:[],gaps:['No matching evidence.']},p);assert.equal(unsupported.steps.length,0);
+});
+test('course-plan context retains source identities and checksums for the shared exact-evidence workshop handoff',async()=>{
+ const h=await setup(),j=await reviewed(h),selected=j.context.evidence.filter(e=>j.draft.steps[0].sourceRefs.includes(e.id));
+ assert.equal(selected[0].resourceId,'r-water');assert.equal(selected[0].checksum,h.source.checksum);
+ const checked=currentEvidence(selected,[{...h.source,id:'r-water',status:'reviewed'}]);assert.deepEqual(checked,selected);
 });
 test('plan request resumes idempotently, edits are free, approval binds hash and source/course versions',async()=>{
  const h=await setup(),j=await reviewed(h);assert.equal(h.submissions(),1);await h.call(h.input);await h.call({action:'run',id:j.id});assert.equal(h.submissions(),1);

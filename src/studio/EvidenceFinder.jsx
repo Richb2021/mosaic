@@ -13,11 +13,11 @@ export function EvidenceFinder({sources,onPrepare,onLink,goal='',disabled=false}
  async function search(q,c=null,h=[]){
   const turn=++sequence.current;setBusy(true);setError('');setPage(null);
   try{const params=new URLSearchParams({...q,order:'relevance',status:'reviewed'});if(c)params.set('cursor',c);const p=await readLibrary('search?'+params);if(!life.current||turn!==sequence.current)return;
-   if(snapshot.current&&snapshot.current!==p.snapshot)setSelected([]);snapshot.current=p.snapshot;setPage(p);setQuery(q);setCursor(c);setHistory(h);
-  }catch(e){if(life.current&&turn===sequence.current){setError(e.message);setSelected([]);snapshot.current=null}}
+   if(snapshot.current&&snapshot.current!==p.snapshot)setError('Your library changed. Selected passages are kept and will be checked before use.');snapshot.current=p.snapshot;setPage(p);setQuery(q);setCursor(c);setHistory(h);
+  }catch(e){if(life.current&&turn===sequence.current){setError(e.message+' Your selected passages are kept and will be checked before use.');snapshot.current=null}}
   finally{if(life.current&&turn===sequence.current)setBusy(false)}
  }
- function submit(e){e.preventDefault();try{retrievalQuery(draft,related)}catch(e){setError(e.message);return}setSelected([]);setPreview(null);snapshot.current=null;void search({q:draft.trim(),related,...(scope==='topic'?{ids:sources.map(s=>s.id).join(',')}:{})});if(!chapterGoal)setChapterGoal(draft.trim())}
+ function submit(e){e.preventDefault();try{retrievalQuery(draft,related)}catch(e){setError(e.message);return}const q={q:draft.trim(),related,...(scope==='topic'?{ids:sources.map(s=>s.id).join(',')}:{})};if(JSON.stringify(q)!==JSON.stringify(query))setSelected([]);setPreview(null);snapshot.current=null;void search(q);if(!chapterGoal)setChapterGoal(draft.trim())}
  const dirty=query&&(query.q!==draft.trim()||query.related!==related||Boolean(query.ids)!==(scope==='topic'));
  async function readSource(id,trigger){
   if(busy||disabled)return;readTrigger.current=trigger;setBusy(true);setError('');

@@ -7,6 +7,7 @@ import {resourceSearch} from '../server/resource-library.js';
 import {workshopAPI} from '../server/workshop-api.js';
 import {retrievalQuery,evidenceChoice,currentEvidence} from '../src/passage-ranking.js';
 import {retrievalCorpus,retrievalCases} from './fixtures/retrieval-corpus.mjs';
+import {validateCourses} from '../src/studio/course-model.js';
 async function setup(){
  const env={DB:new D1()},db=sqlDB(env.DB),batches=[];
  const source=async(id,text,{owner='alice',status='reviewed',created=1,title=id}={})=>{const r=await extractResource({title,text});await db.run('INSERT INTO workshop_resources VALUES(?,?,?,?,?,?,?)',id,owner,r.title,r.checksum,JSON.stringify({text:r.text,units:r.units}),status,created);return {...r,id,status}};
@@ -56,6 +57,12 @@ test('ranked search retains the workshop account-identity gateway',async()=>{
  const req=new Request('https://test/api/workshop/search?order=relevance&q=evaporation',{headers:{'X-Mosaic-Learner':'wrong-account'}});
  const result=await workshopGateway(req,h.env,{session:async()=>({id:'right-account'}),store:{}});assert.equal(result.status,401);assert.match((await result.json()).error,/account changed/);
  const signedOut=await workshopGateway(req,h.env,{session:async()=>null,store:{}});assert.equal(signedOut.status,401);
+});
+test('topic source bound matches notebook storage and out-of-scope changes do not invalidate topic search',async()=>{
+ const h=await setup(),refs=[];for(let i=0;i<12;i++){const r=await h.source('topic-'+i,Array.from({length:3},(_,j)=>`Evaporation changes liquid water to vapour in notebook ${i} passage ${j}.`).join('\n\n'));refs.push({id:r.id,checksum:r.checksum})}
+ const state={schemaVersion:1,courses:[{id:'c',title:'Course',goal:'',topics:[{id:'t',title:'Topic',goal:'',resources:refs,chapters:[]}]}]};assert.equal(validateCourses(state).courses[0].topics[0].resources.length,12);
+ assert.throws(()=>validateCourses({...state,courses:[{...state.courses[0],topics:[{...state.courses[0].topics[0],resources:[...refs,{id:'13',checksum:'a'.repeat(64)}]}]}]}),/Too many/);
+ const ids=refs.map(r=>r.id).join(','),p=await h.search('evaporation',{ids});assert(p.nextCursor);await h.source('outside','This unrelated source describes a distant library and its catalogue entries.');const next=await h.search('evaporation',{ids,cursor:p.nextCursor});assert.equal(next.snapshot,p.snapshot);assert.equal(next.results.length,16);
 });
 test('synthetic relevance cases retrieve labelled evidence in the first five, including French and Spanish; unsupported query stays empty',async()=>{
  const h=await setup();for(const r of retrievalCorpus)await h.source(r.id,r.text);
