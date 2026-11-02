@@ -1,6 +1,6 @@
 // A course plan proposes a route. It is never a grade, prerequisite lock or
 // claim of curriculum coverage. Citations always come from the saved packet.
-import {unitKey} from './programme.js';
+import {unitKey,answerResult} from './programme.js';
 export const PLAN_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','quiz-v1','novel-v1','merge-v1','sports-v1'];
 const need=(x,m)=>{if(!x)throw Error(m)};
 const txt=(v,n)=>{need(typeof v==='string'&&v.trim().length>0&&v.length<=n,'Check the plan text length.');return v.trim()};
@@ -28,10 +28,10 @@ export function coursePlanRoute(plan,links,client,now=Date.now()){
   const link=links.find(l=>l.objectiveId===step.id),item=link&&client.items.find(i=>i.jobId===link.id&&i.sourceHash===link.hash);
   // The UI supplies only current, canonical chapter links. sourceHash is the
   // SHA-256 reviewed draft binding, distinct from the runtime content hash.
-  const unit=item&&client.state.units.find(u=>u.id===unitKey(item.pack)),remote=unit&&client.remoteUnits?.find(u=>u.unit.id===unit.id);
+  const unit=item&&client.state.units.find(u=>u.id===unitKey(item.pack));
   const cycles=unit?[...new Map((client.cycles||[]).filter(c=>c.packId===unit.packId&&c.contentHash===unit.contentHash).sort((a,b)=>(a.updated||0)-(b.updated||0)).map(c=>[c.activityKey,c])).values()]:[];
-  const support=cycles.find(c=>c.needsSupport),due=cycles.find(c=>c.stage!=='complete'&&c.dueAt&&c.dueAt<=now),practice=[...new Map((remote?.programme?.practice||[]).map(p=>[p.key,p])).values()];
-  const needsSupport=!!support||practice.some(p=>p.correct!==true||p.assisted||p.confidence!=='confident');
+  const support=cycles.find(c=>c.needsSupport),due=cycles.find(c=>c.stage!=='complete'&&c.dueAt&&c.dueAt<=now),practice=unit?(unit.practice||[]).map(a=>answerResult(item.pack,a)).filter(Boolean):[],observations=unit?[...new Map([...(unit.answers||[]).map(a=>answerResult(item.pack,a)).filter(Boolean),...practice].map(p=>[p.key,p])).values()]:[];
+  const needsSupport=!!support||observations.some(p=>p.correct!==true||p.assisted||p.confidence!=='confident');
   const practised=practice.length>0||cycles.some(c=>c.attempts>0);
   const reason=!item?'Prepare and review an activity for this objective.':support?support.reason:due?'A later practice question is due.':needsSupport?'Your practice suggests returning to an explanation before moving on.':!unit?'Start with the source and a short starting check.':!practised?'Continue the saved programme and try a practice question.':'You have practised this objective. You can revisit it or try the next one.';
   return {step,item,reason,needsSupport,due:!!due,practised,unit};
