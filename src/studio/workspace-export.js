@@ -13,6 +13,6 @@ export async function workspaceExportFiles(call,progress=()=>{}){
  }while(cursor);
  if(count!==total)throw Error('The source count changed during export. Refresh and retry.');
  files['manifest.json']=strToU8(JSON.stringify({format:'mosaic-workspace-archive',version:1,sourceCount:count,snapshot,parts},null,2));
- files['README.txt']=strToU8('Mosaic workspace export\nRead manifest.json for the ordered material parts. Each materials-NN.json contains exact extracted source text and references. Chapters are included in the first part. Original uploaded files, account passwords and provider/infrastructure backups are not included. No AI requests were used.');
+ files['README.txt']=strToU8('Mosaic workspace export\nRead manifest.json for the ordered material parts. Each materials-NN.json contains exact extracted source text and references. Chapters and course plans are included in the first part. Original uploaded files, account passwords and provider/infrastructure backups are not included. No AI requests were used.');
  return files;
 }

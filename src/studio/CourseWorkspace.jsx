@@ -1,6 +1,7 @@
 import React,{useEffect,useState,useRef} from 'react';
 import {canPrepare,pilotRequest} from './client.js';
 import {LibraryPicker,PassageFinder} from './SourceLibrary.jsx';
+import {CoursePlanner} from './CoursePlanner.jsx';
 import {ChapterWorkshop} from './ChapterWorkshop.jsx';
 import {formatName,activitiesOf,unitKey,contentOf} from './programme.js';
 import './courses.css';
@@ -19,7 +20,7 @@ export function CourseWorkspace({client,onStart,onBrowse}){
  async function run(fn,message=''){if(busy)return;setBusy(true);setError('');setNotice('');try{await fn();setNotice(message)}catch(e){setError(e.message)}finally{setBusy(false)}}
  async function save(input){const result=await client.journal.request('courses',{...input,expectedVersion:data.version});setData(d=>({...d,state:result.state,version:result.version}));await load();}
  function edit(type,current){setForm({type,id:crypto.randomUUID(),title:current?.title||'',goal:current?.goal||''});setConfirm(null)}
- async function attach({type,value}){await save({type:'link-'+type,courseId:course.id,topicId:topic.id,id:value.id,...(type==='resource'?{checksum:value.checksum}:{hash:value.draftHash})})}
+ async function attach({type,value}){if(type==='chapter'&&workshop?.objectiveId){await save({type:'link-objective-chapter',courseId:course.id,topicId:topic.id,objectiveId:workshop.objectiveId,id:value.id,hash:value.draftHash});return;}await save({type:'link-'+type,courseId:course.id,topicId:topic.id,id:value.id,...(type==='resource'?{checksum:value.checksum}:{hash:value.draftHash})})}
  if(!client.journal.user)return <section className="cw-empty"><h1>Keep a course notebook.</h1><p>Sign in to organise your resources, chapters and topics across devices. Included activities remain available to try.</p><a className="button primary" href="/account.html">Sign in</a><button onClick={onBrowse}>Explore activities</button></section>;
  if(!author)return <>{error&&<p className="message error" role="alert">{error}</p>}<AssignmentShelf client={client} busy={busy} onStart={item=>run(()=>onStart(item))}/></>;
  const sources=(topic?.resources||[]).map(binding=>({binding,resource:data?.resources.find(r=>r.id===binding.id)}));
@@ -34,6 +35,7 @@ export function CourseWorkspace({client,onStart,onBrowse}){
  {!course&&!form&&<section className="cw-empty"><h2>A place for the whole subject.</h2><p>Create a course, divide it into topics and bring in your learning material. Every chapter keeps its reviewed sources with it.</p><button className="primary" onClick={()=>edit('create-course')}>Create my first course</button></section>}
  {course&&!workshop&&<><header className="cw-course-heading"><div><p>{course.title}</p><h2>{topic?.title||'Add the first topic'}</h2><p>{topic?.goal||course.goal||'Give this topic a clear learning goal.'}</p></div><details><summary>Notebook options</summary><button onClick={()=>edit('rename-course',course)}>Edit course</button>{topic&&<button onClick={()=>edit('rename-topic',topic)}>Edit topic</button>}<button onClick={()=>setConfirm({type:topic?'remove-topic':'remove-course',label:topic?.title||course.title})}>Remove {topic?'topic':'course'} from notebook</button>{topic&&<button onClick={()=>setConfirm({type:'remove-course',label:course.title})}>Remove whole course from notebook</button>}</details></header>
  {confirm&&<div className="cw-confirm"><h3>Remove “{confirm.label}”?</h3><p>This removes notebook links only. Sources, published chapters, assignments and learner progress remain available.</p><button disabled={busy} onClick={()=>run(async()=>{await save({...confirm,courseId:course.id,topicId:topic?.id});setConfirm(null)},'Removed from the notebook.')}>Remove notebook links</button><button onClick={()=>setConfirm(null)}>Keep it</button></div>}
+ <CoursePlanner key={account+course.id} course={course} data={data} client={client} onSave={save} onStart={onStart} onPrepare={(step,job)=>{setTopicId(step.topicId);setWorkshop({kind:'plan',objectiveId:step.id,goal:step.objective,template:step.template,evidence:job.context.evidence.filter(e=>step.sourceRefs.includes(e.id))});}}/>
  {!topic?<button className="primary" onClick={()=>edit('create-topic')}>Add a topic</button>:<>
  <ol className="cw-route" aria-label="Topic preparation"><li className={readySources.length?'is-ready':''}><b>Collect and review</b><span>{readySources.length} reviewed sources</span></li><li className={readyChapters.length?'is-ready':''}><b>Prepare a chapter</b><span>{readyChapters.length} published chapters</span></li><li><b>Learn or assign</b><span>Keep each learner’s progress private</span></li></ol>
  <section className="cw-sources"><div className="section-heading"><h3>Sources for this topic</h3><button disabled={busy} onClick={()=>setWorkshop({kind:'add'})}>Add learning material</button></div>

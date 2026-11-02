@@ -1,4 +1,5 @@
 import {assignedChapters} from './assignments.js';
+import {coursePlanAPI} from './course-plan-api.js';
 import {courseAPI} from './course-api.js';
 import {workspaceIdentity,requireAdmission,admission} from './pilot-access.js';
 import {registerRetentionSubject} from './background-retention.js';
@@ -38,6 +39,7 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  await registerRetentionSubject(env,{siteOwner,owner,now:now()});
  if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
  return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
+ if(path==='course-plan')return await coursePlanAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='loop')return await learningLoopAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
  if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
