@@ -96,3 +96,11 @@ test('course-plan lifecycle supports individual removal, content-free usage rece
  const plan=await deletionPlan(h.env,{...h.options,now:1000,mode:'episode',id:j.id}),removed=[];const result=await startDeletion(h.env,{...h.options,removeProvider:async id=>removed.push(id)},plan);assert.equal(result.status,'complete');assert.deepEqual(removed,['resp_coursefixture']);
  const receipt=await h.db.one('SELECT * FROM workshop_jobs WHERE id=?',j.id);assert.equal(receipt.status,'usage-only');assert.equal(receipt.draft,null);assert.deepEqual(JSON.parse(receipt.payload),{recordType:'usage'});assert.equal((await h.call()).jobs.length,0);assert(await h.db.one('SELECT id FROM workshop_resources WHERE id=?','r-water'));
 });
+test('deleted plan links can be cleared for free and learner exports keep plan records separate',async()=>{
+ const h=await setup(),j=await reviewed(h);await h.call({action:'approve',id:j.id,draftHash:j.draftHash,confirmed:true});
+ const save=b=>courseAPI(new Request('https://test.local/api/learning/courses',{method:'POST',body:JSON.stringify(b)}),h.env,h.options);
+ await save({type:'link-plan',courseId:'earth',id:j.id,hash:j.draftHash,expectedVersion:1});
+ const exported=await (await dataAPI(new Request('https://test.local/api/learning/data',{method:'POST',body:JSON.stringify({action:'export',scope:'learner',epoch:'0:0'})}),h.env,h.options)).json();assert.equal(exported.export.coursePlans[0].id,j.id);assert.equal(exported.export.creative.length,0);
+ await h.db.run('DELETE FROM workshop_jobs WHERE id=?',j.id);const before=(await h.call()).budget.used;
+ const cleared=await (await save({type:'unlink-plan',courseId:'earth',expectedVersion:2})).json();assert.equal(cleared.state.courses[0].plan,undefined);assert.equal(cleared.state.courses[0].topics[0].resources.length,1);assert.equal((await h.call()).budget.used,before);
+});

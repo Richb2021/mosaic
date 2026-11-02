@@ -27,6 +27,7 @@ export function editCourses(current,input,binding){
  else {
   const c=next.courses.find(c=>c.id===input.courseId);need(c,'Course not found.');
   if(input.type==='rename-course'){c.title=input.title;c.goal=input.goal||'';}
+  else if(input.type==='unlink-plan'){delete c.plan;}
   else if(input.type==='link-plan'){need(binding?.id===input.id,'Review a current course plan first.');c.plan={...binding,links:[]};}
   else if(input.type==='link-objective-chapter'){need(c.plan&&binding?.id===input.id,'Choose a reviewed course plan and chapter.');c.plan.links=c.plan.links.filter(l=>l.objectiveId!==input.objectiveId);c.plan.links.push({...binding,objectiveId:input.objectiveId});const t=c.topics.find(t=>t.id===input.topicId);need(t,'Topic not found.');t.chapters=t.chapters.filter(l=>l.id!==binding.id);t.chapters.push(binding);}
   else if(input.type==='remove-course')next.courses=next.courses.filter(x=>x!==c);
