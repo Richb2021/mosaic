@@ -1,3 +1,4 @@
+import {resourcePage,resourceSearch,RESOURCE_LIMIT} from './resource-library.js';
 import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
@@ -35,11 +36,17 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
    catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
-  if(method==='GET'&&path.join('/')==='library')return json({generationBudget:await generationBudget(one,owner,env,now()),resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',owner)).map(publicResource),jobs:await Promise.all((await all("SELECT * FROM workshop_jobs WHERE owner=? AND json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.recordType') IS NULL ORDER BY created DESC LIMIT 30",owner)).map(r=>publicJob(r,now())))});
+  if(method==='GET'&&path.join('/')==='resources')return json(await resourcePage({all},owner,url.searchParams));
+  if(method==='GET'&&path.join('/')==='search')return json(await resourceSearch({all},owner,url.searchParams));
+  if(method==='GET'&&path[0]==='resources'&&path.length===2)return json({resource:publicResource(await resource(path[1]))});
+  if(method==='GET'&&path.join('/')==='library'){
+   const page=await resourcePage({all},owner,new URLSearchParams());
+   return json({generationBudget:await generationBudget(one,owner,env,now()),resourcePage:page,resources:url.searchParams.get('view')==='metadata'?page.resources:(await all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC,id DESC LIMIT 40',owner)).map(publicResource),resourcesTruncated:page.total>40,jobs:await Promise.all((await all("SELECT * FROM workshop_jobs WHERE owner=? AND json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.recordType') IS NULL ORDER BY created DESC LIMIT 30",owner)).map(r=>publicJob(r,now())))});
+  }
   if(method==='POST'&&path.join('/')==='resources'){
    const input=await body(req),r=await extractResource(input),existing=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);if(existing)return json({resource:publicResource(existing),duplicate:true});
-   requireValue((await one('SELECT COUNT(*) AS n FROM workshop_resources WHERE owner=?',owner)).n<40,'This workshop holds 40 resources. Reuse an existing source for now.',409);
-   const id='resource-'+crypto.randomUUID();await run('INSERT OR IGNORE INTO workshop_resources(id,owner,title,checksum,payload,status,created) SELECT ?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_resources WHERE owner=?)<40',id,owner,r.title,r.checksum,JSON.stringify({text:r.text,units:r.units}),'unreviewed',now(),owner);
+   requireValue((await one('SELECT COUNT(*) AS n FROM workshop_resources WHERE owner=?',owner)).n<RESOURCE_LIMIT,'Your library holds up to 500 sources. Use Your data to remove material you no longer need.',409);
+   const id='resource-'+crypto.randomUUID();await run('INSERT OR IGNORE INTO workshop_resources(id,owner,title,checksum,payload,status,created) SELECT ?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_resources WHERE owner=?)<500',id,owner,r.title,r.checksum,JSON.stringify({text:r.text,units:r.units}),'unreviewed',now(),owner);
    const saved=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);requireValue(saved,'The resource library is full.',409);return json({resource:publicResource(saved)},201);
   }
   if(method==='POST'&&path[0]==='resources'&&path[2]==='review'&&path.length===3){const r=await resource(path[1]),input=await body(req);requireValue(input.checksum===r.checksum&&input.confirmed===true,'Review the exact source text before confirming.');await run('UPDATE workshop_resources SET status=? WHERE id=? AND owner=?','reviewed',r.id,owner);return json({resource:publicResource(await resource(r.id))})}

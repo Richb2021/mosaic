@@ -4,6 +4,18 @@ import {readFileSync} from 'node:fs';
 import {ResourceWorkshop} from '../src/resource-workshop.js';
 const draft=JSON.parse(readFileSync(new URL('../public/chapters/water-and-systems.json',import.meta.url)));
 function ui(){const opened=[],g={modal:{kind:'resource-library'},pack:{id:draft.topicId},renderModal(){},openModal(m){opened.push(m);g.modal=m}};return {g,opened,w:new ResourceWorkshop({get:()=>g})}}
+test('source selection survives page changes, and unapplied title edits do not change a cursor scope',async()=>{
+ const {w}=ui();w.resources=[{id:'old',status:'reviewed',title:'Older source'}];w.selected.add('old');w.page={resources:[{id:'new',status:'reviewed'}],nextCursor:'next'};w.sourceQuery='applied';w.sourceQueryDraft='not applied';w.pageCursor=null;w.pageHistory=[];
+ const requested=[];w.request=async path=>{requested.push(path);return {resources:[{id:'later',status:'reviewed'}],nextCursor:null}};
+ await w.act('resource-page-next',{});assert.match(requested[0],/q=applied/);assert.match(requested[0],/cursor=next/);assert.equal(w.planSources().find(r=>r.id==='old').title,'Older source');assert.deepEqual(w.pageHistory,[null]);
+ w.sourceQueryDraft='fresh query';await w.act('resource-find',{});assert.match(requested[1],/q=fresh\+query/);assert(!requested[1].includes('cursor='));assert.equal(w.pageHistory.length,0);
+});
+test('canonical source loading cannot reopen a closed source dialog',async()=>{
+ const {w,g,opened}=ui();let resolve;w.request=()=>new Promise(r=>resolve=r);const pending=w.act('resource-source',{dataset:{id:'old'}});g.modal=null;resolve({resource:{id:'old',status:'reviewed',units:[]}});await pending;assert.equal(opened.length,0);
+});
+test('refresh keeps selected older source metadata visible for deselection',async()=>{
+ const {w}=ui();w.resources=[{id:'older',status:'reviewed',title:'Older source'}];w.selected.add('older');w.request=async path=>path==='health'?{}:{resourcePage:{resources:[{id:'newer',status:'reviewed'}]},resources:[{id:'newer',status:'reviewed'}],jobs:[]};await w.refresh();assert.deepEqual(w.planSources().map(r=>r.id),['older','newer']);
+});
 test('a response arriving after closing the job dialog cannot reopen it',async()=>{const {g,w,opened}=ui();let resolve;w.request=()=>new Promise(r=>resolve=r);const work=w.showJob('job-one');g.modal=null;resolve({job:{id:'job-one',status:'review'}});await work;assert.equal(opened.length,0)});
 test('closing a dialog before a scheduled poll prevents a request and a null-modal crash',async t=>{const {g,w}=ui();g.modal={kind:'resource-job',job:{id:'job-one',status:'running'}};let scheduled,requests=0;const oldSet=setTimeout,oldClear=clearTimeout;globalThis.setTimeout=callback=>{scheduled=callback;return 1};globalThis.clearTimeout=()=>{};t.after(()=>{globalThis.setTimeout=oldSet;globalThis.clearTimeout=oldClear});w.request=async()=>{requests++;return {job:{}}};w.poll('job-one');g.modal=null;await scheduled();assert.equal(requests,0)});
 test('review acknowledgement does not steal focus back from the world',async()=>{const {g,w,opened}=ui();g.modal={kind:'resource-source',resource:{id:'resource-one',checksum:'sum'},confirmed:true};let resolve;w.request=()=>new Promise(r=>resolve=r);const work=w.act('resource-review',{});g.modal=null;resolve({});await work;assert.equal(opened.length,0)});

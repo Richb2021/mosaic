@@ -44,15 +44,16 @@ export function editCourses(current,input,binding){
 }
 // Local lexical search: exact source text stays on the owned workspace. Scores
 // rank word matches; they never certify coverage or factual entailment.
-export function searchPassages(resources,query){
+export function searchPassages(resources,query,{limit=30,rank=true}={}){
  const terms=goalTerms(query),documents=resources.flatMap(r=>(r.units||[]).map(u=>({resourceId:r.id,checksum:r.checksum,status:r.status,...u})));
  if(!terms.length)return [];
  const tokens=s=>(s.toLowerCase().match(/[\p{L}\p{N}]+/gu)||[]),prepared=documents.map(d=>({...d,tokens:tokens(d.excerpt),heading:tokens(d.title+' '+d.locator)}));
  const average=prepared.reduce((n,d)=>n+d.tokens.length,0)/Math.max(1,prepared.length);
  const frequency=new Map(terms.map(t=>[t,prepared.filter(d=>d.tokens.includes(t)||d.heading.includes(t)).length]));
- return prepared.map(d=>{
+ const matches=prepared.map(d=>{
   const matched=terms.filter(t=>d.tokens.includes(t)||d.heading.includes(t));
   const score=matched.reduce((total,t)=>{const tf=d.tokens.filter(x=>x===t).length+2*Number(d.heading.includes(t));const inverse=Math.log(1+(prepared.length-frequency.get(t)+.5)/(frequency.get(t)+.5));return total+inverse*(tf*2.2)/(tf+1.2*(.25+.75*d.tokens.length/Math.max(1,average)))},0);
   const {tokens:_,heading:__,...result}=d;return {...result,score,matched};
- }).filter(d=>d.score>0).sort((a,b)=>b.score-a.score||a.resourceId.localeCompare(b.resourceId)||a.id.localeCompare(b.id)).slice(0,30);
+ }).filter(d=>d.score>0);
+ return (rank?matches.sort((a,b)=>b.score-a.score||a.resourceId.localeCompare(b.resourceId)||a.id.localeCompare(b.id)):matches).slice(0,limit);
 }

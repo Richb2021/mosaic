@@ -1,6 +1,6 @@
 import {costSummary} from './cost-ledger.js';
 import {readJSON,noStore} from './ncb-auth.js';
-import {digest} from './content-service.js';
+import {digest,safeId} from './content-service.js';
 import {need,sqlDB,readControls,auditEvent,parse,DAY} from './data-control.js';
 
 const K="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.recordType')";
@@ -11,7 +11,7 @@ const ownedJobs=(db,siteOwner)=>db.all("SELECT * FROM workshop_jobs WHERE owner=
 const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length});
 export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now()}){
  const db=sqlDB(env.DB),{controls}=await readControls(env,siteOwner,owner,now),lp=parse(controls.learner.policy),wp=parse(controls.workspace.policy);
- const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
+ const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
  let selected=[],sourceIDs=[],assetIDs=[],profiles=[],saves=[];
  const expired=(stamp,days)=>days>0&&stamp+days*DAY<=now;
  if(mode==='episode'){const j=jobs.find(j=>j.id===id&&parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner);need(j,'Episode not found.',404);selected=[j];}
@@ -160,11 +160,25 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
   await auditEvent(env,c.scope,'retention-changed',policy,now());return noStore({saved:true});
  }
  if(input.action==='export'){
-  const profiles=await store.allRows('learner_profiles',owner),saves=await store.allRows('learner_saves',owner),jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,title,checksum,payload,status,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner);
+  const workspace=input.scope==='workspace',paged=workspace&&input.paged===true;
+  const profiles=workspace?[]:await store.allRows('learner_profiles',owner),saves=workspace?[]:await store.allRows('learner_saves',owner),jobs=await ownedJobs(db,siteOwner);
+  let resources=[],page;
+  if(workspace){
+   if(paged){
+    const catalogue=await db.all('SELECT id,title,checksum,status,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner);
+    const snapshot=await digest(JSON.stringify({siteOwner,epoch:state.epoch,catalogue,jobs:jobs.filter(j=>!parse(j.payload).recordType).map(j=>[j.id,j.status,j.updated])}));
+    need(!input.cursor||safeId(input.cursor),'Invalid export page.');need(!input.cursor||input.snapshot===snapshot,'Your materials changed during export. Refresh and export again.',409);
+    need(!input.cursor||catalogue.some(r=>r.id===input.cursor),'Export page no longer exists.',409);
+    const remaining=catalogue.filter(r=>!input.cursor||r.id>input.cursor),ids=remaining.slice(0,20).map(r=>r.id);
+    if(ids.length)resources=await db.all('SELECT id,title,checksum,payload,status,created FROM workshop_resources WHERE owner=? AND id IN ('+ids.map(()=>'?').join(',')+') ORDER BY id',siteOwner,...ids);
+    need(resources.length===ids.length,'Materials changed during export. Refresh and export again.',409);
+    page={snapshot,total:catalogue.length,nextCursor:remaining.length>20?ids.at(-1):null};
+   }else resources=await db.all('SELECT id,title,checksum,payload,status,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner);
+  }
   const rows=await db.all('SELECT id,script_id,script_hash,segment,status,bytes,created FROM media_assets WHERE site_owner=? AND learner_owner=? ORDER BY id',siteOwner,owner);
   const safeRow=r=>({slot:r.slot_key,version:r.version,updated:Number(r.updated_ms),data:parse(r.payload)});
-  const out={format:'mosaic-data-export',version:1,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),chapters:jobs.filter(j=>!parse(j.payload).recordType).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
-  need(JSON.stringify(out).length<24000000,'This data export exceeds 24 MB. Export a smaller workspace first.',413);await auditEvent(env,state.scopes[input.scope==='workspace'?'workspace':'learner'],'exported',{scope:out.scope},now());return noStore({export:out});
+  const out={format:'mosaic-data-export',version:1,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),chapters:(paged&&input.cursor?[]:jobs.filter(j=>!parse(j.payload).recordType)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
+  need(JSON.stringify(out).length<24000000,'This data export exceeds 24 MB. Export a smaller workspace first.',413);await auditEvent(env,state.scopes[input.scope==='workspace'?'workspace':'learner'],'exported',{scope:out.scope},now());return noStore({export:out,...(page?{page}:{})});
  }
  if(input.action==='download'){
   const asset=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=? AND learner_owner=? AND status=?',input.id,siteOwner,owner,'ready');need(asset,'Saved recording not found.',404);const days=parse(state.controls.learner.policy).mediaDays||0;need(!days||asset.created+days*DAY>now(),'This recording has expired. Refresh Your data to clean it up.',410);

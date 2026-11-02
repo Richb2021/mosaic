@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {zipSync,strToU8} from 'fflate';
 import './data-controls.css';
+import {workspaceExportFiles} from './workspace-export.js';
 const periods=[[0,'Until I delete it'],[7,'7 days'],[30,'30 days'],[90,'90 days'],[365,'1 year']];
 const save=(name,bytes,type)=>{const u=URL.createObjectURL(new Blob([bytes],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),30000)};
 const size=n=>n<1024?`${n} B`:`${(n/1048576).toFixed(1)} MB`;
@@ -15,6 +16,7 @@ export function DataControls({client,onChanged}){
  async function remove(){const d=await call({action:'delete',mode:preview.mode,id:preview.id,hash:preview.hash,confirmed:true});setPreview(null);setConfirmed(false);await reload();await client.refresh();onChanged?.();setNotice(d.operation.status==='complete'?'Deletion completed and checked.':'Local deletion completed. Provider cleanup still needs attention below.');}
  async function mediaBytes(id){const r=await fetch('/api/learning/data',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-Mosaic-Learner':client.journal.user.id},body:JSON.stringify({action:'download',epoch:data.epoch,id})});if(!r.ok){const d=await r.json();throw Error(d.error||'Recording could not be downloaded.')}return new Uint8Array(await r.arrayBuffer());}
  async function exportData(scope){
+  if(scope==='workspace'){const files=await workspaceExportFiles(call,(n,total)=>setNotice(`Preparing source ${n} of ${total} for your archive…`));save('mosaic-workspace-export.zip',zipSync(files,{level:0}),'application/zip');setNotice('Materials and chapters downloaded. Every source page is included; no AI requests used.');return;}
   const {export:record}=await call({action:'export',scope}),files={'mosaic-data.json':strToU8(JSON.stringify(record,null,2))},media=record.media?.filter(m=>m.status==='ready')||[];
   if(media.reduce((n,m)=>n+m.bytes,0)>100*1048576){save('mosaic-'+scope+'-data.json',JSON.stringify(record,null,2),'application/json');setNotice('Your data and media index were downloaded. Saved audio exceeds 100 MB; download individual recordings below.');return;}
   for(let i=0;i<media.length;i++){setNotice(`Adding saved recording ${i+1} of ${media.length} to your archive…`);files['audio/'+media[i].id+'.mp3']=await mediaBytes(media[i].id);}

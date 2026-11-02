@@ -16,10 +16,10 @@ export function ChapterWorkshop({request,topic,client,onAttach,onClose}){
   const workshop=new ResourceWorkshop(context,{template:'quiz-v1'});
   const click=async e=>{const b=e.target.closest('button[data-act]');if(!b||b.disabled)return;if(['close','resource-use'].includes(b.dataset.act)){onClose();return;}try{await workshop.act(b.dataset.act,b)}catch(e){setError(e.message)}};
   const change=e=>{void workshop.change(e).catch(e=>setError(e.message))};root.addEventListener('click',click);root.addEventListener('change',change);root.addEventListener('input',change);
-  void (async()=>{try{await workshop.refresh();if(closed)return;workshop.selected=new Set(topic.resources.filter(r=>workshop.resources.some(x=>x.id===r.id&&x.checksum===r.checksum&&x.status==='reviewed')).map(r=>r.id));workshop.form.goal=topic.goal;workshop.form.level=[client.journal.profile.level,client.journal.profile.context,client.journal.profile.interests.join(', ')].filter(Boolean).join('; ').slice(0,240);
+  void (async()=>{try{await workshop.refresh();if(closed)return;workshop.remember(topic.resourceMetadata||[]);const reviewed=topic.resources.filter(r=>workshop.resources.some(x=>x.id===r.id&&x.checksum===r.checksum&&x.status==='reviewed'));workshop.selected=new Set(reviewed.slice(0,3).map(r=>r.id));workshop.form.goal=topic.goal;workshop.form.level=[client.journal.profile.level,client.journal.profile.context,client.journal.profile.interests.join(', ')].filter(Boolean).join('; ').slice(0,240);
    if(request.kind==='job'){await workshop.showJob(request.id,null);return;}
-   const resource=workshop.resources.find(r=>r.id===request.id);
-   context.get().openModal({kind:request.kind==='source'&&resource?'resource-source':request.kind==='add'?'resource-add':request.kind==='plan'?'resource-plan':'resource-library',...(resource?{resource}:{})});
+   const resource=request.kind==='source'?await workshop.fetchSource(request.id):null;if(request.kind==='plan')await workshop.loadSources({reset:true,status:'reviewed'});if(closed)return;
+   context.get().openModal({kind:request.kind==='source'&&resource?'resource-source':request.kind==='add'?'resource-add':request.kind==='plan'?'resource-plan':'resource-library',...(resource?{resource}:{}),...(request.kind==='plan'&&reviewed.length>3?{feedback:'The first three reviewed topic sources are selected. Change the selection below to choose the evidence you need.'}:{})});
   }catch(e){setError(e.message)}})();
   return()=>{closed=true;modal=null;workshop.extraction?.abort();clearTimeout(workshop.timer);root.removeEventListener('click',click);root.removeEventListener('change',change);root.removeEventListener('input',change)};
  },[request]);

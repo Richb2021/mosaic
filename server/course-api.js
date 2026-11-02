@@ -1,3 +1,4 @@
+import {RESOURCE_METADATA} from './resource-library.js';
 import {emptyCourses,validateCourses,editCourses} from '../src/studio/course-model.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {sqlDB,parse,need} from './data-control.js';
@@ -13,7 +14,8 @@ export async function courseAPI(req,env,{owner,siteOwner,store,access,now=()=>Da
  if(req.method==='GET'){
   // Managed learners receive assignments through the catalogue, not the author's notebook.
   if(!canAuthor)return noStore({state:emptyCourses(),version:0,resources:[],chapters:[],canAuthor:false});
-  const resources=(await db.all('SELECT * FROM workshop_resources WHERE owner=? ORDER BY created DESC LIMIT 40',siteOwner)).map(r=>({id:r.id,title:r.title,checksum:r.checksum,status:r.status,units:parse(r.payload).units||[]}));
+  const sourceIDs=[...new Set(state.courses.flatMap(c=>c.topics.flatMap(t=>t.resources.map(r=>r.id))))],resources=[];
+  for(let start=0;start<sourceIDs.length;start+=50){const batch=sourceIDs.slice(start,start+50);resources.push(...await db.all(`SELECT ${RESOURCE_METADATA} FROM workshop_resources WHERE owner=? AND id IN (`+batch.map(()=>'?').join(',')+')',siteOwner,...batch));}
   const ids=[...new Set(state.courses.flatMap(c=>c.topics.flatMap(t=>t.chapters.map(j=>j.id))))];
   const chapters=[];
   for(let start=0;start<ids.length;start+=50){const batch=ids.slice(start,start+50),rows=await db.all('SELECT * FROM workshop_jobs WHERE owner=? AND id IN ('+batch.map(()=>'?').join(',')+')',siteOwner,...batch);

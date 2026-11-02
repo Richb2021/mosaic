@@ -1,3 +1,4 @@
+import {workshopRequest as resourceRequest} from '../resource-client.js';
 import {learningJournal} from '../game-modes/learning-client.js';
 import {ADVENTURE_PACKS} from '../game-modes/adventure-content.js';
 import {DRAFT_PACKS} from '../game-modes/draft-content.js';
@@ -38,7 +39,5 @@ export async function pilotRequest(body){
  const r=await fetch('/api/pilot',{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'Content-Type':'application/json','X-Mosaic-Learner':learningJournal.user?.id||''},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Group access could not be checked.');return d;
 }
 let workshopEpoch='0:0';
-export async function workshopRequest(path,body){
- const r=await fetch('/api/workshop/'+path,{method:body?'POST':'GET',credentials:'same-origin',cache:'no-store',headers:{'X-Mosaic-Learner':learningJournal.user?.id||'',...(body?{'Content-Type':'application/json','X-Lanternbound-Workshop':'1','X-Mosaic-Data-Epoch':workshopEpoch}:{})},body:body?JSON.stringify(body):undefined});const data=await r.json();if(r.ok&&!body)workshopEpoch=r.headers.get('X-Mosaic-Data-Epoch')||workshopEpoch;if(!r.ok)throw Error(data.error||'The resource library is unavailable.');return data;
-}
+export async function workshopRequest(path,body){const {data,epoch}=await resourceRequest(path,body,{dataEpoch:workshopEpoch});if(!body)workshopEpoch=epoch||workshopEpoch;return data;}
 export function gameURL(item){const p=item.pack;if(p.template==='underlight-v1')return '/?'+new URLSearchParams({rpg:p.id,hash:unitKey(p).slice(p.id.length+1)});return '/modes.html?'+new URLSearchParams(item.jobId?{job:item.jobId}:{game:p.id});}
