@@ -9,11 +9,13 @@ const LOCAL='mosaic:personal-studio:v1';
 export class StudioClient{
  constructor(){this.state=emptyStudio();this.version=0;this.items=[];this.warning='';this.journal=learningJournal;}
  async load(){
+  const previousUser=this.journal.user?.id;
   const session=await fetch('/api/auth/get-session',{credentials:'include',cache:'no-store'});if(!session.ok)throw Error('Your account could not be checked. Retry before opening personal progress.');
   await this.journal.connect();if(!this.journal.connected)throw Error(this.journal.notice||'Your account could not be loaded. Retry before changing saved preferences.');
-  this.warning='';this.access=null;
+  this.warning='';if(previousUser!==this.journal.user?.id||!this.journal.user)this.access=null;
   if(this.journal.user){const [catalog,saved,access]=await Promise.all([this.journal.request('studio/catalog'),this.journal.request('studio'),pilotRequest().catch(()=>{this.warning='Course preparation and group details are temporarily unavailable. Your available learning and saved programmes are still open. Reload to check group access again.';return null})]);this.items=catalog.items;this.state=saved.state;this.version=saved.version;this.remoteUnits=saved.units;this.cycles=saved.cycles||[];this.access=access;}
   else{this.items=[...RPG_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS].map(pack=>({pack,jobId:null,origin:'Included reviewed activity'}));const raw=this.journal.storage.getItem(LOCAL);if(raw){try{const parsed=validateStudioShape(JSON.parse(raw));for(const u of parsed.units){const item=this.items.find(i=>unitKey(i.pack)===u.id);if(item)validateUnit(u,item.pack);}this.state=parsed;}catch{throw Error('The saved programme could not be read. Your record is preserved; do not reset it unless you have a recovery copy.');}}}
+  this.journal.changed?.();
  }
  async refresh(){await this.load();}
  async change(input){

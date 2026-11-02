@@ -89,7 +89,7 @@ test('chapter notebook only links own exact noncreative drafts; missing source r
 test('unavailable group operations preserve learning but fail closed for author tools',async()=>{
  const {StudioClient,canPrepare}=await import('../src/studio/client.js');
  const savedFetch=globalThis.fetch;
- const client=new StudioClient();client.journal={user:{id:'learner'},connected:true,connect:async()=>{},request:async path=>path==='studio/catalog'?{items:[]}:{state:{schemaVersion:1,units:[],active:null},version:7,units:[],cycles:[]}};
+ let notified=false;const client=new StudioClient();client.journal={changed:()=>{notified=client.access===null&&client.version===7},user:{id:'learner'},connected:true,connect:async()=>{},request:async path=>path==='studio/catalog'?{items:[]}:{state:{schemaVersion:1,units:[],active:null},version:7,units:[],cycles:[]}};
  globalThis.fetch=async url=>String(url)==='/api/pilot'?new Response(JSON.stringify({error:'Temporary group status failure'}),{status:503}):new Response('{}');
- try{await client.load();assert.equal(client.version,7);assert.equal(client.access,null);assert.equal(canPrepare(client),false);assert.match(client.warning,/temporarily unavailable/)}finally{globalThis.fetch=savedFetch}
+ try{await client.load();assert.equal(client.version,7);assert.equal(client.access,null);assert.equal(canPrepare(client),false);assert.match(client.warning,/temporarily unavailable/);assert(notified,'Consumers are notified after access and saved state finish loading')}finally{globalThis.fetch=savedFetch}
 });
