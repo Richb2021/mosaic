@@ -13,14 +13,14 @@ function usePage(path,revision=0){
 function PageButtons({page,busy,history,cursor,onMove}){
  return <div className="library-page-actions"><button type="button" disabled={busy||!history.length} onClick={()=>onMove(history.at(-1),history.slice(0,-1))}>Previous page</button><button type="button" disabled={busy||!page?.nextCursor} onClick={()=>onMove(page.nextCursor,[...history,cursor])}>Next page</button></div>;
 }
-export function LibraryPicker({linked,onPick,disabled=false}){
+export function LibraryPicker({linked,onPick,disabled=false,actionLabel='Add source'}){
  const [draft,setDraft]=useState(''),[status,setStatus]=useState('all'),[query,setQuery]=useState({q:'',status:'all'}),[cursor,setCursor]=useState(null),[history,setHistory]=useState([]),[revision,setRevision]=useState(0);
  const params=new URLSearchParams(query);if(cursor)params.set('cursor',cursor);
  const {busy,data:page,error}=usePage('resources?'+params,revision);
  const move=(c,h)=>{setCursor(c);setHistory(h)};
  return <div className="source-library"><form className="library-filters" onSubmit={e=>{e.preventDefault();setRevision(r=>r+1);setQuery({q:draft.trim(),status});move(null,[])}}><label>Find a source by title<input type="search" maxLength={240} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="For example, field notes"/></label><label>Review status<select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All sources</option><option value="reviewed">Reviewed</option><option value="unreviewed">Needs review</option></select></label><button disabled={busy}>Find sources</button></form>
  <div aria-live="polite">{busy&&<p>Opening this page of sources…</p>}{error&&<p role="alert">{error}</p>}{page&&<p>{page.total} of {page.limit} sources in your library. {page.matching} match this view; {page.resources.length} shown. Newest first.</p>}</div>
- {page?.resources.map(r=><div className="cw-existing" key={r.id}><div><b>{r.title}</b><small>{r.unitCount} passages · {r.status==='reviewed'?'Reviewed':'Needs review'}</small></div><button disabled={disabled||linked.includes(r.id)} onClick={()=>onPick(r)}>{linked.includes(r.id)?'Linked to topic':'Add source'}</button></div>)}{page&&!page.resources.length&&<p>No sources match. Clear the title or change the review filter.</p>}
+ {page?.resources.map(r=><div className="cw-existing" key={r.id}><div><b>{r.title}</b><small>{r.unitCount} passages · {r.status==='reviewed'?'Reviewed':'Needs review'}</small></div><button disabled={disabled||linked.includes(r.id)} onClick={()=>onPick(r)}>{linked.includes(r.id)?'Linked to topic':actionLabel}</button></div>)}{page&&!page.resources.length&&<p>No sources match. Clear the title or change the review filter.</p>}
  <PageButtons page={page} busy={busy} history={history} cursor={cursor} onMove={move}/></div>;
 }
 export function PassageFinder({sources,onOpen}){

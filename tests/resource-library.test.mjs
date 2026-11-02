@@ -42,6 +42,13 @@ test('title and review filters span the whole library including Unicode; old can
  const all=await h.call('resources?status=reviewed');assert.equal(all.matching,33);
  assert.equal((await h.call('resources/resource-0000')).resource.units.length,2);assert.equal((await h.call('resources/resource-0000',undefined,'bob')).status,404);assert.equal((await h.call('resources?status=anything')).status,400);
 });
+test('passage-text search does not turn a title or locator match into a quotation match',async()=>{
+ const h=harness();await h.call('resources',{title:'Quasar reference',text:'Trees take up water through their roots and require sunlight to grow.'});
+ assert.equal((await h.call('resources?q=quasar')).matching,1);
+ assert.deepEqual((await h.call('search?q=quasar')).results,[]);
+ assert.deepEqual((await h.call('search?q=paragraph')).results,[]);
+ assert.equal((await h.call('search?q=sunlight')).results.length,1);
+});
 test('passage search resumes inside a dense source and reaches paragraph 40 and documents older than 40',async()=>{
  const h=harness(),text=Array.from({length:65},(_,i)=>`Evaporation is described in this exact isolated paragraph number ${i+1}.`).join('\n\n');await h.seed(1,{text});await h.seed(60,{start:1,text:'This newer unrelated passage describes an industrial machine.'});await h.seed(1,{owner:'bob',text:'Evaporation foreign secret must never appear.'});
  let cursor,results=[];do{const p=await h.call('search?q=evaporation'+(cursor?'&cursor='+encodeURIComponent(cursor):''));assert.equal(p.status,200);assert.equal(p.method,'word-match');assert.equal(p.sourceCount,61);results.push(...p.results);cursor=p.nextCursor;}while(cursor);

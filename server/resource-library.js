@@ -40,7 +40,7 @@ export async function resourceSearch(db,owner,params){
   for(let i=0;i<batch.length;i++){
    const meta=batch[i],row=byId.get(meta.id);if(!row)continue;scanned++;
    const units=JSON.parse(row.payload).units,start=o.cursor&&same(meta,o.cursor)?o.cursor.unit:0;
-   const hits=new Map(searchPassages([{...row,units}],o.query,{limit:80,rank:false}).map(h=>[h.id,h]));
+   const hits=new Map(searchPassages([{...row,units}],o.query,{limit:80,rank:false,includeHeadings:false}).map(h=>[h.id,h]));
    for(let index=start;index<units.length;index++){
     if(hits.has(units[index].id))results.push(hits.get(units[index].id));
     if(results.length===PASSAGE_PAGE_SIZE){const more=index+1<units.length||offset+i+1<rows.length;return {results,sourceCount:catalogue.length,scanned,method:'word-match',nextCursor:more?encode({scope:o.scope,created:meta.created,id:meta.id,unit:index+1}):null};}
