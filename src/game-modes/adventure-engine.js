@@ -5,6 +5,10 @@ export const ADVENTURE_ANCHORS={
  woods:{clue:{x:63,y:77},npc:{x:37,y:78},tool:{x:77,y:84},workshop:{x:8,y:82}},
  archive:{clue:{x:33,y:80},npc:{x:70,y:78},sequence:{x:55,y:82},workshop:{x:8,y:82}}
 };
+export function adventureAnchors(pack){
+ const workshop=pack.setting==='market'?{clue:{x:51,y:78},npc:{x:34,y:80},machine:{x:77,y:82},woods:{x:8,y:82},archive:{x:93,y:82}}:pack.setting==='observatory'?{clue:{x:31,y:78},npc:{x:61,y:80},machine:{x:85,y:79},woods:{x:8,y:82},archive:{x:94,y:82}}:ADVENTURE_ANCHORS.workshop;
+ return {...ADVENTURE_ANCHORS,workshop};
+}
 const copy=v=>JSON.parse(JSON.stringify(v));
 function canonical(value){if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}';return JSON.stringify(value)}
 export function adventureFingerprint(pack){let hash=2166136261;for(const char of canonical(pack)){hash^=char.charCodeAt(0);hash=Math.imul(hash,16777619)}return (hash>>>0).toString(36)}
@@ -20,7 +24,7 @@ export function validateAdventureSave(raw,pack){
   if(!s.positions||Object.keys(s.positions).length!==3)return null;
   for(const room of ADVENTURE_ROOMS){const p=s.positions[room];if(!p||Object.keys(p).length!==2||!Number.isFinite(p.x)||!Number.isFinite(p.y)||p.x<5||p.x>95||p.y<72||p.y>88)return null}
   if(!subset(s.inventory,ITEMS)||!s.inventory.includes('keepsake')||!subset(s.inspected,ADVENTURE_ROOMS)||!subset(s.talked,ADVENTURE_ROOMS)||!subset(s.hints,['repair','sequence'])||!subset(s.visited,ADVENTURE_ROOMS)||!s.visited.includes('workshop')||!s.visited.includes(s.room))return null;
-  if(!Number.isInteger(s.attempts)||s.attempts<0||s.attempts>100000||!subset(s.plates,[0,1,2]))return null;
+  if(!Number.isInteger(s.attempts)||s.attempts<0||s.attempts>100000||!(pack.sequence.mode==='sort'?Array.isArray(s.plates)&&s.plates.length<=3&&s.plates.every(i=>i===0||i===1):subset(s.plates,[0,1,2])))return null;
   if(s.repaired&&!s.collected||s.solved&&!s.repaired||s.completed!==Boolean(s.choice)||s.completed&&!s.solved)return null;
   if(s.choice!==null&&!pack.decision.choices.some(c=>c.id===s.choice))return null;
   if(s.inventory.includes('tool')!==Boolean(s.collected&&!s.repaired)||s.inventory.includes('record')!==s.inspected.includes('archive'))return null;
@@ -29,7 +33,7 @@ export function validateAdventureSave(raw,pack){
   return s;
  }catch{return null}
 }
-export function adventureGoal(s,pack){if(s.completed)return 'A thread restored. Your journal keeps the story.';if(s.solved)return 'Choose what happens next.';if(s.repaired)return s.room==='archive'?pack.sequence.title:'Read the evidence in the archive.';if(s.inventory.includes('tool'))return `Use ${pack.items.tool.name.toLowerCase()} on ${pack.repair.targetName.toLowerCase()}.`;return `Find ${pack.items.tool.name.toLowerCase()} on the woodland path.`}
+export function adventureGoal(s,pack){if(s.completed)return 'A thread restored. Your journal keeps the story.';if(s.solved)return 'Choose what happens next.';if(s.repaired)return s.room==='archive'?pack.sequence.title:`Read the evidence in ${pack.rooms.archive.title}.`;if(s.inventory.includes('tool'))return `Use ${pack.items.tool.name.toLowerCase()} on ${pack.repair.targetName.toLowerCase()}.`;return `Find ${pack.items.tool.name.toLowerCase()} in ${pack.rooms.woods.title}.`}
 export function reduceAdventure(pack,state,action){
  const s=copy(state),reply={state:s,message:'',sourceRefs:[],title:''};
  const say=(message,sourceRefs=[],title='')=>Object.assign(reply,{message,sourceRefs,title});
@@ -59,7 +63,7 @@ export function reduceAdventure(pack,state,action){
   if(action.item!=='tool'||!s.inventory.includes('tool'))return say(pack.repair.failure,pack.repair.sourceRefs,pack.repair.title);
   s.repaired=true;s.inventory=s.inventory.filter(i=>i!=='tool');return say(pack.repair.success,pack.repair.sourceRefs,pack.repair.title);
  }
- if(action.type==='plate'&&s.room==='archive'&&s.repaired&&!s.solved&&Number.isInteger(action.index)&&action.index>=0&&action.index<3&&!s.plates.includes(action.index)&&s.plates.length<3){s.plates.push(action.index);return reply}
+ if(action.type==='plate'&&s.room==='archive'&&s.repaired&&!s.solved&&Number.isInteger(action.index)&&action.index>=0&&action.index<(pack.sequence.mode==='sort'?2:3)&&(pack.sequence.mode==='sort'||!s.plates.includes(action.index))&&s.plates.length<3){s.plates.push(action.index);return reply}
  if(action.type==='clear-plates'&&!s.solved){s.plates=[];return reply}
  if(action.type==='sequence'){
   if(s.room!=='archive'||!s.repaired)return say('The archive mechanism is not available yet.');

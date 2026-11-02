@@ -4,7 +4,7 @@ import {courseAPI} from './course-api.js';
 import {courseSharingAPI} from './course-sharing-api.js';
 import {workspaceIdentity,requireAdmission,admission} from './pilot-access.js';
 import {registerRetentionSubject} from './background-retention.js';
-import {learningLoopAPI} from './learning-loop-api.js';
+import {learningLoopAPI,assignedLoopList} from './learning-loop-api.js';
 import {studioAPI} from './studio-api.js';
 import {withDataGuard} from './data-control.js';
 import {dataAPI,enforceRetention} from './data-lifecycle.js';
@@ -44,7 +44,8 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  if(path==='course-plan')return await coursePlanAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});
- if(path==='loop')return await learningLoopAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
+ if(path==='loop/banks')return await assignedLoopList(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve});
+ if(path==='loop')return await learningLoopAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,siteOwner,resolve:scopedResolve,included:packs,now});
  if(req.method==='GET'&&path==='journal'){

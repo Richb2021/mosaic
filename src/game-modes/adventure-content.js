@@ -8,12 +8,13 @@ const item=obj({name:text(60),icon:{type:'string',enum:ADVENTURE_ICONS},descript
 const learningAction={title:text(80),prompt:text(700),success:text(700),failure:text(500),hint:text(500),sourceRefs:refs};
 export const ADVENTURE_SCHEMA=obj({
  schemaVersion:{type:'integer',enum:[1]},template:{type:'string',enum:['adventure-v1']},id:text(100),topicId:text(100),revision:{type:'integer',minimum:1,maximum:100000},title:text(100),hook:text(1200),
+ setting:{type:'string',enum:['canal','market','observatory']},
  rooms:obj({workshop:room,woods:room,archive:room}),items:obj({tool:item,keepsake:item,record:item}),
  repair:obj({...learningAction,targetName:text(80)}),
- sequence:obj({...learningAction,steps:{type:'array',minItems:3,maxItems:3,items:text(100)},solution:{type:'array',minItems:3,maxItems:3,items:{type:'integer',minimum:0,maximum:2}}}),
+ sequence:obj({...learningAction,mode:{type:'string',enum:['order','match','sort']},targets:{type:'array',minItems:0,maxItems:3,items:text(180)},steps:{type:'array',minItems:3,maxItems:3,items:text(100)},solution:{type:'array',minItems:3,maxItems:3,items:{type:'integer',minimum:0,maximum:2}}}),
  decision:obj({prompt:text(700),choices:{type:'array',minItems:2,maxItems:2,items:obj({id:text(60),label:text(100),ending:text(1400),sourceRefs:refs})}})
 });
-export const ADVENTURE_PROMPT=`Create a complete three-room educational point-and-click adventure using the adventure-v1 template. The reusable art depicts a canal workshop, woodland path and old archive. It is a fictional setting, not a historical reconstruction. Write natural dialogue and environmental clues for these rooms. The player carries a keepsake, finds the tool in the woods, uses that tool to repair the workshop target, reads the archive clue, then orders exactly three plates to solve the archive mechanism. The record item is found by reading the archive clue. Put the three sequence steps in a shuffled display order and supply the solution as a permutation of 0,1,2. Both final choices must have distinct, complete narrative endings and realistic tradeoffs; neither is a quiz answer. Use only supported learning claims from the supplied evidence and distinguish invented story rules from factual claims. Every clue, dialogue, item description, repair, sequence and ending includes exact sourceRefs from the packet. Do not invent source IDs or quote sources into the response; the server attaches canonical sources. Do not ask for facts not present in the evidence. Object names and the mechanical repair may be fictional metaphors, but never present them as historical fact. No code, URLs, new game rules or arbitrary asset paths. Do not use placeholder prose. The two choices conclude the adventure after the sequence is solved. Keep text concise, suitable for being read during exploration.`;
+export const ADVENTURE_PROMPT=`Create a complete three-room educational point-and-click adventure using the adventure-v1 template. Choose setting canal (canal workshop), market (grand trading guild hall) or observatory (star observatory). These starting rooms all connect to a woodland path and an old archive. The art is fixed; room keys stay workshop, woods, archive. Adapt room titles and story to the setting. It is a fictional setting, not a historical reconstruction. Write natural dialogue and environmental clues for these rooms. The player carries a keepsake, finds the tool in the woods, uses that tool to repair the workshop target, reads the archive clue, then solves one evidence-based mechanism in the archive. The record item is found by reading the archive clue. Choose sequence.mode to fit the learning relationship: order has three shuffled steps, targets=[], solution a permutation of 0,1,2; match has three distinct targets (descriptions), three shuffled steps (matching terms) and solution[i] gives the step index for target i, a permutation of 0,1,2; sort has three steps (items), exactly two distinct targets (categories) and solution[i] gives category 0 or 1 for item i, using both categories. No extra rules. Clues, prompt, success and hint must teach this exact relationship and support every mapping with evidence. Prefer match for term/description relationships and sort for supported category membership; use order only for a real ordered process. Both final choices must have distinct, complete narrative endings and realistic tradeoffs; neither is a quiz answer. Use only supported learning claims from the supplied evidence and distinguish invented story rules from factual claims. Every clue, dialogue, item description, repair, sequence and ending includes exact sourceRefs from the packet. Do not invent source IDs or quote sources into the response; the server attaches canonical sources. Do not ask for facts not present in the evidence. Object names and the mechanical repair may be fictional metaphors, but never present them as historical fact. No code, URLs, new game rules or arbitrary asset paths. Do not use placeholder prose. The two choices conclude the adventure after the sequence is solved. Keep text concise, suitable for being read during exploration.`;
 
 function check(value,schema,path){
  if(schema.enum&&!schema.enum.includes(value))throw Error(`${path} is not an allowed value.`);
@@ -21,7 +22,7 @@ function check(value,schema,path){
   if(!value||typeof value!=='object'||Array.isArray(value))throw Error(`${path} must be an object.`);
   for(const key of Object.keys(value))if(!Object.hasOwn(schema.properties,key))throw Error(`${path}.${key} is not supported.`);
   for(const key of schema.required)if(!Object.hasOwn(value,key))throw Error(`${path}.${key} is required.`);
-  for(const [key,child] of Object.entries(schema.properties))check(value[key],child,`${path}.${key}`);
+  for(const [key,child] of Object.entries(schema.properties))if(Object.hasOwn(value,key))check(value[key],child,`${path}.${key}`);
  }else if(schema.type==='array'){
   if(!Array.isArray(value)||value.length<(schema.minItems??0)||value.length>(schema.maxItems??Infinity))throw Error(`${path} has the wrong number of entries.`);
   value.forEach((v,i)=>check(v,schema.items,`${path}[${i}]`));
@@ -33,11 +34,17 @@ export function validateAdventureContent(raw){
  let value;try{value=typeof raw==='string'?JSON.parse(raw):JSON.parse(JSON.stringify(raw));}catch{throw Error('Adventure content must be valid JSON.');}
  if(JSON.stringify(value).length>90000)throw Error('Adventure content is too large.');
  const schema=obj({...ADVENTURE_SCHEMA.properties,sources:{type:'array',minItems:1,maxItems:12,items:obj({id:text(100),title:text(240),locator:text(500),excerpt:text(5000)})}});
+ // Legacy chapters are validated without inserting new fields or changing hashes.
+ schema.required=schema.required.filter(k=>k!=='setting');
+ schema.properties.sequence={...schema.properties.sequence,required:schema.properties.sequence.required.filter(k=>!['mode','targets'].includes(k))};
  const map=value.learningMap;delete value.learningMap;check(value,schema,'Adventure');if(map!==undefined)withLearningMap({learningMap:map},value);
  for(const key of ['id','topicId'])if(!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,99}$/.test(value[key]))throw Error(`Adventure ${key} must be a safe identifier.`);
  const ids=new Set(value.sources.map(s=>s.id));if(ids.size!==value.sources.length)throw Error('Source IDs must be unique.');
  function visit(v){if(Array.isArray(v)){v.forEach(visit);return}if(!v||typeof v!=='object')return;for(const [k,x] of Object.entries(v)){if(k==='sourceRefs'){if(new Set(x).size!==x.length||x.some(id=>!ids.has(id)))throw Error('Every citation must name a unique supplied source.');}else visit(x)}}visit(value);
- if(new Set(value.sequence.solution).size!==3)throw Error('The sequence solution must use each plate exactly once.');
+ const mode=value.sequence.mode||'order',targets=value.sequence.targets||[];
+ if(targets.length!==({order:0,match:3,sort:2}[mode])||new Set(targets.map(s=>s.trim().toLowerCase())).size!==targets.length)throw Error('The puzzle needs distinct targets for its selected mechanic.');
+ if(mode==='sort'&&(value.sequence.solution.some(i=>i>1)||new Set(value.sequence.solution).size!==2))throw Error('Sorting must use both categories, with indices 0 or 1.');
+ if(mode!=='sort'&&new Set(value.sequence.solution).size!==3)throw Error('The sequence solution must use each plate exactly once.');
  if(new Set(value.sequence.steps.map(s=>s.trim().toLowerCase())).size!==3)throw Error('Sequence plates need distinct labels.');
  if(new Set(value.decision.choices.map(c=>c.id)).size!==2||value.decision.choices.some(c=>!/^[a-zA-Z0-9_-]{1,60}$/.test(c.id)))throw Error('Ending choices need distinct safe IDs.');
  return value;

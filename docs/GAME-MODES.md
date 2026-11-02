@@ -49,3 +49,12 @@ The frontend-design skill guided the shared palette, restrained chrome, game-spe
 ## Next extensions
 
 More room plates and event types can expand the vocabulary without adding executable model output. Wider curricula need subject-specific review and live trials. PDF/Word extraction, OCR, semantic retrieval and teacher assignment flows remain separate work. Cloud progress and structured editing of stored chapter copies are now implemented in the accounts phase. The three existing formats provide reusable game loops; additional formats should be added only when they teach something these loops do not cover well.
+
+
+### Adventure mechanisms and settings
+
+New `adventure-v1` generations choose `setting: canal | market | observatory` from the existing painted art manifest. Market uses the trading guild hall; observatory uses the star room. These are starting-room variants within the same three-room exploration template, not three separate open worlds.
+
+`sequence.mode` supports `order` (three-step permutation; empty targets), `match` (three descriptions matched one-to-one to three terms), and `sort` (three items assigned to two categories, both used). Targets and solutions are validated deterministically; the model supplies prose and bounded indices, never rules or asset URLs. Existing chapters without these optional fields retain their exact hashes and saves. The puzzle uses the existing three-entry save field, allowing repeated indices only for sorting.
+
+The location strip puts exits and room description below the walkable scene. On narrow and short screens the page can scroll; movement targets remain inside the scene.

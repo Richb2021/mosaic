@@ -1,3 +1,4 @@
+import {signedCourseRoute} from './course-question-banks.js';
 import {courseGrantRecords,consentScope,reportSlot,publicCourseGrant} from './course-grants.js';
 import {costSummary} from './cost-ledger.js';
 import {readJSON,noStore} from './ncb-auth.js';
@@ -9,7 +10,7 @@ const L="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'
 const choices=new Set([0,7,30,90,365]);
 const sorted=values=>[...new Set(values)].sort();
 const ownedJobs=(db,siteOwner)=>db.all("SELECT * FROM workshop_jobs WHERE owner=? AND status!='usage-only' ORDER BY id",siteOwner);
-const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length});
+const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length,assignedQuestionSets:(plan.courseBankUpdates||[]).reduce((n,r)=>n+r.removed.length,0)});
 export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now()}){
  const db=sqlDB(env.DB),{controls}=await readControls(env,siteOwner,owner,now),lp=parse(controls.learner.policy),wp=parse(controls.workspace.policy);
  const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
@@ -39,12 +40,21 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  assetIDs.push(...assets.filter(a=>selected.some(j=>j.id===a.script_id)).map(a=>a.id));
  const sharing=await courseGrantRecords(env,owner,siteOwner),jobIds=new Set(selected.map(j=>j.id));
  const courseGrants=sharing.grants.filter(r=>{const g=parse(r.policy);return mode==='learner'&&g.learner===owner||mode==='workspace'&&g.siteOwner===siteOwner||g.siteOwner===siteOwner&&(jobIds.has(g.planId)||g.steps.some(s=>jobIds.has(s.jobId))||g.sources.some(s=>sourceIDs.includes(s.id)))}).map(({scope,policy})=>({scope,policy}));
+ // Optional bank cleanup preserves the course games, while rotating the grant
+ // revision so an in-flight question read cannot reveal the removed snapshot.
+ const courseBankUpdates=[];
+ for(const r of sharing.grants){const g=parse(r.policy);if(g.siteOwner!==siteOwner||courseGrants.some(x=>x.scope===r.scope))continue;
+  const removed=g.steps.filter(s=>s.questionBank&&jobIds.has(s.questionBank.id)).map(s=>s.id);if(!removed.length)continue;
+  const next={...g,steps:g.steps.map(s=>{const copy={...s};if(removed.includes(s.id))delete copy.questionBank;return copy})};
+  next.revision='pruned-'+(await digest(g.revision+':'+removed.join(','))).slice(0,32);next.signature=await digest(JSON.stringify(signedCourseRoute(next)));
+  courseBankUpdates.push({scope:r.scope,policy:r.policy,nextPolicy:JSON.stringify(next),removed});
+ }
  const expiredSlots=mode==='expired'?new Set(profileRows.filter(r=>profiles.includes(r.id)).map(r=>r.slot_key)):new Set();
  const remainingSlots=new Set(profileRows.map(r=>r.slot_key));
  const consentMap=new Map(sharing.consents.filter(r=>mode==='learner'||expiredSlots.has(reportSlot(r.scope.slice(15)))||mode==='expired'&&lp.progressDays&&!remainingSlots.has(reportSlot(r.scope.slice(15)))).map(r=>[r.scope,{scope:r.scope,policy:r.policy}]));
- for(const r of courseGrants){const scope=consentScope(r.scope.slice(13)),c=await db.one('SELECT scope,policy FROM data_controls WHERE scope=?',scope);if(c)consentMap.set(scope,c)}
+ for(const r of [...courseGrants,...courseBankUpdates]){const scope=consentScope(r.scope.slice(13)),c=await db.one('SELECT scope,policy FROM data_controls WHERE scope=?',scope);if(c)consentMap.set(scope,c)}
  const courseConsents=[...consentMap.values()].sort((a,b)=>a.scope.localeCompare(b.scope));
- const plan={mode,id:id||null,courseGrants,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
+ const plan={mode,id:id||null,courseGrants,courseBankUpdates,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
  return {...plan,hash:await digest(JSON.stringify(plan)),counts:counts(plan)};
 }
 export async function deleteProviderResponse(id,env,fetcher=fetch){
@@ -58,6 +68,13 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
  const db=sqlDB(env.DB);let plan=parse(op.plan);const save=()=>db.run('UPDATE data_operations SET plan=?,updated=? WHERE id=?',JSON.stringify(plan),now(),op.id);
  try{
   if(!plan.localDone){
+   // Check snapshot removal before deleting the original. Workspace leases
+   // exclude delivery; still fail closed if storage reports a missed CAS.
+   // A retried operation may already have applied this exact next policy.
+   for(const r of plan.courseBankUpdates||[]){
+    const result=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',r.nextPolicy,now(),r.scope,r.policy);
+    if(result.meta.changes!==1){const current=await db.one('SELECT policy FROM data_controls WHERE scope=?',r.scope);need(!current||current.policy===r.nextPolicy,'An assigned question set changed during cleanup. Resume to confirm removal.',409)}
+   }
    for(const id of plan.assets){const row=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);if(!row)continue;need(env.BUCKET,'Private media storage is unavailable; cleanup will resume later.',503);await env.BUCKET.delete(row.object_key);need(!await env.BUCKET.head(row.object_key),'Recording removal has not been confirmed.',503);await db.run('DELETE FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);}
    if(plan.mode==='learner')await db.run('UPDATE cost_receipts SET learner_owner=NULL WHERE site_owner=? AND learner_owner=?',siteOwner,owner);
    await store.deleteRows('learner_profiles',owner,plan.profiles);await store.deleteRows('learner_saves',owner,plan.saves);
@@ -82,7 +99,7 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
 }
 async function lockOperation(env,ctx,op){
  const db=sqlDB(env.DB),state=await readControls(env,ctx.siteOwner,ctx.owner,ctx.now());
- const plan=parse(op.plan),targets=plan.resources?.length||plan.courseGrants?.length||plan.mode==='workspace'?[state.controls.workspace,state.controls.learner]:[state.controls.learner];
+ const plan=parse(op.plan),targets=plan.resources?.length||plan.courseGrants?.length||plan.courseBankUpdates?.length||plan.mode==='workspace'?[state.controls.workspace,state.controls.learner]:[state.controls.learner];
  for(const c of targets){
   if(c.operation===op.id)continue;
   const r=await db.run('UPDATE data_controls SET operation=?,updated=? WHERE scope=? AND operation IS NULL AND NOT EXISTS(SELECT 1 FROM data_leases WHERE scope=? AND expires>?)',op.id,ctx.now(),c.scope,c.scope,ctx.now());
@@ -128,7 +145,7 @@ export async function enforceRetention(env,ctx,{force=false,strict=false}={}){
  try{
   const plan=await deletionPlan(env,{...ctx,mode:'expired',now:ctx.now()});
   if(plan.assets.length&&!env.BUCKET){if(strict)need(false,'Private media storage is unavailable.',503);return;}
-  if(plan.assets.length+plan.jobs.length+plan.resources.length+plan.profiles.length+plan.saves.length+(plan.courseGrants||[]).length+(plan.courseConsents||[]).length)await startDeletion(env,ctx,plan);
+  if(plan.assets.length+plan.jobs.length+plan.resources.length+plan.profiles.length+plan.saves.length+(plan.courseGrants||[]).length+(plan.courseConsents||[]).length+(plan.courseBankUpdates||[]).length)await startDeletion(env,ctx,plan);
   await db.run('UPDATE data_controls SET checked_ms=? WHERE scope IN (?,?)',ctx.now(),state.scopes.learner,state.scopes.workspace);
  }catch(e){
   // Background maintenance cannot fail an unrelated read because another tab

@@ -1,3 +1,4 @@
+import {attachQuestionBanks,availableQuestionBanks,preserveQuestionBanks} from './course-question-banks.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {sqlDB,parse,need,DAY,auditEvent} from './data-control.js';
 import {digest} from './content-service.js';
@@ -49,6 +50,11 @@ async function readSharedReport(env,store,g,now){
 export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,access,now=()=>Date.now()}){
  const db=sqlDB(env.DB),input=req.method==='GET'?Object.fromEntries(new URL(req.url).searchParams):await readJSON(req,10000),manages=access.admitted&&['administrator','teacher','guardian'].includes(access.role);
  const load=async id=>{need(idOk(id),'Choose a course assignment.');const row=await db.one('SELECT * FROM data_controls WHERE scope=?',grantScope(id));need(row,'Course assignment unavailable.',404);return {row,g:{...parse(row.policy),id}}};
+ if(req.method==='GET'&&input.view==='questions'){
+  need(manages,'Only the current organiser can select reviewed question sets.',403);
+  const route=await reviewedRoute(env,{owner,siteOwner,store,courseId:input.courseId,planHash:input.planHash});
+  return noStore({steps:await availableQuestionBanks(env,{owner,siteOwner},route)});
+ }
  if(req.method==='GET'&&input.view==='delivery'){
   need(manages,'Only the current organiser can prepare course delivery.',403);const learners=(input.learners||'').split(',');need(learners.length>0&&learners.length<=20&&learners.every(idOk),'Choose up to twenty learners.');
   const rows=await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND json_extract(policy,'$.courseId')=? AND json_extract(policy,'$.learner') IN ("+learners.map(()=>'?').join(',')+')',principal,siteOwner,input.courseId||'',...learners);
@@ -79,6 +85,8 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   need(manages&&access.ageBand==='18plus','An adult organiser prepares course assignments.',403);need(idOk(input.learner),'Choose a learner in your group.');
   const learner=await admission(env,input.learner);need(learner.admitted&&learner.role==='learner'&&learner.manager===principal,'Choose an active learner in your group.',403);
   const route=await reviewedRoute(env,{owner,siteOwner,store,courseId:input.courseId,planHash:input.planHash}),id=await courseGrantId(principal,input.learner,route.courseId),scope=grantScope(id),saved=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),old=parse(saved?.policy);
+  preserveQuestionBanks(route,old);
+  await attachQuestionBanks(env,{owner,siteOwner},route,input.questionBanks);
   const bindings={learnerBinding:(await memberBinding(env,input.learner)).key,managerBinding:(await memberBinding(env,principal)).key},signature=await digest(JSON.stringify({...route,...bindings}));
   if(saved&&!old.revoked&&old.signature===signature)return noStore({assigned:true,assignment:publicCourseGrant({...old,id})});
   need((input.expectedRevision||null)===(old.revision||null),'This assignment changed. Reload before replacing its reviewed version.',409);
@@ -86,6 +94,8 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   const g={...route,...bindings,owner,manager:principal,learner:input.learner,siteOwner,signature,revision:crypto.randomUUID(),assignedAt:now(),revoked:false};
   return withGrantLease(env,g,now,async()=>{
    need(await activeCourseGrant(env,g),'The learner group changed. Reload before assigning.',409);
+   need((await grantChapters(env,g)).length,'The reviewed sources or chapters changed. Reload before assigning.',409);
+   await attachQuestionBanks(env,{owner,siteOwner},route,input.questionBanks);
    // The cap is checked in the same SQL statement as the mutation, including
    // reactivating a withdrawn assignment. Independent requests cannot overfill it.
    const cap="(SELECT COUNT(*) FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.revoked')=0 AND scope!=?)<24";
