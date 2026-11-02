@@ -1,3 +1,4 @@
+import {mountSaveStatus} from './save-status.js';
 import {readReviewedGames,storeReviewedGame} from './reviewed-games.js';
 import {conceptTrail,CONCEPT_STATUS} from '../concept-progress.js';
 import {learningJournal,gameSaveKey} from './learning-client.js';
@@ -18,11 +19,12 @@ import './mode-style.css';
 let launchSequence=0;
 const root=document.querySelector('#game-library'),layer=document.querySelector('#library-layer');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let assets={},active=null,custom=[],notice='',modal=null,returnFocus=null;
+let assets={},active=null,custom=[],notice='',modal=null,returnFocus=null,saveContext=null;
+const saveStatus=mountSaveStatus({journal:learningJournal,getCurrent:()=>saveContext,onReview:()=>openModal({kind:'learning-journal'})});
 function readCustom(){try{custom=readReviewedGames(learningJournal.storage)}catch{notice='Saved imported games could not be read. The included adventures are ready to play.';custom=[]}}
 function allPacks(){return [...new Map([...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS,...custom].map(pack=>[pack.id,pack])).values()]}
 function register(pack){const clean=validatePlayableContent(pack);if(clean.template==='underlight-v1')throw Error('Open this chapter through the RPG.');try{custom=storeReviewedGame(learningJournal.storage,clean)}catch{custom=[clean,...custom.filter(p=>p.id!==clean.id)].slice(0,20);notice='This browser could not update its saved game library. Existing data is preserved. You can play now and download the chapter from the Resource Library for later.'}return clean}
-function destroy(){active?.destroy();active=null;root.innerHTML=''}
+function destroy(){active?.destroy();active=null;saveContext=null;saveStatus.refresh();root.innerHTML=''}
 function closeModal(){workshop.extraction?.abort();modal=null;layer.innerHTML='';layer.hidden=true;returnFocus?.focus?.()}
 const button=(text,action,attrs='',kind='')=>`<button type="button" data-act="${action}" ${attrs} class="${kind}">${text}</button>`;
 function wrap(html){return `<div class="scrim"><section class="panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"><button type="button" class="modal-close" data-act="close" aria-label="Close dialog">×</button>${html}</section></div>`}
@@ -48,7 +50,8 @@ async function start(pack,classic=false){
   if(launch!==launchSequence)return;
   history.replaceState(null,'','/modes.html?game='+encodeURIComponent(clean.id)+(classic?'&classic=1':''));
   const mount=EXTENDED_IDS.includes(clean.template)?(classic?mountExtended:mountJourney):clean.template==='town-v1'?mountTown:clean.template==='draft-v1'?mountDraft:mountAdventure;
-  active=mount(root,{pack:clean,assets,storage:learningJournal.storage,onExit:hub,onLibrary:()=>library(clean.template),onClassic:()=>start(clean,true),onProgress:data=>learningJournal.observe(data)});
+  saveContext={pack:clean,kind:EXTENDED_IDS.includes(clean.template)&&!classic?'journey':'classic'};saveStatus.refresh();
+  active=mount(root,{pack:clean,assets,storage:learningJournal.storage,onExit:async()=>{await saveStatus.beforeLeave();if(launch===launchSequence)hub()},onLibrary:()=>library(clean.template),onClassic:()=>start(clean,true),onProgress:data=>learningJournal.observe(data)});
   root.focus({preventScroll:true});window.scrollTo({top:0,left:0,behavior:'instant'});
  }catch(error){if(launch===launchSequence){root.innerHTML=`<section class="library-error"><h1>This journey could not open</h1><p>${esc(error.message)}</p><button id="return-games">Return to games</button></section>`;root.querySelector('#return-games').addEventListener('click',hub);}}
 }

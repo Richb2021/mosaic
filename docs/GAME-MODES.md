@@ -26,7 +26,9 @@ Review the full narrative, solutions, game trade-offs and sources before publish
 
 ## Saves and imported packs
 
-Each mode validates its saved state against the pack’s identity, revision and content fingerprint. A source/content change cannot silently reuse incompatible progress. Browser storage failures are reported while allowing the current session to continue. Signed-in illustrated game state now syncs to the learner account; guest runs and the 3D RPG remain device-local. Generated resource/job records remain in the private server library.
+Each mode validates its saved state against the pack’s identity, revision and content fingerprint. A source/content change cannot silently reuse incompatible progress. Browser storage failures are reported while allowing the current session to continue. Signed-in illustrated games and supported 3D RPG chapters sync to the learner account; guest runs remain separate on the device. Generated resource/job records remain in the private server library.
+
+The shared in-game save strip distinguishes confirmed account saves, device-only progress, pending uploads and version conflicts. Completion requests an immediate save; leaving through the game controls waits up to eight seconds for a serialized flush. Smaller save requests use browser keepalive, and hiding or leaving the page attempts a flush. A browser close is not a guaranteed network delivery: pending device progress resumes when that exact game version reopens. Save details provide retry and explicit conflict review; no conflict is overwritten automatically. Guest progress is never silently imported into an account.
 
 Imported JSON passes the same mode validator and a review gate. A reviewed custom version with an included pack’s ID takes precedence consistently in the library and after reload. It does not overwrite the built-in source file. Imports are capped and rendered as text, never HTML or scripts.
 

@@ -16,7 +16,7 @@ export class LearningJournal{
   try{const raw=this.storage.getItem(RUNS)||'[]',records=JSON.parse(raw);if(!Array.isArray(records)||records.length>100)throw Error();this.records=records.filter(validPracticeRecord);if(this.records.length!==records.length){this.storage.setItem(RUNS+':recovery',raw);this.notice='Some journal entries could not be read; a recovery copy is kept on this device.';}}
   catch{this.notice='The practice journal could not be read. Existing game saves are unchanged.';try{const raw=this.storage.getItem(RUNS);if(raw)this.storage.setItem(RUNS+':recovery',raw);}catch{this.keepCorrupt=true;}}
  }
- async request(path,body){const r=await fetch('/api/learning/'+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'X-Mosaic-Learner':this.user?.id||'','X-Mosaic-Data-Epoch':this.dataEpoch||'0:0',...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json();if(r.ok&&!body){this.dataEpoch=r.headers.get('X-Mosaic-Data-Epoch')||this.dataEpoch;this.applyDataReset(Number(r.headers.get('X-Mosaic-Data-Reset')||0),r.headers.get('X-Mosaic-Data-Reset-Kind'));}if(!r.ok)throw Object.assign(Error(d.error||'Cloud progress is unavailable.'),{status:r.status});return d;}
+ async request(path,body){const payload=body?JSON.stringify(body):undefined;const r=await fetch('/api/learning/'+path,{method:body?'POST':'GET',credentials:'include',cache:'no-store',headers:{'X-Mosaic-Learner':this.user?.id||'','X-Mosaic-Data-Epoch':this.dataEpoch||'0:0',...(body?{'Content-Type':'application/json'}:{})},body:payload,keepalive:path==='save'&&!!payload&&new TextEncoder().encode(payload).length<60000});const d=await r.json();if(r.ok&&!body){this.dataEpoch=r.headers.get('X-Mosaic-Data-Epoch')||this.dataEpoch;this.applyDataReset(Number(r.headers.get('X-Mosaic-Data-Reset')||0),r.headers.get('X-Mosaic-Data-Reset-Kind'));}if(!r.ok)throw Object.assign(Error(d.error||'Cloud progress is unavailable.'),{status:r.status});return d;}
  applyDataReset(stamp,kind='all'){
   if(!this.user||!stamp)return;const key=this.prefix+'mosaic:data-reset';if(Number(localStorage.getItem(key)||0)>=stamp)return;
   for(const timer of this.timers.values())clearTimeout(timer);this.timers.clear();
@@ -57,12 +57,48 @@ export class LearningJournal{
  async reloadProfile(){const d=await this.request('journal');this.profile=normaliseProfile(d.profile||{});this.profileVersion=d.profileVersion;this.profileConflict=false;this.profilePending=false;this.storage.setItem(PROFILE,JSON.stringify({profile:this.profile,version:this.profileVersion}));this.notice='Loaded your cloud preferences.';this.changed();}
  observe({pack,record,kind='classic'}){try{const {snapshot,summary}=observeProgress(pack,kind,record),key=progressIdentity(pack,kind),previous=this.records.find(r=>r.key===key);if(previous&&JSON.stringify(previous.snapshot)===JSON.stringify(snapshot))return;
   const next={key,summary,snapshot,updated:Math.max(Date.now(),(previous?.updated||0)+1),version:previous?.version||0,pending:!!this.user,conflict:previous?.conflict||false};this.records=[next,...this.records.filter(r=>r.key!==key)].slice(0,100);this.storeRecords();this.changed();
-  if(this.user&&!next.conflict){clearTimeout(this.timers.get(key));this.timers.set(key,setTimeout(()=>void this.sync(key),1200));}
+  if(this.user&&!next.conflict){clearTimeout(this.timers.get(key));if(summary.completed&&!previous?.summary.completed)void this.flush(key);else this.timers.set(key,setTimeout(()=>void this.sync(key),1200));}
  }catch{this.notice='This practice record could not be validated. Your game save remains separate.';}}
- async sync(key){if(!this.user||this.inflight.has(key))return;const record=this.records.find(r=>r.key===key);if(!record?.pending||record.conflict)return;const sent=JSON.stringify(record.snapshot);this.inflight.set(key,true);try{
-  const d=await this.request('save',{packId:record.summary.packId,contentHash:record.summary.contentHash,kind:record.summary.kind,snapshot:record.snapshot,expectedVersion:record.version});const current=this.records.find(r=>r.key===key);if(current){current.version=d.save.version;current.updated=Math.max(Date.now(),current.updated+1);current.pending=JSON.stringify(current.snapshot)!==sent;current.error='';}this.notice='Progress saved to your learner account.';
- }catch(e){const current=this.records.find(r=>r.key===key);if(current){current.conflict=e.status===409;current.error=e.message;}this.notice=e.message;}
- finally{this.inflight.delete(key);this.storeRecords();this.changed();const current=this.records.find(r=>r.key===key);if(current?.pending&&!current.conflict&&!current.error)this.timers.set(key,setTimeout(()=>void this.sync(key),1200));}}
+ saveStatus(pack,kind='classic'){
+  const key=progressIdentity(pack,kind),r=this.records.find(x=>x.key===key);let device=false;
+  try{const stored=JSON.parse(this.storage.getItem(RUNS)||'[]').find(x=>x.key===key);device=!!r?.snapshot&&JSON.stringify(stored?.snapshot)===JSON.stringify(r.snapshot)}catch{}
+  const local=device?'Your latest progress is saved on this device.':'Keep this tab open until a save is confirmed.';
+  if(r?.conflict)return {state:'conflict',label:'Choose a save',detail:local+' A different account save needs your review. Neither version will be overwritten automatically.',canReview:true};
+  if(this.inflight.has(key))return {state:'saving',label:'Saving to account…',detail:local+' Waiting for the account to confirm this progress.'};
+  if(r?.error)return {state:'pending',label:device?'Saved on device · not synced':'Progress not saved',detail:local+' '+r.error,canRetry:!!this.user};
+  if(this.user&&r?.pending)return {state:'pending',label:device?'Saved on device · waiting to sync':'Waiting to save',detail:local+' The account save is still pending.',canRetry:true};
+  if(r?.snapshot&&!device&&!this.user)return {state:'pending',label:'Progress not saved',detail:local};
+  if(this.user&&r?.version>0)return {state:'saved',label:'Saved to account',detail:'This game version and your latest progress are confirmed in your learner account.'};
+  return {state:'device',label:device?'Saved on this device':this.user?'Autosave ready':'Device saves only',detail:device?local+(this.user?'':' Sign in to use separate account saves across devices.'):this.user?'Your first game action will be saved automatically.':'Play on this device, or sign in for account saves.'};
+ }
+ async flush(key){
+  const keys=key?[key]:this.records.filter(r=>r.pending&&!r.conflict).map(r=>r.key);
+  await Promise.all(keys.map(async k=>{
+   // Drain an older in-flight snapshot before sending the newest one, without parallel writes.
+   for(let pass=0;pass<3;pass++){
+    clearTimeout(this.timers.get(k));this.timers.delete(k);
+    const r=this.records.find(x=>x.key===k);if(!this.user||!r?.pending||r.conflict)return;
+    await this.sync(k);const latest=this.records.find(x=>x.key===k);if(!latest?.pending||latest.conflict||latest.error)return;
+   }
+  }));
+ }
+ sync(key){
+  if(this.inflight.has(key))return this.inflight.get(key);
+  const record=this.records.find(r=>r.key===key);if(!this.user||!record?.pending||record.conflict)return Promise.resolve();
+  clearTimeout(this.timers.get(key));this.timers.delete(key);
+  const owner=this.user.id,epoch=this.dataEpoch,sent=JSON.stringify(record.snapshot),body={packId:record.summary.packId,contentHash:record.summary.contentHash,kind:record.summary.kind,snapshot:JSON.parse(sent),expectedVersion:record.version};
+  const sameAccount=()=>this.user?.id===owner&&this.dataEpoch===epoch;
+  const task=(async()=>{await Promise.resolve();try{
+   if(!sameAccount())return;
+   const d=await this.request('save',body);if(!sameAccount())return;
+   const current=this.records.find(r=>r.key===key);if(current){current.version=d.save.version;current.updated=Math.max(Date.now(),current.updated+1);current.pending=JSON.stringify(current.snapshot)!==sent;current.error='';}this.notice='Progress saved to your learner account.';
+  }catch(e){if(!sameAccount())return;const current=this.records.find(r=>r.key===key);if(current){current.conflict=e.status===409;current.error=e.message;}this.notice=e.message;
+  }finally{
+   if(this.inflight.get(key)===task)this.inflight.delete(key);
+   if(sameAccount()){this.storeRecords();this.changed();const current=this.records.find(r=>r.key===key);if(current?.pending&&!current.conflict&&!current.error)this.timers.set(key,setTimeout(()=>void this.sync(key),1200));}
+  }})();
+  this.inflight.set(key,task);this.changed();return task;
+ }
  async prepare(pack,kind){const key=progressIdentity(pack,kind);if(!this.user)return;try{
   const d=await this.request('save?'+new URLSearchParams({packId:pack.id,contentHash:draftHash(pack),kind}));let local=this.records.find(r=>r.key===key);
   const deviceRaw=this.storage.getItem(gameSaveKey(pack,kind));let device;
