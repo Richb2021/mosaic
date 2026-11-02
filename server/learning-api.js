@@ -66,4 +66,4 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  }
  return noStore({error:'Learning route not found.'},404);
  });
- }catch(e){return noStore({error:e instanceof StoreError?e.message:e.status?e.message:'The learning record could not be validated. Your device save is unchanged.'},e.status||400)}}
+ }catch(e){return noStore({error:e instanceof StoreError?e.message:e.status?e.message:'The learning record could not be validated. Your device save is unchanged.',...(e.code==='DATA_RELOAD_REQUIRED'?{code:e.code}:{})},e.status||400)}}

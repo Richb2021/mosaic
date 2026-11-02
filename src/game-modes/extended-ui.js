@@ -46,7 +46,7 @@ export function mountExtended(container,{pack:input,assets={},onExit=()=>{},onLi
   if(['help','recipes','journal','restart'].includes(a)){open({kind:a},b);return}
   if(a==='source'){const refs=(b.dataset.refs||'').split(',').filter(id=>pack.sources.some(s=>s.id===id));if(['recipes','craft'].includes(modal?.kind)){modal={kind:'source',refs,back:modal.kind};render(null)}else open({kind:'source',refs},b);return}
   if(a==='close'){if(modal?.back){modal={kind:modal.back};render(null)}else close();return}
-  if(a==='restart-confirm'){record=newExtended(pack,seed());notice=saveExtended(storage,pack,record);modal=null;selected=null;combine=null;render();return}
+  if(a==='restart-confirm'){record=newExtended(pack,seed());notice=saveExtended(storage,pack,record);onProgress({pack,record,kind:'classic'});modal=null;selected=null;combine=null;render();return}
   if(a==='choose')commit({type:'choose',choice:Number(b.dataset.choice)});
   else if(['continue','next','next-possession'].includes(a))commit({type:a});
   else if(a==='answer')commit({type:a,answer:Number(b.dataset.answer)},'feedback');
@@ -57,7 +57,7 @@ export function mountExtended(container,{pack:input,assets={},onExit=()=>{},onLi
   else if(a==='cancel-combine'){combine=null;selected=null;render('[data-slot="0"]')}
   else if(a==='recycle'&&selected!==null)commit({type:a,slot:selected},`[data-slot="${selected}"]`);
   else if(a==='deliver')commit({type:a,order:Number(b.dataset.order)});
-  else if(a==='undo'){record=undoExtended(pack,record);notice=saveExtended(storage,pack,record)||'Last move undone.';selected=null;combine=null;render('[data-rx="undo"]')}
+  else if(a==='undo'){record=undoExtended(pack,record);notice=saveExtended(storage,pack,record)||'Last move undone.';onProgress({pack,record,kind:'classic'});selected=null;combine=null;render('[data-rx="undo"]')}
  }catch(e){notice=e.message;render('heading')}}
  function keydown(e){if(modal){if(e.key==='Escape'){e.preventDefault();close();return}if(e.key==='Tab'){const nodes=[...container.querySelectorAll('.rx-modal button:not(:disabled),.rx-modal a,.rx-modal summary')],first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&(document.activeElement===first||!container.querySelector('.rx-modal')?.contains(document.activeElement))){e.preventDefault();last?.focus()}else if(!e.shiftKey&&(document.activeElement===last||!container.querySelector('.rx-modal')?.contains(document.activeElement))){e.preventDefault();first?.focus()}}return}
   const slot=e.target.closest('[data-slot]');if(slot&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const i=Number(slot.dataset.slot),next=Math.max(0,Math.min(15,i+({ArrowLeft:-1,ArrowRight:1,ArrowUp:-4,ArrowDown:4}[e.key])));container.querySelector(`[data-slot="${next}"]`)?.focus()}}

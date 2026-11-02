@@ -1,6 +1,6 @@
 // Database API and filter contract: docs/ncb/swagger.json. Never accepts client paths.
 const TABLES=new Set(['learner_profiles','learner_saves']);
-export class StoreError extends Error{constructor(message,status=503){super(message);this.status=status}}
+export class StoreError extends Error{constructor(message,status=503,code){super(message);this.status=status;this.code=code}}
 export class NCBStore{
  constructor(env,fetcher=fetch){this.env=env;this.fetcher=fetcher;}
  async request(table,action,params={},payload){

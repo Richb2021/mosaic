@@ -45,6 +45,7 @@ async function start(pack,classic=false){
  try{
   const clean=validatePlayableContent(pack);
   if(clean.template==='underlight-v1')throw Error('This chapter belongs in the 3D RPG.');
+  await saveStatus.beforeLeave();if(launch!==launchSequence)return;
   destroy();closeModal();root.innerHTML='<p class="library-error">Restoring your journey…</p>';
   await learningJournal.prepare(clean,EXTENDED_IDS.includes(clean.template)&&!classic?'journey':'classic');
   if(launch!==launchSequence)return;
