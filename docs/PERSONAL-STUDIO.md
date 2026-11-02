@@ -34,3 +34,13 @@ All eight game formats link to the exact pack ID and content hash. Questions, dr
 Support is an optional bounded field in the existing NoCodeBackend `learner_profiles` studio slot, covered by the same verified learner identity, expectedVersion/CAS, export and programme removal. No database migration, additional endpoint or provider call was introduced. See `docs/ncb/storage-contract.json` for limits. Old programmes default to no guided support. A starting/practice answer submitted after using a clue/source/explanation is marked assisted by the server; later help does not rewrite a previous answer. First recorded game attempts do not establish unaided performance. Self-checks and completed text are never grades, mastery estimates or access gates.
 
 Validation: `tests/guided-support.test.mjs`, real NCB API acceptance in `../scripts/check_guided_support_api.mjs`, and browser evidence in `../output/guided-support/evidence/`. These checks use synthetic learners; they do not establish production readiness for school accounts, retention/consent or an unrestricted AI tutor.
+
+## Reviewed questions alongside an adventure
+
+Reviewed four-stage question cycles now appear in the programme before the first answer is recorded. Recommendations bind the learner, exact game-content hash and selected activity; due revisits take precedence over unfinished, new and waiting cycles. An unreadable saved cycle is never advertised as an unanswered one. Drafts and withdrawn reviews stay out of recommendations.
+
+A learner can try the starting question, choose “Not sure”, use help, or go straight to the game. The cycle records the original answer, confidence and in-cycle help separately in the existing NoCodeBackend learner-profile slots. Corrected game answers and XP do not replace that record or establish mastery. The existing fixed one-/three-day revisit schedule is unchanged; returning early does not reveal the later question or move its due date.
+
+“Open the game” from a reviewed cycle adds a return link for that exact chapter version. “Return to learning” flushes pending game progress and reopens the exact reviewed question hash. Changing to another game hides that return link. The URL is local-only; ownership and review checks still run on the server. Reloading the question page resumes the saved cycle rather than silently choosing a different bank.
+
+The current cycles remain private to the learner account that prepared them. This change does not distribute an organiser’s question banks through school assignments or claim unseen assessment when a learner has reviewed the answer key. Those are separate product flows. Each prepared bank covers its stated focus, not necessarily every concept in a larger course objective.

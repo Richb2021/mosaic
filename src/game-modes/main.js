@@ -1,4 +1,6 @@
 import {mountSaveStatus} from './save-status.js';
+import {modeGameLocation} from '../studio/cycle-navigation.js';
+import {draftHash} from './draft-engine.js';
 import {readReviewedGames,storeReviewedGame} from './reviewed-games.js';
 import {conceptTrail,CONCEPT_STATUS} from '../concept-progress.js';
 import {learningJournal,gameSaveKey} from './learning-client.js';
@@ -17,6 +19,7 @@ import {validatePlayableContent,GAME_TEMPLATES,gameReviewHTML} from './content-r
 import {ResourceWorkshop} from '../resource-workshop.js';
 import './mode-style.css';
 let launchSequence=0;
+const learningReturnSearch=location.search;
 const root=document.querySelector('#game-library'),layer=document.querySelector('#library-layer');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let assets={},active=null,custom=[],notice='',modal=null,returnFocus=null,saveContext=null;
@@ -49,7 +52,7 @@ async function start(pack,classic=false){
   destroy();closeModal();root.innerHTML='<p class="library-error">Restoring your journey…</p>';
   await learningJournal.prepare(clean,EXTENDED_IDS.includes(clean.template)&&!classic?'journey':'classic');
   if(launch!==launchSequence)return;
-  history.replaceState(null,'','/modes.html?game='+encodeURIComponent(clean.id)+(classic?'&classic=1':''));
+  history.replaceState(null,'',modeGameLocation(learningReturnSearch,{packId:clean.id,contentHash:draftHash(clean)},classic));
   const mount=EXTENDED_IDS.includes(clean.template)?(classic?mountExtended:mountJourney):clean.template==='town-v1'?mountTown:clean.template==='draft-v1'?mountDraft:mountAdventure;
   saveContext={pack:clean,kind:EXTENDED_IDS.includes(clean.template)&&!classic?'journey':'classic'};saveStatus.refresh();
   active=mount(root,{pack:clean,assets,storage:learningJournal.storage,onExit:async()=>{await saveStatus.beforeLeave();if(launch===launchSequence)hub()},onLibrary:()=>library(clean.template),onClassic:()=>start(clean,true),onProgress:data=>learningJournal.observe(data)});

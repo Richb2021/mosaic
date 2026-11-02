@@ -27,16 +27,21 @@ export async function learningLoopAPI(req,env,{owner,siteOwner,store,resolve,now
  return noStore({...loopView(bank,next,now()),version,activityKey:p.activityKey,profile:p.context.learner,profileChanged:JSON.stringify(p.context.learner)!==JSON.stringify({level:unit.profile.level,interests:unit.profile.interests.slice(0,2),focus:unit.profile.struggles.slice(0,500),goal:unit.profile.goal.slice(0,500)})});
 }
 
-export async function learningLoopSummaries(env,{siteOwner,owner,store,now}){
+export async function learningLoopSummaries(env,{siteOwner,owner,store,now,units}){
  if(!env.DB||!siteOwner)return [];
+ if(!units){const programme=await store.latest('learner_profiles',owner,'studio');units=parse(programme?.payload).studio?.units||[];}
  const rows=await store.allRows('learner_profiles',owner),heads=new Map();
  for(const r of rows)if(r.slot_key.startsWith('loop-')&&(!heads.has(r.slot_key)||heads.get(r.slot_key).version<r.version))heads.set(r.slot_key,r);
- const summaries=[],jobs=await sqlDB(env.DB).all("SELECT * FROM workshop_jobs WHERE owner=? AND status=? AND json_extract(payload,'$.kind')='practice' AND json_extract(payload,'$.learnerOwner')=?",siteOwner,'creative-published',owner),byId=new Map(jobs.map(j=>[j.id,j]));
- for(const row of [...heads.values()]){try{
-  const saved=parse(row.payload),j=byId.get(saved.loop.bankId);if(!j)continue;
-  const p=parse(j.payload);if(p.kind!=='practice'||p.learnerOwner!==owner||await digest(j.draft)!==saved.loop.bankHash)continue;
-  const bank=validatePractice(parse(j.draft),p),state=validateLoop(bank,saved.loop.bankHash,saved.loop),view=loopView(bank,state,now);
-  summaries.push({bankId:bank.id,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey,title:bank.title,updated:Number(row.updated_ms),stage:view.route.stage,dueAt:state.dueAt,waiting:!!view.route.waiting,needsSupport:view.route.needsSupport,reason:view.route.reason,attempts:state.answers.length});
- }catch{ /* An unavailable historical bank never becomes a recommendation. */ }}
+ const summaries=[],counts=new Map(),jobs=await sqlDB(env.DB).all("SELECT * FROM workshop_jobs WHERE owner=? AND json_extract(payload,'$.recordType')='creative' AND json_extract(payload,'$.learnerOwner')=? ORDER BY created DESC",siteOwner,owner);
+ for(const j of jobs){try{
+  const p=parse(j.payload),identity=p.packId+':'+p.contentHash,count=(counts.get(identity)||0)+1;counts.set(identity,count);
+  // Match the saved-request shelf's 40-record window and the current focus.
+  if(count>40||j.status!=='creative-published'||!units.some(u=>u.packId===p.packId&&u.contentHash===p.contentHash&&u.activityKeys.includes(p.activityKey)))continue;
+  if(p.recordType!=='creative'||p.kind!=='practice'||p.learnerOwner!==owner)continue;
+  const bank=validatePractice(parse(j.draft),p),hash=await digest(j.draft),slot='loop-'+(await digest(j.id+':'+hash)).slice(0,59),row=heads.get(slot),saved=row?parse(row.payload):null;
+  // An invalid saved attempt is never presented as a new unanswered cycle.
+  const state=row?validateLoop(bank,hash,saved.loop):emptyLoop(bank,hash),view=loopView(bank,state,now);
+  summaries.push({bankId:bank.id,bankHash:hash,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey,title:bank.title,updated:Number(row?.updated_ms||j.updated),stage:view.route.stage,dueAt:state.dueAt,waiting:!!view.route.waiting,needsSupport:view.route.needsSupport,reason:view.route.reason,attempts:state.answers.length});
+ }catch{ /* Unavailable banks and unreadable attempts stay out of recommendations. */ }}
  return summaries.sort((a,b)=>b.updated-a.updated);
 }

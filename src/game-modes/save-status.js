@@ -1,3 +1,5 @@
+import {draftHash} from './draft-engine.js';
+import {gameReturnLocation} from '../studio/cycle-navigation.js';
 import {progressIdentity} from './learning-model.js';
 import './save-status.css';
 
@@ -5,10 +7,12 @@ import './save-status.css';
 export function mountSaveStatus({journal,getCurrent,beforeFlush=()=>{},onReview=()=>{}}){
  const bar=document.createElement('aside');bar.className='game-save-status';bar.setAttribute('aria-label','Game saving');bar.hidden=true;
  bar.innerHTML='<details><summary><span class="game-save-dot" aria-hidden="true"></span><span role="status" aria-live="polite" aria-atomic="true">Autosave ready</span><span class="game-save-more">Save details</span></summary><div class="game-save-panel"><h2>Your game progress</h2><p></p><div><button type="button" data-save-retry>Save to account now</button><button type="button" data-save-reload>Reload game</button><button type="button" data-save-review>Review save versions</button><a href="/account.html" data-save-account>Sign in</a><button type="button" data-save-close>Close</button></div><small>Closing the browser can interrupt an upload. Progress saved on this device can sync when you reopen this game.</small></div></details>';
+ const returnSearch=location.search,returnLink=document.createElement('a');returnLink.className='game-return-learning';returnLink.hidden=true;returnLink.textContent='Return to learning';returnLink.addEventListener('click',async event=>{if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();const target=returnLink.href;await beforeLeave();location.assign(target)});bar.append(returnLink);
  document.body.prepend(bar);
  const details=bar.querySelector('details'),label=bar.querySelector('[role=status]'),copy=bar.querySelector('p'),retry=bar.querySelector('[data-save-retry]'),review=bar.querySelector('[data-save-review]'),account=bar.querySelector('[data-save-account]');
  function refresh(){
   const current=getCurrent();bar.hidden=!current;document.body.classList.toggle('has-game-save-status',!!current);if(!current){details.open=false;return}
+  const destination=gameReturnLocation(returnSearch,{packId:current.pack.id,contentHash:draftHash(current.pack)});returnLink.hidden=!destination;if(destination)returnLink.href=destination;
   const status=journal.saveStatus(current.pack,current.kind);bar.dataset.state=status.state;
   if(label.textContent!==status.label)label.textContent=status.label;
   copy.textContent=status.detail;bar.querySelector('small').textContent=journal.user?'Closing the browser can interrupt an upload. Progress saved on this device can sync when you reopen this game.':'Guest progress stays on this device. Signed-in account saves are separate.';bar.querySelector('[data-save-reload]').hidden=!status.canReload;retry.hidden=!status.canRetry;review.hidden=!status.canReview;account.hidden=!!journal.user;

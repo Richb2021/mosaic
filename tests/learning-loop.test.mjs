@@ -44,9 +44,14 @@ test('real D1 bank, NCB-style CAS saves, exact revision, learner isolation and p
  await store.write('learner_profiles',owner,'studio',0,{studio:{schemaVersion:1,active:unit.id,units:[unit]}},1);
  const call=async(body,changes={})=>{const input={bankId:bank.id,bankHash:hash,...body};return learningLoopAPI(new Request('https://test/api/learning/loop'+(body?'':'?'+new URLSearchParams(input)),{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(input):undefined}),env,{store,owner,siteOwner,resolve:async()=>pack,now:()=>1000,...changes})};
  assert.equal((await (await call()).json()).version,0);
+ const unstarted=await learningLoopSummaries(env,{siteOwner,owner,store,now:1000});assert.equal(unstarted.length,1);assert.equal(unstarted[0].attempts,0);assert.equal(unstarted[0].stage,'diagnostic');assert.equal(unstarted[0].bankHash,hash);assert.equal(unstarted[0].questions,undefined);
+ assert.deepEqual(await learningLoopSummaries(env,{siteOwner,owner:'other',store,now:1000}),[]);
+ assert.deepEqual(await learningLoopSummaries(env,{siteOwner,owner,store,now:1000,units:[{...unit,activityKeys:[]}]}),[]);
+ assert.deepEqual(await learningLoopSummaries(env,{siteOwner,owner,store,now:1000,units:[{...unit,contentHash:'changed'}]}),[]);
  await assert.rejects(call(null,{owner:'other'}),e=>e.status===404);await assert.rejects(call({bankHash:'0'.repeat(64),expectedVersion:0,action:{}}),e=>e.status===409);
  const body={expectedVersion:0,action:{type:'answer',stage:'diagnostic',answer:1,confidence:'tentative'}};assert.equal((await (await call(body)).json()).version,1);
  await assert.rejects(call(body),e=>e.status===409);
  const summaries=await learningLoopSummaries(env,{siteOwner,owner,store,now:1000});assert.equal(summaries.length,1);assert.equal(summaries[0].needsSupport,true);
- await db.run('UPDATE workshop_jobs SET status=? WHERE id=?','creative-review',bank.id);await assert.rejects(call(),e=>e.status===409);
+ const saved=[...store.rows.values()].find(r=>r.slot_key.startsWith('loop-'));const intact=saved.payload;saved.payload=JSON.stringify({loop:{bankId:bank.id}});assert.deepEqual(await learningLoopSummaries(env,{siteOwner,owner,store,now:1000}),[]);saved.payload=intact;
+ await db.run('UPDATE workshop_jobs SET status=? WHERE id=?','creative-review',bank.id);await assert.rejects(call(),e=>e.status===409);assert.deepEqual(await learningLoopSummaries(env,{siteOwner,owner,store,now:1000}),[]);
 });
