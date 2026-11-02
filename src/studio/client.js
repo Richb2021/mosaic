@@ -26,7 +26,7 @@ export class StudioClient{
    if(input.type==='activate'){if(!next.units.some(u=>u.id===input.id))throw Error('Programme not found.');next.active=input.id;}
    else if(input.type==='remove'){next.units=next.units.filter(u=>u.id!==input.id);if(next.active===input.id)next.active=next.units[0]?.id||null;}
    else{const item=this.items.find(i=>i.pack.id===input.packId&&unitKey(i.pack)===input.packId+':'+input.contentHash);if(!item)throw Error('This exact content version is not available.');const pack=item.pack,id=unitKey(pack);
-    if(input.type==='create'){if(!input.evidenceConfirmed)throw Error('Review the sources first.');if(next.units.some(u=>u.id===id))throw Error('Continue your existing programme for this activity.');if(next.units.length>=12)throw Error('Keep up to twelve programmes. Remove one before adding another.');next.units.unshift(newUnit(pack,this.journal.profile,input.activityKeys));next.active=id;}
+    if(input.type==='create'){if(!input.evidenceConfirmed)throw Error('Review the sources first.');if(next.units.some(u=>u.id===id))throw Error('Continue your existing programme for this activity.');if(next.units.length>=12)throw Error('Keep up to twelve programmes. Remove one before adding another.');next.units.unshift(newUnit(pack,{...this.journal.profile,...(input.learningGoal!==undefined?{goal:input.learningGoal}:{})},input.activityKeys));next.active=id;}
     else next.units=next.units.map(u=>u.id===id?applyUnitAction(u,pack,{...input.action,...(input.action?.type==='replan'?{profile:this.journal.profile}:{})}):u);
    }
    this.journal.storage.setItem(LOCAL,JSON.stringify(next));this.state=next;

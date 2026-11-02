@@ -43,6 +43,9 @@ export async function studioAPI(req,env,{path,store,owner,siteOwner,resolve,incl
    }
    need(input.evidenceConfirmed===true||organiserReviewed,'Review the exact sources before creating a programme.');need(!existing,'A programme for this exact version already exists. Continue or remove it before starting again.',409);need(state.units.length<12,'Keep up to twelve programmes. Remove one before adding another.',409);
    const profile=await readProfile();
+   // A course start can set this programme's goal without changing the
+   // learner's saved preferences or any other programme.
+   if(input.learningGoal!==undefined){need(typeof input.learningGoal==='string'&&input.learningGoal.trim().length>0&&input.learningGoal.length<=1200,'Check this programme’s learning goal.');profile.goal=input.learningGoal.trim();}
    state={...state,active:id,units:[newUnit(pack,profile,input.activityKeys,now()),...state.units]};
   }else{
    need(existing,'Create a programme before recording practice.');let action={...input.action};

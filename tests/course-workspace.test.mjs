@@ -63,8 +63,12 @@ test('assigned chapter starts a learner programme without an author review; stal
  const assign={action:'assign',jobId,accountReference:await learnerOwner(learner),draftHash:hash};assert.equal((await call(teacher,'pilot',assign)).status,404);
  await db.run('UPDATE workshop_jobs SET status=? WHERE id=?','published',jobId);
  assert.equal((await call(teacher,'pilot',{...assign,draftHash:'b'.repeat(64)})).status,409);assert.equal((await call(teacher,'pilot',assign)).status,200);
- const create={type:'create',packId:pack.id,contentHash:draftHash(pack),activityKeys:activitiesOf(pack).map(a=>a.key),evidenceConfirmed:false,expectedVersion:0};
+ const create={type:'create',packId:pack.id,contentHash:draftHash(pack),activityKeys:activitiesOf(pack).map(a=>a.key),evidenceConfirmed:false,learningGoal:'Explain the producer and consumer relationship in this assigned chapter.',expectedVersion:0};
+ const originalProfile=(await call(learner,'learning/journal')).profile;
+ assert.equal((await call(learner,'learning/studio',{...create,learningGoal:'x'.repeat(1201)})).status,400);
  assert.equal((await call(learner,'learning/studio',create)).status,200);
+ assert.equal((await call(learner,'learning/studio')).state.units[0].profile.goal,create.learningGoal);
+ assert.deepEqual((await call(learner,'learning/journal')).profile,originalProfile,'Topic goal does not rewrite saved learner preferences');
  assert.equal((await call(other,'learning/studio',{...create,evidenceConfirmed:true})).status,422);
  assert.equal((await call(teacher,'learning/studio',create)).status,400,'An author still reviews their own source');
  const catalog=await call(learner,'learning/studio/catalog');assert.ok(catalog.items.find(i=>i.jobId===jobId)?.readOnly);

@@ -37,7 +37,7 @@ function App(){
  const cycles=(client.cycles||[]).filter(c=>c.packId===pack?.id&&c.contentHash===(pack?draftHash(pack):null)),nextCycle=cycles.find(c=>c.stage==='revisit'&&!c.waiting)||cycles.find(c=>c.stage!=='complete')||cycles[0];
  const update=async action=>{await client.change({type:'update',packId:pack.id,contentHash:draftHash(pack),action});};
  const openProgramme=async (id,section='overview')=>{await client.change({type:'activate',id});go('programme');setSection(section)};
- const startItem=async (item,reviewed=false)=>{const id=unitKey(item.pack);if(!client.state.units.some(u=>u.id===id))await client.change({type:'create',packId:item.pack.id,contentHash:draftHash(item.pack),activityKeys:activitiesOf(item.pack).map(a=>a.key),evidenceConfirmed:reviewed});await openProgramme(id);};
+ const startItem=async (item,reviewed=false,learningGoal=contentOf(item.pack).learningMap?.map(n=>n.objective).join(' ').slice(0,1200)||('Explore '+item.pack.title))=>{const id=unitKey(item.pack);if(!client.state.units.some(u=>u.id===id))await client.change({type:'create',packId:item.pack.id,contentHash:draftHash(item.pack),activityKeys:activitiesOf(item.pack).map(a=>a.key),evidenceConfirmed:reviewed,learningGoal});await openProgramme(id);};
  const openSupport=key=>{setSupportKey(key||activitiesOf(pack)[0]?.key);go('support')};
  const choose=item=>{setSelected(unitKey(item.pack));setKeys(activitiesOf(item.pack).map(a=>a.key));setReviewed(false)};
  const toggle=(list,v)=>list.includes(v)?list.filter(x=>x!==v):[...list,v];

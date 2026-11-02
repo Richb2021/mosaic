@@ -12,6 +12,8 @@ The Studio now connects an organiser's course notebook to the existing reviewed-
 
 A learner's assignment introduction includes the hook and objectives. Starting an assigned programme checks a real, active, exact-version server grant; the learner does not have to tick the author's source-review checkbox. Each learner keeps their own programme, attempts and saves.
 
+Starting personal learning from a course uses that topic's goal for the new programme. Assigned starts derive a goal from the chapter's reviewed concept objectives. This does not overwrite the account's saved preferences or change older programmes; an existing programme continues with its own saved context.
+
 ## Data contract
 
 - NoCodeBackend `learner_profiles`, slot `courses`; no new table or schema migration.
