@@ -61,7 +61,7 @@ export function mountAdventure(container,{pack:raw,assets={},onExit=()=>{},onLib
   if(id==='sequence'){if(state.completed){showEnding();return}if(state.solved){if(pack.world)message({title:'The tower awaits',message:adventureGoal(state,pack)});else open({type:'decision'});return}open({type:'sequence'});return}
  }
  function walk(x,y,callback=null){if(panel||!state.started||document.querySelector('[aria-modal="true"]'))return;const point={x:clamp(x,5,95),y:clamp(y,72,88)};if(noMotion()||preferences.direct){stop();state.facing=point.x>=state.positions[state.room].x?1:-1;state.positions[state.room]=point;persist();updateSprite(0);if(callback)callback();return}destination=point;arrival=callback;feedback='';}
- function walkTo(id){const p=anchors[state.room][id];if(p)walk(p.x,p.y,()=>interact(id))}
+ function walkTo(id){const p=anchors[state.room][id];if(p)walk(id==='npc'?p.x+(p.x<50?9:-9):p.x,p.y,()=>interact(id))}
  function puzzleHTML(){
   const q=pack.sequence,mode=q.mode||'order',labels=mode==='sort'?q.targets:q.steps;
   const slots=[0,1,2].map(i=>`<div class="${state.plates[i]===undefined?'':'filled'}"><small>${i+1}${mode==='order'?'':'. '+esc(mode==='sort'?q.steps[i]:q.targets[i])}</small><span>${state.plates[i]===undefined?(mode==='order'?'Empty socket':'Awaiting a match'):esc(labels[state.plates[i]])}</span></div>`).join('');

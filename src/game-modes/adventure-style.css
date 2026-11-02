@@ -52,3 +52,10 @@
 .atlas-game .atlas-brand{overflow-wrap:anywhere}.atlas-game .atlas-panel h2{hyphens:auto}
 /* Decorative glyphs retain their target size when text is enlarged. */
 .atlas-game .atlas-hotspot>span{font-size:35px}.atlas-game .atlas-close{font-size:25px}.atlas-game .atlas-brand>span{font-size:38px}
+/* Keep the full play surface and satchel together on desktop; allow reflow
+   for narrow screens, short landscape and enlarged text. */
+.atlas-game{height:100svh;min-height:650px;grid-template-rows:auto minmax(250px,1fr) auto auto}
+.has-game-save-status .atlas-game{height:calc(100svh - 40px);min-height:650px}
+.atlas-game .atlas-top,.atlas-game .atlas-location,.atlas-game .atlas-satchel{min-height:min-content}
+.atlas-game.atlas-large-text,.has-game-save-status .atlas-game.atlas-large-text{height:auto;grid-template-rows:auto minmax(310px,52svh) auto auto}
+@media(max-width:700px),(max-height:600px){.atlas-game,.has-game-save-status .atlas-game{height:auto;min-height:calc(100svh - 40px);grid-template-rows:auto minmax(310px,52svh) auto auto}}
