@@ -36,7 +36,7 @@ export async function deliverCourse({tasks,previous=[],send,isCurrent=()=>true,o
   if(receipts[i].status==='confirmed')continue;
   if(!isCurrent())break;
   try{
-   const t=receipts[i];await send({action:'assign',accountReference:t.learner,jobId:t.jobId,draftHash:t.hash});
+   const t=receipts[i];await send(t.body||{action:'assign',accountReference:t.learner,jobId:t.jobId,draftHash:t.hash});
    receipts[i]={...t,status:'confirmed'};
   }catch(e){receipts[i]={...receipts[i],status:'unconfirmed',error:e?.message||'No confirmation received.'};if(isCurrent())onUpdate(receipts.map(r=>({...r})));break;}
   if(isCurrent())onUpdate(receipts.map(r=>({...r})));

@@ -1,6 +1,7 @@
 import {sqlDB,parse} from './data-control.js';
 import {admission} from './pilot-access.js';
 import {digest} from './content-service.js';
+import {learnerCourseGrants,grantChapters} from './course-grants.js';
 // Grants expose a published, read-only chapter, never the organiser's library,
 // private notes, unfinished drafts, other learners' saves or provider responses.
 export async function assignedChapters(env,owner){
@@ -11,5 +12,6 @@ export async function assignedChapters(env,owner){
   const manager=await admission(env,g.manager);if(!manager.admitted)continue;
   const j=await db.one('SELECT id,draft,created,updated FROM workshop_jobs WHERE id=? AND owner=? AND status=?',g.jobId,g.siteOwner,'published');if(j?.draft&&(!g.draftHash||await digest(j.draft)===g.draftHash))rows.push(j);
  }
- return rows;
+ for(const g of await learnerCourseGrants(env,owner))rows.push(...await grantChapters(env,g));
+ return [...new Map(rows.map(j=>[j.id,j])).values()];
 }

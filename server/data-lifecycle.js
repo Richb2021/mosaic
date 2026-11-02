@@ -1,3 +1,4 @@
+import {courseGrantRecords,consentScope,reportSlot,publicCourseGrant} from './course-grants.js';
 import {costSummary} from './cost-ledger.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {digest,safeId} from './content-service.js';
@@ -8,11 +9,11 @@ const L="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'
 const choices=new Set([0,7,30,90,365]);
 const sorted=values=>[...new Set(values)].sort();
 const ownedJobs=(db,siteOwner)=>db.all("SELECT * FROM workshop_jobs WHERE owner=? AND status!='usage-only' ORDER BY id",siteOwner);
-const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length});
+const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length});
 export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now()}){
  const db=sqlDB(env.DB),{controls}=await readControls(env,siteOwner,owner,now),lp=parse(controls.learner.policy),wp=parse(controls.workspace.policy);
  const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
- let selected=[],sourceIDs=[],assetIDs=[],profiles=[],saves=[];
+ let selected=[],sourceIDs=[],assetIDs=[],profiles=[],saves=[],profileRows=[];
  const expired=(stamp,days)=>days>0&&stamp+days*DAY<=now;
  if(mode==='episode'){const j=jobs.find(j=>j.id===id&&['creative','course-plan'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner);need(j,'Episode not found.',404);selected=[j];}
  else if(mode==='media'){assetIDs=assets.filter(a=>a.learner_owner===owner&&(id==='all'||a.id===id)).map(a=>a.id);need(id==='all'||assetIDs.length,'Recording not found.',404);}
@@ -27,7 +28,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
   assetIDs=assets.filter(a=>a.learner_owner===owner&&expired(a.created,lp.mediaDays)).map(a=>a.id);
   sourceIDs=resources.filter(r=>expired(r.created,wp.resourceDays)).map(r=>r.id);
   selected=jobs.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner&&expired(j.updated,lp.creativeDays)||parse(j.payload).resourceVersions?.some(v=>sourceIDs.includes(v.id)));
-  if(lp.progressDays)for(const table of ['learner_profiles','learner_saves']){const rows=await store.allRows(table,owner),latest=new Map();for(const r of rows)latest.set(r.slot_key,Math.max(latest.get(r.slot_key)||0,Number(r.updated_ms)));const ids=rows.filter(r=>expired(latest.get(r.slot_key),lp.progressDays)).map(r=>r.id);if(table==='learner_profiles')profiles=ids;else saves=ids;}
+  if(lp.progressDays)for(const table of ['learner_profiles','learner_saves']){const rows=await store.allRows(table,owner),latest=new Map();for(const r of rows)latest.set(r.slot_key,Math.max(latest.get(r.slot_key)||0,Number(r.updated_ms)));const ids=rows.filter(r=>expired(latest.get(r.slot_key),lp.progressDays)).map(r=>r.id);if(table==='learner_profiles'){profiles=ids;profileRows=rows}else saves=ids;}
  }else throw Object.assign(Error('Choose a supported data action.'),{status:400});
  const packs=new Set(selected.filter(j=>!parse(j.payload).recordType).flatMap(j=>{const id=parse(j.payload).chapterId;return id?[id,'rpg-'+id]:[]}));
  const derived=jobs.filter(j=>parse(j.payload).recordType==='creative'&&packs.has(parse(j.payload).packId));
@@ -36,7 +37,14 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  const ids=new Set(selected.map(j=>j.id));selected.push(...jobs.filter(j=>parse(j.payload).recordType==='creative-audio'&&ids.has(parse(j.payload).scriptId)));
  selected=[...new Map(selected.map(j=>[j.id,j])).values()];
  assetIDs.push(...assets.filter(a=>selected.some(j=>j.id===a.script_id)).map(a=>a.id));
- const plan={mode,id:id||null,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
+ const sharing=await courseGrantRecords(env,owner,siteOwner),jobIds=new Set(selected.map(j=>j.id));
+ const courseGrants=sharing.grants.filter(r=>{const g=parse(r.policy);return mode==='learner'&&g.learner===owner||mode==='workspace'&&g.siteOwner===siteOwner||g.siteOwner===siteOwner&&(jobIds.has(g.planId)||g.steps.some(s=>jobIds.has(s.jobId))||g.sources.some(s=>sourceIDs.includes(s.id)))}).map(({scope,policy})=>({scope,policy}));
+ const expiredSlots=mode==='expired'?new Set(profileRows.filter(r=>profiles.includes(r.id)).map(r=>r.slot_key)):new Set();
+ const remainingSlots=new Set(profileRows.map(r=>r.slot_key));
+ const consentMap=new Map(sharing.consents.filter(r=>mode==='learner'||expiredSlots.has(reportSlot(r.scope.slice(15)))||mode==='expired'&&lp.progressDays&&!remainingSlots.has(reportSlot(r.scope.slice(15)))).map(r=>[r.scope,{scope:r.scope,policy:r.policy}]));
+ for(const r of courseGrants){const scope=consentScope(r.scope.slice(13)),c=await db.one('SELECT scope,policy FROM data_controls WHERE scope=?',scope);if(c)consentMap.set(scope,c)}
+ const courseConsents=[...consentMap.values()].sort((a,b)=>a.scope.localeCompare(b.scope));
+ const plan={mode,id:id||null,courseGrants,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
  return {...plan,hash:await digest(JSON.stringify(plan)),counts:counts(plan)};
 }
 export async function deleteProviderResponse(id,env,fetcher=fetch){
@@ -53,6 +61,7 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
    for(const id of plan.assets){const row=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);if(!row)continue;need(env.BUCKET,'Private media storage is unavailable; cleanup will resume later.',503);await env.BUCKET.delete(row.object_key);need(!await env.BUCKET.head(row.object_key),'Recording removal has not been confirmed.',503);await db.run('DELETE FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);}
    if(plan.mode==='learner')await db.run('UPDATE cost_receipts SET learner_owner=NULL WHERE site_owner=? AND learner_owner=?',siteOwner,owner);
    await store.deleteRows('learner_profiles',owner,plan.profiles);await store.deleteRows('learner_saves',owner,plan.saves);
+   for(const r of [...(plan.courseConsents||[]),...(plan.courseGrants||[])])await db.run('DELETE FROM data_controls WHERE scope=? AND policy=?',r.scope,r.policy);
    for(const id of plan.jobs){const j=await db.one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,siteOwner);if(!j)continue;
     // Preserve only a content-free admission receipt until its 24h window ends.
     if(j.created>now()-DAY){const p=parse(j.payload),payload={recordType:'usage',...(p.revisionOf?{revisionOf:{deleted:true}}:{})};await db.run('UPDATE workshop_jobs SET request_key=?,request_hash=?,status=?,payload=?,draft=NULL,error=NULL,provider_id=NULL,updated=? WHERE id=? AND owner=?','deleted-'+id,'deleted','usage-only',JSON.stringify(payload),now(),id,siteOwner);}
@@ -73,7 +82,7 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
 }
 async function lockOperation(env,ctx,op){
  const db=sqlDB(env.DB),state=await readControls(env,ctx.siteOwner,ctx.owner,ctx.now());
- const plan=parse(op.plan),targets=plan.resources?.length||plan.mode==='workspace'?[state.controls.workspace,state.controls.learner]:[state.controls.learner];
+ const plan=parse(op.plan),targets=plan.resources?.length||plan.courseGrants?.length||plan.mode==='workspace'?[state.controls.workspace,state.controls.learner]:[state.controls.learner];
  for(const c of targets){
   if(c.operation===op.id)continue;
   const r=await db.run('UPDATE data_controls SET operation=?,updated=? WHERE scope=? AND operation IS NULL AND NOT EXISTS(SELECT 1 FROM data_leases WHERE scope=? AND expires>?)',op.id,ctx.now(),c.scope,c.scope,ctx.now());
@@ -119,7 +128,7 @@ export async function enforceRetention(env,ctx,{force=false,strict=false}={}){
  try{
   const plan=await deletionPlan(env,{...ctx,mode:'expired',now:ctx.now()});
   if(plan.assets.length&&!env.BUCKET){if(strict)need(false,'Private media storage is unavailable.',503);return;}
-  if(plan.assets.length+plan.jobs.length+plan.resources.length+plan.profiles.length+plan.saves.length)await startDeletion(env,ctx,plan);
+  if(plan.assets.length+plan.jobs.length+plan.resources.length+plan.profiles.length+plan.saves.length+(plan.courseGrants||[]).length+(plan.courseConsents||[]).length)await startDeletion(env,ctx,plan);
   await db.run('UPDATE data_controls SET checked_ms=? WHERE scope IN (?,?)',ctx.now(),state.scopes.learner,state.scopes.workspace);
  }catch(e){
   // Background maintenance cannot fail an unrelated read because another tab
@@ -177,7 +186,10 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
   }
   const rows=await db.all('SELECT id,script_id,script_hash,segment,status,bytes,created FROM media_assets WHERE site_owner=? AND learner_owner=? ORDER BY id',siteOwner,owner);
   const safeRow=r=>({slot:r.slot_key,version:r.version,updated:Number(r.updated_ms),data:parse(r.payload)});
-  const out={format:'mosaic-data-export',version:1,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),coursePlans:(paged&&input.cursor?[]:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)})),chapters:(paged&&input.cursor?[]:jobs.filter(j=>!parse(j.payload).recordType)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),coursePlans:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
+  const sharingRecords=await courseGrantRecords(env,owner,siteOwner);
+  const courseAssignments=sharingRecords.grants.filter(r=>!workspace||parse(r.policy).siteOwner===siteOwner).map(r=>{const g={...parse(r.policy),id:r.scope.slice(13)};return {...publicCourseGrant(g),revoked:!!g.revoked,...(g.learner!==owner?{learner:g.learner}:{})}});
+  const sharingSettings=workspace?[]:sharingRecords.consents.map(r=>({assignmentId:r.scope.slice(15),...parse(r.policy)}));
+  const out={format:'mosaic-data-export',version:1,courseAssignments,sharingSettings,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),coursePlans:(paged&&input.cursor?[]:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)})),chapters:(paged&&input.cursor?[]:jobs.filter(j=>!parse(j.payload).recordType)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),coursePlans:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
   need(JSON.stringify(out).length<24000000,'This data export exceeds 24 MB. Export a smaller workspace first.',413);await auditEvent(env,state.scopes[input.scope==='workspace'?'workspace':'learner'],'exported',{scope:out.scope},now());return noStore({export:out,...(page?{page}:{})});
  }
  if(input.action==='download'){

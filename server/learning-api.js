@@ -1,6 +1,7 @@
 import {assignedChapters} from './assignments.js';
 import {coursePlanAPI} from './course-plan-api.js';
 import {courseAPI} from './course-api.js';
+import {courseSharingAPI} from './course-sharing-api.js';
 import {workspaceIdentity,requireAdmission,admission} from './pilot-access.js';
 import {registerRetentionSubject} from './background-retention.js';
 import {learningLoopAPI} from './learning-loop-api.js';
@@ -34,13 +35,15 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  const {owner,principal,siteOwner}=await workspaceIdentity(user,env),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
  const scopedResolve=(id,hash,r,e)=>resolve(id,hash,r,e,siteOwner,owner);
  if(path==='data'){const access=await admission(env,principal);need(access.admitted||['active','revoked','closing'].includes(access.status),'Accept your invitation before using account data controls.',403);return await dataAPI(req,env,{owner,siteOwner,store,now});}
- const access=await requireAdmission(env,principal,{store,onboarding:true,storageOwner:owner});
+ const withdrawal=path==='course-sharing'&&req.method==='POST'&&await req.clone().json().then(x=>x.action==='share'&&x.enabled===false).catch(()=>false);
+ const access=await requireAdmission(env,principal,{store,onboarding:!withdrawal,storageOwner:owner});
  if(req.method==='POST'&&path.startsWith('creative')&&env.PILOT_ENABLED==='true'&&(!access.canAuthor||access.ageBand!=='18plus'))return noStore({error:'Ask your organiser to prepare and review new AI learning material. Your assigned games and learning record remain available.'},403);
  await registerRetentionSubject(env,{siteOwner,owner,now:now()});
  if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
  return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
  if(path==='course-plan')return await coursePlanAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
+ if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='loop')return await learningLoopAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
  if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,siteOwner,resolve:scopedResolve,included:packs,now});

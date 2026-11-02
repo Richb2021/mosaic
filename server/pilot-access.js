@@ -95,20 +95,20 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(row&&member.role==='learner'&&['active','revoked'].includes(member.status),'Choose an existing learner.',404);
   need(manager.admitted&&(manager.admin||manager.role===(member.context==='family'?'guardian':'teacher')),'Choose an authorised organiser for this setting.',403);
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
-  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager}),now(),scope,row.policy);
+  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
  }
  if(input.action==='restore-access'){
   need(manages,'Only an authorised organiser can manage access.',403);
   const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);
   need(member.status==='revoked'&&(access.admin||member.manager===owner),'Choose a withdrawn learner in your group.',403);
-  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active'}),now(),scope,row.policy);await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
+  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
  }
  if(input.action==='revoke'){
   need(manages,'Only an authorised organiser can manage access.',403);need(/^[a-f0-9]{64}$/.test(input.accountReference)&&input.accountReference!==owner,'Use the learner’s account support reference.');
   const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);need(row,'Learner membership not found.',404);need(access.admin||member.manager===owner,'This learner is not in your group.',403);
   need(['active','revoked'].includes(member.status),'This account is closing or already closed.',409);
-  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked'}),now(),scope,row.policy);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true});
  }

@@ -1,3 +1,4 @@
+import {digest} from './content-service.js';
 import {assignedChapters} from './assignments.js';
 import {learningLoopSummaries} from './learning-loop-api.js';
 import {emptyStudio,unitKey,newUnit,applyUnitAction,makeProgramme,validateStudioShape} from '../src/studio/programme.js';
@@ -13,9 +14,9 @@ export async function studioCatalog(req,env,included,siteOwner,learnerOwner){
  const owner=siteOwner;
  if(owner&&env.DB){
   const rows=await env.DB.prepare('SELECT id,draft FROM workshop_jobs WHERE owner=? AND status=? ORDER BY updated DESC LIMIT 80').bind(owner,'published').all();
-  for(const row of rows.results){try{const p=validatePlayableContent(JSON.parse(row.draft)),pack=p.template==='underlight-v1'?bundlePublishedChapter(p):p;if(pack)items.push({pack,jobId:row.id,origin:'Published from your reviewed material'});}catch{/* An invalid historical draft is never launchable. */}}
+  for(const row of rows.results){try{const p=validatePlayableContent(JSON.parse(row.draft)),pack=p.template==='underlight-v1'?bundlePublishedChapter(p):p;if(pack)items.push({pack,jobId:row.id,sourceHash:await digest(row.draft),origin:'Published from your reviewed material'});}catch{/* An invalid historical draft is never launchable. */}}
  }
- for(const row of await assignedChapters(env,learnerOwner)){try{const p=validatePlayableContent(JSON.parse(row.draft)),pack=p.template==='underlight-v1'?bundlePublishedChapter(p):p;items.push({pack,jobId:row.id,origin:'Assigned by your organiser',readOnly:true});}catch{}}
+ for(const row of await assignedChapters(env,learnerOwner)){try{const p=validatePlayableContent(JSON.parse(row.draft)),pack=p.template==='underlight-v1'?bundlePublishedChapter(p):p;items.push({pack,jobId:row.id,sourceHash:await digest(row.draft),origin:'Assigned by your organiser',readOnly:true});}catch{}}
  return [...new Map(items.map(x=>[unitKey(x.pack),x])).values()];
 }
 export async function studioAPI(req,env,{path,store,owner,siteOwner,resolve,included,now}){
