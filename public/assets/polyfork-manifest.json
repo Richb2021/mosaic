@@ -156,6 +156,198 @@
       "license": "Use in commercial projects, no attribution. No redistribution of the files themselves. https://polyfork.dev/licensing",
       "sha256": "fd42a31905bd2a0f3dcff8a844b841a61313d193113093ff73426970d13ee04a",
       "rest_pose": "Native T-pose with original skeleton"
+    },
+    {
+      "id": "polyfork_anvil",
+      "file": "polyfork_anvil.glb",
+      "provider": "Polyfork",
+      "source_id": "anvil-1286cb",
+      "source": "https://polyfork.dev/asset/anvil-1286cb",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 0.81,
+        "y": 0.82,
+        "z": 0.76
+      },
+      "triangles": 686,
+      "sha256": "c770754c4d57651446dbf6256657e8b7c3c76b502d5ed34fb2597416bb8d5c38",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_bread_oven",
+      "file": "polyfork_bread_oven.glb",
+      "provider": "Polyfork",
+      "source_id": "clay-bread-oven-860b06",
+      "source": "https://polyfork.dev/asset/clay-bread-oven-860b06",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 1.59,
+        "y": 1.52,
+        "z": 1.55
+      },
+      "triangles": 564,
+      "sha256": "dd24def10f0b16d7f3090277220671c5d94ff125fd8748fc319a92aeda9b6ed4",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_crate",
+      "file": "polyfork_crate.glb",
+      "provider": "Polyfork",
+      "source_id": "wooden-crate-b9c96a",
+      "source": "https://polyfork.dev/asset/wooden-crate-b9c96a",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 0.9,
+        "y": 0.61,
+        "z": 0.66
+      },
+      "triangles": 700,
+      "sha256": "498edb7a60db1aed1fc2caff1e1cb5f6d81bcb2ee782783425a17b4951bb983b",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_fence_wood",
+      "file": "polyfork_fence_wood.glb",
+      "provider": "Polyfork",
+      "source_id": "wooden-fence-3d8ee7",
+      "source": "https://polyfork.dev/asset/wooden-fence-3d8ee7",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 2,
+        "y": 1.22,
+        "z": 0.15
+      },
+      "triangles": 464,
+      "sha256": "ffc7cd6a65d418f6a928397d0b6ddc7b99fc4fa3f1f1c13557cad440d6d17bd8",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_flower_planter",
+      "file": "polyfork_flower_planter.glb",
+      "provider": "Polyfork",
+      "source_id": "flower-planter-500ed2",
+      "source": "https://polyfork.dev/asset/flower-planter-500ed2",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 0.82,
+        "y": 0.35,
+        "z": 0.32
+      },
+      "triangles": 606,
+      "sha256": "ed6fc913c6e924ffbd212d81c6f87619fe7a9de909a4fb872e2e99c2d2705e15",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_haystack",
+      "file": "polyfork_haystack.glb",
+      "provider": "Polyfork",
+      "source_id": "haystack-77b0dd",
+      "source": "https://polyfork.dev/asset/haystack-77b0dd",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 2.02,
+        "y": 1.85,
+        "z": 2.04
+      },
+      "triangles": 711,
+      "sha256": "a77309c0ef9a735c0a67c37ab8ec09aadb881ad4695ca11c3bb649639b8c38c4",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_quench_barrel",
+      "file": "polyfork_quench_barrel.glb",
+      "provider": "Polyfork",
+      "source_id": "quench-barrel-0c78fd",
+      "source": "https://polyfork.dev/asset/quench-barrel-0c78fd",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 1.08,
+        "y": 0.7,
+        "z": 1.08
+      },
+      "triangles": 576,
+      "sha256": "340ad351e09990b19e9aca0328fb8af20153157f48317ee904c7659d64e8bd8b",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_sack",
+      "file": "polyfork_sack.glb",
+      "provider": "Polyfork",
+      "source_id": "grain-sack-401d96",
+      "source": "https://polyfork.dev/asset/grain-sack-401d96",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 0.58,
+        "y": 0.73,
+        "z": 0.55
+      },
+      "triangles": 448,
+      "sha256": "75c7eb8ef23b01facfe74c308310d7a0e5283a203e963b2ffb5c37e2ed95c9b3",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_stone_wall",
+      "file": "polyfork_stone_wall.glb",
+      "provider": "Polyfork",
+      "source_id": "low-stone-wall-8a8ea3",
+      "source": "https://polyfork.dev/asset/low-stone-wall-8a8ea3",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 2.05,
+        "y": 0.94,
+        "z": 0.5
+      },
+      "triangles": 732,
+      "sha256": "0adeb13df9c14613af01175514a796b8763e108c70e81dbc7cf2144b1e7d0801",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_tree_stump",
+      "file": "polyfork_tree_stump.glb",
+      "provider": "Polyfork",
+      "source_id": "tree-stump-8c0513",
+      "source": "https://polyfork.dev/asset/tree-stump-8c0513",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 1.25,
+        "y": 1.32,
+        "z": 1.14
+      },
+      "triangles": 524,
+      "sha256": "b48c3ccece7181a2dc58d7de6054c0e50d8e4ee7a46912df97c3b35dfa69a8a0",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_water_trough",
+      "file": "polyfork_water_trough.glb",
+      "provider": "Polyfork",
+      "source_id": "water-trough-318ee1",
+      "source": "https://polyfork.dev/asset/water-trough-318ee1",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 2.35,
+        "y": 0.65,
+        "z": 1.06
+      },
+      "triangles": 670,
+      "sha256": "c5caf97507a5a1f7c7906b3d553550a8a4054a42f715f4a51b1ab47f53f35d02",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
+    },
+    {
+      "id": "polyfork_well",
+      "file": "polyfork_well.glb",
+      "provider": "Polyfork",
+      "source_id": "village-well-f8e361",
+      "source": "https://polyfork.dev/asset/village-well-f8e361",
+      "kit": "medieval-village-kit-ca0b43",
+      "size_m": {
+        "x": 1.96,
+        "y": 2.56,
+        "z": 1.53
+      },
+      "triangles": 788,
+      "sha256": "b7a025678ce56b59a501838a34253077a061dbe9776994579f146a8aca94af36",
+      "license": "Embedded in games/apps only; no standalone redistribution. https://polyfork.dev/licensing"
     }
   ]
 }

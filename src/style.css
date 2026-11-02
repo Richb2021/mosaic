@@ -35,3 +35,5 @@
 
 /* Source selection and concept review use the same workshop treatment in the RPG. */
 .evidence-selection{max-height:45vh;overflow:auto;padding-right:12px}.evidence-selection section,.learning-map-review section{padding:18px 0;border-bottom:1px solid #647b84}.evidence-selection section p{white-space:pre-wrap}.concept-editor{margin:20px 0;padding:16px;border-left:3px solid #76a9bb}.learning-map-editor .workshop-check{align-items:flex-start}.learning-map-review h4{font-weight:400;color:#e9c479}
+/* Long dungeon names must push their quest summary down on narrow screens. */
+@media(max-width:480px){.field-header{position:relative;left:auto;right:auto;top:auto;margin:15px 15px 0}.quest-tracker{position:relative;left:auto;top:auto;margin:12px 15px 0;max-width:calc(100% - 30px)}}

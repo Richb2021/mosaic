@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.j-game *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 .j-account-link{font:inherit;color:#e4c48c;text-decoration:none;font-size:14px;padding:10px 4px}.j-star .star-gem{transform:none;border-radius:50%}.journal-save-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* Keep the overhead pitch and its gameplay coordinate system aligned. */
+.j-stadium>.j-background{object-fit:fill}

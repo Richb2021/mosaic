@@ -1,6 +1,7 @@
 import {worksMap} from './chapter-maps.js';
 import {DISCOVERIES} from './scenes.js';
 import {makeInteriors,BUILDINGS} from './interiors.js';
+import {solidProps} from './prop-collision.js';
 const prop=(asset,x,z,scale=1,rotation=0)=>({asset,x,z,scale,rotation});
 const npc=(name,x,z)=>({id:'npc',kind:'npc',name,x,z,asset:'ivo'});
 const exit=(to,x,z)=>({id:'exit-'+to,kind:'exit',to,name:to,x,z,asset:'arch'});
@@ -58,12 +59,10 @@ for(const [id,m] of Object.entries(MAPS)){
 }
 for(const [id,d] of Object.entries(DISCOVERIES))MAPS[d.area].entities.push({id,kind:'discovery',name:'Inspect '+d.title,asset:'crystal',x:d.x,z:d.z});
 MAPS.mill.entities.push({id:'works-entrance',kind:'works-entrance',name:'Underlight Works',asset:'arch',x:4,z:8});
+const SCENERY={quay:[['well',6,6],['crate',8,7],['sack',8.8,7],['flower_planter',-9,-7]],woods:[['tree_stump',-10,5],['fence_wood',-10,-9],['fence_wood',-8,-9],['haystack',12,6]],mill:[['water_trough',10,5],['sack',-7,7],['crate',-8,7]],forge:[['anvil',-4,2],['quench_barrel',-5.8,2],['bread_oven',9,5]],quarry:[['stone_wall',-10,6],['stone_wall',-12,6],['crate',9,-7]],archive:[['flower_planter',-9,6],['flower_planter',9,6]],observatory:[['stone_wall',-9,8],['flower_planter',10,5]],beacon:[['stone_wall',-10,7],['stone_wall',10,7]]};
+for(const [id,placements] of Object.entries(SCENERY))for(const [asset,x,z] of placements)MAPS[id].props.push(prop('polyfork_'+asset,x,z));
 export const INTERIORS=makeInteriors(MAPS);
+for(const maps of [MAPS,INTERIORS])for(const id of Object.keys(maps))maps[id]=solidProps(maps[id]);
 export {BUILDINGS};
-export const getMap=s=>s.chapter?.room?worksMap(s):s.interior?INTERIORS[s.interior]:MAPS[s.area];
-export const blocked=(map,x,z)=>Math.abs(x)>map.bounds.x||Math.abs(z)>map.bounds.z||map.obstacles.some(([cx,cz,w,h])=>Math.abs(x-cx)<w/2+.25&&Math.abs(z-cz)<h/2+.25);
-export function findPath(map,start,end){
- const step=.5,key=(x,z)=>`${x},${z}`,grid=p=>[Math.round(p.x/step),Math.round(p.z/step)];const [sx,sz]=grid(start),[ex,ez]=grid(end);const queue=[[sx,sz]],seen=new Set([key(sx,sz)]),parents=new Map();let found=null;
- for(let i=0;i<queue.length&&i<12000;i++){const [x,z]=queue[i];if(Math.hypot(x-ex,z-ez)<=1){found=[x,z];break}for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,nz=z+dz,k=key(nx,nz);if(seen.has(k)||blocked(map,nx*step,nz*step))continue;seen.add(k);parents.set(k,[x,z]);queue.push([nx,nz])}}
- if(!found)return [];const path=[];let cur=found;while(cur[0]!==sx||cur[1]!==sz){path.push({x:cur[0]*step,z:cur[1]*step});cur=parents.get(key(...cur));if(!cur)return []}return path.reverse();
-}
+export const getMap=s=>s.chapter?.room?solidProps(worksMap(s)):s.interior?INTERIORS[s.interior]:MAPS[s.area];
+export {blocked,findPath} from './navigation.js';

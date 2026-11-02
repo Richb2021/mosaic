@@ -1,0 +1,523 @@
+{
+  "version": 1,
+  "provider": "Sorceress",
+  "model": "gpt-image-2.5-sunburst",
+  "style": "Painterly adventure; navy, limestone, aged brass, moss",
+  "scenes": {
+    "novel-square": {
+      "url": "/game-modes/expansion-art/novel-square.webp",
+      "width": 1920,
+      "height": 1078,
+      "sourceJobId": "21e110ed-5616-4069-a0c3-4d693c59d451",
+      "sha256": "db9eeaca65735ef29439292b9c08a348de7204371eb3a930248bfd6544cd8736"
+    },
+    "novel-foundry": {
+      "url": "/game-modes/expansion-art/novel-foundry.webp",
+      "width": 1920,
+      "height": 1078,
+      "sourceJobId": "80b9b10d-990d-4419-bb11-f8c82a6210bd",
+      "sha256": "ea09eaac3a133fb70ec30207a12815f6440f42ac2006dbee053d7c0b620919da"
+    },
+    "quiz-orrery": {
+      "url": "/game-modes/expansion-art/quiz-orrery.webp",
+      "width": 1920,
+      "height": 1078,
+      "sourceJobId": "d8aad13d-c0c7-43ed-b144-015356f74a7d",
+      "sha256": "d110e9320601ee8b00f7b4613454c3e471a84d5b0d263dd0575e40f5f3f77981"
+    },
+    "sports-ground": {
+      "url": "/game-modes/expansion-art/sports-ground.webp",
+      "width": 1920,
+      "height": 1078,
+      "sourceJobId": "0af0659d-2713-4115-9d39-6b8768390745",
+      "sha256": "3cb081cf823cbdbd089b931e2e2a7e19f8218d7c9496701a2c98655e51299873"
+    },
+    "merge-bench": {
+      "url": "/game-modes/expansion-art/merge-bench.webp",
+      "width": 1920,
+      "height": 1078,
+      "sourceJobId": "3be1acae-6fd7-42dd-9307-4fe58bd5d720",
+      "sha256": "3d489cd1089136868a6a60c2e3d284d1d58aac940dc259dd9a7cdc2268e5e010"
+    }
+  },
+  "cards": {
+    "steam": {
+      "url": "/game-modes/expansion-art/cards-steam.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "e4ef265c97d364d3ff14e04ca1509b02b6a5336ee44d059f6c6d94ed5dd4f826"
+    },
+    "waterwheel": {
+      "url": "/game-modes/expansion-art/cards-waterwheel.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "ba7f32a5115c29679a8fe6ee9589a78ac5e701912374659b1d253269844d62e8"
+    },
+    "canal": {
+      "url": "/game-modes/expansion-art/cards-canal.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "a7dc94856bb4bb3accc539990bb793fe7c66535f813434e4fcefb8e94a1b950a"
+    },
+    "rail": {
+      "url": "/game-modes/expansion-art/cards-rail.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "b87b6135c32ba07571745891a2904691158e330a22bcbd8d5013e14379a13792"
+    },
+    "loom": {
+      "url": "/game-modes/expansion-art/cards-loom.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "8a417924b2760ec16cafc938c85cb080d33afdfd1d6dff2df0f1497d0f0f2c37"
+    },
+    "iron": {
+      "url": "/game-modes/expansion-art/cards-iron.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "491f33cbed3f9c56aeb8bec428dd6583dc4508e7d4a32cf3c96bda6b0dadf5f1"
+    },
+    "workers": {
+      "url": "/game-modes/expansion-art/cards-workers.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "7279965cfe9f65aff8ff87ffb97111c829c944b922cb3deecc2ee1972eb65efb"
+    },
+    "school": {
+      "url": "/game-modes/expansion-art/cards-school.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "b482cb9914b4b38560caa1006112466819a01c99b835e52b12cf3ed9ff372352"
+    },
+    "inspector": {
+      "url": "/game-modes/expansion-art/cards-inspector.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "50919ab259eef50f630862285f7fa4e404b7efdb5a4b3d4257554cc828ed48f4"
+    },
+    "trees": {
+      "url": "/game-modes/expansion-art/cards-trees.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "b15896866573be812c437676620b26e5ccf32d18d67dd624f4e6704ac4306751"
+    },
+    "water": {
+      "url": "/game-modes/expansion-art/cards-water.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "9c2542ea933190c4dd0764adb08f6e3a77da0a8bbc10ae06da5a2e2cd074cdac"
+    },
+    "soil": {
+      "url": "/game-modes/expansion-art/cards-soil.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "eb46b80c1400432ca494b2159aa93f61f098f7cfa74e7f1e7c19f7c33a6ea5e5"
+    },
+    "geology": {
+      "url": "/game-modes/expansion-art/cards-geology.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "0d5857c0a934dacdbaf69d22d7d4fddba8a44cb1030c0faf27b2800de117fa64"
+    },
+    "river": {
+      "url": "/game-modes/expansion-art/cards-river.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "55addf7a966b4362505734d78f46fb9d73e1c25c996309e2c1aa81f4dd62efa0"
+    },
+    "library": {
+      "url": "/game-modes/expansion-art/cards-library.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "7808e4a7dd76f9d10392ac7c2fda6050cd3c84cf4ab6de8c219ec78bed47f128"
+    },
+    "forge": {
+      "url": "/game-modes/expansion-art/cards-forge.webp",
+      "width": 640,
+      "height": 640,
+      "sourceJobId": "58872902-adb1-4cf8-aa6b-b9cc482d408e",
+      "sha256": "b67c226d0b7c5a15e87e889e0efa92593b4cb353f66ea6f7a49d94dcd1ac4a9d"
+    }
+  },
+  "props": {
+    "crate": {
+      "url": "/game-modes/expansion-art/props-crate.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "c55c08dc30f70685abb182051bfa2982fd8cdbaab3422012e77e6d2aad2e2def",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "barrel": {
+      "url": "/game-modes/expansion-art/props-barrel.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "7c775c4a5517f4d8de6e5b2c50b38b870a1a9195fbf913664d315b6369a8c2d9",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "planter": {
+      "url": "/game-modes/expansion-art/props-planter.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "03ff6bee67e544e31718853bdf7861a6ec9315c07474a47f3f906e8517b6a1dd",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "bench": {
+      "url": "/game-modes/expansion-art/props-bench.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "5013a90aecfc0eed4bd7b4c0627ef92428fc14f1d17e1d6dd4a6f89ce235a49a",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "trough": {
+      "url": "/game-modes/expansion-art/props-trough.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "5c65803429302a64c6c5d4aaaa285434fa6a932e6d2dcd2a19a8c9d2f3222726",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "wall": {
+      "url": "/game-modes/expansion-art/props-wall.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "6bc1bc605cb49365f5973ef8f448ad7b2884182adc24d3efcee30bcdc5cdc6a5",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "rope": {
+      "url": "/game-modes/expansion-art/props-rope.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "0a5d8394bab9419534de0f248b548883ca48c901c37a109e0a0e1bc350e19c99",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "gear": {
+      "url": "/game-modes/expansion-art/props-gear.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "33f17bbde6616d38ac6c65e4dccb4e40fe8eed7a1d99bd24ff5d4130a22e706e",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "chest": {
+      "url": "/game-modes/expansion-art/props-chest.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "b5870adf6c52c2be4a05f4ed3fb198ece606cfa57e6608522893420e622cc2a4",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "books": {
+      "url": "/game-modes/expansion-art/props-books.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "f52b9cf16d06e64b55c49675f6dc176400a4e20b64856a75cb920439af8e30d2",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "lantern": {
+      "url": "/game-modes/expansion-art/props-lantern.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "16ff21b9a3da6b64f76b5ea41ed3e0269b5f8cc475f0553e762730f3812e74ab",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "sack": {
+      "url": "/game-modes/expansion-art/props-sack.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "16c104bf-ab06-4cae-8317-a4442441a8dc",
+      "sha256": "1e5e21e7f70fc476e15346b3b2c4c9969b45aaff81fa5554639264d4af6b21fa",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    }
+  },
+  "town": {
+    "hall": {
+      "url": "/game-modes/expansion-art/town-hall.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "8b4a1c947bef96b7edc40a129bfbf6f3df517fc8a262d1e5bc0847264da9e66e",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "home": {
+      "url": "/game-modes/expansion-art/town-home.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "24356225f9f92bc09a29adf29115210cb0af1d0a40993cb26d7a3d951de38c96",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "workshop": {
+      "url": "/game-modes/expansion-art/town-workshop.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "5674cf75b89f06d549aaeccbe91f254cfe1a08646947571fcbb4227bf01a27f4",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "market": {
+      "url": "/game-modes/expansion-art/town-market.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "ea6f2bef329e7f3b1deaf7f87955fd9e14d0877c12c53b79a2ff84e5c0da0800",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "warehouse": {
+      "url": "/game-modes/expansion-art/town-warehouse.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "53754ebe5c9423059a8bdd508ff6a9880616aac506130fa0e1afea093bbebd3f",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "school": {
+      "url": "/game-modes/expansion-art/town-school.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "8bf641131ee40d54ed1d125df5e1547f40bebaba3d9e94acd0959b02d988e266",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "clinic": {
+      "url": "/game-modes/expansion-art/town-clinic.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "e9fd56e234ed912cd6897ac09c1a397b1e7a89554aa76ee65760e54eaf542277",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "garden": {
+      "url": "/game-modes/expansion-art/town-garden.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "0f250fa38da2cf70c90ee6d12090925ed6473261101055247c7ac09df9cafeb2",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "power": {
+      "url": "/game-modes/expansion-art/town-power.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "7eb671930e20807818c4baac7d92c5e8b833ee3d9cf5c6638ef91b85856ac093",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "water": {
+      "url": "/game-modes/expansion-art/town-water.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "77f41178-2239-4152-9dc7-1c2628144d34",
+      "sha256": "b1dcacd56d83f7e97494c1d44cfbdd36115773ed2b3b8533418c469122eddbdb",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    }
+  },
+  "craft": {
+    "seed": {
+      "url": "/game-modes/expansion-art/craft-seed.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "9efd62f1f171b49f02692bc4c622f0292288bf0a8875806f4437f4bf8cf3f62e",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "sapling": {
+      "url": "/game-modes/expansion-art/craft-sapling.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "b1479989b49f2777e6249491e5fb1d36c24b88737c1b8b18bad33f87d1b893c7",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "tree": {
+      "url": "/game-modes/expansion-art/craft-tree.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "68a6f3fb54f7066187f124588a61c8f84e02ade9f4d24d85a415645734e1317f",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "fibre": {
+      "url": "/game-modes/expansion-art/craft-fibre.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "572c6c5d5a6dd86653dff6475940eab02d9b011731891cf3792a1f324ab40abc",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "spool": {
+      "url": "/game-modes/expansion-art/craft-spool.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "8c957259f3929b9a4562b99aef00b5b1548816cca53d471865188c2c0a56420e",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "cloth": {
+      "url": "/game-modes/expansion-art/craft-cloth.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "8ef169168c5e116fa92b7cf155d723f0ad669df6db7febf031daadcae11ea66e",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "gear": {
+      "url": "/game-modes/expansion-art/craft-gear.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "193d20b60835976f65bdeffe380cc1f4c936b6739dfe027540714203af706276",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    },
+    "mechanism": {
+      "url": "/game-modes/expansion-art/craft-mechanism.webp",
+      "width": 720,
+      "height": 720,
+      "sourceJobId": "36fcb4e2-2300-4077-94e1-a8c7a349df68",
+      "sha256": "30610cbfb2a27c4b0454c4b49b6a00ae288f473e30f2cae61e5b4239e2e29dda",
+      "anchor": [
+        0.5,
+        0.94
+      ],
+      "alpha": true
+    }
+  }
+}
