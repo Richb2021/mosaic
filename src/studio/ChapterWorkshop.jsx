@@ -21,7 +21,7 @@ export function ChapterWorkshop({request,topic,client,onAttach,onClose}){
    const resource=workshop.resources.find(r=>r.id===request.id);
    context.get().openModal({kind:request.kind==='source'&&resource?'resource-source':request.kind==='add'?'resource-add':request.kind==='plan'?'resource-plan':'resource-library',...(resource?{resource}:{})});
   }catch(e){setError(e.message)}})();
-  return()=>{closed=true;modal=null;clearTimeout(workshop.timer);root.removeEventListener('click',click);root.removeEventListener('change',change);root.removeEventListener('input',change)};
+  return()=>{closed=true;modal=null;workshop.extraction?.abort();clearTimeout(workshop.timer);root.removeEventListener('click',click);root.removeEventListener('change',change);root.removeEventListener('input',change)};
  },[request]);
  return <section className="cw-workshop"><div className="cw-workshop-top"><button onClick={onClose}>Back to topic</button><span>{topic.title}</span></div>{error&&<p role="alert" className="message error">{error}</p>}{current&&<div className="cw-attach"><p><strong>{current.value.draft?.title||current.value.title}</strong><br/>Keep this {current.type} with this topic. Linking it does not publish or assign it.</p><button className="primary" disabled={saving} onClick={async()=>{setSaving(true);setError('');try{await onAttach(current);setCurrent(null);onClose()}catch(e){setError(e.message)}finally{setSaving(false)}}}>Add {current.type} to topic</button></div>}{loading&&!error&&<p role="status">Opening the source workshop…</p>}<div ref={host} aria-busy={loading&&!error}/></section>;
 }

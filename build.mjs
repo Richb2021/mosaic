@@ -13,3 +13,11 @@ await build({entryPoints:['src/pdf-reader.js'],bundle:true,format:'esm',minify:t
 await copyFile('node_modules/pdfjs-dist/build/pdf.worker.mjs','public/extraction/pdf.worker.mjs');
 for(const dir of ['standard_fonts','cmaps'])await cp('node_modules/pdfjs-dist/'+dir,'public/extraction/'+dir,{recursive:true});
 await copyFile('node_modules/pdfjs-dist/LICENSE','public/extraction/PDFJS-LICENSE.txt');
+await mkdir('public/extraction/ocr',{recursive:true});
+await build({entryPoints:['src/ocr-reader.js'],bundle:true,format:'esm',minify:true,outfile:'public/extraction/ocr-reader.js',target:'es2022'});
+await build({entryPoints:['src/ocr-worker.js'],bundle:true,format:'esm',minify:true,outfile:'public/extraction/ocr-reader-worker.js',target:'es2022'});
+await copyFile('node_modules/tesseract.js/dist/worker.min.js','public/extraction/ocr/worker.min.js');
+for(const name of ['tesseract-core-lstm.wasm.js','tesseract-core-simd-lstm.wasm.js','tesseract-core-relaxedsimd-lstm.wasm.js'])await copyFile('node_modules/tesseract.js-core/'+name,'public/extraction/ocr/'+name);
+await copyFile('node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz','public/extraction/ocr/eng.traineddata.gz');
+await copyFile('node_modules/tesseract.js/LICENSE.md','public/extraction/ocr/TESSERACT-LICENSE.txt');
+await copyFile('node_modules/tesseract.js-core/LICENSE','public/extraction/ocr/CORE-LICENSE.txt');

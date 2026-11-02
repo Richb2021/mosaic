@@ -1,5 +1,5 @@
 import {unzipSync} from 'fflate';
-export const DOCUMENT_ACCEPT='.txt,.md,.markdown,.pdf,.docx,.pptx,.vtt,.srt';
+export const DOCUMENT_ACCEPT='.txt,.md,.markdown,.pdf,.docx,.pptx,.vtt,.srt,.png,.jpg,.jpeg,.webp';
 const need=(v,m)=>{if(!v)throw Error(m)};
 const decode=bytes=>new TextDecoder('utf-8',{fatal:true}).decode(bytes);
 const normal=text=>text.replace(/\r\n?/g,'\n').replace(/[\t ]+\n/g,'\n').trim();
@@ -33,10 +33,11 @@ export function extractTranscript(text){
  }
  need(sections.length,'No timed captions were found in this transcript.');return {text:sections.join('\n\n'),warnings:['Caption timing is preserved. Check transcription errors, speaker names and missing context.']};
 }
-export async function extractDocument(file,{pdfReader,Parser=globalThis.DOMParser}={}){
- const extension=file.name.split('.').at(-1).toLowerCase();need(DOCUMENT_ACCEPT.split(',').includes('.'+extension),'Choose text, Markdown, PDF, DOCX, PPTX, VTT or SRT.');need(file.size>0&&file.size<=8*1024*1024,'Choose a file up to 8 MB.');
+export async function extractDocument(file,{pdfReader,imageReader,Parser=globalThis.DOMParser,...options}={}){
+ const extension=file.name.split('.').at(-1).toLowerCase();need(DOCUMENT_ACCEPT.split(',').includes('.'+extension),'Choose text, PDF, DOCX, PPTX, captions, PNG, JPEG or WebP.');need(file.size>0&&file.size<=8*1024*1024,'Choose a file up to 8 MB.');options.signal?.throwIfAborted();
  const bytes=new Uint8Array(await file.arrayBuffer());need(bytes.length<=8*1024*1024,'The file exceeds 8 MB.');let result;
- if(extension==='pdf'){const read=pdfReader||(await import('/extraction/pdf-reader.js')).extractPDF;result=await read(bytes);}
+ if(extension==='pdf'){const read=pdfReader||(await import('/extraction/pdf-reader.js')).extractPDF;result=await read(bytes,options);}
+ else if(['png','jpg','jpeg','webp'].includes(extension)){need(options.ocr===true,'Enable “Read printed scans” before choosing an image.');const read=imageReader||(await import('/extraction/ocr-reader.js')).extractImage;result=await read(bytes,options);}
  else if(['docx','pptx'].includes(extension))result=extractOffice(bytes,extension,Parser);
  else if(['vtt','srt'].includes(extension))result=extractTranscript(decode(bytes));
  else result={text:decode(bytes),warnings:[]};

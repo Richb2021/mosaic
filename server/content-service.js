@@ -15,7 +15,7 @@ export const safeId=v=>typeof v==='string'&&/^[a-z][a-z0-9-]{0,79}$/.test(v);
 export const boundedText=(value,max,min=1)=>typeof value==='string'&&value.trim().length>=min&&value.length<=max;
 export async function extractResource(input){
  requireValue(boundedText(input.title,160),'Give the resource a title (up to 160 characters).');
- requireValue(!input.filename||typeof input.filename==='string'&&input.filename.length<=240&&/\.(txt|md|markdown|pdf|docx|pptx|vtt|srt)$/i.test(input.filename),'Upload text extracted from a supported document.');
+ requireValue(!input.filename||typeof input.filename==='string'&&input.filename.length<=240&&/\.(txt|md|markdown|pdf|docx|pptx|vtt|srt|png|jpg|jpeg|webp)$/i.test(input.filename),'Upload text extracted from a supported document.');
  requireValue(boundedText(input.text,60000,60)&&new TextEncoder().encode(input.text).length<=65536,'Use 60–60,000 characters, within 64 KB.');
  requireValue(!/[\x00-\x08\x0b\x0c\x0e-\x1f\ufffd]/.test(input.text),'This file is not readable UTF-8 text.');
  const text=input.text.replace(/\r\n?/g,'\n').trim(),checksum=await digest(text),units=[];

@@ -32,4 +32,4 @@ The browser evidence and production result are recorded in `output/course-worksp
 
 ## Remaining boundaries
 
-This is a bounded course notebook and lexical passage finder, not a semantic search engine or a formal curriculum map. Scanned documents still need reviewed text; OCR, diagram and equation extraction, large-library pagination, curricular standards alignment, group-level reporting and bulk term planning are later work. The Site audience remains private to its owner. No new email service, provider model or billing arrangement is introduced here.
+This is a bounded course notebook and lexical passage finder, not a semantic search engine or a formal curriculum map. English printed scans can now be read on-device with explicit OCR selection, editable transcription and source review; see OCR.md. Reliable diagram/equation interpretation, semantic retrieval, large-library pagination, curricular standards alignment, group-level reporting and bulk term planning remain later work. The Site audience remains private to its owner. No new email service, provider model or billing arrangement is introduced here.

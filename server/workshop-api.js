@@ -13,7 +13,7 @@ const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null}={}){
  try{
   const url=new URL(req.url),path=url.pathname.replace(/^\/api\/workshop\/?/,'').split('/').filter(Boolean),method=req.method;
-  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt'],extraction:'browser-text-only',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
+  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt','png','jpg','jpeg','webp'],extraction:'browser-text-and-optional-english-ocr',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
   requireValue(owner&&owner.length<=200,'Sign in to your learner account to use your resource library.',401);
   requireValue(env.DB,'Resource storage is not configured.',503);
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
