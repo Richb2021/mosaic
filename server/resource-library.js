@@ -1,6 +1,7 @@
 import {digest,requireValue,safeId} from './content-service.js';
 import {goalTerms} from '../src/evidence-selection.js';
 import {searchPassages} from '../src/studio/course-model.js';
+import {rankedRetrieval} from './ranked-retrieval.js';
 export const RESOURCE_LIMIT=500,RESOURCE_PAGE_SIZE=25,PASSAGE_PAGE_SIZE=30;
 export const RESOURCE_METADATA='id,title,checksum,status,created,json_array_length(payload,\'$.units\') AS unitCount';
 const older=(r,c)=>r.created<c.created||r.created===c.created&&r.id<c.id;
@@ -31,6 +32,7 @@ export async function resourcePage(db,owner,params){
  return {resources,total:catalogue.length,matching:matches.length,limit:RESOURCE_LIMIT,nextCursor:remaining.length>RESOURCE_PAGE_SIZE?encode({scope:o.scope,created:last.created,id:last.id,unit:0}):null};
 }
 export async function resourceSearch(db,owner,params){
+ if(params.get('order')==='relevance')return rankedRetrieval(db,owner,params,resourceMetadata);
  const o=await options(params,owner,'search'),terms=goalTerms(o.query);requireValue(terms.length>0,'Enter at least one meaningful word of three or more characters.');requireValue(terms.length<=12,'Use up to twelve meaningful search words.');
  const catalogue=scopeRows(await resourceMetadata(db,owner),o),rows=catalogue.filter(r=>!o.cursor||older(r,o.cursor)||same(r,o.cursor));const results=[];let scanned=0;
  // Read bounded batches; never materialise the whole library's text. A cursor

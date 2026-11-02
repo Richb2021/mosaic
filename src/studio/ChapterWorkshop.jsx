@@ -1,5 +1,6 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {ResourceWorkshop} from '../resource-workshop.js';
+import {currentEvidence} from '../passage-ranking.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Embed the existing reviewed-source pipeline. It owns its request IDs and
 // resumes provider jobs; this wrapper never submits inference independently.
@@ -19,7 +20,7 @@ export function ChapterWorkshop({request,topic,client,onAttach,onClose}){
   void (async()=>{try{await workshop.refresh();if(closed)return;workshop.remember(topic.resourceMetadata||[]);const reviewed=topic.resources.filter(r=>workshop.resources.some(x=>x.id===r.id&&x.checksum===r.checksum&&x.status==='reviewed'));workshop.selected=new Set(reviewed.slice(0,3).map(r=>r.id));workshop.form.goal=request.goal||topic.goal;workshop.form.level=[client.journal.profile.level,client.journal.profile.context,client.journal.profile.interests.join(', ')].filter(Boolean).join('; ').slice(0,240);
    if(request.kind==='job'){await workshop.showJob(request.id,null);return;}
    const resource=request.kind==='source'?await workshop.fetchSource(request.id):null;if(request.kind==='plan')await workshop.loadSources({reset:true,status:'reviewed'});if(closed)return;
-   if(request.evidence){workshop.selected=new Set(request.evidence.map(e=>e.resourceId));await Promise.all([...workshop.selected].map(id=>workshop.fetchSource(id)));if(closed)return;context.get().openModal({kind:'resource-evidence',evidenceIds:request.evidence.map(e=>e.id),confirmed:false});return;}
+   if(request.evidence){workshop.selected=new Set(request.evidence.map(e=>e.resourceId));const fresh=await Promise.all([...workshop.selected].map(id=>workshop.fetchSource(id)));if(closed)return;currentEvidence(request.evidence,fresh);context.get().openModal({kind:'resource-evidence',evidenceIds:request.evidence.map(e=>e.id),confirmed:false});return;}
    context.get().openModal({kind:request.kind==='source'&&resource?'resource-source':request.kind==='add'?'resource-add':request.kind==='plan'?'resource-plan':'resource-library',...(resource?{resource}:{}),...(request.kind==='plan'&&reviewed.length>3?{feedback:'The first three reviewed topic sources are selected. Change the selection below to choose the evidence you need.'}:{})});
   }catch(e){setError(e.message)}})();
   return()=>{closed=true;modal=null;workshop.extraction?.abort();clearTimeout(workshop.timer);root.removeEventListener('click',click);root.removeEventListener('change',change);root.removeEventListener('input',change)};

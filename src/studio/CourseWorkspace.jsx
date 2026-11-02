@@ -1,6 +1,7 @@
 import React,{useEffect,useState,useRef} from 'react';
 import {canPrepare,pilotRequest} from './client.js';
-import {LibraryPicker,PassageFinder} from './SourceLibrary.jsx';
+import {LibraryPicker} from './SourceLibrary.jsx';
+import {EvidenceFinder} from './EvidenceFinder.jsx';
 import {CoursePlanner} from './CoursePlanner.jsx';
 import {ChapterWorkshop} from './ChapterWorkshop.jsx';
 import {formatName,activitiesOf,unitKey,contentOf} from './programme.js';
@@ -43,7 +44,7 @@ export function CourseWorkspace({client,onStart,onBrowse}){
  {!sources.length&&<p>Add notes or a document, or reuse something already in your library.</p>}
  <details><summary>Use a source already in my library</summary><LibraryPicker key={client.journal.user.id+topic.id} linked={topic.resources.map(r=>r.id)} disabled={busy} onPick={r=>run(()=>attach({type:'resource',value:r}),'Source linked to this topic.')}/></details>
  </section>
- <PassageFinder key={account+topic.id+readySources.map(s=>s.binding.id+s.binding.checksum).join(',')} sources={readySources.map(s=>s.resource)} onOpen={id=>setWorkshop({kind:'source',id})}/>
+ <EvidenceFinder key={account+topic.id} sources={readySources.map(s=>s.resource)} goal={topic.goal||course.goal} disabled={busy} onPrepare={setWorkshop} onLink={r=>run(()=>attach({type:'resource',value:r}),'Source linked to this topic.')}/>
  <section className="cw-chapters"><div className="section-heading"><h3>Chapters and activities</h3><button className="primary" disabled={busy||!readySources.length} onClick={()=>setWorkshop({kind:'plan'})}>Prepare a chapter</button></div>{!readySources.length&&<p>Review a source before asking Muse Wonder to create a chapter.</p>}{chapters.map(({binding,chapter})=>{const valid=chapter?.hash===binding.hash,published=valid&&chapter.status==='published',item=client.items.find(i=>i.jobId===binding.id);return <article key={binding.id}><div><span>{chapter?formatName(chapter.template):'Chapter unavailable'}</span><h3>{chapter?.title||'This chapter is no longer available'}</h3><p>{!chapter?'The original chapter may have been removed.':!valid?'This chapter changed. Review and link its current version.':published?'Reviewed and ready to learn.':'Teaching review required before use.'}</p></div><div className="cw-actions">{chapter&&<button onClick={()=>setWorkshop({kind:'job',id:chapter.id})}>Open review</button>}{published&&<button className="primary" disabled={busy} onClick={()=>run(async()=>{await client.refresh();const exact=client.items.find(i=>i.jobId===binding.id);if(!exact)throw Error('This reviewed chapter is no longer available.');await onStart(exact,true,topic.goal||course.goal||undefined)})}>Use for my learning</button>}{published&&client.access?.manages&&<button onClick={()=>setDelivery(chapter)}>Assign to learners</button>}<button className="text-button" disabled={busy} onClick={()=>run(()=>save({type:'unlink-chapter',courseId:course.id,topicId:topic.id,id:binding.id}))}>Remove link</button></div></article>})}{!chapters.length&&<p>Prepare a new chapter or open an existing draft, then add it to this topic. Publication still requires a teaching review.</p>}<button className="text-button" onClick={()=>setWorkshop({kind:'library'})}>Open existing chapters</button></section>
  {delivery&&<DeliveryPanel chapter={delivery} client={client} onClose={()=>setDelivery(null)}/>}
  </>}
