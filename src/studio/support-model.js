@@ -6,7 +6,7 @@ export function supportActivity(bundle,key){
  let item;
  if(pack.questions)item=pack.questions[Number(key.slice(9))];
  else if(pack.template==='underlight-v1')item=pack.challenges[key];
- else if(pack.template==='adventure-v1')item=pack.sequence;
+ else if(pack.template==='adventure-v1')item=key==='field'?pack.world?.field:pack.sequence;
  else if(pack.template==='draft-v1')item=pack.scenarios.find(q=>q.id===key);
  else if(pack.template==='town-v1')item=pack.events[Number(key.slice(8))];
  else if(pack.template==='novel-v1')item=pack.nodes[Number(key.slice(6))];
@@ -15,7 +15,7 @@ export function supportActivity(bundle,key){
  const objective=pack.learningMap?.filter(c=>c.activityKeys.includes(key)).map(c=>c.objective).join(' ')||activity.objective||activity.label;
  // Only reviewed fields are used as subject explanations. Generic prompts ask the
  // learner to inspect evidence; they do not invent a new fact or solution.
- const explanation=item?.explanation||null;
+ const explanation=item?.explanation||(key==='field'?item?.feedback?.[item.solution]:null)||null;
  return {...activity,objective,prompt:item?.question||item?.prompt||(pack.template==='merge-v1'?`Explain the connection between ${item.inputs.map(i=>pack.items[i].name).join(' + ')} and ${activity.label}.`:activity.label),context:pack.template==='novel-v1'?item.text:null,hint:item?.hint||null,explanation,sources,hasEvidence:sources.length>0,scope:pack.template==='town-v1'?'Compare the source-supported trade-offs. Council outcomes and capability values are fictional game rules.':pack.template==='merge-v1'?'Check what the combination represents in this source. Game items are representations, not necessarily real transformations.':pack.template==='novel-v1'?'A story choice can express a value or trade-off. It is not automatically a right-or-wrong answer.':'Use the reviewed source to explain the relationship, not just repeat an answer word.'};
 }
 export function selectedSupportKey(bundle,key){const activities=learningActivities(bundle.chapter||bundle);return activities.some(a=>a.key===key)?key:activities[0]?.key;}

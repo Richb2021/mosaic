@@ -1,3 +1,4 @@
+import {WORLD_PACKS} from '../src/game-modes/adventure-world-packs.js';
 import {assignedChapters} from './assignments.js';
 import {coursePlanAPI} from './course-plan-api.js';
 import {courseAPI} from './course-api.js';
@@ -20,7 +21,7 @@ import {EXTENDED_PACKS} from '../src/game-modes/extended-packs.js';
 import {validatePlayableContent} from '../src/game-modes/content-registry.js';
 import {digest} from './content-service.js';
 import {draftHash} from '../src/game-modes/draft-engine.js';
-const packs=[...RPG_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS];
+const packs=[...RPG_PACKS,...WORLD_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS];
 const need=(x,m,status=400)=>{if(!x)throw new StoreError(m,status)};
 export async function canonicalPack(id,hash,req,env,workspace,learner){
  let pack=packs.find(p=>p.id===id&&draftHash(p)===hash);

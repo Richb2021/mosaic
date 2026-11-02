@@ -4,7 +4,10 @@
   "rooms": {
     "workshop": "/game-modes/art/room-workshop.webp",
     "woods": "/game-modes/art/room-woods.webp",
-    "archive": "/game-modes/art/room-archive.webp"
+    "archive": "/game-modes/art/room-archive.webp",
+    "quay": "/game-modes/art/room-quay.webp",
+    "garden": "/game-modes/art/room-garden.webp",
+    "tower": "/game-modes/art/room-tower.webp"
   },
   "heroes": {
     "male": {
@@ -173,5 +176,25 @@
     "draft": "/game-modes/art/table-draft.webp"
   },
   "artDirection": "Painterly late-1990s adventure; navy, slate, brass and moss.",
-  "provenance": "Generated for this project using the connected Sorceress account; retain generation provenance."
+  "provenance": "Generated for this project using the connected Sorceress account; retain generation provenance.",
+  "worldProvenance": {
+    "quay": {
+      "provider": "Sorceress",
+      "model": "gpt-image-2.5-sunburst",
+      "jobId": "d62fea43-21b0-430e-8f0c-e2a5ff8b269a",
+      "reviewed": true
+    },
+    "garden": {
+      "provider": "Sorceress",
+      "model": "gpt-image-2.5-sunburst",
+      "jobId": "e33501f0-359c-4e3a-a683-57ab357243e7",
+      "reviewed": true
+    },
+    "tower": {
+      "provider": "Sorceress",
+      "model": "gpt-image-2.5-sunburst",
+      "jobId": "450bcf74-8aff-4b50-ab5d-fc8bae6b617d",
+      "reviewed": true
+    }
+  }
 }

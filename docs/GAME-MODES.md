@@ -4,7 +4,7 @@ The game library at `/modes.html` shares Lanternbound’s private Resource Libra
 
 ## The Thread Atlas
 
-A scene-led 2D adventure with three connected illustrated spaces: workshop, woodland and archive. The traveller walks to clicked destinations and interaction anchors; keyboard movement and an accessible places/objects list are also available. Players talk to keepers, inspect evidence, collect a missing object, use it on a mechanism, arrange a meaningful sequence and choose a story ending. Mira and Ren use real transparent Sorceress animation sheets. The engine maintains animation phase while walking and mirrors the right-facing sprite for leftward motion.
+A scene-led 2D adventure. The original stories have three connected illustrated spaces: workshop, woodland and archive. New expanded worlds add a quay, garden and signal tower; see the expanded-world contract below. The traveller walks to clicked destinations and interaction anchors; keyboard movement and an accessible places/objects list are also available. Players talk to keepers, inspect evidence, collect a missing object, use it on a mechanism, arrange a meaningful sequence and choose a story ending. Mira and Ren use real transparent Sorceress animation sheets. The engine maintains animation phase while walking and mirrors the right-facing sprite for leftward motion.
 
 The `adventure-v1` pack owns the room descriptions, characters’ dialogue, clue passages, inventory labels, repair context, three-stage sequence, hints, corrective feedback and two endings. Its scene and asset vocabulary is allowlisted. Included examples use a fictional waterworks and a woodland food-chain investigation. These are authored examples, distinct from Muse-generated games.
 
@@ -53,8 +53,16 @@ More room plates and event types can expand the vocabulary without adding execut
 
 ### Adventure mechanisms and settings
 
-New `adventure-v1` generations choose `setting: canal | market | observatory` from the existing painted art manifest. Market uses the trading guild hall; observatory uses the star room. These are starting-room variants within the same three-room exploration template, not three separate open worlds.
+The version-47 `adventure-v1` extension added `setting: canal | market | observatory` from the existing painted art manifest. Market uses the trading guild hall; observatory uses the star room. These are starting-room variants within the same three-room exploration template, not three separate open worlds.
 
 `sequence.mode` supports `order` (three-step permutation; empty targets), `match` (three descriptions matched one-to-one to three terms), and `sort` (three items assigned to two categories, both used). Targets and solutions are validated deterministically; the model supplies prose and bounded indices, never rules or asset URLs. Existing chapters without these optional fields retain their exact hashes and saves. The puzzle uses the existing three-entry save field, allowing repeated indices only for sorting.
 
 The location strip puts exits and room description below the walkable scene. On narrow and short screens the page can scroll; movement targets remain inside the scene.
+
+### Expanded Thread Atlas worlds (2 November 2026)
+
+New adventure generation includes a bounded `world` section. It adds a quay, garden and signal tower to the workshop, woods and archive. Authored rules provide a delivery request, a separate evidence question, two unlockable shortcuts, discovered-place travel, three exploration tokens and a three-wheel mechanical finale. Side requests remain playable after the ending. The model supplies reviewed prose, citations and the garden answer; it cannot change the map or rules.
+
+The included `atlas-water-world` and `atlas-woodland-world` stories have new identities. Original three-room pack JSON, fingerprints and version-1 saves are preserved. Expanded packs use version-2 saves tied to the exact content fingerprint. The source-backed archive and garden activities produce practice observations; delivery, tokens and relay success do not imply mastery. Post-success hints preserve whether the original answer was assisted.
+
+All hotspots also appear in Places & objects. Comfort controls provide direct interaction, reduced motion and larger text. Keyboard movement stays within the active game and does not intercept fields or external controls. Reduced-motion walking uses discrete key presses; click destinations and interactions are immediate. Modal backgrounds are inert and announcements persist across renders. Review the release's browser evidence separately: viewport emulation does not certify physical devices or screen-reader conformance.
