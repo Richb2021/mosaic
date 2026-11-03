@@ -12,7 +12,7 @@ export async function learningLoopAPI(req,env,{owner,principal=owner,siteOwner,s
  need(typeof input.bankId==='string'&&input.bankId.length<=100&&typeof input.bankHash==='string'&&/^[a-f0-9]{64}$/.test(input.bankHash),'Choose an exact reviewed learning cycle.');
  let j=await sqlDB(env.DB).one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',input.bankId,siteOwner),p=parse(j?.payload),assigned=null;
  if(!(j&&p.recordType==='creative'&&p.kind==='practice'&&p.learnerOwner===owner)){
-  assigned=(await assignedQuestionBanks(env,principal,{id:input.bankId,hash:input.bankHash}))[0];
+  assigned=(await assignedQuestionBanks(env,principal,{id:input.bankId,hash:input.bankHash})).find(q=>q.bank.kind==='practice');
   need(assigned,'Learning cycle not found or assignment unavailable.',404);p=assigned.p;j={id:assigned.bank.id};
  }else need(j.status==='creative-published'&&j.draft&&await digest(j.draft)===input.bankHash,'This cycle changed or needs review. Reopen the reviewed version.',409);
  const execute=async()=>{
@@ -53,6 +53,7 @@ export async function learningLoopSummaries(env,{siteOwner,owner,store,now,units
   summaries.push({bankId:bank.id,bankHash:hash,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey,title:bank.title,updated:Number(row?.updated_ms||j.updated),stage:view.route.stage,dueAt:state.dueAt,waiting:!!view.route.waiting,needsSupport:view.route.needsSupport,reason:view.route.reason,attempts:state.answers.length});
  }catch{ /* Unavailable banks and unreadable attempts stay out of recommendations. */ }}
  for(const {bank,p,hash,updated} of await assignedQuestionBanks(env,owner))try{
+  if(bank.kind!=='practice')continue;
   if(!units.some(u=>u.packId===p.packId&&u.contentHash===p.contentHash&&u.activityKeys.includes(p.activityKey))||summaries.some(s=>s.bankId===bank.id&&s.bankHash===hash))continue;
   const slot='loop-'+(await digest(bank.id+':'+hash)).slice(0,59),row=heads.get(slot),state=row?validateLoop(bank,hash,parse(row.payload).loop):emptyLoop(bank,hash),view=loopView(bank,state,now);
   summaries.push({bankId:bank.id,bankHash:hash,...p,title:bank.title,updated:Number(row?.updated_ms||updated),stage:view.route.stage,dueAt:state.dueAt,waiting:!!view.route.waiting,needsSupport:view.route.needsSupport,reason:view.route.reason,attempts:state.answers.length});
@@ -65,5 +66,5 @@ export async function assignedLoopList(req,env,{owner,principal=owner,store,reso
  const input=Object.fromEntries(new URL(req.url).searchParams),pack=await resolve(input.packId,input.contentHash,req,env),row=await store.latest('learner_profiles',owner,'studio');
  let unit;try{unit=validateUnit(parse(row?.payload).studio.units.find(u=>u.packId===pack.id&&u.contentHash===input.contentHash),pack)}catch{need(false,'Open your saved programme before continuing.',409)}
  const banks=await assignedQuestionBanks(env,principal,{packId:input.packId,contentHash:input.contentHash});
- return noStore({jobs:banks.filter(b=>unit.activityKeys.includes(b.p.activityKey)).map(b=>({id:b.bank.id,draftHash:b.hash,kind:'practice',status:'published',readOnly:true,activityKey:b.p.activityKey,draft:{title:b.bank.title}}))});
+ return noStore({jobs:banks.filter(b=>unit.activityKeys.includes(b.p.activityKey)).map(b=>({id:b.bank.id,draftHash:b.hash,kind:b.bank.kind,status:'published',readOnly:true,activityKey:b.p.activityKey,draft:{title:b.bank.title}}))});
 }

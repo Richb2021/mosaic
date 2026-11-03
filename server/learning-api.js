@@ -1,3 +1,4 @@
+import {exploreAPI} from './explore-api.js';
 import {WORLD_PACKS} from '../src/game-modes/adventure-world-packs.js';
 import {assignedChapters} from './assignments.js';
 import {coursePlanAPI} from './course-plan-api.js';
@@ -47,6 +48,7 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='loop/banks')return await assignedLoopList(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve});
+ if(path==='explore')return await exploreAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='loop')return await learningLoopAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='creative'||path==='creative/audio')return await creativeAPI(req,env,{store,owner,siteOwner,resolve:scopedResolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,siteOwner,resolve:scopedResolve,included:packs,now});

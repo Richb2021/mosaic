@@ -1,10 +1,11 @@
+import {validateExplore,exploreSchema} from './explore-model.js';
 import {STORY_PROPS,PERFORMANCE_MOVES,PROP_INTERACTIONS,validatePerformance,validatePerformances} from '../cartoon-performance.js';
 import {validatePractice,practiceSchema} from './learning-loop.js';
 import {supportActivity} from './support-model.js';
 import {contentOf,activitiesOf} from './programme.js';
 import {storyBrief,validateDirection,STORY_BEATS,STORY_BLOCKING,STORY_SHOTS,STORY_PACES} from '../story-direction.js';
 
-export const CREATIVE_KINDS=['tutor','podcast','cartoon','practice'];
+export const CREATIVE_KINDS=['tutor','podcast','cartoon','practice','explore'];
 export const SCENES=['observatory','workshop','garden','city'];
 export const SPEAKERS=['guide','learner'];
 const need=(value,message)=>{if(!value)throw Error(message)};
@@ -19,17 +20,18 @@ export function creativeEvidence(pack,activityKeys){
 }
 export function creativeContext(pack,unit,kind,key,story){
  need(CREATIVE_KINDS.includes(kind),'Choose a supported learning format.');
- need(!['tutor','practice'].includes(kind)||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
- const keys=['tutor','practice'].includes(kind)?[key]:unit.activityKeys;
+ need(!['tutor','practice','explore'].includes(kind)||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
+ const keys=['tutor','practice','explore'].includes(kind)?[key]:unit.activityKeys;
  const evidence=creativeEvidence(pack,keys),profile=unit.profile;
  const brief=story!==undefined&&['podcast','cartoon'].includes(kind)?storyBrief(story,profile.interests):null;
  const interests=brief?.interest?[brief.interest,...profile.interests.filter(i=>i!==brief.interest)].slice(0,2):profile.interests.slice(0,2);
- return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests,focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500)},...(brief?{story:brief}:{})};
+ return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests,focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500),...(kind==='explore'?{stage:profile.stage,context:profile.context,exam:profile.exam,minutes:profile.minutes,access:profile.access}:{})},...(brief?{story:brief}:{})};
 }
 function references(value,evidence,optional=false){need(Array.isArray(value)&&value.length<=12&&(optional||value.length>0)&&new Set(value).size===value.length&&value.every(id=>evidence.some(s=>s.id===id)),'Every factual passage needs references from this exact source packet.');return [...value];}
 export function validateCreative(raw,job){
  const evidence=job.context.evidence;
  if(job.kind==='practice')return validatePractice(raw,job);
+ if(job.kind==='explore')return validateExplore(raw,job);
  if(job.kind==='tutor'){
   only(raw,['status','message','question','sourceRefs','sources']);need(['hint','scaffold','unsupported'].includes(raw.status),'Invalid tutor response type.');
   const refs=references(raw.sourceRefs,evidence,raw.status==='unsupported');need(raw.status!=='unsupported'||refs.length===0,'An unsupported reply cannot claim source support.');
@@ -73,6 +75,7 @@ export function integrityResponse(message){
 const str={type:'string'},arr=items=>({type:'array',items}),obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
 export function creativeSchema(job){
  if(job.kind==='practice')return practiceSchema(job);
+ if(job.kind==='explore')return exploreSchema(job);
  const refs=arr({type:'string',enum:job.context.evidence.map(s=>s.id)});
  if(job.kind==='tutor')return obj({status:{type:'string',enum:['hint','scaffold','unsupported']},message:str,question:str,sourceRefs:refs});
  if([2,3].includes(job.storyVersion)){
