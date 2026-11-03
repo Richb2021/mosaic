@@ -1,3 +1,4 @@
+import {originalKey} from './knowledge-import.js';
 import {signedCourseRoute} from './course-question-banks.js';
 import {courseGrantRecords,consentScope,reportSlot,publicCourseGrant} from './course-grants.js';
 import {costSummary} from './cost-ledger.js';
@@ -10,13 +11,13 @@ const L="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'
 const choices=new Set([0,7,30,90,365]);
 const sorted=values=>[...new Set(values)].sort();
 const ownedJobs=(db,siteOwner)=>db.all("SELECT * FROM workshop_jobs WHERE owner=? AND status!='usage-only' ORDER BY id",siteOwner);
-const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length,assignedQuestionSets:(plan.courseBankUpdates||[]).reduce((n,r)=>n+r.removed.length,0)});
+const counts=plan=>({recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length,collections:(plan.collectionUpdates||[]).length,assignedQuestionSets:(plan.courseBankUpdates||[]).reduce((n,r)=>n+r.removed.length,0)});
 export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now()}){
  const db=sqlDB(env.DB),{controls}=await readControls(env,siteOwner,owner,now),lp=parse(controls.learner.policy),wp=parse(controls.workspace.policy);
- const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
+ const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created,payload FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
  let selected=[],sourceIDs=[],assetIDs=[],profiles=[],saves=[],profileRows=[];
  const expired=(stamp,days)=>days>0&&stamp+days*DAY<=now;
- if(mode==='episode'){const j=jobs.find(j=>j.id===id&&['creative','course-plan'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner);need(j,'Episode not found.',404);selected=[j];}
+ if(mode==='episode'){const j=jobs.find(j=>j.id===id&&['creative','course-plan','knowledge'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner);need(j,'Episode not found.',404);selected=[j];}
  else if(mode==='media'){assetIDs=assets.filter(a=>a.learner_owner===owner&&(id==='all'||a.id===id)).map(a=>a.id);need(id==='all'||assetIDs.length,'Recording not found.',404);}
  else if(mode==='learner'){
   selected=jobs.filter(j=>parse(j.payload).learnerOwner===owner);
@@ -28,9 +29,10 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  }else if(mode==='expired'){
   assetIDs=assets.filter(a=>a.learner_owner===owner&&expired(a.created,lp.mediaDays)).map(a=>a.id);
   sourceIDs=resources.filter(r=>expired(r.created,wp.resourceDays)).map(r=>r.id);
-  selected=jobs.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner&&expired(j.updated,lp.creativeDays)||parse(j.payload).resourceVersions?.some(v=>sourceIDs.includes(v.id)));
+  selected=jobs.filter(j=>['creative','course-plan','knowledge'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner&&expired(j.updated,lp.creativeDays)||parse(j.payload).resourceVersions?.some(v=>sourceIDs.includes(v.id)));
   if(lp.progressDays)for(const table of ['learner_profiles','learner_saves']){const rows=await store.allRows(table,owner),latest=new Map();for(const r of rows)latest.set(r.slot_key,Math.max(latest.get(r.slot_key)||0,Number(r.updated_ms)));const ids=rows.filter(r=>expired(latest.get(r.slot_key),lp.progressDays)).map(r=>r.id);if(table==='learner_profiles'){profiles=ids;profileRows=rows}else saves=ids;}
  }else throw Object.assign(Error('Choose a supported data action.'),{status:400});
+ const importIds=new Set(resources.filter(r=>sourceIDs.includes(r.id)).map(r=>parse(r.payload).provenance?.importJobId).filter(Boolean));selected.push(...jobs.filter(j=>parse(j.payload).recordType==='knowledge'&&importIds.has(j.id)));
  const packs=new Set(selected.filter(j=>!parse(j.payload).recordType).flatMap(j=>{const id=parse(j.payload).chapterId;return id?[id,'rpg-'+id]:[]}));
  const derived=jobs.filter(j=>parse(j.payload).recordType==='creative'&&packs.has(parse(j.payload).packId));
  need(![...selected,...derived].some(j=>parse(j.payload).learnerOwner&&parse(j.payload).learnerOwner!==owner),'Another learner has work derived from this source. They must remove their episodes before this source can be deleted.',409);
@@ -44,8 +46,8 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  // revision so an in-flight question read cannot reveal the removed snapshot.
  const courseBankUpdates=[];
  for(const r of sharing.grants){const g=parse(r.policy);if(g.siteOwner!==siteOwner||courseGrants.some(x=>x.scope===r.scope))continue;
-  const removed=g.steps.filter(s=>s.questionBank&&jobIds.has(s.questionBank.id)).map(s=>s.id);if(!removed.length)continue;
-  const next={...g,steps:g.steps.map(s=>{const copy={...s};if(removed.includes(s.id))delete copy.questionBank;return copy})};
+  const removed=g.steps.filter(s=>s.questionBank&&jobIds.has(s.questionBank.id)||(s.learningResources||[]).some(r=>jobIds.has(r.id))).map(s=>s.id);if(!removed.length)continue;
+  const next={...g,steps:g.steps.map(s=>{const copy={...s};if(s.questionBank&&jobIds.has(s.questionBank.id))delete copy.questionBank;if(s.learningResources)copy.learningResources=s.learningResources.filter(r=>!jobIds.has(r.id));return copy})};
   next.revision='pruned-'+(await digest(g.revision+':'+removed.join(','))).slice(0,32);next.signature=await digest(JSON.stringify(signedCourseRoute(next)));
   courseBankUpdates.push({scope:r.scope,policy:r.policy,nextPolicy:JSON.stringify(next),removed});
  }
@@ -54,7 +56,11 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  const consentMap=new Map(sharing.consents.filter(r=>mode==='learner'||expiredSlots.has(reportSlot(r.scope.slice(15)))||mode==='expired'&&lp.progressDays&&!remainingSlots.has(reportSlot(r.scope.slice(15)))).map(r=>[r.scope,{scope:r.scope,policy:r.policy}]));
  for(const r of [...courseGrants,...courseBankUpdates]){const scope=consentScope(r.scope.slice(13)),c=await db.one('SELECT scope,policy FROM data_controls WHERE scope=?',scope);if(c)consentMap.set(scope,c)}
  const courseConsents=[...consentMap.values()].sort((a,b)=>a.scope.localeCompare(b.scope));
- const plan={mode,id:id||null,courseGrants,courseBankUpdates,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
+ const collectionRows=await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'knowledge-collection:%' AND (json_extract(policy,'$.siteOwner')=? OR EXISTS(SELECT 1 FROM json_each(json_extract(policy,'$.readers')) WHERE value=?))",siteOwner,owner),collectionUpdates=[];
+ for(const r of collectionRows){const c=parse(r.policy),remove=mode==='workspace'&&c.siteOwner===siteOwner,sources=c.siteOwner===siteOwner?c.sources.filter(s=>!sourceIDs.includes(s.id)):c.sources,readers=mode==='learner'?c.readers.filter(id=>id!==owner):c.readers;
+  if(remove||sources.length!==c.sources.length||readers.length!==c.readers.length){const readerBindings=Object.fromEntries(Object.entries(c.readerBindings||{}).filter(([id])=>readers.includes(id)));collectionUpdates.push({scope:r.scope,policy:r.policy,nextPolicy:remove?null:JSON.stringify({...c,sources,readers,readerBindings,revision:'cleanup-'+(await digest(r.policy+sourceIDs.join(',')+mode)).slice(0,32)})})}
+ }
+ const plan={mode,id:id||null,collectionUpdates,courseGrants,courseBankUpdates,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan','knowledge'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
  return {...plan,hash:await digest(JSON.stringify(plan)),counts:counts(plan)};
 }
 export async function deleteProviderResponse(id,env,fetcher=fetch){
@@ -75,6 +81,10 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
     const result=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',r.nextPolicy,now(),r.scope,r.policy);
     if(result.meta.changes!==1){const current=await db.one('SELECT policy FROM data_controls WHERE scope=?',r.scope);need(!current||current.policy===r.nextPolicy,'An assigned question set changed during cleanup. Resume to confirm removal.',409)}
    }
+   for(const r of plan.collectionUpdates||[]){
+    const result=r.nextPolicy?await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',r.nextPolicy,now(),r.scope,r.policy):await db.run('DELETE FROM data_controls WHERE scope=? AND policy=?',r.scope,r.policy);
+    if(!result.meta.changes){const current=await db.one('SELECT policy FROM data_controls WHERE scope=?',r.scope);need(!current||current.policy===r.nextPolicy,'A collection changed during cleanup. Resume removal to confirm its access.',409)}
+   }
    for(const id of plan.assets){const row=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);if(!row)continue;need(env.BUCKET,'Private media storage is unavailable; cleanup will resume later.',503);await env.BUCKET.delete(row.object_key);need(!await env.BUCKET.head(row.object_key),'Recording removal has not been confirmed.',503);await db.run('DELETE FROM media_assets WHERE id=? AND site_owner=?',id,siteOwner);}
    if(plan.mode==='learner')await db.run('UPDATE cost_receipts SET learner_owner=NULL WHERE site_owner=? AND learner_owner=?',siteOwner,owner);
    await store.deleteRows('learner_profiles',owner,plan.profiles);await store.deleteRows('learner_saves',owner,plan.saves);
@@ -84,7 +94,12 @@ async function executeOperation(env,{owner,siteOwner,store,op,now,removeProvider
     if(j.created>now()-DAY){const p=parse(j.payload),payload={recordType:'usage',...(p.revisionOf?{revisionOf:{deleted:true}}:{})};await db.run('UPDATE workshop_jobs SET request_key=?,request_hash=?,status=?,payload=?,draft=NULL,error=NULL,provider_id=NULL,updated=? WHERE id=? AND owner=?','deleted-'+id,'deleted','usage-only',JSON.stringify(payload),now(),id,siteOwner);}
     else await db.run('DELETE FROM workshop_jobs WHERE id=? AND owner=?',id,siteOwner);
    }
-   for(const id of plan.resources)await db.run('DELETE FROM workshop_resources WHERE id=? AND owner=?',id,siteOwner);
+   for(const id of plan.resources){
+    const r=await db.one('SELECT payload FROM workshop_resources WHERE id=? AND owner=?',id,siteOwner);
+    if(parse(r?.payload).original)need(env.BUCKET,'Original-file storage is unavailable; cleanup will resume later.',503);
+    if(env.BUCKET){const key=await originalKey(siteOwner,id);await env.BUCKET.delete(key);need(!await env.BUCKET.head(key),'Original-file removal has not been confirmed.',503)}
+    await db.run('DELETE FROM workshop_resources WHERE id=? AND owner=?',id,siteOwner);
+   }
    if(plan.profiles.length||plan.saves.length)await db.run('UPDATE data_controls SET reset_ms=?,reset_kind=? WHERE scope=?',now(),plan.mode==='learner'?'all':'expired',op.scope);
    plan.localDone=true;await save();
    await db.run('UPDATE data_controls SET operation=NULL,updated=? WHERE operation=?',now(),op.id);
@@ -160,11 +175,11 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
  const inventory=async()=>{
   const [media,jobs,resources,ops,events]=await Promise.all([
    db.all('SELECT id,script_id,script_hash,segment,status,bytes,created FROM media_assets WHERE site_owner=? AND learner_owner=? ORDER BY created DESC',siteOwner,owner),
-   db.all(`SELECT id,status,draft,created,updated,payload FROM workshop_jobs WHERE owner=? AND ${K} IN (?,?) AND ${L}=? ORDER BY created DESC`,siteOwner,'creative','course-plan',owner),
+   db.all(`SELECT id,status,draft,created,updated,payload FROM workshop_jobs WHERE owner=? AND ${K} IN (?,?,?) AND ${L}=? ORDER BY created DESC`,siteOwner,'creative','course-plan','knowledge',owner),
    db.all('SELECT id,title,status,created FROM workshop_resources WHERE owner=? ORDER BY created DESC',siteOwner),
    db.all("SELECT id,status,plan,created FROM data_operations WHERE site_owner=? AND (learner_owner=? OR id IN (SELECT operation FROM data_controls WHERE scope=?)) ORDER BY created DESC LIMIT 30",siteOwner,owner,state.scopes.workspace),
    db.all('SELECT action,detail,created FROM data_events WHERE scope IN (?,?) AND created>? ORDER BY created DESC LIMIT 30',state.scopes.learner,state.scopes.workspace,now()-30*DAY)
-  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||(parse(j.payload).recordType==='course-plan'?'Course plan request':'Tutor conversation'),kind:parse(j.payload).kind||(parse(j.payload).recordType==='course-plan'?'course-plan':null),status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()}),maintenance:{enabled:env.RETENTION_BACKGROUND_ENABLED==='true'}};
+  ]);return {epoch:state.epoch,resetMs:state.controls.learner.reset_ms,resetKind:state.controls.learner.reset_kind,policy:{learner:parse(state.controls.learner.policy),workspace:parse(state.controls.workspace.policy)},media,jobs:jobs.map(j=>({id:j.id,title:parse(j.draft).title||parse(j.payload).filename||parse(j.payload).query||(parse(j.payload).recordType==='course-plan'?'Course plan request':'Tutor conversation'),kind:parse(j.payload).kind||(parse(j.payload).recordType==='course-plan'?'course-plan':null),status:j.status,created:j.created,updated:j.updated})),resources,operations:ops.map(o=>({id:o.id,status:o.status,created:o.created,counts:parse(o.plan).counts,localDone:!!parse(o.plan).localDone})),events:events.map(e=>({...e,detail:parse(e.detail)})),storageConnected:!!env.BUCKET,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()}),maintenance:{enabled:env.RETENTION_BACKGROUND_ENABLED==='true'}};
  };
  if(req.method==='GET'){await enforceRetention(env,ctx,{force:true});state=await readControls(env,siteOwner,owner,now());return noStore(await inventory());}
  need(req.method==='POST','Data action not found.',404);
@@ -188,11 +203,12 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
  if(input.action==='export'){
   const workspace=input.scope==='workspace',paged=workspace&&input.paged===true;
   const profiles=workspace?[]:await store.allRows('learner_profiles',owner),saves=workspace?[]:await store.allRows('learner_saves',owner),jobs=await ownedJobs(db,siteOwner);
+  const knowledgeCollections=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'knowledge-collection:%' AND json_extract(policy,'$.siteOwner')=? ORDER BY scope",siteOwner)).map(r=>parse(r.policy));
   let resources=[],page;
   if(workspace){
    if(paged){
-    const catalogue=await db.all('SELECT id,title,checksum,status,created FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner);
-    const snapshot=await digest(JSON.stringify({siteOwner,epoch:state.epoch,catalogue,jobs:jobs.filter(j=>!parse(j.payload).recordType||parse(j.payload).recordType==='course-plan').map(j=>[j.id,j.status,j.updated])}));
+    const catalogue=await db.all("SELECT id,title,checksum,status,created,json_extract(payload,'$.original') AS original,json_extract(payload,'$.provenance') AS provenance FROM workshop_resources WHERE owner=? ORDER BY id",siteOwner);
+    const snapshot=await digest(JSON.stringify({siteOwner,epoch:state.epoch,catalogue,jobs:jobs.filter(j=>!parse(j.payload).recordType||['course-plan','knowledge'].includes(parse(j.payload).recordType)).map(j=>[j.id,j.status,j.updated,j.payload,j.draft]),knowledgeCollections}));
     need(!input.cursor||safeId(input.cursor),'Invalid export page.');need(!input.cursor||input.snapshot===snapshot,'Your materials changed during export. Refresh and export again.',409);
     need(!input.cursor||catalogue.some(r=>r.id===input.cursor),'Export page no longer exists.',409);
     const remaining=catalogue.filter(r=>!input.cursor||r.id>input.cursor),ids=remaining.slice(0,20).map(r=>r.id);
@@ -206,7 +222,8 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
   const sharingRecords=await courseGrantRecords(env,owner,siteOwner);
   const courseAssignments=sharingRecords.grants.filter(r=>!workspace||parse(r.policy).siteOwner===siteOwner).map(r=>{const g={...parse(r.policy),id:r.scope.slice(13)};return {...publicCourseGrant(g),revoked:!!g.revoked,...(g.learner!==owner?{learner:g.learner}:{})}});
   const sharingSettings=workspace?[]:sharingRecords.consents.map(r=>({assignmentId:r.scope.slice(15),...parse(r.policy)}));
-  const out={format:'mosaic-data-export',version:1,courseAssignments,sharingSettings,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),coursePlans:(paged&&input.cursor?[]:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)})),chapters:(paged&&input.cursor?[]:jobs.filter(j=>!parse(j.payload).recordType)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),coursePlans:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
+  const knowledge=jobs.filter(j=>parse(j.payload).recordType==='knowledge'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}));
+  const out={knowledgeCollections:!paged||!input.cursor?knowledgeCollections:[],knowledge:!paged||!input.cursor?knowledge:[],format:'mosaic-data-export',version:1,courseAssignments,sharingSettings,exportedAt:new Date(now()).toISOString(),scope:input.scope==='workspace'?'workspace':'learner',policy:input.scope==='workspace'?parse(state.controls.workspace.policy):parse(state.controls.learner.policy),...(input.scope==='workspace'?{resources:resources.map(r=>({...r,payload:parse(r.payload)})),coursePlans:(paged&&input.cursor?[]:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)})),chapters:(paged&&input.cursor?[]:jobs.filter(j=>!parse(j.payload).recordType)).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}))}:{profiles:profiles.map(safeRow),saves:saves.map(safeRow),coursePlans:jobs.filter(j=>parse(j.payload).recordType==='course-plan'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),creative:jobs.filter(j=>parse(j.payload).recordType==='creative'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,updated:j.updated,payload:parse(j.payload),draft:parse(j.draft)})),media:rows,costs:await costSummary(env,{siteOwner,learnerOwner:owner,now:now()})}),limitations:['Sign-in account credentials and provider or infrastructure backups are not part of this export.','Media bytes are included separately by the archive download; failed recordings have metadata only.']};
   need(JSON.stringify(out).length<24000000,'This data export exceeds 24 MB. Export a smaller workspace first.',413);await auditEvent(env,state.scopes[input.scope==='workspace'?'workspace':'learner'],'exported',{scope:out.scope},now());return noStore({export:out,...(page?{page}:{})});
  }
  if(input.action==='download'){

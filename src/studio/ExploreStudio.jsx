@@ -15,11 +15,11 @@ export function ExploreReview({job,busy,onSave,onApprove}){
  <div className="form-actions"><button disabled={busy||JSON.stringify(draft)===JSON.stringify(job.draft)} onClick={()=>onSave({...draft,assessment:draft.assessment.map(q=>({...q,accepted:typeof q.accepted==='string'?q.accepted.split('\n').map(v=>v.trim()).filter(Boolean):q.accepted}))})}>Save lesson edits</button><button disabled={JSON.stringify(draft)!==JSON.stringify(job.draft)} onClick={()=>setPreview(!preview)}>{preview?'Close preview':'Preview this exact lesson'}</button></div>{preview&&<ExplorePlayer key={job.draftHash} view={{...exploreView(job.draft,previewState),reviewerSawAnswers:true}} onAction={a=>setPreviewState(exploreAction(job.draft,previewState,a,Date.now()))}/>}
  <label className="check"><input type="checkbox" checked={checked} onChange={e=>setChecked(e.target.checked)}/>I checked every model, claim, answer, unit, analogy and criterion against the source and intended learner context.</label><button className="primary" disabled={busy||!checked||JSON.stringify(draft)!==JSON.stringify(job.draft)} onClick={onApprove}>Approve this lesson</button></section>;
 }
-export function ExploreStudio({item,unit,client,onBack}){
+export function ExploreStudio({item,unit,client,onBack,initialJobId=null}){
  const {pack}=item,identity={packId:pack.id,contentHash:draftHash(pack)};
- const [jobs,setJobs]=useState([]),[id,setId]=useState(null),[focus,setFocus]=useState(unit.activityKeys[0]),[budget,setBudget]=useState(null),[view,setView]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const [jobs,setJobs]=useState([]),[id,setId]=useState(initialJobId),[focus,setFocus]=useState(unit.activityKeys[0]),[budget,setBudget]=useState(null),[view,setView]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const alive=useRef(true),lock=useRef(false),requestKey=useRef(null),job=jobs.find(j=>j.id===id);
- const request=body=>client.journal.request((item.readOnly&&!body?'loop/banks':'creative')+(body?'':'?'+new URLSearchParams(identity)),body?{...identity,...body}:undefined);
+ const request=body=>client.journal.request((item.readOnly&&!body?'loop/banks':'creative')+(body?'':'?'+new URLSearchParams({...identity,...(id?{selectedJob:id}:{})})),body?{...identity,...body}:undefined);
  const adopt=data=>{if(alive.current){setJobs(data.jobs.filter(j=>j.kind==='explore'));setBudget(data.budget)}};
  const run=async fn=>{if(lock.current)return;lock.current=true;setBusy(true);setError('');setNotice('');try{await fn()}catch(e){if(alive.current)setError(e.message)}finally{lock.current=false;if(alive.current)setBusy(false)}};
  const loadView=async(j=job)=>{const v=await client.journal.request('explore?'+new URLSearchParams({lessonId:j.id,lessonHash:j.draftHash}));if(alive.current)setView(v)};

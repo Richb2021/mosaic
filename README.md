@@ -95,3 +95,7 @@ Resource workshop: see [Dynamic game content](docs/DYNAMIC-CONTENT.md). The priv
 ## Personal learning studio
 
 Open `/studio.html` for saved learner preferences, reviewed topics, starting checks, explainable programmes and a shared practice trail. See [the implementation scope](docs/PERSONAL-STUDIO.md) for behavior, storage and tested limits.
+
+## Knowledge library and connected programme
+
+See [sources and connected programmes](docs/KNOWLEDGE-PROGRAMME.md) for imports, originals, reviewed collections, programme choices, personalised sequencing and lifecycle bounds.

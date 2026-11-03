@@ -8,11 +8,11 @@ import {PodcastPlayer} from './media/PodcastPlayer.jsx';
 import {CartoonPlayer} from './media/CartoonPlayer.jsx';
 import './creative.css';
 
-export function CreativeStudio({pack,unit,client,onBack,onAssisted}){
- const [kind,setKind]=useState('tutor'),[activity,setActivity]=useState(unit.activityKeys[0]),[question,setQuestion]=useState(''),[jobs,setJobs]=useState([]),[selected,setSelected]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[budget,setBudget]=useState(null),[checked,setChecked]=useState(false),[draft,setDraft]=useState(null),[audioConfigured,setAudioConfigured]=useState(false);
+export function CreativeStudio({pack,unit,client,onBack,onAssisted,initialJobId=null,initialKind='tutor'}){
+ const [kind,setKind]=useState(initialKind),[activity,setActivity]=useState(unit.activityKeys[0]),[question,setQuestion]=useState(''),[jobs,setJobs]=useState([]),[selected,setSelected]=useState(initialJobId),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[budget,setBudget]=useState(null),[checked,setChecked]=useState(false),[draft,setDraft]=useState(null),[audioConfigured,setAudioConfigured]=useState(false);
  const [story,setStory]=useState({genre:'adventure',interest:unit.profile.interests[0]||''});
  const busyRef=useRef(false);const mounted=useRef(true),requestKey=useRef(null),clips=useRef(new Map());
- const identity={packId:pack.id,contentHash:draftHash(pack)},query=new URLSearchParams(identity).toString(),job=jobs.find(j=>j.id===selected),context=creativeContext(pack,unit,kind,activity,kind==='tutor'?undefined:story);
+ const identity={packId:pack.id,contentHash:draftHash(pack)},query=new URLSearchParams({...identity,...(selected?{selectedJob:selected}:{})}).toString(),job=jobs.find(j=>j.id===selected),context=creativeContext(pack,unit,kind,activity,kind==='tutor'?undefined:story);
  const request=async body=>client.journal.request('creative'+(body?'':'?'+query),body?{...identity,...body}:undefined);
  const useResult=data=>{if(!mounted.current)return;setJobs(data.jobs);setBudget(data.budget);setAudioConfigured(data.audioConfigured);};
  async function reload(){useResult(await request());}

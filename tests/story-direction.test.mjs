@@ -17,6 +17,7 @@ test('story inputs are bounded data and selected interest comes from the program
 });
 test('v2 stories bind exact facts, intent, structure and closed directions; v1 cannot masquerade as v2',()=>{
  const raw=fixture(),clean=validateCreative(raw,job);assert.deepEqual(validateCreative(clean,job),clean);assert.equal(clean.sources[0].excerpt,evidence[0].excerpt);
+ const directAddress=structuredClone(raw);directAddress.segments[0].text='Choose, Kit: compare the evidence before spending.';assert.equal(validateCreative(directAddress,job).segments[0].text,directAddress.segments[0].text);
  for(const mutate of [x=>x.story.genre='comedy',x=>x.story.interest='Football',x=>x.segments[0].direction.x=900,x=>x.segments[0].direction.blocking='https://evil/',x=>x.segments[0].sourceRefs=['fake'],x=>x.story.want='',x=>x.segments[0].beat='goal',x=>x.segments.at(-1).beat='choice',x=>x.segments.forEach(s=>s.scene='city'),x=>x.segments.forEach(s=>s.direction.blocking='face-off'),x=>x.schemaVersion=1,x=>x.segments[0].text='Mira: Hello. Kit: Hi.']){const bad=structuredClone(raw);mutate(bad);assert.throws(()=>validateCreative(bad,job));}
  assert.throws(()=>validateCreative(raw,{...job,storyVersion:undefined}));
  const schema=creativeSchema(job);assert.deepEqual(schema.properties.schemaVersion.enum,[2]);assert.equal(schema.properties.segments.items.properties.direction.additionalProperties,false);

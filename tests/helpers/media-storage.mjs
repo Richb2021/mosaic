@@ -6,7 +6,7 @@ export class D1{
 }
 export class Bucket{
  objects=new Map();puts=0;failDelete=false;failPut=false;
- async put(key,bytes){if(this.failPut)throw Error('fixture put failure');this.objects.set(key,new Uint8Array(bytes));this.puts++;return {size:bytes.byteLength}}
+ async put(key,bytes,options){if(this.failPut)throw Error('fixture put failure');if(options?.onlyIf?.etagDoesNotMatch==='*'&&this.objects.has(key))return null;this.objects.set(key,new Uint8Array(bytes));this.puts++;return {size:bytes.byteLength}}
  async get(key){const bytes=this.objects.get(key);return bytes?{body:new Blob([bytes]).stream(),size:bytes.byteLength}:null}
  async head(key){return this.objects.has(key)?{size:this.objects.get(key).byteLength}:null}
  async delete(key){if(this.failDelete)throw Error('fixture delete failure');this.objects.delete(key)}

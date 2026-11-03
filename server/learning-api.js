@@ -1,3 +1,5 @@
+import {connectedProgrammeAPI} from './connected-programme-api.js';
+import {collectionsAPI} from './knowledge-collections.js';
 import {exploreAPI} from './explore-api.js';
 import {WORLD_PACKS} from '../src/game-modes/adventure-world-packs.js';
 import {assignedChapters} from './assignments.js';
@@ -44,6 +46,8 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  await registerRetentionSubject(env,{siteOwner,owner,now:now()});
  if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
  return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
+ if(path==='programme')return await connectedProgrammeAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
+ if(path==='collections')return await collectionsAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='course-plan')return await coursePlanAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});

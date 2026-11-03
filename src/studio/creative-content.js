@@ -25,7 +25,7 @@ export function creativeContext(pack,unit,kind,key,story){
  const evidence=creativeEvidence(pack,keys),profile=unit.profile;
  const brief=story!==undefined&&['podcast','cartoon'].includes(kind)?storyBrief(story,profile.interests):null;
  const interests=brief?.interest?[brief.interest,...profile.interests.filter(i=>i!==brief.interest)].slice(0,2):profile.interests.slice(0,2);
- return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests,focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500),...(kind==='explore'?{stage:profile.stage,context:profile.context,exam:profile.exam,minutes:profile.minutes,access:profile.access}:{})},...(brief?{story:brief}:{})};
+ return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests,focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500),stage:profile.stage,context:profile.context,exam:profile.exam,minutes:profile.minutes,access:profile.access},...(brief?{story:brief}:{})};
 }
 function references(value,evidence,optional=false){need(Array.isArray(value)&&value.length<=12&&(optional||value.length>0)&&new Set(value).size===value.length&&value.every(id=>evidence.some(s=>s.id===id)),'Every factual passage needs references from this exact source packet.');return [...value];}
 export function validateCreative(raw,job){
@@ -50,7 +50,7 @@ export function validateCreative(raw,job){
  }
  const segments=raw.segments.map((s,i)=>{
   only(s,['id','speaker','text','sourceRefs','scene','action',...(narrative?['beat',...(job.kind==='cartoon'?['direction',...(performed?['performance']:[])]:[])]:[])]);need(s.id===`segment-${i+1}`,'Scenes must have consecutive identities.');need(SPEAKERS.includes(s.speaker)&&SCENES.includes(s.scene)&&['talk','think','celebrate'].includes(s.action),'Choose a preset presenter, scene and action.');
-  if(narrative){need(STORY_BEATS.includes(s.beat),'Choose a story beat.');need(typeof s.text==='string'&&!/\b(?:Mira|Kit|guide|learner)\s*:/i.test(s.text),'Each scene must contain only its designated character’s spoken line, without speaker labels.');}
+  if(narrative){need(STORY_BEATS.includes(s.beat),'Choose a story beat.');need(typeof s.text==='string'&&!/(?:^|[\r\n]|[.!?]\s+)\s*(?:Mira|Kit|guide|learner)\s*:/i.test(s.text),'Each scene must contain only its designated character’s spoken line, without speaker labels.');}
   return {id:s.id,speaker:s.speaker,text:text(s.text,500,'Spoken passage'),sourceRefs:references(s.sourceRefs,evidence),scene:s.scene,action:s.action,...(narrative?{beat:s.beat,...(job.kind==='cartoon'?{direction:validateDirection(s.direction),...(performed?{performance:validatePerformance(s.performance)}:{})}:{})}:{})};
  });
  if(performed)validatePerformances(segments,story.prop);

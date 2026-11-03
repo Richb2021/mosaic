@@ -1,4 +1,6 @@
 import {storyBrief} from '../src/story-direction.js';
+import {knowledgeAPI} from './knowledge-api.js';
+import {permittedSourceURL} from './knowledge-import.js';
 import {resourcePage,resourceSearch,RESOURCE_LIMIT} from './resource-library.js';
 import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
@@ -7,19 +9,20 @@ import {WorkshopError,requireValue,boundedText,safeId,digest,generationRequest,e
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function body(req){const reader=req.body?.getReader();requireValue(reader,'A request body is required.');let size=0,parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;requireValue(size<=100000,'The upload exceeds 100 KB.',413);parts.push(value)}}finally{await reader.cancel().catch(()=>{})}const data=new Uint8Array(size);let at=0;for(const p of parts){data.set(p,at);at+=p.length}try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(data))}catch{throw new WorkshopError('Send a valid UTF-8 JSON request.')}}
-const publicResource=r=>({id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:JSON.parse(r.payload).units});
+const publicResource=r=>{const p=JSON.parse(r.payload);return {id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:p.units,provenance:p.provenance||null,original:p.original||null}};
 const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
 const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,story:JSON.parse(r.payload).story||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
-export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null}={}){
+export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null,fetcher=fetch}={}){
  try{
   const url=new URL(req.url),path=url.pathname.replace(/^\/api\/workshop\/?/,'').split('/').filter(Boolean),method=req.method;
-  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','vtt','srt','png','jpg','jpeg','webp'],extraction:'browser-text-and-optional-english-ocr',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
+  if(method==='GET'&&path.join('/')==='health')return json({service:'resource-workshop',model:MODEL,configured:!!env.META_API_KEY,formats:['txt','md','pdf','docx','pptx','csv','tsv','xlsx','vtt','srt','png','jpg','jpeg','webp'],extraction:'browser-text-and-optional-english-ocr',maxFileBytes:8388608,templates:TEMPLATE_IDS,maxBytes:65536,generationLimit:generationLimit(env)});
   requireValue(owner&&owner.length<=200,'Sign in to your learner account to use your resource library.',401);
   requireValue(env.DB,'Resource storage is not configured.',503);
   if(method!=='GET'){requireValue(req.headers.get('origin')===url.origin,'Open the workshop on this site before saving.',403);requireValue(req.headers.get('content-type')?.startsWith('application/json')&&req.headers.get('x-lanternbound-workshop')==='1','Use the workshop form to make changes.',403)}
   const db=env.DB,one=(sql,...v)=>db.prepare(sql).bind(...v).first(),all=async(sql,...v)=>(await db.prepare(sql).bind(...v).all()).results,run=(sql,...v)=>db.prepare(sql).bind(...v).run();
+  if(path[0]==='knowledge')return await knowledgeAPI(req,env,{owner,learnerOwner,now,fetcher});
   const resource=async id=>{const r=await one('SELECT * FROM workshop_resources WHERE id=? AND owner=?',id,owner);requireValue(r,'Resource not found.',404);return r};
   const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'Draft not found.',404);return j};
   const sweepStarting=()=>run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
@@ -47,7 +50,12 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   if(method==='POST'&&path.join('/')==='resources'){
    const input=await body(req),r=await extractResource(input),existing=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);if(existing)return json({resource:publicResource(existing),duplicate:true});
    requireValue((await one('SELECT COUNT(*) AS n FROM workshop_resources WHERE owner=?',owner)).n<RESOURCE_LIMIT,'Your library holds up to 500 sources. Use Your data to remove material you no longer need.',409);
-   const id='resource-'+crypto.randomUUID();await run('INSERT OR IGNORE INTO workshop_resources(id,owner,title,checksum,payload,status,created) SELECT ?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_resources WHERE owner=?)<500',id,owner,r.title,r.checksum,JSON.stringify({text:r.text,units:r.units}),'unreviewed',now(),owner);
+   const id='resource-'+crypto.randomUUID(),provenance={filename:input.filename||null,language:input.language||'',rootId:id,parentId:null};
+   requireValue(typeof provenance.language==='string'&&provenance.language.length<=60,'Use a short source language name or code.');
+   if(input.importJobId){const imported=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',input.importJobId,owner);requireValue(imported,'Saved transcript not found.',404);const details=JSON.parse(imported.payload);requireValue(details.recordType==='knowledge'&&details.kind==='transcript'&&imported.status==='knowledge-review','Choose a completed transcript from this workspace.');provenance.importJobId=imported.id;}
+   if(input.url)provenance.url=permittedSourceURL(input.url,env).href;
+   if(input.parentId){const parent=await resource(input.parentId);requireValue(input.parentChecksum===parent.checksum,'The previous source version changed. Reopen it first.',409);provenance.rootId=JSON.parse(parent.payload).provenance?.rootId||parent.id;provenance.parentId=parent.id;}
+   await run('INSERT OR IGNORE INTO workshop_resources(id,owner,title,checksum,payload,status,created) SELECT ?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_resources WHERE owner=?)<500',id,owner,r.title,r.checksum,JSON.stringify({text:r.text,units:r.units,provenance}),'unreviewed',now(),owner);
    const saved=await one('SELECT * FROM workshop_resources WHERE owner=? AND checksum=?',owner,r.checksum);requireValue(saved,'The resource library is full.',409);return json({resource:publicResource(saved)},201);
   }
   if(method==='POST'&&path[0]==='resources'&&path[2]==='review'&&path.length===3){const r=await resource(path[1]),input=await body(req);requireValue(input.checksum===r.checksum&&input.confirmed===true,'Review the exact source text before confirming.');await run('UPDATE workshop_resources SET status=? WHERE id=? AND owner=?','reviewed',r.id,owner);return json({resource:publicResource(await resource(r.id))})}

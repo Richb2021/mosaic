@@ -1,3 +1,4 @@
+import {assignedLearningResources} from './course-learning-resources.js';
 import {validateExplore} from '../src/studio/explore-model.js';
 import {sqlDB,parse,need} from './data-control.js';
 import {digest} from './content-service.js';
@@ -59,6 +60,7 @@ export async function assignedQuestionBanks(env,learner,filter={}){
    if(!seen.has(key)){seen.add(key);result.push({g,bank,p:{packId:q.packId,contentHash:q.contentHash,activityKey:q.activityKey},hash:q.hash,updated:g.assignedAt})}
   }catch{ /* Invalid snapshots never reveal a partial bank. */ }
  }
+ for(const r of await assignedLearningResources(env,learner,filter)){if(!['practice','explore'].includes(r.kind)||seen.has(r.id+':'+r.hash))continue;seen.add(r.id+':'+r.hash);result.push({g:r.g,bank:r.content,p:{packId:r.packId,contentHash:r.contentHash,activityKey:r.activityKeys[0]},hash:r.hash,updated:r.g.assignedAt})}
  return result;
 }
 
