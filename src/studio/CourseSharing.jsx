@@ -1,8 +1,10 @@
+import {OperationsHealth} from './MediaJobs.jsx';
+import {TeacherReview} from './TeacherReview.jsx';
 import React,{useEffect,useRef,useState} from 'react';
 import './course-sharing.css';
 const labels={'not-started':'Not started','started':'Started','practised':'Practised'};
 const blank=g=>g.steps.map(s=>({objectiveId:s.id,status:'not-started',help:false}));
-export function OrganiserOverview({client}){const [open,setOpen]=useState(false);return <details className="cs-overview" onToggle={e=>setOpen(e.currentTarget.open)}><summary>All course assignments and shared updates</summary>{open&&<OrganiserReports course={{id:''}} client={client}/>}</details>}
+export function OrganiserOverview({client}){const [open,setOpen]=useState(false);return <details className="cs-overview" onToggle={e=>setOpen(e.currentTarget.open)}><summary>All course assignments and shared updates</summary>{open&&<><OrganiserReports course={{id:''}} client={client}/>{client.access?.role==='administrator'&&<OperationsHealth client={client}/>}</>}</details>}
 
 export function LearnerCourses({client,onStart}){
  const [data,setData]=useState(null),[error,setError]=useState('');const sequence=useRef(0),identity=client.journal.user?.id;
@@ -20,8 +22,10 @@ function LearnerCourse({assignment:g,client,onStart,onReload,onError}){
   if(!current())return;setNotice(result.notice||(on?'Your chosen update is shared with your current organiser.':'Sharing stopped.'));setEnabled(false);await onReload();
  }catch(e){if(current()){setError(e.message);try{await onReload()}catch{}onError(e.message)}}finally{running.current=false;if(current())setBusy(false)}}
  return <article className="shared-course"><div className="cs-heading"><div><span>ASSIGNED COURSE</span><h3>{g.title}</h3></div><b className="cs-sharing-state">{g.sharing?'Sharing enabled':'Sharing off'}</b></div>
+ {g.settings?.instructions&&<p>{g.settings.instructions}</p>}{g.settings?.dueAt&&<p>Suggested due date: {new Date(g.settings.dueAt).toLocaleString()}. You can continue after this date.</p>}
  {!g.available&&<p className="message error">These activities changed or are unavailable. Your organiser needs to assign a reviewed version.</p>}
  <ol>{g.steps.map(s=>{const update=updates.find(u=>u.objectiveId===s.id),item=client.items.find(i=>i.jobId===s.jobId&&i.sourceHash===s.hash);return <li key={s.id}><div><small>{s.topicTitle}</small><h4>{s.objective}</h4><p>{s.title}</p><button disabled={busy||!g.available||!item} onClick={async()=>{try{await onStart(item)}catch(e){setError(e.message)}}}>Open activity</button></div><fieldset disabled={busy||!g.available||!g.storageAvailable}><legend>Your update for this objective</legend><label>Status<select value={update.status} onChange={e=>setUpdates(v=>v.map(u=>u.objectiveId===s.id?{...u,status:e.target.value}:u))}>{Object.entries(labels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label><label className="check"><input type="checkbox" checked={update.help} onChange={e=>setUpdates(v=>v.map(u=>u.objectiveId===s.id?{...u,help:e.target.checked}:u))}/>I would like help with this</label></fieldset></li>})}</ol>
+ {g.available&&<TeacherReview assignment={g} client={client}/>}
  <aside className="cs-consent"><h4>You choose what to share.</h4><p>Only the statuses and help requests above go to your current organiser. These are your own updates, not grades. Private answers, conversations, interests and game scores are not included. Editing a choice does not send it.</p>
  {!g.storageAvailable&&<p role="alert">Saved updates are temporarily unavailable. You can still stop sharing.</p>}
  <label className="check"><input type="checkbox" checked={enabled} disabled={busy||!g.available||!g.storageAvailable} onChange={e=>setEnabled(e.target.checked)}/>Share these updates with my current organiser.</label>
@@ -40,6 +44,7 @@ export function OrganiserReports({course,client,revision=0}){
  {!busy&&!error&&data&&!data.assignments.length&&<p>No course assignments yet. Assign a fully reviewed course above to offer learner-controlled updates.</p>}
  {!busy&&!error&&data?.assignments.map(g=><article key={g.id}><div className="cs-heading"><div><h4>{g.label}</h4><p>{g.title}</p></div><span>{g.revoked?'Assignment withdrawn':!g.available?'Assignment unavailable':g.report.state==='shared'?'Learner update shared':g.report.state==='off'?'Not sharing':g.report.state==='expired'?'Shared update expired':'Updates temporarily unavailable'}</span></div>
  {g.report.state==='shared'&&<><p className="cs-small">Last sent {new Date(g.report.updated).toLocaleString()}</p><ul>{g.steps.map(s=>{const u=g.report.updates.find(u=>u.objectiveId===s.id);return <li key={s.id}><span>{s.objective}</span><b>{labels[u.status]}</b>{u.help&&<strong className="cs-help">Help requested</strong>}</li>})}</ul></>}
+ {g.available&&!g.revoked&&<TeacherReview assignment={g} client={client} teacher/>}
  {!g.revoked&&<button disabled={busy} onClick={()=>setConfirm(g)}>Withdraw course assignment</button>}
  {confirm?.id===g.id&&<div className="cs-withdraw"><p>Withdraw this course and its shared updates? The learner’s private saves remain. Chapters assigned separately remain available.</p><button disabled={busy} onClick={async()=>{setBusy(true);try{await client.journal.request('course-sharing',{action:'revoke',id:g.id,revision:g.revision});setConfirm(null);await load()}catch(e){setError(e.message);setBusy(false)}}}>Withdraw this course</button><button disabled={busy} onClick={()=>setConfirm(null)}>Keep assignment</button></div>}
  </article>)}

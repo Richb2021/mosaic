@@ -69,3 +69,4 @@ test('synthetic relevance cases retrieve labelled evidence in the first five, in
  for(let i=0;i<35;i++)await h.source('distractor-'+i,'Fractions, steam, energy, ecosystem, evaporation, DNA, loop, metaphor, photosynthèse and evaporación are catalogue words without an explanation. Entry '+i+'.',{created:100+i});
  for(const c of retrievalCases){const p=await h.search(c.query,{related:c.related||''});const top=p.results.slice(0,5).map(p=>p.resourceId);assert(c.relevant.every(id=>top.includes(id)),c.id+': '+top.join(','));if(!c.relevant.length)assert.equal(p.totalMatches,0)}
 });
+test('numeric learning queries retain short numbers instead of silently discarding fraction evidence',()=>{const q=retrievalQuery('What multiplier changes 3/4 into 9/12?');assert(q.terms.includes('3'));assert(q.terms.includes('4'));assert(q.terms.includes('9'));assert(q.terms.includes('12'));});

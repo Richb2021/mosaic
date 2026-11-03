@@ -6,7 +6,7 @@ export const passageTokens=s=>{const text=s.normalize('NFKC').toLowerCase();retu
 export function retrievalQuery(query,related=''){
  need(typeof query==='string'&&query.trim().length>0&&query.length<=240,'Enter a search of up to 240 characters.');
  need(typeof related==='string'&&related.length<=488,'Keep alternative phrases within eight lines of 60 characters.');
- const ordinary=new Set(goalTerms(query.normalize('NFKC'))),terms=[...new Set(passageTokens(query).filter(t=>ordinary.has(t)||segmentedScript.test(t)))];
+ const ordinary=new Set(goalTerms(query.normalize('NFKC'))),terms=[...new Set(passageTokens(query).filter(t=>ordinary.has(t)||/^\d+$/.test(t)||segmentedScript.test(t)))];
  need(terms.length>0&&terms.length<=12,'Use one to twelve meaningful search words (three or more characters for alphabetic words).');
  const phrases=[...new Set(related.split('\n').map(s=>s.trim()).filter(Boolean))];
  need(phrases.length<=8&&phrases.every(p=>p.length<=60&&passageTokens(p).length>0&&passageTokens(p).length<=8),'Use up to eight alternative phrases, each at most 60 characters and eight words.');

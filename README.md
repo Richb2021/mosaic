@@ -99,3 +99,5 @@ Open `/studio.html` for saved learner preferences, reviewed topics, starting che
 ## Knowledge library and connected programme
 
 See [sources and connected programmes](docs/KNOWLEDGE-PROGRAMME.md) for imports, originals, reviewed collections, programme choices, personalised sequencing and lifecycle bounds.
+
+Production media queues, teacher feedback and the frozen educational evaluation are documented in [PRODUCTION-TEACHING.md](docs/PRODUCTION-TEACHING.md).

@@ -1,0 +1,545 @@
+{
+  "version": 1,
+  "origin": "Agent-authored synthetic evaluation; not an efficacy study or teacher-approved curriculum.",
+  "frozenAt": "2026-11-03",
+  "passages": [
+    {
+      "id": "fractions",
+      "text": "Equivalent fractions name the same amount. Multiplying the numerator and denominator by the same nonzero number preserves the ratio."
+    },
+    {
+      "id": "steam",
+      "text": "Steam engines supplied power to factories. Steam power allowed machinery to work away from fast-flowing rivers during industrialisation."
+    },
+    {
+      "id": "towns",
+      "text": "Factories attracted workers into towns. Urbanisation changed housing, transport and working conditions during industrialisation."
+    },
+    {
+      "id": "arrows",
+      "text": "Food web arrows point from the organism being eaten to the consumer. The arrows represent the direction of energy transfer."
+    },
+    {
+      "id": "ecosystem",
+      "text": "An ecosystem includes organisms, their physical surroundings and the interactions between them. A population contains members of one species."
+    },
+    {
+      "id": "water",
+      "text": "Evaporation changes liquid water to water vapour. Condensation changes water vapour into liquid droplets when it cools."
+    },
+    {
+      "id": "cells",
+      "text": "DNA carries genetic information in cells. A gene is a section of DNA that contributes to a functional product."
+    },
+    {
+      "id": "inertia",
+      "text": "Inertia describes resistance to a change of motion. With no resultant force, an object maintains constant velocity."
+    },
+    {
+      "id": "loops",
+      "text": "A programming loop repeats instructions. A loop condition controls whether another iteration runs and an update can move it towards termination."
+    },
+    {
+      "id": "metaphor",
+      "text": "A metaphor describes one thing as another to create a comparison. It can give a reader a new way to imagine an experience."
+    },
+    {
+      "id": "french",
+      "text": "La photosynthèse utilise la lumière pour fabriquer de la matière organique. Les plantes absorbent du dioxyde de carbone et libèrent du dioxygène."
+    },
+    {
+      "id": "spanish",
+      "text": "La evaporación transforma el agua líquida en vapor. La condensación transforma el vapor de agua en gotas líquidas."
+    },
+    {
+      "id": "battery",
+      "text": "A battery can drive an electric current around a complete circuit. Opening a switch interrupts the conducting path."
+    },
+    {
+      "id": "shop",
+      "text": "In a fictional club shop, 10 shirts sell for 12 pounds each. Revenue is 120 pounds. Each shirt costs 5 pounds to buy and print, so total costs are 50 pounds. Profit equals revenue minus costs: 70 pounds. Revenue is not profit. Break-even means revenue equals total costs and profit is zero."
+    },
+    {
+      "id": "fractions-example",
+      "text": "Equivalent fractions describe the same amount of the same whole. Multiplying both parts of 3/4 by 3 gives 9/12. Multiplying both parts of 2/3 by 2 gives 4/6. Twelve twenty-fourths is one half, not three quarters."
+    },
+    {
+      "id": "circuit-example",
+      "text": "In an idealised series circuit, a 6 volt battery supplies two resistors of 3 ohms each. Series resistances add to 6 ohms. Current equals voltage divided by resistance, so the current is 1 ampere. This model assumes the resistor values remain fixed."
+    },
+    {
+      "id": "source-argument",
+      "text": "In a fictional town, a diary says rain delayed one canal delivery in May. A ledger records deliveries in every month. The diary supports a delay on that occasion; it does not establish that rain caused all annual losses. Comparing dates and multiple sources helps test the broader claim."
+    },
+    {
+      "id": "metaphor-example",
+      "text": "The sentence \"The classroom was a zoo\" uses a metaphor to suggest noise and disorder. It does not mean that literal animals were present. The word \"was\" places this description in the past."
+    },
+    {
+      "id": "spanish-example",
+      "text": "La frase \"El agua se evapora cuando hace calor\" describe un proceso general en presente. \"Ayer llovió\" describe un evento pasado. En inglés, ayer significa yesterday."
+    }
+  ],
+  "cases": [
+    {
+      "id": "a01",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "What are equivalent fractions?",
+      "evidence": [
+        "fractions"
+      ],
+      "expectedAnswer": "Fractions naming the same amount.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a02",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "Which direction do food web arrows point?",
+      "evidence": [
+        "arrows"
+      ],
+      "expectedAnswer": "From the organism being eaten to its consumer; direction of energy transfer.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a03",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "What is a gene in DNA?",
+      "evidence": [
+        "cells"
+      ],
+      "expectedAnswer": "A section of DNA contributing to a functional product.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a04",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "What does evaporation change?",
+      "evidence": [
+        "water"
+      ],
+      "expectedAnswer": "Liquid water into water vapour.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a05",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "Why could steam factories operate away from rivers?",
+      "evidence": [
+        "steam"
+      ],
+      "expectedAnswer": "Steam supplied power without requiring a fast-flowing river.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a06",
+      "category": "factual",
+      "kind": "answerable",
+      "query": "What happens when a circuit switch opens?",
+      "evidence": [
+        "battery"
+      ],
+      "expectedAnswer": "The conducting path is interrupted.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a07",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "Calculate revenue for 10 shirts sold at 12 pounds each.",
+      "evidence": [
+        "shop"
+      ],
+      "expectedAnswer": "120 pounds.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a08",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "Calculate total costs of 10 shirts costing 5 pounds each.",
+      "evidence": [
+        "shop"
+      ],
+      "expectedAnswer": "50 pounds.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a09",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "Revenue is 120 pounds and costs are 50 pounds. Calculate profit.",
+      "evidence": [
+        "shop"
+      ],
+      "expectedAnswer": "70 pounds.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a10",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "What is profit when revenue equals total costs at break-even?",
+      "evidence": [
+        "shop"
+      ],
+      "expectedAnswer": "Zero pounds.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a11",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "What multiplier changes 3/4 into 9/12?",
+      "evidence": [
+        "fractions-example"
+      ],
+      "expectedAnswer": "Multiply numerator and denominator by 3.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a12",
+      "category": "quantitative",
+      "kind": "answerable",
+      "query": "Calculate current for the idealised 6 volt series circuit with two 3 ohm resistors.",
+      "evidence": [
+        "circuit-example"
+      ],
+      "expectedAnswer": "1 ampere: 6 volts / 6 ohms.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a13",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "A shop earns revenue of 120 pounds. Is all revenue profit?",
+      "evidence": [
+        "shop"
+      ],
+      "expectedAnswer": "No. Subtract total costs; in the example profit is 70 pounds.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a14",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "Does the diary rain delay establish all annual losses?",
+      "evidence": [
+        "source-argument"
+      ],
+      "expectedAnswer": "No. It supports one delayed delivery, not the broader causal claim.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a15",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "Why compare the ledger with the diary about deliveries?",
+      "evidence": [
+        "source-argument"
+      ],
+      "expectedAnswer": "To compare dates and test whether the broader claim is supported.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a16",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "Are 2/3 and 4/6 different amounts because the numbers are bigger?",
+      "evidence": [
+        "fractions-example"
+      ],
+      "expectedAnswer": "No, for the same whole the ratio is preserved by multiplying both parts by 2.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a17",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "Does a population contain multiple species like an ecosystem?",
+      "evidence": [
+        "ecosystem"
+      ],
+      "expectedAnswer": "No. A population contains members of one species.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a18",
+      "category": "argumentative",
+      "kind": "answerable",
+      "query": "Can a loop update help termination?",
+      "evidence": [
+        "loops"
+      ],
+      "expectedAnswer": "Yes, an update can move the loop towards its terminating condition.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a19",
+      "category": "language",
+      "kind": "answerable",
+      "query": "What does classroom was a zoo suggest?",
+      "evidence": [
+        "metaphor-example"
+      ],
+      "expectedAnswer": "Noise and disorder through metaphor, not literal animals.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a20",
+      "category": "language",
+      "kind": "answerable",
+      "query": "Which tense is was in classroom was a zoo?",
+      "evidence": [
+        "metaphor-example"
+      ],
+      "expectedAnswer": "Past tense.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a21",
+      "category": "language",
+      "kind": "answerable",
+      "query": "La photosynthèse utilise quoi pour fabriquer de la matière organique?",
+      "evidence": [
+        "french"
+      ],
+      "expectedAnswer": "La lumière.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a22",
+      "category": "language",
+      "kind": "answerable",
+      "query": "Que libèrent les plantes selon la phrase?",
+      "evidence": [
+        "french"
+      ],
+      "expectedAnswer": "Du dioxygène.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a23",
+      "category": "language",
+      "kind": "answerable",
+      "query": "Qué transforma la condensación según el texto?",
+      "evidence": [
+        "spanish"
+      ],
+      "expectedAnswer": "El vapor de agua en gotas líquidas.",
+      "holdout": false,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "a24",
+      "category": "language",
+      "kind": "answerable",
+      "query": "What does ayer mean in Ayer llovió?",
+      "evidence": [
+        "spanish-example"
+      ],
+      "expectedAnswer": "Yesterday.",
+      "holdout": true,
+      "age": "11+ with teacher adaptation",
+      "criterion": "Answer must follow the pinned passage; exact citations alone do not establish support."
+    },
+    {
+      "id": "absent-0",
+      "kind": "absent",
+      "query": "quasar accretion redshift",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-1",
+      "kind": "absent",
+      "query": "mitochondrial cristae ATP synthase",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-2",
+      "kind": "absent",
+      "query": "Shakespeare birthplace anniversary",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": true,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-3",
+      "kind": "absent",
+      "query": "Napoleonic cavalry Waterloo",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-4",
+      "kind": "absent",
+      "query": "quadratic discriminant parabola",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-5",
+      "kind": "absent",
+      "query": "tectonic subduction lithosphere",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-6",
+      "kind": "absent",
+      "query": "Byzantine coinage nomisma",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": true,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "absent-7",
+      "kind": "absent",
+      "query": "molarity titration phenolphthalein",
+      "evidence": [],
+      "expectedAnswer": "Insufficient evidence in the selected reviewed material. Ask for a relevant source.",
+      "holdout": false,
+      "criterion": "No passage or answer may be invented. These are lexical absence controls; near-miss semantic refusal requires human review."
+    },
+    {
+      "id": "boundary-0",
+      "kind": "boundary",
+      "scenario": "foreign-search",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-1",
+      "kind": "boundary",
+      "scenario": "foreign-id-filter",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-2",
+      "kind": "boundary",
+      "scenario": "foreign-read",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-3",
+      "kind": "boundary",
+      "scenario": "unreviewed-search",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-4",
+      "kind": "boundary",
+      "scenario": "unreviewed-generate",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-5",
+      "kind": "boundary",
+      "scenario": "forged-citation",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-6",
+      "kind": "boundary",
+      "scenario": "changed-version",
+      "holdout": true,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    },
+    {
+      "id": "boundary-7",
+      "kind": "boundary",
+      "scenario": "foreign-counts",
+      "holdout": false,
+      "expectedAnswer": "Refuse inaccessible or invalid evidence; no foreign excerpts, ids, counts or downloads.",
+      "criterion": "Exercise the actual application handlers and validators."
+    }
+  ],
+  "semanticReview": {
+    "required": true,
+    "status": "pending independent human teacher review",
+    "checks": [
+      "correctness beyond exact citation",
+      "age and language suitability",
+      "analogy limits",
+      "misconceptions",
+      "game mechanic concept fit",
+      "help versus answer copying"
+    ]
+  }
+}

@@ -1,3 +1,4 @@
+import {assignmentSettings} from './assignment-settings.js';
 import {attachLearningResources,availableLearningResources,preserveLearningResources} from './course-learning-resources.js';
 import {attachQuestionBanks,availableQuestionBanks,preserveQuestionBanks} from './course-question-banks.js';
 import {readJSON,noStore} from './ncb-auth.js';
@@ -87,6 +88,7 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   const learner=await admission(env,input.learner);need(learner.admitted&&learner.role==='learner'&&learner.manager===principal,'Choose an active learner in your group.',403);
   const route=await reviewedRoute(env,{owner,siteOwner,store,courseId:input.courseId,planHash:input.planHash}),id=await courseGrantId(principal,input.learner,route.courseId),scope=grantScope(id),saved=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),old=parse(saved?.policy);
   preserveQuestionBanks(route,old);preserveLearningResources(route,old);
+  route.settings=assignmentSettings(input.settings??old.settings);
   await attachQuestionBanks(env,{owner,siteOwner},route,input.questionBanks);await attachLearningResources(env,{owner,siteOwner},route,input.learningResources);
   const bindings={learnerBinding:(await memberBinding(env,input.learner)).key,managerBinding:(await memberBinding(env,principal)).key},signature=await digest(JSON.stringify({...route,...bindings}));
   if(saved&&!old.revoked&&old.signature===signature)return noStore({assigned:true,assignment:publicCourseGrant({...old,id})});

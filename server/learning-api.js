@@ -1,3 +1,5 @@
+import {mediaJobsAPI,mediaHealth} from './media-jobs.js';
+import {teacherReviewAPI} from './teacher-review.js';
 import {connectedProgrammeAPI} from './connected-programme-api.js';
 import {collectionsAPI} from './knowledge-collections.js';
 import {exploreAPI} from './explore-api.js';
@@ -40,16 +42,19 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  const {owner,principal,siteOwner}=await workspaceIdentity(user,env),url=new URL(req.url),path=url.pathname.replace(/^\/api\/learning\/?/,'');
  const scopedResolve=(id,hash,r,e)=>resolve(id,hash,r,e,siteOwner,owner);
  if(path==='data'){const access=await admission(env,principal);need(access.admitted||['active','revoked','closing'].includes(access.status),'Accept your invitation before using account data controls.',403);return await dataAPI(req,env,{owner,siteOwner,store,now});}
- const withdrawal=path==='course-sharing'&&req.method==='POST'&&await req.clone().json().then(x=>x.action==='share'&&x.enabled===false).catch(()=>false);
+ const withdrawal=['course-sharing','teacher-review'].includes(path)&&req.method==='POST'&&await req.clone().json().then(x=>path==='course-sharing'?x.action==='share'&&x.enabled===false:x.action==='withdraw').catch(()=>false);
  const access=await requireAdmission(env,principal,{store,onboarding:!withdrawal,storageOwner:owner});
  if(req.method==='POST'&&path.startsWith('creative')&&env.PILOT_ENABLED==='true'&&(!access.canAuthor||access.ageBand!=='18plus'))return noStore({error:'Ask your organiser to prepare and review new AI learning material. Your assigned games and learning record remain available.'},403);
  await registerRetentionSubject(env,{siteOwner,owner,now:now()});
  if(req.method==='GET')await enforceRetention(env,{owner,siteOwner,store,now});
  return await withDataGuard(req,env,{owner,siteOwner,now},async()=>{
+ if(path==='media-jobs')return await mediaJobsAPI(req,env,{owner,principal,siteOwner,access,now});
+ if(path==='operations'){need(access.role==='administrator','Administrator access required.',403);return noStore(await mediaHealth(env,now()));}
  if(path==='programme')return await connectedProgrammeAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='collections')return await collectionsAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='course-plan')return await coursePlanAPI(req,env,{store,owner,siteOwner,access,now});
  if(path==='courses')return await courseAPI(req,env,{store,owner,siteOwner,access,now});
+ if(path==='teacher-review')return await teacherReviewAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='loop/banks')return await assignedLoopList(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve});
  if(path==='explore')return await exploreAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});

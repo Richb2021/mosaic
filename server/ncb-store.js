@@ -8,7 +8,7 @@ export class NCBStore{
   if(!this.env.NCB_INSTANCE||!this.env.NCB_SECRET_KEY)throw new StoreError('Cloud progress is not connected.');
   const url=new URL('https://eu-api.nocodebackend.com/'+action+'/'+table);url.searchParams.set('Instance',this.env.NCB_INSTANCE);
   for(const [k,v] of Object.entries(params))url.searchParams.set(k,String(v));
-  const res=await this.fetcher(url,{method:action==='read'?'GET':(action.startsWith('delete/')||action==='bulk/delete')?'DELETE':'POST',headers:{Authorization:'Bearer '+this.env.NCB_SECRET_KEY,'Content-Type':'application/json','Cache-Control':'no-cache, no-store'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(12000),cache:'no-store'});
+  let res;try{res=await this.fetcher(url,{method:action==='read'?'GET':(action.startsWith('delete/')||action==='bulk/delete')?'DELETE':'POST',headers:{Authorization:'Bearer '+this.env.NCB_SECRET_KEY,'Content-Type':'application/json','Cache-Control':'no-cache, no-store'},body:payload?JSON.stringify(payload):undefined,signal:AbortSignal.timeout(12000),cache:'no-store'});}catch{throw new StoreError('Cloud progress is temporarily unavailable. Your saved data is unchanged; retry when the connection returns.');}
   const data=await res.json().catch(()=>null);if(!res.ok||data?.status!=='success')throw new StoreError('Cloud progress could not be saved. Your device save is safe.');return data;
  }
  async rows(table,owner,extra={}){const d=await this.request(table,'read',{owner_key:owner,...extra});if(!Array.isArray(d.data)||d.data.some(r=>r.owner_key!==owner))throw new StoreError('Cloud progress could not be verified.');return d;}

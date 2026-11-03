@@ -1,3 +1,4 @@
+import {assignmentSettings} from './assignment-settings.js';
 import {publicLearningResource} from './course-learning-resources.js';
 import {publicQuestionBank} from './course-question-banks.js';
 import {sqlDB,parse,need,readControls} from './data-control.js';
@@ -41,7 +42,7 @@ export async function grantChapters(env,g){
 export async function learnerCourseGrants(env,learner){
  return (await sqlDB(env.DB).all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.revoked')=0 ORDER BY scope LIMIT 25",learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
 }
-export function publicCourseGrant(g){return {id:g.id,revision:g.revision,title:g.title,courseId:g.courseId,planId:g.planId,planHash:g.planHash,assignedAt:g.assignedAt,steps:g.steps.map(({id,objective,jobId,hash,title,topicTitle,questionBank,learningResources})=>({id,objective,jobId,hash,title,topicTitle,...(questionBank?{questionBank:publicQuestionBank(questionBank)}:{}),...(learningResources?{learningResources:learningResources.map(publicLearningResource)}:{})}))};}
+export function publicCourseGrant(g){return {id:g.id,revision:g.revision,title:g.title,courseId:g.courseId,planId:g.planId,planHash:g.planHash,assignedAt:g.assignedAt,settings:assignmentSettings(g.settings),steps:g.steps.map(({id,objective,jobId,hash,title,topicTitle,questionBank,learningResources})=>({id,objective,jobId,hash,title,topicTitle,...(questionBank?{questionBank:publicQuestionBank(questionBank)}:{}),...(learningResources?{learningResources:learningResources.map(publicLearningResource)}:{})}))};}
 // Existing export/deletion flows use this owner-scoped inventory. It contains no
 // other learner's report payload; those remain in their NCB account.
 export async function courseGrantRecords(env,owner,siteOwner){

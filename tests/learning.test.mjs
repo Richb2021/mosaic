@@ -62,3 +62,7 @@ test('older published chapters remain canonical after more than thirty newer cop
  const request=new Request('https://game.test/api/learning/save',{headers:{'oai-authenticated-user-id':'alice'}});
  assert.equal((await canonicalPack(source.id,draftHash(source),request,{DB},'alice')).title,source.title);db.close();
 });
+test('NCB network interruption is a temporary service error rather than invalid learner data',async()=>{
+ let attempts=0;const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async()=>{attempts++;throw new TypeError('Network unavailable')});
+ await assert.rejects(()=>store.latest('learner_profiles','a','profile'),e=>e instanceof StoreError&&e.status===503&&/temporarily unavailable/.test(e.message));assert.equal(attempts,1);
+});
