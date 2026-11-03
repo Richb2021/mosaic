@@ -35,9 +35,14 @@ def transition(state, issues, now):
     count=state.get('count',0)+1 if signature==previous else 1
     state.update(candidate=signature,count=count,checkedAt=now,issues=issues)
     notified=state.get('notified','')
-    # Two consecutive failing probes suppress brief provider/network blips.
-    if signature != notified and (not signature or count >= 2):
-        return {'kind':'incident' if signature else 'recovered','signature':signature,'previous':notified}
+    history=(state.get('history',[])+[bool(issues)])[-5:];state['history']=history
+    # Catch oscillating degradation as well as repeated failures, and require
+    # two healthy probes before declaring recovery.
+    sustained=count>=2 or sum(history)>=3
+    new_issues=set(issues)-set(notified.split(','))
+    if (signature and sustained and (not notified or new_issues)) or (not signature and notified and count>=2):
+        affected=','.join(sorted((set(issues)|set(notified.split(',')))-{''})) if signature else ''
+        return {'kind':'incident' if signature else 'recovered','signature':affected,'previous':notified,'observedAt':now}
     return None
 
 def password():
@@ -52,7 +57,7 @@ def send(event, ident, rehearsal=''):
     tag=' REHEARSAL '+rehearsal if rehearsal else ''
     msg['Subject']='[Mosaic'+tag+'] '+event['kind']+': '+(event['signature'] or event['previous'])
     msg['Message-ID']='<mosaic-'+ident+'@graysongames.com>'
-    msg.set_content('Mosaic operational '+event['kind']+'.\nChecks: '+(event['signature'] or 'All checks recovered')+'\nSite: '+ORIGIN+'\nReceipt: '+ident+'\nNo learner information is included.\nRunbook: rpg-demo/docs/LAUNCH-OPERATIONS.md\n'+('This is an explicitly injected delivery rehearsal.\n' if rehearsal else ''))
+    msg.set_content('Mosaic operational '+event['kind']+' observed at '+event.get('observedAt','an earlier check')+'.\nAffected checks: '+(event['signature'] or 'All checks recovered')+'\nCurrent checks: '+(event.get('current') or 'All checks healthy')+'\nSite: '+ORIGIN+'\nReceipt: '+ident+'\nNo learner information is included.\nRunbook: rpg-demo/docs/LAUNCH-OPERATIONS.md\n'+('This is an explicitly injected delivery rehearsal.\n' if rehearsal else ''))
     with smtplib.SMTP('smtp.stackmail.com',587,timeout=30) as smtp:
         smtp.ehlo();smtp.starttls(context=ssl.create_default_context());smtp.ehlo();smtp.login(RECIPIENT,password());smtp.send_message(msg)
 
@@ -67,15 +72,17 @@ def run(args):
         try:config=json.loads((pathlib.Path.home()/'.config/mosaic-pilot/maintenance.json').read_text())
         except Exception:config={}
         issues=[] if args.inject=='healthy' else ['endpoint'] if args.inject=='failure' else probe(config)
-        now=datetime.datetime.now(datetime.timezone.utc).isoformat();event=transition(state,issues,now)
+        now=datetime.datetime.now(datetime.timezone.utc).isoformat();candidate=transition(state,issues,now)
+        event=state.get('pending',{}).get('event') or candidate
         if event:
             # Stable receipt for ambiguous SMTP acknowledgement. Leave pending on
             # failure and retry at most once per hour, using the same Message-ID.
-            identity=hashlib.sha256((args.rehearsal+event['kind']+event['signature']+state.get('lastSentAt','initial')).encode()).hexdigest()[:24]
+            event['current']=','.join(issues)
+            identity=state.get('pending',{}).get('id') or hashlib.sha256((args.rehearsal+event['kind']+event['signature']+state.get('lastSentAt','initial')).encode()).hexdigest()[:24]
             pending=state.get('pending',{})
             if pending.get('id')==identity and datetime.datetime.now(datetime.timezone.utc).timestamp()-pending.get('attemptAt',0)<3600:
                 save(path,state);print(json.dumps({'status':'delivery-pending','issues':issues}));return 1
-            state['pending']={'id':identity,'attemptAt':datetime.datetime.now(datetime.timezone.utc).timestamp()};save(path,state)
+            state['pending']={'id':identity,'event':event,'attemptAt':datetime.datetime.now(datetime.timezone.utc).timestamp()};save(path,state)
             try: send(event,identity,args.rehearsal)
             except Exception:
                 save(path,state);print(json.dumps({'status':'delivery-pending','receipt':identity,'issues':issues}));return 1

@@ -6,7 +6,7 @@ report={'at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'
 try:
  for name in ['ncb_recovery.py','site_recovery.py']:
   r=subprocess.run([sys.executable,str(pathlib.Path(__file__).with_name(name))],capture_output=True,timeout=720)
-  if r.returncode:raise RuntimeError(name+' failed; prior backups preserved')
+  if r.returncode:raise RuntimeError(name+' failed; unexpired backups retained')
  report['status']='verified'
 except Exception:
  report['status']='failed'

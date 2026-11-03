@@ -6,7 +6,7 @@ The Site remains owner-private. These controls do not constitute approval to ope
 
 `GET /api/operations` with the existing maintenance bearer key and `X-Mosaic-Maintenance: health-v1` returns only named checks and booleans. It checks D1, NoCodeBackend reads, R2 listing, the media worker heartbeat, failed/stalled media work, and a recent **completed** retention sweep. The Sites service credential remains independently required by private hosting. It never returns learner data, provider errors, credentials, file names or account identifiers.
 
-Baldur runs `mosaic-alerts.timer` every five minutes. Two consecutive failures generate an incident email to `contact@graysongames.com`; a recovery generates one follow-up. Identical incidents are deduplicated in `~/.local/state/mosaic-alerts/production.json`. An ambiguous SMTP acknowledgement is retained as pending, with at most one retry per hour and a stable Message-ID; mail providers may still deliver a duplicate. A failed/stale daily backup also raises an alert.
+Baldur runs `mosaic-alerts.timer` every five minutes. Two matching consecutive failures, or three failures in five checks, generate an incident email to `contact@graysongames.com`; two healthy checks generate one recovery follow-up. Failed deliveries retain their original event and current condition across later checks. Identical incidents are deduplicated in `~/.local/state/mosaic-alerts/production.json`. An ambiguous SMTP acknowledgement is retained as pending, with at most one retry per hour and a stable Message-ID; mail providers may still deliver a duplicate. A failed/stale daily backup also raises an alert.
 
 Rehearsals use a separate named state and explicitly labelled messages:
 
@@ -26,7 +26,7 @@ The operations scripts are `scripts/operations/ncb_recovery.py`, `site_recovery.
 
 - Encryption key: `~/.config/mosaic-pilot/recovery.key` (0600).
 - Encrypted backups and content-free receipts: `~/.local/state/mosaic-recovery/` (0700).
-- Daily status: `backup-last.json`; failed jobs preserve prior backups.
+- Daily status: `backup-last.json`; failed jobs retain unexpired backups. A continuous outage exceeding the seven-day retention window can exhaust the recovery copies; daily failures are alerted before that deadline. Retention is not silently extended.
 - Each file is limited to 64 MB, total files 256 MB. Increase bounds or move to streaming backup before exceeding them.
 - Every Site backup is decrypted and restored to independent in-memory SQLite, checks every table hash and integrity, and checks decoded file hashes.
 - The provider rehearsal creates a separate private NoCodeBackend database and restores the two business-data tables with the slot/version uniqueness constraint, then compares exact rows. It must never point to `34968_mosaic_learning` as a restore target.
