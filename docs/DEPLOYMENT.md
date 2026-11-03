@@ -1,12 +1,12 @@
 # Deployment and public access
 
-## Hosting transition
+## Current hosting
 
-The requested public origin is `https://mosaic.richardbatt.com`, using the domain managed through 20i. The user requested migration away from Sites on 3 November 2026. Sites version 68 remains the private fallback; it has not been made public. A custom address alone would not remove the Sites dependency.
+Production is [mosaic.richardbatt.com](https://mosaic.richardbatt.com), migrated on 3 November 2026. The frontend runs on 20i and the API on Baldur; neither needs a Sites token or ChatGPT login. NoCodeBackend remains the sign-in and learner-record provider. Private Sites version 69 returns HTTP 410 for learner and write APIs and keeps operator recovery reads available. It is not a writable fallback.
 
 The existing `richardbatt.com` package is 20i Linux Ultimate shared hosting. It can serve built frontend assets, but [20i does not support persistent Node.js backends on shared hosting](https://docs.20i.com/programming-languages/nodejs-supported). No managed cloud server was present in the inventory. The user approved the existing Baldur server after a capacity check: 16 CPU threads, approximately 45 GB available RAM and load 0.12. A separate systemd service caps the API at one CPU and 1 GB RAM; the existing media worker retains its own limits. 20i serves the static artwork and frontend.
 
-Acceptance must verify the public URL without a Sites token, NCB sign-in, protected API denial, data/media integrity, background operations and rollback. Until recorded, this is a target address, not a completed deployment.
+Acceptance verified public NCB sign-in, admission, all nine saved programmes, the source library, saved audio, sign-out and protected-route denial. The final transfer preserved all nine SQL tables, including 11 resources and 73 jobs, plus 10 stored objects. Counts are a cutover snapshot, not permanent limits. Private restore verification and background retention also passed; see the parent `output/public-release/` for exact evidence.
 
 ## Authentication and permissions
 
@@ -51,3 +51,13 @@ The parent `task-state.json` and `output/public-release/` retain migration IDs, 
 Private SQLite files replace the old host’s SQL and object bindings; application validation and NCB ownership checks are shared unchanged. The importer refuses an existing destination, validates the fixed table and column set, rejects active mutations and verifies rows and object bytes before promoting a new directory. It never executes schema text from a backup. NCB accounts, membership and learning records remain in the same NCB instance.
 
 The old host must return HTTP 410 for learner and write APIs before the final export. Operator recovery reads remain available. Preserve its private snapshot during cutover. Before new writes, rollback can restore the old deployment; after any new writes, freeze and reconcile first to avoid losing data. Runtime configuration and backup files must never enter Git or the public document root.
+
+## Live operations
+
+- API: `mosaic.service`, loopback port 3185. Release at `~/services/mosaic/current`; private environment at `~/.config/mosaic/app.env`; current databases at `~/.local/share/mosaic/data-20261103/`.
+- Transport: the existing Cloudflare tunnel routes `mosaic-api.24hourcoder.com` to the API. A private gateway key is required in addition to learner/operator authentication. 20i reads that key outside its document root, at `~/.mosaic/gateway.json`.
+- Media worker: `mosaic-media.service`, using the loopback API and gateway credential. No Sites bearer token is needed. Media completion accepts up to 64 MB; ordinary requests are capped at 16 MB by the gateway.
+- Scheduled operations: existing `mosaic-retention.timer`, `mosaic-alerts.timer` and `mosaic-backup.timer`. The independent 20i Baldur-outage monitor is unchanged. Encrypted recovery archives retain their existing seven-day expiry.
+- Gateway responses preserve session cookies, deletion/reset markers and security headers. A private temporary stream buffers each bounded response before delivery, so a failed upstream transfer returns an error rather than a partial successful recording.
+
+The public test used one administrator and up to four parallel read requests. API peak memory was about 43 MB during the initial journey; the service limit is 1 GB. This is evidence of modest pilot load, not a general capacity guarantee. External learner/educator evaluation and remaining physical-device tests remain separate launch work.

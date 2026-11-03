@@ -1,4 +1,4 @@
-import {mkdir,rename,rm,access} from 'node:fs/promises';
+import {mkdir,rename,rm,rmdir,access} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
 import {SQLStore,ObjectStore} from './storage.mjs';
@@ -12,7 +12,7 @@ const need=(ok,message)=>{if(!ok)throw Error(message);};
 // comes from our reviewed migrations, never SQL contained in the export.
 export async function importRecovery(bundle,{target,migrations}) {
   const destination=resolve(target),stage=destination+'.import-'+randomUUID();
-  let DB,BUCKET;
+  let DB,BUCKET,reserved=false;
   try {
     try{await access(destination);throw Error('Import target already exists');}catch(error){if(error.code!=='ENOENT')throw error;}
     const {snapshot,objects}=bundle;
@@ -54,6 +54,9 @@ export async function importRecovery(bundle,{target,migrations}) {
     }
     need(DB.db.prepare('PRAGMA integrity_check').get().integrity_check==='ok','Database integrity failed');report.databaseIntegrity='ok';
     DB.close();DB=null;BUCKET.close();BUCKET=null;
-    await rename(stage,destination);return report;
-  }catch(error){DB?.close();BUCKET?.close();await rm(stage,{recursive:true,force:true});throw error;}
+    // Exclusive mkdir closes the initial existence-check race. Rename can only
+    // replace this new empty reservation; concurrent importers get EEXIST.
+    await mkdir(destination,{mode:0o700});reserved=true;
+    await rename(stage,destination);reserved=false;return report;
+  }catch(error){DB?.close();BUCKET?.close();await rm(stage,{recursive:true,force:true});if(reserved)await rmdir(destination).catch(()=>{});throw error;}
 }

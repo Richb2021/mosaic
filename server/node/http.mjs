@@ -3,7 +3,7 @@ import {Readable} from 'node:stream';
 import {createHash,timingSafeEqual} from 'node:crypto';
 
 const equal=(a,b)=>timingSafeEqual(createHash('sha256').update(a).digest(),createHash('sha256').update(b).digest());
-export function createHTTPServer(app,{origin,gatewayKey='',upstreamHost='',maxBodyBytes=16*1024*1024}={}) {
+export function createHTTPServer(app,{origin,gatewayKey='',upstreamHost='',maxBodyBytes=16*1024*1024,onError=entry=>console.error(JSON.stringify(entry))}={}) {
   const publicURL=new URL(origin);
   if(!['https:','http:'].includes(publicURL.protocol)||publicURL.pathname!=='/'||publicURL.search||publicURL.username||publicURL.password)throw Error('Configure an exact public origin');
   if(gatewayKey&&gatewayKey.length<32)throw Error('Gateway key must be at least 32 characters');
@@ -25,6 +25,6 @@ export function createHTTPServer(app,{origin,gatewayKey='',upstreamHost='',maxBo
       const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('Set-Cookie',cookies);
       if(!response.body||method==='HEAD'){res.end();return;}
       const stream=Readable.fromWeb(response.body);res.on('close',()=>stream.destroy());stream.on('error',()=>res.destroy());stream.pipe(res);
-    }catch {if(!res.headersSent)res.writeHead(500,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end('{"error":"The request could not be completed."}');}
+    }catch(error) {onError({event:'request-failed',method:req.method,route:req.url?.startsWith('/api/')?'/api/'+req.url.split('/')[2].split('?')[0]:'static',kind:['TypeError','RangeError','SyntaxError'].includes(error?.name)?error.name:'Error'});if(!res.headersSent)res.writeHead(500,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end('{"error":"The request could not be completed."}');}
   });
 }

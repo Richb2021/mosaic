@@ -2,7 +2,7 @@
 
 Mosaic turns reviewed learning material into a connected programme of games, Explore lessons, practice, podcasts, cartoons and tutoring. Lanternbound is its 3D JRPG; this repository now contains the wider platform as well as the game.
 
-**Hosting transition:** the requested public address is `https://mosaic.richardbatt.com`. Migration away from Sites is in progress. The existing private preview remains available until deployment and data checks are complete. See [deployment and access](docs/DEPLOYMENT.md) for the authoritative status.
+**Live:** [mosaic.richardbatt.com](https://mosaic.richardbatt.com) · [NoCodeBackend sign-in](https://mosaic.richardbatt.com/account.html). Static assets run on 20i; the Node.js API and private file storage run on Baldur. The old Sites host is retired. See [deployment and access](docs/DEPLOYMENT.md).
 
 ## What is implemented
 
@@ -50,7 +50,9 @@ npm test
 npm run build
 ```
 
-The last complete acceptance before the hosting migration passed **632 tests** and the production build. Real NoCodeBackend, Muse and Fish journeys covered uploaded material, review, gameplay, practice, adaptive support and saved tutor speech. Those provider tests used local application storage; the published preview separately passed a read-only browser check. Evidence is in the parent workspace's `output/adaptive-voice/`.
+The hosting migration passed **639 tests**, the production and portable builds, a real public NCB login/library/programme/media/sign-out journey and an isolated storage restore. Public testing used the existing administrator account, with at most four concurrent read requests; this is not a classroom capacity result. Evidence is in `output/public-release/` in the parent workspace.
+
+The preceding adaptive-voice acceptance passed 632 tests. Real NoCodeBackend, Muse and Fish journeys covered uploaded material, review, gameplay, practice, adaptive support and saved tutor speech. Those provider tests used local application storage; the published preview separately passed a read-only browser check. Evidence is in the parent workspace's `output/adaptive-voice/`.
 
 Physical microphone capture, physical mobile/assistive-technology sessions, independent educator/learner evaluation, an independent code audit and a larger production-like load exercise remain outstanding. This is a working platform with bounded evidence, not a claim of universal subject coverage, classroom-scale capacity or accessibility conformance.
 

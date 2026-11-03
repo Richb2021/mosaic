@@ -13,6 +13,7 @@ function failRequest(int $status, string $message): never {
 }
 $config = json_decode((string)@file_get_contents($configPath), true);
 if (!is_array($config) || !isset($config['upstream'], $config['key']) || strlen($config['key']) < 32) failRequest(503, 'Mosaic is being prepared. Please try again shortly.');
+if (($config['enabled'] ?? false) !== true) failRequest(503, 'Mosaic is being prepared. Please try again shortly.');
 if ($config['upstream'] !== 'https://mosaic-api.24hourcoder.com') failRequest(503, 'Mosaic connection needs attention.');
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
 if (!in_array($method, ['GET', 'POST'], true)) failRequest(405, 'Method not allowed.');
@@ -27,6 +28,13 @@ $allowed = ['content-type', 'origin', 'cookie', 'authorization', 'x-mosaic-learn
 foreach (getallheaders() as $name => $value) {
     if (in_array(strtolower($name), $allowed, true) && !str_contains($value, "\r") && !str_contains($value, "\n")) $forward[] = $name . ': ' . $value;
 }
+// Buffer a bounded response in a private temporary stream. Do not send a 2xx
+// status or partial saved recording if the upstream connection is interrupted.
+$stream = fopen('php://temp/maxmemory:2097152', 'w+b');
+if ($stream === false) failRequest(503, 'Mosaic is temporarily unavailable.');
+$status = 502;
+$responseHeaders = [];
+$size = 0;
 $curl = curl_init($config['upstream'] . $uri);
 curl_setopt_array($curl, [
     CURLOPT_CUSTOMREQUEST => $method,
@@ -37,18 +45,41 @@ curl_setopt_array($curl, [
     CURLOPT_TIMEOUT => 90,
     CURLOPT_SSL_VERIFYPEER => true,
     CURLOPT_SSL_VERIFYHOST => 2,
-    CURLOPT_HEADERFUNCTION => static function ($curl, string $line): int {
-        if (preg_match('#^HTTP/\S+ ([2-5][0-9]{2})#', $line, $match)) http_response_code((int)$match[1]);
-        elseif (str_contains($line, ':')) {
+    CURLOPT_HEADERFUNCTION => static function ($curl, string $line) use (&$status, &$responseHeaders): int {
+        if (preg_match('#^HTTP/\\S+ ([1-5][0-9]{2})#', $line, $match)) {
+            $status = (int)$match[1];
+            $responseHeaders = [];
+        } elseif (str_contains($line, ':')) {
             [$name, $value] = explode(':', $line, 2);
             $key = strtolower(trim($name));
-            if (in_array($key, ['content-type','cache-control','content-disposition','content-length','retry-after','set-cookie','x-mosaic-data-epoch','x-mosaic-audio','x-mosaic-media-id'], true)) header(trim($name) . ': ' . trim($value), $key !== 'set-cookie');
+            if (in_array($key, ['content-type','cache-control','content-disposition','content-length','content-security-policy','x-frame-options','retry-after','set-cookie','x-mosaic-data-epoch','x-mosaic-data-reset','x-mosaic-data-reset-kind','x-mosaic-audio','x-mosaic-media-id'], true)) $responseHeaders[] = [$key, trim($value)];
         }
         return strlen($line);
     },
-    CURLOPT_WRITEFUNCTION => static function ($curl, string $bytes): int { echo $bytes; return strlen($bytes); },
+    CURLOPT_WRITEFUNCTION => static function ($curl, string $bytes) use ($stream, &$size): int {
+        $size += strlen($bytes);
+        if ($size > 67108864) return 0;
+        return fwrite($stream, $bytes);
+    },
 ]);
 if ($method === 'POST') curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
 $ok = curl_exec($curl);
 curl_close($curl);
-if ($ok === false && !headers_sent()) failRequest(503, 'Mosaic is temporarily unavailable. Your saved learning is unchanged.');
+if ($ok === false || $status < 200 || $status >= 300 && $status < 400) {
+    fclose($stream);
+    failRequest(503, 'Mosaic is temporarily unavailable. Your saved learning is unchanged.');
+}
+foreach ($responseHeaders as [$key, $value]) {
+    if ($key === 'content-length' && (int)$value !== $size) {
+        fclose($stream);
+        failRequest(503, 'The transfer was interrupted. Please try again.');
+    }
+}
+http_response_code($status);
+foreach ($responseHeaders as [$key, $value]) {
+    if ($key !== 'content-length') header($key . ': ' . $value, $key !== 'set-cookie');
+}
+header('Content-Length: ' . $size);
+rewind($stream);
+fpassthru($stream);
+fclose($stream);

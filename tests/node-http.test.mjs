@@ -25,9 +25,9 @@ test('portable app keeps private routes protected and static paths contained',as
 
 test('HTTP bridge pins origin, verifies gateway, preserves cookies and limits bodies',async()=>{
  const gatewayKey='g'.repeat(40),origin='https://mosaic.example';
- const server=createHTTPServer(async req=>{assert.equal(new URL(req.url).origin,origin);assert.equal(req.headers.get('x-mosaic-gateway'),null);const headers=new Headers();headers.append('Set-Cookie','one=1; HttpOnly; Secure');headers.append('Set-Cookie','two=2; HttpOnly; Secure');return new Response(await req.text()||'ok',{headers});},{origin,gatewayKey,maxBodyBytes:8});
+ const server=createHTTPServer(async req=>{assert.equal(new URL(req.url).origin,origin);assert.equal(req.headers.get('x-mosaic-gateway'),null);const headers=new Headers();headers.append('Set-Cookie','one=1; HttpOnly; Secure');headers.append('Set-Cookie','two=2; HttpOnly; Secure');headers.set('X-Test-Cookie',req.headers.get('cookie')||'');return new Response(await req.text()||'ok',{headers});},{origin,gatewayKey,upstreamHost:'backend.internal',maxBodyBytes:8});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const url='http://127.0.0.1:'+server.address().port;
- const send=(options={})=>new Promise((resolve,reject)=>{const req=httpRequest(url,{method:options.method||'GET',headers:options.headers},res=>{let body='';res.on('data',chunk=>body+=chunk);res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body}));});req.on('error',reject);req.end(options.body);});
+ const send=(options={})=>new Promise((resolve,reject)=>{const req=httpRequest(url+(options.path||''),{method:options.method||'GET',headers:options.headers},res=>{let body='';res.on('data',chunk=>body+=chunk);res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body}));});req.on('error',reject);req.end(options.body);});
  try {
   assert.equal((await send()).status,421);
   assert.equal((await send({headers:{Host:'mosaic.example'}})).status,403);
@@ -35,5 +35,11 @@ test('HTTP bridge pins origin, verifies gateway, preserves cookies and limits bo
   const response=await send({headers});assert.equal(response.status,200);assert.equal(response.headers['set-cookie'].length,2);assert.equal(response.body,'ok');
   assert.equal((await send({method:'POST',headers,body:'123456789'})).status,413);
   assert.equal((await send({method:'POST',headers,body:'hello'})).body,'hello');
+  assert.equal((await send({headers:{...headers,Host:'backend.internal'}})).status,200);
+  assert.equal((await send({headers:{...headers,Cookie:['one=1','two=2']}})).headers['x-test-cookie'],'one=1; two=2');
+  assert.equal((await send({method:'HEAD',headers})).body,'');
+  assert.equal((await send({headers:{...headers,'Content-Length':'1'},body:'x'})).status,400);
+  assert.equal((await send({method:'POST',path:'/api/media-worker',headers,body:'123456789'})).status,200);
+  assert.equal((await send({method:'POST',path:'/api/media-worker',headers:{...headers,'Content-Length':String(64*1024*1024+1)}})).status,413);
  } finally {await new Promise(resolve=>server.close(resolve));}
 });
