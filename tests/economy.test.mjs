@@ -86,3 +86,8 @@ test('economy cloud saves use existing owner checks, replay validation and optim
  const response=await call('save',body);assert.equal(response.status,200);const saved=await response.json();assert.equal(saved.save.summary.template,'economy-v1');assert.equal(saved.save.summary.engagement,1);assert.equal((await call('save',body)).status,409);assert.equal((await (await call('journal',null,'bob')).json()).records.length,0);
  assert.equal((await call('save',{...body,expectedVersion:1,snapshot:{...body.snapshot,actions:[{type:'trade',good:'tools',side:'sell',quantity:24}]}})).status,400);
 });
+
+test('unreadable campaign history is copied before a fresh action can replace it',()=>{
+ const key=E.economySaveKey(p),data=new Map([[key,'{broken history']]),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};const loaded=E.loadEconomy(storage,p);assert.equal(loaded.saveBlocked,false);assert.equal(data.get(key+':recovery'),'{broken history');storage.setItem(key,JSON.stringify(E.encodeEconomy(p,step(loaded.state,{type:'advance'}))));assert.equal(data.get(key+':recovery'),'{broken history');assert.equal(loaded.recoveryRaw,'{broken history');
+ const blocked=E.loadEconomy({getItem:()=>'{broken',setItem:()=>{throw Error('quota');}},p);assert.equal(blocked.saveBlocked,true);assert.equal(blocked.recoveryRaw,'{broken');assert.match(blocked.notice,/paused/);
+});
