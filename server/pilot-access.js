@@ -5,6 +5,7 @@ import {digest} from './content-service.js';
 import {need,sqlDB,parse,auditEvent} from './data-control.js';
 import {ncbSession,checkOrigin,readJSON,noStore} from './ncb-auth.js';
 import {NCBStore} from './ncb-store.js';
+import {memberBinding} from './course-grants.js';
 
 export const PILOT_NOTICE='2026-11-01-v2';
 export const learnerOwner=user=>digest('mosaic-learner:'+user.id);
@@ -69,6 +70,8 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(result.meta.changes===1,'Invitation changed. Try accepting it again.',409);
   const member={status:'active',joined:now(),invite:scope,manager:invite.manager,role:invite.role,context:invite.context,group:invite.group,label:invite.label,managedApproval:invite.managedApproval,authoringAllowed:invite.authoringAllowed};
   await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-member:'+owner,JSON.stringify(member),now());
+  const accepted=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+owner))?.policy);
+  need(accepted.invite===scope,'Another invitation was accepted first. Reload to review your access arrangement.',409);
   need((await admission(env,owner)).admitted,'Access has been withdrawn. Contact your organiser.',403);
   await auditEvent(env,'pilot-member:'+owner,'invitation-accepted',{role:member.role,context:member.context},now());return noStore({admitted:true});
  }
@@ -95,14 +98,17 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(row&&member.role==='learner'&&['active','revoked'].includes(member.status),'Choose an existing learner.',404);
   need(manager.admitted&&(manager.admin||manager.role===(member.context==='family'?'guardian':'teacher')),'Choose an authorised organiser for this setting.',403);
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
-  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
  }
  if(input.action==='restore-access'){
   need(manages,'Only an authorised organiser can manage access.',403);
   const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);
   need(member.status==='revoked'&&(access.admin||member.manager===owner),'Choose a withdrawn learner in your group.',403);
-  await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
+  await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
  }
  if(input.action==='revoke'){
   need(manages,'Only an authorised organiser can manage access.',403);need(/^[a-f0-9]{64}$/.test(input.accountReference)&&input.accountReference!==owner,'Use the learner’s account support reference.');
@@ -131,12 +137,12 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
  }
  if(input.action==='assign'){
   need(manages,'Only an authorised organiser can assign learning.',403);
-  const member=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+input.accountReference))?.policy);
+  const {member,key:learnerBinding}=await memberBinding(env,input.accountReference),{key:managerBinding}=await memberBinding(env,owner);
   need(member.manager===owner&&member.status==='active','Choose an active learner in your group.',403);
   const job=await db.one('SELECT id,draft FROM workshop_jobs WHERE id=? AND owner=? AND status=?',input.jobId,siteOwner,'published');need(job,'Review and publish the chapter in your library first.',404);
   const draftHash=await digest(job.draft);need(input.draftHash===undefined||input.draftHash===draftHash,'This chapter changed. Reopen its review before assigning it.',409);
   const scope='assignment:'+await digest(owner+':'+input.accountReference+':'+job.id);
-  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',scope,JSON.stringify({manager:owner,learner:input.accountReference,siteOwner,jobId:job.id,draftHash}),now());return noStore({assigned:true});
+  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',scope,JSON.stringify({manager:owner,learner:input.accountReference,siteOwner,jobId:job.id,draftHash,learnerBinding,managerBinding}),now());return noStore({assigned:true});
  }
  throw Object.assign(Error('Pilot action not found.'),{status:404});
 }catch(e){return noStore({error:e.status?e.message:'Account access could not be checked. Please try again.'},e.status||503)}}

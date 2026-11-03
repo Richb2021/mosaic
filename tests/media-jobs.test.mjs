@@ -40,3 +40,10 @@ test('expired scripts are refused before a worker receives their content',async(
  const h=await fixture();await h.create();await h.db.run('UPDATE data_controls SET policy=? WHERE scope=?',JSON.stringify({creativeDays:1}),'learner:'+h.identity.owner);h.advance(2*86400000);
  const claim=await (await h.worker({action:'claim'})).json();assert.equal(claim.job,null);assert.equal(claim.attention,true);assert.equal(h.calls(),0);
 });
+test('simultaneous workers claim one job once and losers cannot change its lease',async()=>{
+ const h=await fixture();await h.create();
+ const results=await Promise.all(Array.from({length:12},async()=>{const r=await h.worker({action:'claim'});assert.equal(r.status,200);return r.json()}));
+ const winners=results.filter(r=>r.job);assert.equal(winners.length,1);
+ const winner=winners[0].job,row=await h.db.one('SELECT payload FROM workshop_jobs WHERE id=?',winner.id);
+ assert.equal(JSON.parse(row.payload).token,winner.token);assert.equal(h.calls(),0);
+});

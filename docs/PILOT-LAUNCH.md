@@ -1,5 +1,9 @@
 # Ownership, onboarding and pilot operations
 
+For the latest concurrency checks, grant corrections and remaining external
+release gates, see [release acceptance](RELEASE-ACCEPTANCE.md). Historical counts
+and gaps below should be read alongside the newer launch-operations evidence.
+
 This release uses NoCodeBackend for sign-in, email verification, recovery and learner records. The application enforces resource ownership and managed-learning permissions around the verified NCB identity. The Site audience remains owner-private until named pilot access is explicitly authorised.
 
 ## Accounts and ownership

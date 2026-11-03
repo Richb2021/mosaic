@@ -165,3 +165,48 @@ test('uninvited closure cannot manufacture membership or a cleanup request',asyn
  assert.equal(await db.one('SELECT scope FROM data_controls WHERE scope=?','pilot-close:'+owner),null);
  await h.invite(h.a);assert.equal((await h.call(h.a)).admitted,true);
 });
+
+test('restoring learner or organiser access does not resurrect withdrawn chapter assignments',async()=>{
+ const h=await setup(),teacher=user('teacher');await h.invite(teacher,{role:'teacher',context:'school',managedApproval:true});await h.welcome(teacher);
+ await h.invite(h.a,{context:'school',managedApproval:true},teacher);await h.welcome(h.a,'13to17');
+ const {assignedChapters}=await import('../server/assignments.js'),ctx=await workspaceIdentity(teacher,h.env),db=sqlDB(h.env.DB),pack={...EXTENDED_PACKS.find(p=>p.template==='quiz-v1'),id:'generated-withdrawal'};
+ await db.run('INSERT INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)','withdraw-job',ctx.siteOwner,'fixture','hash','published','{}',JSON.stringify(pack),1,1);
+ const assignment={action:'assign',jobId:'withdraw-job',accountReference:await learnerOwner(h.a)};
+ for(const subject of [h.a,teacher]){
+  assert.equal((await h.call(teacher,assignment)).status,200);assert.equal((await assignedChapters(h.env,await learnerOwner(h.a))).length,1);
+  assert.equal((await h.call(h.admin,{action:'revoke',accountReference:await learnerOwner(subject)})).status,200);
+  assert.equal((await h.call(h.admin,{action:'restore-access',accountReference:await learnerOwner(subject)})).status,200);
+  assert.equal((await assignedChapters(h.env,await learnerOwner(h.a))).length,0,'Explicit reassignment is required after withdrawal');
+ }
+ assert.equal((await h.call(teacher,assignment)).status,200);assert.equal((await assignedChapters(h.env,await learnerOwner(h.a))).length,1);
+});
+
+test('legacy chapter grants remain usable until either membership changes',async()=>{
+ const h=await setup();await h.invite(h.a);await h.welcome(h.a);const db=sqlDB(h.env.DB),ctx=await workspaceIdentity(h.admin,h.env),owner=await learnerOwner(h.a);
+ const {assignedChapters}=await import('../server/assignments.js');
+ await db.run('INSERT INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)','legacy-job',ctx.siteOwner,'fixture','hash','published','{}','{}',1,1);
+ await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','assignment:legacy',JSON.stringify({manager:await learnerOwner(h.admin),learner:owner,siteOwner:ctx.siteOwner,jobId:'legacy-job'}),1);
+ assert.equal((await assignedChapters(h.env,owner)).length,1);
+ await h.call(h.admin,{action:'revoke',accountReference:owner});await h.call(h.admin,{action:'restore-access',accountReference:owner});
+ assert.equal((await assignedChapters(h.env,owner)).length,0);
+});
+
+test('competing invitations cannot both report an accepted access arrangement',async()=>{
+ const h=await setup(),first=await h.call(h.admin,{action:'invite',email:h.a.email}),second=await h.call(h.admin,{action:'invite',email:h.a.email,context:'family',managedApproval:true});
+ const original=h.env.DB.prepare.bind(h.env.DB);let arrivals=0,release;const ready=new Promise(r=>{release=r});
+ h.env.DB.prepare=sql=>{const statement=original(sql);return {bind(...args){const bound=statement.bind(...args);if(sql==='UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?'&&args[2].startsWith('pilot-invite:'))return {...bound,run:async()=>{if(++arrivals===2)release();await ready;return bound.run()}};return bound}}};
+ const results=await Promise.all([first,second].map(i=>h.call(h.a,{action:'claim',code:i.code})));
+ assert.deepEqual(results.map(r=>r.status).sort(),[200,409]);
+ const winner=results.findIndex(r=>r.status===200);assert.equal((await h.call(h.a,{action:'claim',code:[first,second][winner].code})).status,200,'Retry the winning invitation safely');
+});
+
+test('stale restore and transfer return a conflict instead of falsely reporting success',async()=>{
+ for(const action of ['restore-access','reassign']){
+  const h=await setup();await h.invite(h.a);await h.welcome(h.a);const owner=await learnerOwner(h.a),scope='pilot-member:'+owner;
+  if(action==='restore-access')await h.call(h.admin,{action:'revoke',accountReference:owner});
+  const original=h.env.DB.prepare.bind(h.env.DB);let raced=false;
+  h.env.DB.prepare=sql=>{const statement=original(sql);return {bind(...args){const bound=statement.bind(...args);if(sql==='UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?'&&args[2]===scope)return {...bound,run:async()=>{raced=true;await original('UPDATE data_controls SET policy=? WHERE scope=?').bind(JSON.stringify({status:'closed',manager:await learnerOwner(h.admin)}),scope).run();return bound.run()}};return bound}}};
+  const result=await h.call(h.admin,{action,accountReference:owner,manager:await learnerOwner(h.admin)});
+  assert.equal(raced,true);assert.equal(result.status,409);assert.equal(JSON.parse((await sqlDB(h.env.DB).one('SELECT policy FROM data_controls WHERE scope=?',scope)).policy).status,'closed');
+ }
+});
