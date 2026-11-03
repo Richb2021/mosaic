@@ -33,7 +33,7 @@ export async function admission(env,owner){
   const manager=parse((await sqlDB(env.DB).one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+member.manager))?.policy);
   admitted=manager.status==='active'&&['teacher','guardian'].includes(manager.role);
  }
- return {admitted,admin,canAuthor:admin||['teacher','guardian'].includes(member.role)||member.authoringAllowed===true,role:admin?'administrator':member.role||'learner',context:member.context||'individual',manager:member.manager||null,group:member.group||null,status:member.status||'invitation-required'};
+ return {admitted,admin,tutorAllowed:member.tutorAllowed===true,canAuthor:admin||['teacher','guardian'].includes(member.role)||member.authoringAllowed===true,role:admin?'administrator':member.role||'learner',context:member.context||'individual',manager:member.manager||null,group:member.group||null,status:member.status||'invitation-required'};
 }
 export async function requireAdmission(env,owner,{store,onboarding=false,storageOwner=owner}={}){
  const a=await admission(env,owner);need(a.admitted,'Open Welcome to accept your invitation or check access with your organiser.',403);
@@ -68,7 +68,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(!current.status||(current.status==='active'&&current.invite===scope),'This account already has an access arrangement. Ask the administrator to review it.',409);
   const result=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...invite,owner}),now(),scope,row.policy);
   need(result.meta.changes===1,'Invitation changed. Try accepting it again.',409);
-  const member={status:'active',joined:now(),invite:scope,manager:invite.manager,role:invite.role,context:invite.context,group:invite.group,label:invite.label,managedApproval:invite.managedApproval,authoringAllowed:invite.authoringAllowed};
+  const member={status:'active',joined:now(),invite:scope,manager:invite.manager,role:invite.role,context:invite.context,group:invite.group,label:invite.label,managedApproval:invite.managedApproval,authoringAllowed:invite.authoringAllowed,tutorAllowed:invite.tutorAllowed===true};
   await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-member:'+owner,JSON.stringify(member),now());
   const accepted=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+owner))?.policy);
   need(accepted.invite===scope,'Another invitation was accepted first. Reload to review your access arrangement.',409);
@@ -84,8 +84,18 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(context==='individual'||input.managedApproval===true,'Confirm the school or guardian has authorised this learner’s access.');
   const clean=(v,n)=>typeof v==='string'?v.trim().slice(0,n):'';
   const bytes=crypto.getRandomValues(new Uint8Array(32)),code=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join(''),expires=now()+7*86400000;
-  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(input.email.trim().toLowerCase()),expires,manager:owner,role,context,group:clean(input.group,80),label:clean(input.label,60),managedApproval:context!=='individual'&&input.managedApproval===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true}),now());
+  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(input.email.trim().toLowerCase()),expires,manager:owner,role,context,group:clean(input.group,80),label:clean(input.label,60),managedApproval:context!=='individual'&&input.managedApproval===true,tutorAllowed:input.tutorAllowed===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true}),now());
   await auditEvent(env,'pilot-member:'+owner,'invitation-created',{role,context,expires},now());return noStore({code,expires,url:new URL('/welcome.html#invite='+code,req.url).href});
+ }
+ if(input.action==='tutor-access'){
+  need(manages,'Only an authorised organiser can manage tutor access.',403);
+  need(/^[a-f0-9]{64}$/.test(input.accountReference)&&typeof input.enabled==='boolean','Choose a learner and tutor setting.');
+  const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);
+  need(member.role==='learner'&&member.status==='active'&&(access.admin||member.manager===owner),'Choose an active learner in your group.',403);
+  need(!input.enabled||member.context==='individual'||member.managedApproval===true,'Confirm managed access before enabling the tutor.',403);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,tutorAllowed:input.enabled}),now(),scope,row.policy);
+  need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
+  await auditEvent(env,scope,'tutor-access-changed',{enabled:input.enabled},now());return noStore({tutorAllowed:input.enabled});
  }
  if(input.action==='pause'){
   need(access.admin,'Only the administrator can pause new generation.',403);need(typeof input.paused==='boolean','Choose a generation state.');
@@ -98,7 +108,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(row&&member.role==='learner'&&['active','revoked'].includes(member.status),'Choose an existing learner.',404);
   need(manager.admitted&&(manager.admin||manager.role===(member.context==='family'?'guardian':'teacher')),'Choose an authorised organiser for this setting.',403);
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
-  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,tutorAllowed:false,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
  }

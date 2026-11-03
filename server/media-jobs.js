@@ -50,7 +50,7 @@ export async function mediaWorkerAPI(req,env,{now=()=>Date.now(),store=new NCBSt
   if(input.action==='audio'){
    need(Number.isInteger(input.index)&&input.index>=0&&input.index<script.segments.length,'Choose an episode segment.');
    const sp=parse(scriptJob.payload),body={packId:sp.packId,contentHash:sp.contentHash,id:scriptJob.id,draftHash:p.scriptHash,index:input.index,requestKey:(await digest(j.id+':'+input.index)).slice(0,64)};
-   const audio=await creativeAPI(new Request(new URL('/api/learning/creative/audio',req.url),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),env,{store,owner:p.learnerOwner,siteOwner:j.owner,resolve:(id,hash,r,e)=>resolve(id,hash,r,e,j.owner,p.learnerOwner),now,...(speech?{speech}:{})});
+   const audio=await creativeAPI(new Request(new URL('/api/learning/creative/audio',req.url),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),env,{store,access,owner:p.learnerOwner,principal:p.principal,siteOwner:j.owner,resolve:(id,hash,r,e)=>resolve(id,hash,r,e,j.owner,p.learnerOwner),now,...(speech?{speech}:{})});
    const r=await active(),next={...parse(r.payload),done:Math.max(parse(r.payload).done||0,input.index+1),until:now()+LEASE};await db.run('UPDATE workshop_jobs SET payload=?,updated=? WHERE id=? AND payload=?',JSON.stringify(next),now(),j.id,r.payload);return audio;
   }
   if(input.action==='fail'){await db.run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND status=? AND json_extract(payload,\'$.token\')=?','media-failed','Preparation stopped. Retry reuses saved narration; unresolved voice requests need attention in Your data.',now(),j.id,'media-running',input.token);return noStore({failed:true})}

@@ -1,3 +1,4 @@
+import {tutorSupportSince} from './tutor-support.js';
 import {assignedQuestionBanks,assertQuestionGrant} from './course-question-banks.js';
 import {withGrantLease} from './course-grants.js';
 import {readJSON,noStore} from './ncb-auth.js';
@@ -24,6 +25,7 @@ export async function exploreAPI(req,env,{owner,principal=owner,siteOwner,store,
   let state=row?validateExploreState(lesson,input.lessonHash,parse(row.payload).explore):emptyExplore(lesson,input.lessonHash),version=row?.version||0;
   if(req.method==='POST'){
    need(Number.isInteger(input.expectedVersion)&&input.expectedVersion===version,'A newer lesson record exists. Refresh before saving; your typed response is still here.',409);
+   if(input.action?.type==='answer'&&await tutorSupportSince(env,{siteOwner,owner,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey,since:state.answers.at(-1)?.at||0}))state=exploreAction(lesson,state,{type:'help',id:input.action.id},now());
    state=exploreAction(lesson,state,input.action,now());
    const saved=await store.write('learner_profiles',owner,slot,version,{explore:state,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey},now());version=saved.version;
   }else need(req.method==='GET','Lesson route not found.',404);

@@ -1,3 +1,6 @@
+import {connectedProgrammeAPI} from './connected-programme-api.js';
+import {creativePermissions} from './tutor-access.js';
+import {tutorSpeechSegments} from '../src/studio/voice-format.js';
 import {startCost,finishCost} from './cost-ledger.js';
 import {readJSON,noStore} from './ncb-auth.js';
 import {StoreError} from './ncb-store.js';
@@ -7,7 +10,7 @@ import {validateUnit,applyUnitAction} from '../src/studio/programme.js';
 import {creativeContext,validateCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
 import {submitCreative,checkCreative,creativeRequest} from './creative-provider.js';
 import {synthesizeSpeech,speechConfiguration} from './media-audio.js';
-import {persistentAudio} from './persistent-audio.js';
+import {persistentAudio,AUDIO_RECIPE} from './persistent-audio.js';
 
 const need=(ok,message,status=400)=>{if(!ok)throw new StoreError(message,status)};
 const keyOK=x=>typeof x==='string'&&/^[a-z0-9-]{1,80}$/.test(x);
@@ -15,7 +18,9 @@ const KIND="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' EN
 const LEARNER="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.learnerOwner')";
 const PACK="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.packId')";
 const HASH="json_extract(CASE WHEN json_valid(payload) THEN payload ELSE '{}' END,'$.contentHash')";
-export async function creativeAPI(req,env,{store,owner,siteOwner,resolve,now=()=>Date.now(),provider=submitCreative,reader=checkCreative,speech=synthesizeSpeech}){
+export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner,access,resolve,now=()=>Date.now(),provider=submitCreative,reader=checkCreative,speech=synthesizeSpeech}){
+ const capabilities=creativePermissions(env,access);
+ if(req.method==='POST')need(capabilities.canTutor,'Ask your organiser to enable tutor conversations or authoring tools.',403);
  const input=req.method==='GET'?Object.fromEntries(new URL(req.url).searchParams):await readJSON(req,60000);
  need(siteOwner&&siteOwner.length<=200,'Sign in to your personal library to use the creative studio.',401);need(env.DB,'Creative storage is not connected.',503);
  need(typeof input.packId==='string'&&input.packId.length<=100&&typeof input.contentHash==='string'&&input.contentHash.length<=100,'Choose an exact reviewed programme.');
@@ -29,7 +34,7 @@ export async function creativeAPI(req,env,{store,owner,siteOwner,resolve,now=()=
  };
  const load=async id=>{need(typeof id==='string'&&id.length<=100,'Choose a saved request.');const j=await one(`SELECT * FROM workshop_jobs WHERE id=? AND owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=?`,id,siteOwner,'creative',owner,input.packId,input.contentHash);need(j,'Creative request not found.',404);return j;};
  const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,story:p.context?.story||null,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};
- const result=async extra=>{const jobs=await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash),selected=extra?.jobId||input.selectedJob||input.id;if(selected&&!jobs.some(j=>j.id===selected))jobs.push(await load(selected));return noStore({jobs:await Promise.all(jobs.map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:!!env.BUCKET,...extra})};
+ const result=async extra=>{const jobs=await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash),selected=extra?.jobId||input.selectedJob||input.id;if(selected&&!jobs.some(j=>j.id===selected))jobs.push(await load(selected));const voiceInputs=await all(`SELECT id,status,draft,payload FROM workshop_jobs WHERE owner=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? AND json_extract(payload,'$.voiceTutor')=1 ORDER BY created DESC LIMIT 5`,siteOwner,owner,input.packId,input.contentHash);return noStore({voiceInputs:voiceInputs.map(v=>({id:v.id,status:v.status.replace(/^knowledge-/,''),activityKey:JSON.parse(v.payload).activityKey,text:v.draft?JSON.parse(v.draft).text:''})),jobs:await Promise.all(jobs.map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:!!env.BUCKET,capabilities,...extra})};
  const reserve=async(payload,requestKey,requestHash,status)=>{
   const budget=await generationBudget(one,siteOwner,env,now());need(!budget.configurationError,budgetMessage(budget),503);need(budget.remaining>0,budgetMessage(budget),429);
   await run(`INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND created>? AND ${GENERATION_ROWS})<?`,payload.id,siteOwner,requestKey,requestHash,status,JSON.stringify(payload),now(),now(),siteOwner,now()-GENERATION_WINDOW_MS,budget.limit);
@@ -37,17 +42,33 @@ export async function creativeAPI(req,env,{store,owner,siteOwner,resolve,now=()=
  };
  if(req.method==='GET')return result();
  need(req.method==='POST','Creative route not found.',404);
+ if(new URL(req.url).pathname.endsWith('/tutor-audio')){
+  need(capabilities.canTutor,'Ask your organiser to enable tutor conversations in Welcome.',403);
+  const j=await load(input.id),p=JSON.parse(j.payload);
+  need(p.kind==='tutor'&&j.status==='creative-review'&&j.draft,'Choose an available tutor reply.',409);
+  need(input.draftHash===await digest(j.draft),'The reply changed. Reload before requesting audio.',409);
+  const reply=p.local?JSON.parse(j.draft):validateCreative(JSON.parse(j.draft),p),draft={segments:tutorSpeechSegments(reply)};
+  need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose a reply segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');
+  const recipe=AUDIO_RECIPE+'-tutor-chunks-v1';
+  const requestKey='audio-'+input.requestKey,requestHash=await digest(JSON.stringify({owner,id:j.id,hash:input.draftHash,index:input.index,recipe}));
+  return persistentAudio({env,siteOwner,owner,j,draft,index:input.index,requestKey,requestHash,reserve,speech,now,recipe});
+ }
  if(new URL(req.url).pathname.endsWith('/audio')){
+  need(capabilities.canAuthor,'Ask your organiser to prepare and review new AI learning material.',403);
   const j=await load(input.id);need(j.status==='creative-published'&&j.draft,'Review this exact script before creating narration.',409);need(input.draftHash===await digest(j.draft),'This script changed. Reload before creating narration.',409);
   const p=JSON.parse(j.payload);need(['podcast','cartoon'].includes(p.kind),'Only reviewed podcast and cartoon scripts can be narrated.');const draft=validateCreative(JSON.parse(j.draft),p);need(Number.isInteger(input.index)&&input.index>=0&&input.index<draft.segments.length,'Choose an episode segment.');need(keyOK(input.requestKey),'Use a valid narration request identity.');
   const requestKey='audio-'+input.requestKey,requestHash=await digest(JSON.stringify({owner,id:j.id,hash:input.draftHash,index:input.index}));
   return persistentAudio({env,siteOwner,owner,j,draft,index:input.index,requestKey,requestHash,reserve,speech,now});
  }
  if(input.action==='create'){
+  need(input.kind==='tutor'?capabilities.canTutor:capabilities.canAuthor,input.kind==='tutor'?'Ask your organiser to enable tutor conversations in Welcome.':'Ask your organiser to prepare and review new AI learning material.',403);
   need(keyOK(input.requestKey)&&CREATIVE_KINDS.includes(input.kind),'Choose a learning format and request identity.');need(input.kind!=='tutor'||typeof input.question==='string'&&input.question.trim().length>0&&input.question.length<=1200,'Write a short question or your reasoning.');
   const context=creativeContext(pack,unit,input.kind,input.activityKey,input.story),question=input.kind==='tutor'?input.question.trim():null,requestKey='creative-'+input.requestKey;
   const requestHash=await digest(JSON.stringify({owner,packId:input.packId,hash:input.contentHash,kind:input.kind,activityKey:['tutor','practice','explore'].includes(input.kind)?input.activityKey:null,question,...(context.story?{story:context.story}:{})}));
   const existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);if(existing){need(existing.request_hash===requestHash,'This request identity belongs to different input.',409);return result({jobId:existing.id})}
+  const programme=await connectedProgrammeAPI(new Request(new URL('/api/learning/programme?'+new URLSearchParams({packId:input.packId,contentHash:input.contentHash}),req.url)),env,{store,owner,principal,siteOwner,resolve,now,adaptationOnly:true});
+  const adaptive=(await programme.json()).adaptive;
+  context.adaptation=adaptive.focus.filter(f=>!input.activityKey||f.key===input.activityKey).map(({key,support,reason,instruction,pointToRevisit})=>({key,support,reason,instruction,pointToRevisit}));
   const id='creative-'+crypto.randomUUID(),payload={id,recordType:'creative',learnerOwner:owner,packId:input.packId,contentHash:input.contentHash,kind:input.kind,activityKey:['tutor','practice','explore'].includes(input.kind)?input.activityKey:null,question,context,...(context.story?{storyVersion:input.kind==='cartoon'?3:2}:{})};
   const fixed=input.kind==='tutor'?integrityResponse(question):null;
   if(fixed){await recordAssistance(input.activityKey);payload.local=true;payload.revisionOf={localScaffold:true};const reply={...fixed,sources:[]};await run('INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)',id,siteOwner,requestKey,requestHash,'creative-review',JSON.stringify(payload),JSON.stringify(reply),now(),now());const saved=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);need(saved?.request_hash===requestHash,'This request identity belongs to different input.',409);return result({jobId:saved.id})}
@@ -56,6 +77,7 @@ export async function creativeAPI(req,env,{store,owner,siteOwner,resolve,now=()=
   const saved=await reserve(payload,requestKey,requestHash,'creative-queued');return result({jobId:saved.id});
  }
  let j=await load(input.id),p=JSON.parse(j.payload);
+ need(p.kind==='tutor'?capabilities.canTutor:capabilities.canAuthor,'Ask your organiser to enable the appropriate learning tools.',403);
  const settle=async(out,from)=>{
   await finishCost(env,{id:j.id,siteOwner,usage:out.usage,status:out.status,now:now()});
   const content=out.content?validateCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);

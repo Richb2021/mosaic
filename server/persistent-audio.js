@@ -4,11 +4,11 @@ import {SPEECH_MODEL,speechConfiguration} from './media-audio.js';
 import {need,sqlDB,readControls,parse,DAY} from './data-control.js';
 
 export const AUDIO_RECIPE='mp3-44100-128-normalize0-speed1-temp05-top07-v1';
-export async function persistentAudio({env,siteOwner,owner,j,draft,index,requestKey,requestHash,reserve,speech,now}){
+export async function persistentAudio({env,siteOwner,owner,j,draft,index,requestKey,requestHash,reserve,speech,now,recipe=AUDIO_RECIPE}){
  need(env.BUCKET,'Private audio storage is not connected. No narration request was sent.',503);
  const db=sqlDB(env.DB),hash=await digest(j.draft),segment=draft.segments[index];
  const voice=segment.speaker==='guide'?env.FISH_AUDIO_GUIDE_VOICE:env.FISH_AUDIO_LEARNER_VOICE;
- const id=await digest(JSON.stringify({siteOwner,owner,script:j.id,hash,index,voice,model:SPEECH_MODEL,recipe:AUDIO_RECIPE})),objectKey='narration/'+id+'.mp3';
+ const id=await digest(JSON.stringify({siteOwner,owner,script:j.id,hash,index,voice,model:SPEECH_MODEL,recipe})),objectKey='narration/'+id+'.mp3';
  let previous=await db.one('SELECT * FROM media_assets WHERE id=?',id);
  if(previous?.status==='pending'&&now()-previous.updated>60000){const recovered=await env.BUCKET.head(objectKey);if(recovered){await db.run('UPDATE media_assets SET status=?,bytes=?,updated=? WHERE id=? AND status=?','ready',recovered.size,now(),id,'pending');previous={...previous,status:'ready'};}}
  const priorRequest=await db.one('SELECT request_hash FROM workshop_jobs WHERE owner=? AND request_key=?',siteOwner,requestKey);need(!priorRequest||priorRequest.request_hash===requestHash,'This narration identity belongs to different input.',409);
@@ -34,7 +34,7 @@ export async function persistentAudio({env,siteOwner,owner,j,draft,index,request
   const rendered=await speech(segment,env);
   await finishCost(env,{id:audio.id,siteOwner,usage:{inputBytes:new TextEncoder().encode(segment.text).length,outputBytes:rendered.bytes.byteLength},now:now()});
   // Deletion and policy changes hold the same workspace/learner guard as this request.
-  await env.BUCKET.put(objectKey,rendered.bytes,{httpMetadata:{contentType:'audio/mpeg'},customMetadata:{scriptHash:hash,recipe:AUDIO_RECIPE}});
+  await env.BUCKET.put(objectKey,rendered.bytes,{httpMetadata:{contentType:'audio/mpeg'},customMetadata:{scriptHash:hash,recipe}});
   const saved=await db.run('UPDATE media_assets SET status=?,bytes=?,updated=? WHERE id=? AND status=?','ready',rendered.bytes.byteLength,now(),id,'pending');
   need(saved.meta.changes===1,'The recording changed while saving. No repeat request was sent.',409);
   await db.run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=?','audio-complete',now(),audio.id,siteOwner);

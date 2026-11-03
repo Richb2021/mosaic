@@ -1,3 +1,5 @@
+import {creativeContext} from '../src/studio/creative-content.js';
+import {tutorSupportSince} from './tutor-support.js';
 import {assignedQuestionBanks,assertQuestionGrant} from './course-question-banks.js';
 import {withGrantLease} from './course-grants.js';
 import {readJSON,noStore} from './ncb-auth.js';
@@ -28,10 +30,12 @@ export async function learningLoopAPI(req,env,{owner,principal=owner,siteOwner,s
  if(req.method==='POST'){
   need(Number.isInteger(input.expectedVersion)&&input.expectedVersion>=0&&input.expectedVersion===version,'A newer learning record exists. Refresh this cycle before answering.',409);
   need(input.action&&typeof input.action==='object'&&!Array.isArray(input.action),'Choose a learning action.');
-  next=loopAction(bank,state,input.action,now());const saved=await store.write('learner_profiles',owner,slot,version,{loop:next,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey},now());version=saved.version;
+  const assisted=input.action.type==='answer'&&await tutorSupportSince(env,{siteOwner,owner,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey,since:state.answers.at(-1)?.at||0});
+  const before=assisted?loopAction(bank,state,{type:'help',stage:input.action.stage,kind:'hint'},now()):state;
+  next=loopAction(bank,before,input.action,now());const saved=await store.write('learner_profiles',owner,slot,version,{loop:next,packId:p.packId,contentHash:p.contentHash,activityKey:p.activityKey},now());version=saved.version;
  }else need(req.method==='GET','Learning cycle route not found.',404);
  if(assigned)await assertQuestionGrant(env,assigned.g);
- return noStore({...loopView(bank,next,now()),version,activityKey:p.activityKey,assigned:!!assigned,...(assigned?{}:{profile:p.context.learner,profileChanged:JSON.stringify(p.context.learner)!==JSON.stringify({level:unit.profile.level,interests:unit.profile.interests.slice(0,2),focus:unit.profile.struggles.slice(0,500),goal:unit.profile.goal.slice(0,500)})})});
+ return noStore({...loopView(bank,next,now()),version,activityKey:p.activityKey,assigned:!!assigned,...(assigned?{}:{profile:p.context.learner,profileChanged:Object.entries(p.context.learner).some(([key,value])=>JSON.stringify(value)!==JSON.stringify(creativeContext(pack,unit,'practice',p.activityKey).learner[key]))})});
  };
  return assigned?withGrantLease(env,assigned.g,now,execute):execute();
 }

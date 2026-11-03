@@ -36,7 +36,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  selected.push(...jobs.filter(j=>parse(j.payload).recordType==='media-render'&&assetIDs.includes(parse(j.payload).assetId)));
  const importIds=new Set(resources.filter(r=>sourceIDs.includes(r.id)).map(r=>parse(r.payload).provenance?.importJobId).filter(Boolean));selected.push(...jobs.filter(j=>parse(j.payload).recordType==='knowledge'&&importIds.has(j.id)));
  const packs=new Set(selected.filter(j=>!parse(j.payload).recordType).flatMap(j=>{const id=parse(j.payload).chapterId;return id?[id,'rpg-'+id]:[]}));
- const derived=jobs.filter(j=>parse(j.payload).recordType==='creative'&&packs.has(parse(j.payload).packId));
+ const derived=jobs.filter(j=>(parse(j.payload).recordType==='creative'||parse(j.payload).voiceTutor===true)&&packs.has(parse(j.payload).packId));
  need(![...selected,...derived].some(j=>parse(j.payload).learnerOwner&&parse(j.payload).learnerOwner!==owner),'Another learner has work derived from this source. They must remove their episodes before this source can be deleted.',409);
  selected.push(...derived);
  const ids=new Set(selected.map(j=>j.id));selected.push(...jobs.filter(j=>['creative-audio','media-render'].includes(parse(j.payload).recordType)&&ids.has(parse(j.payload).scriptId)));
