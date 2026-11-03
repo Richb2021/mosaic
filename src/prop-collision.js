@@ -1,3 +1,4 @@
+import {VARIETY_PROPS} from './variety-props.js';
 // Footprints describe the solid base. Tree canopies, flowers and bridge decks
 // remain passable; rails/pillars are separate solid rectangles.
 export const EXTRA_PROPS={
@@ -9,6 +10,7 @@ const BASES={...EXTRA_PROPS,lantern_fox:[.7,1.1],tree:[.65,.65],pine:[.65,.65],p
 export function propBoxes(p){
  const s=p.scale??1,r=p.rotation||0,c=Math.abs(Math.cos(r)),n=Math.abs(Math.sin(r));
  const box=([x,z,w,h])=>{const dx=x*s,dz=z*s;return [p.x+dx*Math.cos(r)+dz*Math.sin(r),p.z-dx*Math.sin(r)+dz*Math.cos(r),(w*c+h*n)*s,(w*n+h*c)*s]};
+ if(VARIETY_PROPS[p.asset])return [box(VARIETY_PROPS[p.asset])];
  if(p.asset==='arch')return [[-1,0,.7,.8],[1,0,.7,.8]].map(box);
  if(p.asset==='bridge')return [[0,-.64,3.4,.12],[0,.64,3.4,.12]].map(box);
  if(p.asset==='works_bridge')return [[-2.15,0,.18,5.4],[2.15,0,.18,5.4]].map(box);

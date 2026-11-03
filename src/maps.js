@@ -61,6 +61,10 @@ for(const [id,d] of Object.entries(DISCOVERIES))MAPS[d.area].entities.push({id,k
 MAPS.mill.entities.push({id:'works-entrance',kind:'works-entrance',name:'Underlight Works',asset:'arch',x:4,z:8});
 const SCENERY={quay:[['well',6,6],['crate',8,7],['sack',8.8,7],['flower_planter',-9,-7]],woods:[['tree_stump',-10,5],['fence_wood',-10,-9],['fence_wood',-8,-9],['haystack',12,6]],mill:[['water_trough',10,5],['sack',-7,7],['crate',-8,7]],forge:[['anvil',-4,2],['quench_barrel',-5.8,2],['bread_oven',9,5]],quarry:[['stone_wall',-10,6],['stone_wall',-12,6],['crate',9,-7]],archive:[['flower_planter',-9,6],['flower_planter',9,6]],observatory:[['stone_wall',-9,8],['flower_planter',10,5]],beacon:[['stone_wall',-10,7],['stone_wall',10,7]]};
 for(const [id,placements] of Object.entries(SCENERY))for(const [asset,x,z] of placements)MAPS[id].props.push(prop('polyfork_'+asset,x,z));
+// Region-specific silhouettes, using native metre scale. Existing travel lanes stay clear.
+const VARIED={quay:[['market_stall',-9,10],['tide_gauge',9,9],['lamp_post',4,10],['wheelbarrow',9,12]],woods:[['orchard_tree',-12,7],['beehive',-12,10],['tree_oak',10,10]],mill:[['granary',-8,11],['plough',-6,11],['loom',-4,11]],forge:[['spinning_wheel',-8,6]],quarry:[['mine_cart',-8,-8],['ore_stack',-10,-8],['small_rock',-12,-8]],archive:[['printing_press',-6,10],['lectern',-3,10],['herb_rack',-6,13]],observatory:[['orrery',8,11],['sundial',5,10]],beacon:[['crystal_cluster',-8,10]]};
+for(const [area,items] of Object.entries(VARIED))for(const [asset,x,z] of items)MAPS[area].props.push(prop('var_'+asset,x,z));
+for(const [area,x,z,asset] of [['mill',-18,8,'watermill'],['mill',18,9,'windmill'],['forge',-18,9,'barn'],['archive',18,-10,'watchtower']])MAPS[area].props.push(prop('var_'+asset,x,z));
 export const INTERIORS=makeInteriors(MAPS);
 for(const maps of [MAPS,INTERIORS])for(const id of Object.keys(maps))maps[id]=solidProps(maps[id]);
 export {BUILDINGS};

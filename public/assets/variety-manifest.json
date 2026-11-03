@@ -1,0 +1,1023 @@
+{
+  "version": 1,
+  "artDirection": "Polyfork Medieval Village Kit",
+  "assets": [
+    {
+      "id": "stilted-granary-3e7d7d",
+      "title": "Stilted Granary",
+      "class": "building",
+      "triangles": 1424,
+      "plan": "free",
+      "has_rig": true,
+      "size_m": {
+        "x": 2,
+        "y": 2.71,
+        "z": 1.99
+      },
+      "key": "granary",
+      "n": 0,
+      "asset": "var_granary",
+      "sourceURL": "https://polyfork.dev/cdn/stilted-granary-3e7d7d.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -1,
+          0,
+          -0.996999979019165
+        ],
+        "max": [
+          1,
+          2.712141513824463,
+          0.996999979019165
+        ],
+        "center": [
+          0,
+          1.3560707569122314,
+          0
+        ]
+      },
+      "bytes": 164804,
+      "sha256": "3e5b7a55cd0f6d2d2775c51f6ab44e6093aabca3d0aa0efd32293e49628b7111",
+      "collision": [
+        0,
+        0,
+        2,
+        1.99399995803833
+      ]
+    },
+    {
+      "id": "horse-plough-85a82e",
+      "title": "Horse Plough",
+      "class": "vehicle",
+      "triangles": 1439,
+      "plan": "free",
+      "has_rig": true,
+      "size_m": {
+        "x": 0.65,
+        "y": 0.97,
+        "z": 1.85
+      },
+      "key": "plough",
+      "n": 0,
+      "asset": "var_plough",
+      "sourceURL": "https://polyfork.dev/cdn/horse-plough-85a82e.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -0.3235555589199066,
+          0,
+          -0.9236037731170654
+        ],
+        "max": [
+          0.3235555589199066,
+          0.9734501838684082,
+          0.9235000610351562
+        ],
+        "center": [
+          0,
+          0.4867250919342041,
+          -0.000051856040954589844
+        ]
+      },
+      "bytes": 164892,
+      "sha256": "700d19853d839a131dc408e08019d9186c8c7b661bb1b8d5a29597038420cb87",
+      "collision": [
+        0,
+        -0.000051856040954589844,
+        0.6471111178398132,
+        1.8471038341522217
+      ]
+    },
+    {
+      "id": "wheelbarrow-13f422",
+      "title": "Wheelbarrow",
+      "class": "vehicle",
+      "triangles": 1132,
+      "plan": "free",
+      "has_rig": true,
+      "remixable": false,
+      "size_m": {
+        "x": 0.69,
+        "y": 0.87,
+        "z": 1.67
+      },
+      "key": "wheelbarrow",
+      "n": 1,
+      "at": [
+        [
+          3.5,
+          12.3
+        ]
+      ],
+      "asset": "var_wheelbarrow",
+      "sourceURL": "https://polyfork.dev/cdn/wheelbarrow-13f422.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -0.34599998593330383,
+          -7.3891048557594985e-9,
+          -1
+        ],
+        "max": [
+          0.34599998593330383,
+          0.8656877875328064,
+          0.6699413180351257
+        ],
+        "center": [
+          0,
+          0.43284389007185076,
+          -0.16502934098243716
+        ]
+      },
+      "bytes": 129684,
+      "sha256": "245be6ed9024252c5ab8b84ba167de32ac91ea9f678caced5e213bf0d6a3651e",
+      "collision": [
+        0,
+        -0.16502934098243716,
+        0.6919999718666077,
+        1.6699413180351257
+      ]
+    },
+    {
+      "id": "market-stall-94937d",
+      "title": "Market Stall",
+      "class": "building",
+      "triangles": 592,
+      "plan": "free",
+      "has_rig": false,
+      "size_m": {
+        "x": 1.96,
+        "y": 2.02,
+        "z": 1.13
+      },
+      "key": "market-stall",
+      "n": 1,
+      "at": [
+        [
+          6.4,
+          7
+        ]
+      ],
+      "asset": "var_market_stall",
+      "sourceURL": "https://polyfork.dev/cdn/market-stall-94937d.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -0.9800000190734863,
+          1.668930060816365e-8,
+          -0.5659999847412109
+        ],
+        "max": [
+          0.9800000190734863,
+          2.0199999809265137,
+          0.5659999847412109
+        ],
+        "center": [
+          0,
+          1.0099999988079071,
+          0
+        ]
+      },
+      "bytes": 68224,
+      "sha256": "d8a505aba4c753eb23af6b904db3d983b4c7fc4e623e8e1f02dc042489f0f09f",
+      "collision": [
+        0,
+        0,
+        1.9600000381469727,
+        1.1319999694824219
+      ]
+    },
+    {
+      "id": "orchard-apple-tree-b21f85",
+      "title": "Orchard Apple Tree",
+      "class": "prop",
+      "triangles": 736,
+      "plan": "free",
+      "has_rig": false,
+      "size_m": {
+        "x": 4.76,
+        "y": 3.64,
+        "z": 4.71
+      },
+      "key": "orchard-tree",
+      "n": 0,
+      "asset": "var_orchard_tree",
+      "sourceURL": "https://polyfork.dev/cdn/orchard-apple-tree-b21f85.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -2.3722705535062,
+          0,
+          -2.362511157989502
+        ],
+        "max": [
+          2.384840726852417,
+          3.643728287463184,
+          2.3442868636847036
+        ],
+        "center": [
+          0.006285086673108564,
+          1.821864143731592,
+          -0.009112147152399164
+        ]
+      },
+      "bytes": 91108,
+      "sha256": "ea0225db26bdf39a5d1c1f8b425035b12f05a9209b4e95391da0ecc1441e4ce9",
+      "collision": [
+        0,
+        0,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "id": "oak-tree-50ee7c",
+      "title": "Oak Tree",
+      "class": "prop",
+      "triangles": 686,
+      "plan": "free",
+      "has_rig": false,
+      "size_m": {
+        "x": 5.14,
+        "y": 6.17,
+        "z": 4.22
+      },
+      "key": "tree-oak",
+      "n": 4,
+      "at": [
+        [
+          -4.4,
+          -7.6
+        ],
+        [
+          -10.6,
+          -0.8
+        ],
+        [
+          4.6,
+          -5.2
+        ],
+        [
+          -2,
+          6.6
+        ]
+      ],
+      "asset": "var_tree_oak",
+      "sourceURL": "https://polyfork.dev/cdn/oak-tree-50ee7c.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -2.570176124572754,
+          0,
+          -2.1106977462768555
+        ],
+        "max": [
+          2.570176124572754,
+          6.17460298538208,
+          2.1106977462768555
+        ],
+        "center": [
+          0,
+          3.08730149269104,
+          0
+        ]
+      },
+      "bytes": 79620,
+      "sha256": "4a8aca87c32c4356a22babdfa9f53f701a867454e6391f568790952ffbc66e9f",
+      "collision": [
+        0,
+        0,
+        0.6,
+        0.6
+      ]
+    },
+    {
+      "id": "small-rock-d43710",
+      "title": "Small Rock",
+      "class": "prop",
+      "triangles": 80,
+      "plan": "free",
+      "has_rig": false,
+      "size_m": {
+        "x": 0.52,
+        "y": 0.36,
+        "z": 0.46
+      },
+      "key": "small-rock",
+      "n": 51,
+      "area": {
+        "x": [
+          -21.3,
+          15.2
+        ],
+        "z": [
+          -18.6,
+          18.3
+        ]
+      },
+      "asset": "var_small_rock",
+      "sourceURL": "https://polyfork.dev/cdn/small-rock-d43710.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -0.25999999046325684,
+          0,
+          -0.23000000417232513
+        ],
+        "max": [
+          0.25999999046325684,
+          0.36000001430511475,
+          0.23000000417232513
+        ],
+        "center": [
+          0,
+          0.18000000715255737,
+          0
+        ]
+      },
+      "bytes": 10528,
+      "sha256": "17243b26a90417dffe01f27ee898208a9ef5f093fa560185828bab9659496fda",
+      "collision": [
+        0,
+        0,
+        0.5199999809265137,
+        0.46000000834465027
+      ]
+    },
+    {
+      "id": "lamp-post-c9e409",
+      "title": "Lamp Post",
+      "class": "prop",
+      "triangles": 478,
+      "plan": "free",
+      "has_rig": true,
+      "has_night": true,
+      "size_m": {
+        "x": 0.26,
+        "y": 2.2,
+        "z": 0.58
+      },
+      "key": "lamp-post",
+      "n": 2,
+      "at": [
+        [
+          7.6,
+          9.1
+        ],
+        [
+          -9.4,
+          5.5
+        ]
+      ],
+      "asset": "var_lamp_post",
+      "sourceURL": "https://polyfork.dev/cdn/lamp-post-c9e409.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -0.12800000607967377,
+          0,
+          -0.29100000143051147
+        ],
+        "max": [
+          0.12800000607967377,
+          2.200000047683716,
+          0.29100000143051147
+        ],
+        "center": [
+          0,
+          1.100000023841858,
+          0
+        ]
+      },
+      "bytes": 56692,
+      "sha256": "19e93458c53caa810307da9908dd14b3a7ca5898da8f37dd6947ff93435ea228",
+      "collision": [
+        0,
+        0,
+        0.3,
+        0.3
+      ]
+    },
+    {
+      "id": "watchtower-140f78",
+      "title": "Watchtower",
+      "class": "building",
+      "triangles": 1736,
+      "plan": "free",
+      "has_rig": true,
+      "has_night": true,
+      "size_m": {
+        "x": 3.61,
+        "y": 9.45,
+        "z": 4.56
+      },
+      "key": "watchtower",
+      "n": 1,
+      "at": [
+        [
+          -18,
+          -6
+        ]
+      ],
+      "asset": "var_watchtower",
+      "sourceURL": "https://polyfork.dev/cdn/watchtower-140f78.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -1.8049999475479126,
+          0,
+          -1.8049999475479126
+        ],
+        "max": [
+          1.8049999475479126,
+          9.449999809265137,
+          2.7541376028954985
+        ],
+        "center": [
+          0,
+          4.724999904632568,
+          0.47456882767379294
+        ]
+      },
+      "bytes": 200328,
+      "sha256": "3935f630774d122ab1486fde36d72f6f2cedbf3cdf704ebc186c2c14c07bbcb7",
+      "collision": [
+        0,
+        0.47456882767379294,
+        3.609999895095825,
+        4.5591375504434115
+      ]
+    },
+    {
+      "id": "windmill-3aad49",
+      "title": "Windmill",
+      "class": "building",
+      "triangles": 1842,
+      "plan": "free",
+      "has_rig": true,
+      "has_night": true,
+      "size_m": {
+        "x": 5.65,
+        "y": 9.6,
+        "z": 4.18
+      },
+      "key": "windmill",
+      "n": 1,
+      "at": [
+        [
+          11.1,
+          -9.1
+        ]
+      ],
+      "asset": "var_windmill",
+      "sourceURL": "https://polyfork.dev/cdn/windmill-3aad49.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -2.8248915672302246,
+          0,
+          -2.0901455879211426
+        ],
+        "max": [
+          2.8248915672302246,
+          9.595475196838379,
+          2.0901456752419474
+        ],
+        "center": [
+          0,
+          4.7977375984191895,
+          4.366040240455504e-8
+        ]
+      },
+      "bytes": 210616,
+      "sha256": "8d3b35bcc2ba3bde7ab5833d825ccf57b86b1cd6de132e463259a813bfe08d1d",
+      "collision": [
+        0,
+        4.366040240455504e-8,
+        5.649783134460449,
+        4.18029126316309
+      ]
+    },
+    {
+      "id": "water-mill-b31972",
+      "title": "Water Mill",
+      "class": "building",
+      "triangles": 1758,
+      "plan": "free",
+      "has_rig": true,
+      "has_night": true,
+      "has_decals": true,
+      "size_m": {
+        "x": 4,
+        "y": 7.89,
+        "z": 3.98
+      },
+      "key": "watermill",
+      "n": 0,
+      "asset": "var_watermill",
+      "sourceURL": "https://polyfork.dev/cdn/water-mill-b31972.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -2,
+          0,
+          -1.9900000095367432
+        ],
+        "max": [
+          1.9950000047683716,
+          7.889999866485596,
+          1.9900000095367432
+        ],
+        "center": [
+          -0.002499997615814209,
+          3.944999933242798,
+          0
+        ]
+      },
+      "bytes": 205456,
+      "sha256": "b85fdec9402b519a41256bdeee006fc33c4d1930bd2b283d1012fd6784096814",
+      "collision": [
+        -0.002499997615814209,
+        0,
+        3.9950000047683716,
+        3.9800000190734863
+      ]
+    },
+    {
+      "id": "timber-barn-90b3ce",
+      "title": "Timber Barn",
+      "class": "building",
+      "triangles": 1382,
+      "plan": "free",
+      "has_rig": true,
+      "has_night": true,
+      "size_m": {
+        "x": 4,
+        "y": 5.35,
+        "z": 6.91
+      },
+      "key": "barn",
+      "n": 0,
+      "asset": "var_barn",
+      "sourceURL": "https://polyfork.dev/cdn/timber-barn-90b3ce.glb",
+      "source": "Polyfork Medieval Village Kit",
+      "bounds": {
+        "min": [
+          -2,
+          -5.9604645663569045e-9,
+          -3.430000066757202
+        ],
+        "max": [
+          2,
+          5.349999904632568,
+          3.481446201260958
+        ],
+        "center": [
+          0,
+          2.674999949336052,
+          0.025723067251878007
+        ]
+      },
+      "bytes": 160972,
+      "sha256": "6929b76199dc74bd1519dc726f60455a52b433277260876390d83f805fca1ad4",
+      "collision": [
+        0,
+        0.025723067251878007,
+        4,
+        6.91144626801816
+      ]
+    },
+    {
+      "asset": "var_loom",
+      "source": "Original Blender model",
+      "file": "var_loom.glb",
+      "size_m": {
+        "x": 2,
+        "y": 2,
+        "z": 1.3
+      },
+      "sha256": "24273abb547b5e2f099ddab39229d60ac15d4b17ecba8c774df78872c541fd9a",
+      "triangles": 276,
+      "bounds": {
+        "min": [
+          -1.0000000149011612,
+          0,
+          -0.6499999761581421
+        ],
+        "max": [
+          1.0000000596046448,
+          2,
+          0.6499999761581421
+        ],
+        "center": [
+          2.2351741790771484e-8,
+          1,
+          0
+        ]
+      },
+      "bytes": 24404,
+      "collision": [
+        2.2351741790771484e-8,
+        0,
+        2.000000074505806,
+        1.2999999523162842
+      ]
+    },
+    {
+      "asset": "var_spinning_wheel",
+      "source": "Original Blender model",
+      "file": "var_spinning_wheel.glb",
+      "size_m": {
+        "x": 1.865,
+        "y": 1.865,
+        "z": 0.65
+      },
+      "sha256": "f056061f4447e9f71530b0c843109180210ebf5b95433ecb4424fe49d438c89c",
+      "triangles": 512,
+      "bounds": {
+        "min": [
+          -1.065000057220459,
+          0,
+          -0.32499998807907104
+        ],
+        "max": [
+          0.800000011920929,
+          1.8650000095367432,
+          0.32499998807907104
+        ],
+        "center": [
+          -0.13250002264976501,
+          0.9325000047683716,
+          0
+        ]
+      },
+      "bytes": 35492,
+      "collision": [
+        -0.13250002264976501,
+        0,
+        1.865000069141388,
+        0.6499999761581421
+      ]
+    },
+    {
+      "asset": "var_printing_press",
+      "source": "Original Blender model",
+      "file": "var_printing_press.glb",
+      "size_m": {
+        "x": 1.8,
+        "y": 2.25,
+        "z": 1.1
+      },
+      "sha256": "66295c8b942ec8127afa4bf4706128d3036964a688685efc18e91ac45dd0fa64",
+      "triangles": 176,
+      "bounds": {
+        "min": [
+          -0.8999999761581421,
+          0,
+          -0.550000011920929
+        ],
+        "max": [
+          0.8999999761581421,
+          2.2500000596046448,
+          0.550000011920929
+        ],
+        "center": [
+          0,
+          1.1250000298023224,
+          0
+        ]
+      },
+      "bytes": 15584,
+      "collision": [
+        0,
+        0,
+        1.7999999523162842,
+        1.100000023841858
+      ]
+    },
+    {
+      "asset": "var_orrery",
+      "source": "Original Blender model",
+      "file": "var_orrery.glb",
+      "size_m": {
+        "x": 1.716,
+        "y": 1.67,
+        "z": 1.751
+      },
+      "sha256": "db42a65115e7ea754c7cb24ccff571202d785aafdf2445392f36ff22c1ee60ce",
+      "triangles": 1032,
+      "bounds": {
+        "min": [
+          -0.8579999804496765,
+          0,
+          -0.8579999804496765
+        ],
+        "max": [
+          0.8579999804496765,
+          1.6700000539422035,
+          0.8929161429405212
+        ],
+        "center": [
+          0,
+          0.8350000269711018,
+          0.017458081245422363
+        ]
+      },
+      "bytes": 69444,
+      "collision": [
+        0,
+        0.017458081245422363,
+        1.715999960899353,
+        1.7509161233901978
+      ]
+    },
+    {
+      "asset": "var_sundial",
+      "source": "Original Blender model",
+      "file": "var_sundial.glb",
+      "size_m": {
+        "x": 1.4,
+        "y": 1.767,
+        "z": 1.4
+      },
+      "sha256": "55c042569e9e57d4bef3f519a8000a04d9c7d25f8a178059781ee5523317aa85",
+      "triangles": 272,
+      "bounds": {
+        "min": [
+          -0.699999988079071,
+          0,
+          -0.699999988079071
+        ],
+        "max": [
+          0.699999988079071,
+          1.7673125192523003,
+          0.699999988079071
+        ],
+        "center": [
+          0,
+          0.8836562596261501,
+          0
+        ]
+      },
+      "bytes": 20880,
+      "collision": [
+        0,
+        0,
+        1.399999976158142,
+        1.399999976158142
+      ]
+    },
+    {
+      "asset": "var_tide_gauge",
+      "source": "Original Blender model",
+      "file": "var_tide_gauge.glb",
+      "size_m": {
+        "x": 1.345,
+        "y": 2.6,
+        "z": 0.8
+      },
+      "sha256": "5e55820f7783d29f2c230a02b6e9dcf9132b6b013886581c0a446bec73724f32",
+      "triangles": 480,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -0.4000000059604645
+        ],
+        "max": [
+          0.8449999690055847,
+          2.600000001490116,
+          0.4000000059604645
+        ],
+        "center": [
+          0.17249998450279236,
+          1.300000000745058,
+          0
+        ]
+      },
+      "bytes": 35840,
+      "collision": [
+        0.17249998450279236,
+        0,
+        1.3449999690055847,
+        0.800000011920929
+      ]
+    },
+    {
+      "asset": "var_mine_cart",
+      "source": "Original Blender model",
+      "file": "var_mine_cart.glb",
+      "size_m": {
+        "x": 1.52,
+        "y": 1.3,
+        "z": 1.24
+      },
+      "sha256": "40cacf6d5c2ddd3e60d24529a37129b069f3bae518d4e1fb83e71e13883bd446",
+      "triangles": 336,
+      "bounds": {
+        "min": [
+          -0.7599999904632568,
+          0,
+          -0.6200000047683716
+        ],
+        "max": [
+          0.7599999904632568,
+          1.2999999523162842,
+          0.6200000047683716
+        ],
+        "center": [
+          0,
+          0.6499999761581421,
+          0
+        ]
+      },
+      "bytes": 27776,
+      "collision": [
+        0,
+        0,
+        1.5199999809265137,
+        1.2400000095367432
+      ]
+    },
+    {
+      "asset": "var_ore_stack",
+      "source": "Original Blender model",
+      "file": "var_ore_stack.glb",
+      "size_m": {
+        "x": 1.404,
+        "y": 0.82,
+        "z": 1.224
+      },
+      "sha256": "b4584b4850bd84f741b37e718775f698145acd72527167d142e023894fa920ba",
+      "triangles": 152,
+      "bounds": {
+        "min": [
+          -0.7019929885864258,
+          0,
+          -0.6122047901153564
+        ],
+        "max": [
+          0.7019929885864258,
+          0.8200000301003456,
+          0.6122047901153564
+        ],
+        "center": [
+          0,
+          0.4100000150501728,
+          0
+        ]
+      },
+      "bytes": 17292,
+      "collision": [
+        0,
+        0,
+        1.4039859771728516,
+        1.224409580230713
+      ]
+    },
+    {
+      "asset": "var_beehive",
+      "source": "Original Blender model",
+      "file": "var_beehive.glb",
+      "size_m": {
+        "x": 1.44,
+        "y": 1.725,
+        "z": 1.44
+      },
+      "sha256": "637e9b0a1a88859730ea95b1b8aa4b52b37fc4bda1ad63ef39d4563765611cd0",
+      "triangles": 126,
+      "bounds": {
+        "min": [
+          -0.7200000286102295,
+          0,
+          -0.7200000286102295
+        ],
+        "max": [
+          0.7200000286102295,
+          1.7249998450279236,
+          0.7200000286102295
+        ],
+        "center": [
+          0,
+          0.8624999225139618,
+          0
+        ]
+      },
+      "bytes": 12992,
+      "collision": [
+        0,
+        0,
+        1.440000057220459,
+        1.440000057220459
+      ]
+    },
+    {
+      "asset": "var_herb_rack",
+      "source": "Original Blender model",
+      "file": "var_herb_rack.glb",
+      "size_m": {
+        "x": 1.6,
+        "y": 2,
+        "z": 0.65
+      },
+      "sha256": "2d488b486b52c3586c25ae7e0bd9c2165196bc20eb9095ec5271155362956166",
+      "triangles": 448,
+      "bounds": {
+        "min": [
+          -0.800000011920929,
+          0,
+          -0.32499998807907104
+        ],
+        "max": [
+          0.800000011920929,
+          2,
+          0.32499998807907104
+        ],
+        "center": [
+          0,
+          1,
+          0
+        ]
+      },
+      "bytes": 45240,
+      "collision": [
+        0,
+        0,
+        1.600000023841858,
+        0.6499999761581421
+      ]
+    },
+    {
+      "asset": "var_lectern",
+      "source": "Original Blender model",
+      "file": "var_lectern.glb",
+      "size_m": {
+        "x": 1.1,
+        "y": 1.502,
+        "z": 1
+      },
+      "sha256": "ed390ab26c45f7f6d62aa48d44aff46744214891ab8022cabdb5cdadfd3646c0",
+      "triangles": 92,
+      "bounds": {
+        "min": [
+          -0.550000011920929,
+          0,
+          -0.5
+        ],
+        "max": [
+          0.550000011920929,
+          1.5021979585289955,
+          0.5
+        ],
+        "center": [
+          0,
+          0.7510989792644978,
+          0
+        ]
+      },
+      "bytes": 8088,
+      "collision": [
+        0,
+        0,
+        1.100000023841858,
+        1
+      ]
+    },
+    {
+      "asset": "var_crystal_cluster",
+      "source": "Original Blender model",
+      "file": "var_crystal_cluster.glb",
+      "size_m": {
+        "x": 1.252,
+        "y": 1.9,
+        "z": 0.936
+      },
+      "sha256": "552349ac5ee771f3c463f3465acb010cd7de381aa7c81903c1e0cd57255f00a2",
+      "triangles": 110,
+      "bounds": {
+        "min": [
+          -0.6260975003242493,
+          -0.10000000894069672,
+          -0.46785199642181396
+        ],
+        "max": [
+          0.6260975003242493,
+          1.8000001460313797,
+          0.46785199642181396
+        ],
+        "center": [
+          0,
+          0.8500000685453415,
+          0
+        ]
+      },
+      "bytes": 10552,
+      "collision": [
+        0,
+        0,
+        1.2521950006484985,
+        0.9357039928436279
+      ]
+    }
+  ]
+}

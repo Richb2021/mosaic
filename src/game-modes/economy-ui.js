@@ -10,7 +10,7 @@ export function mountEconomy(root,{pack,assets,storage,onExit,onLibrary,onProgre
  const expanded=pack.rulesVersion===2,{goods:GOODS,facilities:FACILITIES,technologies:TECHNOLOGIES,contracts:CONTRACTS,councilRules:COUNCIL_RULES,retailGoods}=economyCatalog(pack);
  const access=modalAccess(root),announcer=gameAnnouncer(root);
  const button=(label,act,attrs='',cls='')=>`<button type="button" data-e="${act}" ${attrs} class="${cls}">${label}</button>`;
- const art=kind=>assets.expansion?.town?.[FACILITIES[kind]?.art||kind]||assets.town?.buildings?.[FACILITIES[kind]?.art||kind];
+ const art=kind=>assets.expansion?.town?.[kind]||assets.expansion?.town?.[FACILITIES[kind]?.art||kind]||assets.town?.buildings?.[FACILITIES[kind]?.art||kind];
  const picture=(kind,cls='')=>art(kind)?`<img class="${cls}" src="${esc(art(kind).url)}" alt="">`:'';
  const ended=()=>state.status!=='playing';
  const locked=()=>ended()||pendingCouncil(state)>=0;

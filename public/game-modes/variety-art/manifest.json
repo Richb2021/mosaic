@@ -1,0 +1,2323 @@
+{
+  "version": 1,
+  "provider": "Sorceress",
+  "model": "gpt-image-2.5-sunburst",
+  "themes": {
+    "sunstone": {
+      "scenes": {
+        "workshop": {
+          "url": "/game-modes/variety-art/sunstone/scenes-workshop.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 165858,
+          "sha256": "6e4d1bd4fbe951aa8fd0094c3461ab193da93ef0ef7531ce9ce812be826a093f",
+          "sourceJobId": "ceb58272-b5fe-4c92-a07b-7fe5c8bbf46d"
+        },
+        "woods": {
+          "url": "/game-modes/variety-art/sunstone/scenes-woods.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 189196,
+          "sha256": "ac4b0c9141b47229d95685cd3aab93c75b4b5dc945c53bc79a40a9c288cae7a5",
+          "sourceJobId": "b8baf08e-9516-4aaf-abe5-e67a906f1a2f"
+        },
+        "archive": {
+          "url": "/game-modes/variety-art/sunstone/scenes-archive.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 253706,
+          "sha256": "3d5f5811238141abc11160c449c7f8729dcdf627f278ad49b30b22dbe60fe7fa",
+          "sourceJobId": "bbee6836-b61a-4acd-8a82-7a7cc961758a"
+        },
+        "quay": {
+          "url": "/game-modes/variety-art/sunstone/scenes-quay.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 243278,
+          "sha256": "643193396a721343335f44800672d50df5139cb22834d10a79e531742f54aa2c",
+          "sourceJobId": "1dd0d1e9-c518-406c-8213-37c310a8d591"
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/sunstone/scenes-garden.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 351956,
+          "sha256": "f32ba933a7efc3a293dc1187ddeecbb19b79b1f408eab877db3886ebf398b0de",
+          "sourceJobId": "0f946be3-10e1-47b0-84ed-e975a1b342c9"
+        },
+        "tower": {
+          "url": "/game-modes/variety-art/sunstone/scenes-tower.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 190998,
+          "sha256": "090e3d1d3cf10912943796bd40c7956982c3866a6f5abbf85a1af2e547b53380",
+          "sourceJobId": "9315d596-5ae5-4540-a92c-b438f4a16c57"
+        },
+        "sports": {
+          "url": "/game-modes/variety-art/sunstone/scenes-sports.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 320182,
+          "sha256": "5981e0c35bc185cfac366247814dd1f279d53afbb7dd92c41c5e372904851f19",
+          "sourceJobId": "4fc71ff2-d6b9-4871-a02a-dcfa96358771"
+        },
+        "merge": {
+          "url": "/game-modes/variety-art/sunstone/scenes-merge.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 177340,
+          "sha256": "7d1500d5b3c41bf61c18b3f1b8357d25a7ec82d5a4471c090f9ad7c0b875b3c6",
+          "sourceJobId": "8a983750-227f-48e7-aa8d-7f52073fd0ff"
+        },
+        "town": {
+          "url": "/game-modes/variety-art/sunstone/scenes-town.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 191354,
+          "sha256": "bb82f7563aecb648565222b6587d0914d8133eb892cb49db06d952fcc15fc0f2",
+          "sourceJobId": "7ac4e81d-d4e7-4a12-accd-f981419a3484"
+        }
+      },
+      "town": {
+        "hall": {
+          "url": "/game-modes/variety-art/sunstone/town-hall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48964,
+          "sha256": "8eda4ee21652a67dca00df68be5ba1960890400bc7b38865f550a02231354606",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "1f943e12-f5c9-4204-b6a4-532e2998ce47",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "home": {
+          "url": "/game-modes/variety-art/sunstone/town-home.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48648,
+          "sha256": "ffad9d1595a864863213335f80cde68716831acfc6d80a673421d4bd726107a0",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "65dec092-2f50-4460-b415-5f2d61ed712a",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "workshop": {
+          "url": "/game-modes/variety-art/sunstone/town-workshop.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 49412,
+          "sha256": "5b8b0b146eedc266af3e690d54e30b4d3fde3b80b4699c585dcf00935f658e75",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "7406e615-9e52-44c2-a725-3c1400b8ec8b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "market": {
+          "url": "/game-modes/variety-art/sunstone/town-market.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 55876,
+          "sha256": "e53d5697ccca96fc864693e120000594433071da15805513faa1c7bc2dcf428e",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "9137eb95-81f5-4617-947c-b70d08cf3103",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "warehouse": {
+          "url": "/game-modes/variety-art/sunstone/town-warehouse.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 50828,
+          "sha256": "0c7d1522190d039301cc6adba63d85bf5bbff25441d41dae2a72da11933ea005",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "8b23a372-c100-4703-ae02-50dac6185bfe",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "school": {
+          "url": "/game-modes/variety-art/sunstone/town-school.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 42044,
+          "sha256": "f628e71dff25fde5b871bde11b8e4767a5c33ac8b49a63c891092f74b2dcaa79",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "56d8d558-5491-497c-96b4-78ba95066b4b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "clinic": {
+          "url": "/game-modes/variety-art/sunstone/town-clinic.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 65160,
+          "sha256": "1be9428418f237cd2a70e846435ad58950bff8055522ce47d777827a5800adb0",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "f35fda04-1e08-4c2f-b251-9f1c8833e0a1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/sunstone/town-garden.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 60494,
+          "sha256": "9b39ca846b9992339b1ff7b64ff1cd7a4deb798989d2b1a1514da2cad94bc3b7",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "6f59ef6e-805b-4ad0-ad39-26e4197b2899",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "power": {
+          "url": "/game-modes/variety-art/sunstone/town-power.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 46314,
+          "sha256": "b4778f67fafd1d73ca1214f261d59ae03af07a663815f8ee4b9586bfd862bad7",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "f2090d0f-49ff-4eed-b8b4-47bf8a0226f9",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "water": {
+          "url": "/game-modes/variety-art/sunstone/town-water.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45036,
+          "sha256": "1d0a2ac70abd1935911cc03e3c3d60b345ac1da961a3d7242be0de64013f35ba",
+          "sourceJobId": "9220975b-2cfb-492b-97c6-ba41198e69a9",
+          "alpha": true,
+          "keyJobId": "c580f4de-5145-422e-b9aa-6c79cf2e51e1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "farm": {
+          "url": "/game-modes/variety-art/sunstone/town-farm.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 67602,
+          "sha256": "6e0f43ee861d4610da0bad45922973469e425d0d173904bf96c75cd749f7c368",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "836f4ed6-84c6-46ed-a95d-a6634b6f6ca2",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mill": {
+          "url": "/game-modes/variety-art/sunstone/town-mill.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 53502,
+          "sha256": "30538f8f19a6aee7f3319c13942ab9c2688e4f0cdf39acac7e37cd676c912023",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "67be4488-76ec-409d-abe6-a48765504e09",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bakery": {
+          "url": "/game-modes/variety-art/sunstone/town-bakery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 67948,
+          "sha256": "489013b1ea99f75c855861bda9a1ea0c49f8e2edda100d8dd7dc4afcf261489a",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "3a826083-20ee-4c11-818f-7433d4440c87",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "forestry": {
+          "url": "/game-modes/variety-art/sunstone/town-forestry.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 60746,
+          "sha256": "0bb457addff61fe4fdf8c779703dee5fe14c71e7f73acc134ed8ea9b54470b86",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "46123d8f-b9b5-48f1-9916-6bf2aabfc6ca",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mine": {
+          "url": "/game-modes/variety-art/sunstone/town-mine.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 67544,
+          "sha256": "0e658c8ea4df6dab0015358bbbad229b838279802164a214bf81e2d95c7bedcb",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "89f94249-67d0-4c57-90a9-f5efce985456",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "toolworks": {
+          "url": "/game-modes/variety-art/sunstone/town-toolworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 70110,
+          "sha256": "f738b2d680889db7a168d485ae388b0ed420406525c543b73a21054455d2087a",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "af8a26e3-0baf-4291-993b-95c4fd50e732",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sheep": {
+          "url": "/game-modes/variety-art/sunstone/town-sheep.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 69038,
+          "sha256": "8f5e3bf916e97b0c8f73d0a9ab9c5f26b72acbec0ad1b84ae561ec3f5d9a8a32",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "23d60438-73af-438f-9f21-08b0bc493b8d",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "weavery": {
+          "url": "/game-modes/variety-art/sunstone/town-weavery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 69550,
+          "sha256": "03c17c69d82a09907bca8262948cd9d9caead5365ae885806eff470b8d8fb5cd",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "220290be-6b68-43d2-b467-a13616f07400",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tailor": {
+          "url": "/game-modes/variety-art/sunstone/town-tailor.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 68970,
+          "sha256": "1a28b401427bf8ce5cf5f0ec1e6f429be885d8aad0309cb8820769f236603e8c",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "9c195ac6-0556-41a0-a64b-09115b858e23",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "furnitureworks": {
+          "url": "/game-modes/variety-art/sunstone/town-furnitureworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 64030,
+          "sha256": "af86ca8cb4df40611e73f8822e459550188553df004d7ab67784290bd6bfd591",
+          "sourceJobId": "f8862183-a762-4312-8328-a6215cd5d90f",
+          "alpha": true,
+          "keyJobId": "52316bef-4501-49b0-89ca-e4cfe19a095f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "props": {
+        "crate": {
+          "url": "/game-modes/variety-art/sunstone/props-crate.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38902,
+          "sha256": "9f3b6b6de58e3e812a58104a1191f9a988e1f329046827e427ea71840c3201b1",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "2a48a399-31cc-4f62-93cd-542439b6f46d",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "barrel": {
+          "url": "/game-modes/variety-art/sunstone/props-barrel.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 30940,
+          "sha256": "1e92100a23b478b1fb83457bcc75e7446212dbed527a80be5db243afac1fae74",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "1725a468-75a4-43d2-a4b3-9cd354a631d2",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "planter": {
+          "url": "/game-modes/variety-art/sunstone/props-planter.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48520,
+          "sha256": "d983ab51555e8832129bbb296efad0c0fd40e73d9cea0d4e8d5ae8e6ec83be1c",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "ad6df9fe-90c6-48a0-855e-33bd9f24e176",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bench": {
+          "url": "/game-modes/variety-art/sunstone/props-bench.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38798,
+          "sha256": "f7152eef29bebd031d51f2cf7bb35bc6791b47bb0fc8f9147e3abb52d04d45de",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "e2f902f0-eeb5-4612-9649-2828b1fa44ae",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "trough": {
+          "url": "/game-modes/variety-art/sunstone/props-trough.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 31192,
+          "sha256": "91e8ef1691173b26c6a377287f49cb6229c4033aca87e198d066da79f5cc62d4",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "22b77135-faf3-4e20-b80b-d580c9f15a17",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "wall": {
+          "url": "/game-modes/variety-art/sunstone/props-wall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41282,
+          "sha256": "7a4cf210868394d32964447b0df84815896cab84d2eb7db424a3dd7d90440583",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "bfd621a4-818d-4924-b3d2-873a303dd795",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "rope": {
+          "url": "/game-modes/variety-art/sunstone/props-rope.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 49076,
+          "sha256": "d74b6cf42d9e549a0f91ad2184dcd312bd2cc3bb68da38cbc2c874cc69bc2c55",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "0af30cad-1754-4e2d-9963-f276d686dd0d",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/sunstone/props-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41226,
+          "sha256": "40b94952c42d22e90cf5324b16e35eeabe13d3c5cd4f8175c61b4aef5192c946",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "345ef385-addb-4715-9fdf-8cc523554696",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "chest": {
+          "url": "/game-modes/variety-art/sunstone/props-chest.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48114,
+          "sha256": "1bc30a58180a9cd7235775e40e173493b7e75d674f20cd233e2fb965ab86a5f2",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "4b1d9859-08d8-49cb-bd46-6b0247be92fd",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "books": {
+          "url": "/game-modes/variety-art/sunstone/props-books.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38442,
+          "sha256": "6cac7a68272cb2c3266646ff8c37f6b0e338f88b054c216b849983c1e56ca864",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "f7570858-69e4-4a93-a056-ec5d15071057",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "lantern": {
+          "url": "/game-modes/variety-art/sunstone/props-lantern.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 23532,
+          "sha256": "4d4a178a34cd10dce8c0b0eccc190a33b7ffdcee79d336accae2dcdb17e3298c",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "0db84cc4-4bf4-4356-a292-96d7bb6a0dc0",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sack": {
+          "url": "/game-modes/variety-art/sunstone/props-sack.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 32054,
+          "sha256": "109ded6e8bde7d7cc616e4bd5a25dc909c5379fb3cb009903841cbe70f83f315",
+          "sourceJobId": "0800be5d-ac77-42af-9bdf-9ef260f94314",
+          "alpha": true,
+          "keyJobId": "f38238fd-d7f9-4ee6-8062-7dae411d3cd2",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "craft": {
+        "seed": {
+          "url": "/game-modes/variety-art/sunstone/craft-seed.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 27544,
+          "sha256": "9f92aefdd9ed5bbd2ac5dd069c0b655e558f3b9aca44ee7a096513a4f4980511",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "aff37b74-d994-4f1f-bf8b-f285d019d24b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sapling": {
+          "url": "/game-modes/variety-art/sunstone/craft-sapling.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 31222,
+          "sha256": "061e06bb58e0d6f175a82dc23167773d50d5b25fd335658d0733f38ef32365e6",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "f63d950a-0658-4bb4-8ac6-bf7ac988f3f9",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tree": {
+          "url": "/game-modes/variety-art/sunstone/craft-tree.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 54214,
+          "sha256": "a733b6aa242ed58229ca53a28a4402dbf41ce27e29f823f674f12920348828ac",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "81caf80c-e0c4-4c45-abf2-23dd153dd9b1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "fibre": {
+          "url": "/game-modes/variety-art/sunstone/craft-fibre.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45952,
+          "sha256": "c36ee0647f7d8e8f7e0fd41d20666c239b169207197008e474faf3aaaf86b47d",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "bfcdc030-c8ee-4c52-aa3b-44aa23b49234",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "spool": {
+          "url": "/game-modes/variety-art/sunstone/craft-spool.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 35076,
+          "sha256": "622f6c1f9aa526d52ea1cd3af807aa4637876df6070b15d2fb8e79ae647dbec0",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "70c4b00e-9c57-434b-9db6-0eb212c7d0d0",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "cloth": {
+          "url": "/game-modes/variety-art/sunstone/craft-cloth.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 37354,
+          "sha256": "22b37a15d68c615095473e36409304a7bf948629adedea6cf298cd2a87517d96",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "2705e8e6-0174-433e-9141-16255275329c",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/sunstone/craft-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38862,
+          "sha256": "3d19b35293abc374838da90fbfdc355b18d8182425081f703d2f5a11ea29163c",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "7996472d-3f1b-4c95-8e6a-037d970b5294",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mechanism": {
+          "url": "/game-modes/variety-art/sunstone/craft-mechanism.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48768,
+          "sha256": "0ab3203c8fbe834b3e06a59fc6d390a0804a75765a309f2683b55812b9ca1da1",
+          "sourceJobId": "2f4b73dd-c035-4d11-9ed6-80766b1cdf46",
+          "alpha": true,
+          "keyJobId": "316295e3-ac25-4613-83bf-dd8faddbcfea",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "cards": {
+        "steam": {
+          "url": "/game-modes/variety-art/sunstone/cards-steam.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 58920,
+          "sha256": "65a0646b32425375a2c48326981b7a0d4049f0dd968a07bc04a418846855b6ce",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "waterwheel": {
+          "url": "/game-modes/variety-art/sunstone/cards-waterwheel.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 71874,
+          "sha256": "7a45470f144a358590bcd57a0c12969527f10d0702420188a84655d48b68b349",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "canal": {
+          "url": "/game-modes/variety-art/sunstone/cards-canal.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 61082,
+          "sha256": "56f8cd2f82d4dd09a629fcd3ec8159717c10360c619c5ba1bda82d06c44b62be",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "rail": {
+          "url": "/game-modes/variety-art/sunstone/cards-rail.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 59500,
+          "sha256": "55472aecf18da542fd28e7ed9ff7da26df030bf6cebce72277e1c98ccd9af263",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "loom": {
+          "url": "/game-modes/variety-art/sunstone/cards-loom.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 55714,
+          "sha256": "554f78a52aaad4fc3b5951ccb5321673cb1673f396c044e1c053a7a987803bc3",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "iron": {
+          "url": "/game-modes/variety-art/sunstone/cards-iron.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 62828,
+          "sha256": "7fc0d240cead593e4ce0b4ab04a48baab4627a9e72fb7382e634f26175058e8c",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "workers": {
+          "url": "/game-modes/variety-art/sunstone/cards-workers.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 54366,
+          "sha256": "74561599fb445e48ec8d8e08cad165a1963c46b4c6e1b7e2d774a0b358f9ec3f",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "school": {
+          "url": "/game-modes/variety-art/sunstone/cards-school.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 43666,
+          "sha256": "cfe347c2b7929960d8abcbebf022a21f095205b4368b67c9b373d9da4809c60f",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "inspector": {
+          "url": "/game-modes/variety-art/sunstone/cards-inspector.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 48012,
+          "sha256": "f53ff1c1b137d194267ae8c0f2b7e196279afb2430136487788bf6dca2a2e11c",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "trees": {
+          "url": "/game-modes/variety-art/sunstone/cards-trees.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 81496,
+          "sha256": "9c3ec938277179651c8e0d0a8924b69adafad391af971a4fb8577e1bd2e6fea4",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "water": {
+          "url": "/game-modes/variety-art/sunstone/cards-water.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 77956,
+          "sha256": "fda97e89996412f998ad027c5d7130a39da0f42aee7bfe2353459db1dd074857",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "soil": {
+          "url": "/game-modes/variety-art/sunstone/cards-soil.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 77734,
+          "sha256": "bc753d75965952f83aa0e7bc4d0c70702a907a8c8fa25fa8778a70fe434fe507",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "geology": {
+          "url": "/game-modes/variety-art/sunstone/cards-geology.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 71876,
+          "sha256": "412536f07647464e3384da6ffefde98eb8512a4d38c13ddaa0f6fe8ff59f3261",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "river": {
+          "url": "/game-modes/variety-art/sunstone/cards-river.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 64106,
+          "sha256": "8f80b411d9fb46fe005f49dec132d9fb1720a61586c37ba0ee878214f75ac758",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "library": {
+          "url": "/game-modes/variety-art/sunstone/cards-library.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 52586,
+          "sha256": "9aeb9f1aa8cdeb427a5587fbae6ca0cdacae9623cbae0977344eb90b020088da",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        },
+        "forge": {
+          "url": "/game-modes/variety-art/sunstone/cards-forge.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 42942,
+          "sha256": "dd5e60cc3669dc8c4e453339645050697ba9744a05e527001fa6136d068b4989",
+          "sourceJobId": "c27e8245-b506-4457-958f-707fc6b0dbe0"
+        }
+      }
+    },
+    "frostvale": {
+      "scenes": {
+        "workshop": {
+          "url": "/game-modes/variety-art/frostvale/scenes-workshop.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 231190,
+          "sha256": "71bc30feae0bd89dfbf99a3277f45f562a0ac0c3f7e4a91ad6cc71f5d7510fa9",
+          "sourceJobId": "33855086-000f-497b-999a-d5a775ac0cfe"
+        },
+        "woods": {
+          "url": "/game-modes/variety-art/frostvale/scenes-woods.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 168096,
+          "sha256": "172caf5e05c5ecf0b242a5309c2a51f5529e35e83c5a70c795325f9cc5c1be2c",
+          "sourceJobId": "190511d2-99e2-4391-9a2a-6ff08fbe98e9"
+        },
+        "archive": {
+          "url": "/game-modes/variety-art/frostvale/scenes-archive.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 137084,
+          "sha256": "de35acb22ec1f028ea8098170e600807209ad11b64914cb008dcdc206cdc4f34",
+          "sourceJobId": "cc8d31c5-9bca-4750-8d9e-ce2c8cf5a26c"
+        },
+        "quay": {
+          "url": "/game-modes/variety-art/frostvale/scenes-quay.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 237618,
+          "sha256": "5a5f901b65184152acce1a47be7510628d442b3b6ad0e6e7e559acf89023a06b",
+          "sourceJobId": "9f8033d0-fd88-4131-ba6b-61f12764ebe7"
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/frostvale/scenes-garden.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 221756,
+          "sha256": "6a50eb43c37a4422fa69cae29cd89e901b07064f73aad74fd219b7fb84bf2b4b",
+          "sourceJobId": "4b364843-765d-4120-95e6-24fe55cd26e8"
+        },
+        "tower": {
+          "url": "/game-modes/variety-art/frostvale/scenes-tower.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 202860,
+          "sha256": "d30af139a927221f9d96cf1406520c57247108550c4c636aaef859610a0fdfdf",
+          "sourceJobId": "50bb70ee-16e9-46b5-8795-ecba9cb01530"
+        },
+        "sports": {
+          "url": "/game-modes/variety-art/frostvale/scenes-sports.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 287244,
+          "sha256": "6e33bef0ccb5da3b296811f7be21b01898d61545c8f383246238212c03a9a4c6",
+          "sourceJobId": "9c14c713-c180-4440-acc4-aab34657461f"
+        },
+        "merge": {
+          "url": "/game-modes/variety-art/frostvale/scenes-merge.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 241282,
+          "sha256": "8a403fe9547d55342eb5c97d1c55a77b6e6268bc936adf9cf1a0e18bbab86409",
+          "sourceJobId": "207c8b50-9047-4cda-ac9f-864ea0c51a4e"
+        },
+        "town": {
+          "url": "/game-modes/variety-art/frostvale/scenes-town.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 228346,
+          "sha256": "0b86cb7333e6d368b01ed7b9a54a7fb80a95387177cbd481c331d2030ce20027",
+          "sourceJobId": "13255d1f-541f-4b29-8c46-d5dce632bebe"
+        }
+      },
+      "town": {
+        "hall": {
+          "url": "/game-modes/variety-art/frostvale/town-hall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 43564,
+          "sha256": "6071275efea0a92d369a709357e9ebb395424fdc9df27b5c5274bf7e3a998311",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "9df5bd4b-0431-4f03-b7bc-3fafca791365",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "home": {
+          "url": "/game-modes/variety-art/frostvale/town-home.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38462,
+          "sha256": "89e88a06db1299424af4c3cacb284d3965daf15f84445774ea5a5c6ce93ad342",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "c8a7f1e4-d631-460f-b292-63aae0a1cfc2",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "workshop": {
+          "url": "/game-modes/variety-art/frostvale/town-workshop.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 36512,
+          "sha256": "a45420981e99b959379224310978f405f75c61ca057bbdf7b044eeb503a342a3",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "ad9db204-fe6c-4f87-affb-ae5dc7b02b88",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "market": {
+          "url": "/game-modes/variety-art/frostvale/town-market.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41578,
+          "sha256": "3daf315d4a00e8fe96dba8d51994c99887b6728d0ae7e94456dae44ffa367f65",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "1b621f57-38e2-4939-bf8f-72e098f7f5e8",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "warehouse": {
+          "url": "/game-modes/variety-art/frostvale/town-warehouse.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 34868,
+          "sha256": "baab22220250a930a2c0d11d307e7a03f0189d4bdd3d6147fa335a87f7d2a825",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "3e60d191-5d24-4aa0-b59e-4bb959a863d6",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "school": {
+          "url": "/game-modes/variety-art/frostvale/town-school.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 36644,
+          "sha256": "028054d5c1e22de7a1fdf2267b05647038085441872f5f8447e77fb78d62eeed",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "0a088ab0-e227-443d-9b69-18abf0579b51",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "clinic": {
+          "url": "/game-modes/variety-art/frostvale/town-clinic.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 43684,
+          "sha256": "6f9505402990080b3196d26e66667ba6bb498fe754dc68b95f2f6cd3e9cabd7b",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "0b0a9167-eccc-491c-9f29-d15de64c5cd1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/frostvale/town-garden.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41140,
+          "sha256": "f0713ddf5978a5829dbe2ba96ae56a1fc4be13a42b78cacc77249c721be2b4a5",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "2c42d394-408c-4004-9c75-39da0d235d36",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "power": {
+          "url": "/game-modes/variety-art/frostvale/town-power.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 38196,
+          "sha256": "df19036f7578e5160ca7a27ce6a700c7e64446229d9205b84ff9ef1d26db9f58",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "e5c47e96-0f10-456c-801a-7c7f79654f4f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "water": {
+          "url": "/game-modes/variety-art/frostvale/town-water.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 28758,
+          "sha256": "486bba3090a669d0370f1781d6815204a88be57beb02b88eec0f145525b01cde",
+          "sourceJobId": "7f0fa0f6-b254-40ce-827a-cd09bfca65aa",
+          "alpha": true,
+          "keyJobId": "4f9a567c-ef7e-4d37-8bdd-b1e7337c256c",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "farm": {
+          "url": "/game-modes/variety-art/frostvale/town-farm.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 64828,
+          "sha256": "01ed6902e1c4891925ecc2a6dbe352ecd9a7e2db3838e885335d0a105d499d3b",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "ca8f70ba-536c-4b2e-9c9d-851a77371421",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mill": {
+          "url": "/game-modes/variety-art/frostvale/town-mill.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 67168,
+          "sha256": "0498aacefab0d281f1bb036dfc45b9928a05060f8fe455fcfe92651cea74787a",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "2fb62b2e-479a-40e3-9e4c-bc358db901e2",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bakery": {
+          "url": "/game-modes/variety-art/frostvale/town-bakery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 70964,
+          "sha256": "c907783a84a3c57c7a18b4586080458c80b65feac653006a857d41ae295265d3",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "8e48f5c2-513e-4acd-808a-4b70b805bbc1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "forestry": {
+          "url": "/game-modes/variety-art/frostvale/town-forestry.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 71154,
+          "sha256": "a3a9f3a3454c784b001cce8982f1f6db25ffb4066caf144576bd1833abf07777",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "342116ce-a6ed-466f-8d70-6cae3142c795",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mine": {
+          "url": "/game-modes/variety-art/frostvale/town-mine.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 78600,
+          "sha256": "08af8c343fdc5f85270871e576cbc8f33a633d9be59b035cf4548e4228d116a3",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "92f70e97-4a8d-4234-9b3b-e5a58f724dfe",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "toolworks": {
+          "url": "/game-modes/variety-art/frostvale/town-toolworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 65702,
+          "sha256": "a8a0862b25b5abeba65091d1a4a305ac508d0854720532126b3fe7cb043a83e1",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "8ef7227c-2221-4a17-8334-3f6b4f04b772",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sheep": {
+          "url": "/game-modes/variety-art/frostvale/town-sheep.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 69336,
+          "sha256": "0ddf42b9cf966b851a769dd6bdddeea8a54de3b09649af02dad05a75754b713c",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "1d8ebe21-f91c-450c-8e59-b8c81df6ced6",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "weavery": {
+          "url": "/game-modes/variety-art/frostvale/town-weavery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 70342,
+          "sha256": "a0946e9ced9d30a52a9f7ddcaae7a6ecff821f9f12e4ddf56d8751acf1314956",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "97373149-7fe0-4aba-b2fa-07ef94e2c066",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tailor": {
+          "url": "/game-modes/variety-art/frostvale/town-tailor.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 66198,
+          "sha256": "611181002adeb668e3a7ad30641cbbcaf9075d5bbc793783c5846fa837ac4168",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "db4925ca-dda6-4260-8c90-3dfa62f6efe0",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "furnitureworks": {
+          "url": "/game-modes/variety-art/frostvale/town-furnitureworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 66232,
+          "sha256": "185f83f01943539cea928f63f74474ae1c34f352908fddea308ce6952af9790a",
+          "sourceJobId": "1927a004-e623-48e1-885a-f70d55795d5c",
+          "alpha": true,
+          "keyJobId": "65dd5e34-651f-42bb-a7d4-75aa7cad4efd",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "props": {
+        "crate": {
+          "url": "/game-modes/variety-art/frostvale/props-crate.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 32532,
+          "sha256": "2eb5228b554d88a0530a67ea7471c13a51cbfbd7e3ee0ab93ddd3859c46a5805",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "c4039dcc-eb18-44c6-a00d-48acdd525dc8",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "barrel": {
+          "url": "/game-modes/variety-art/frostvale/props-barrel.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 30280,
+          "sha256": "733c9e6758d08f93a2604457016f672d3dc3f21f88102ac51880317141ab4949",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "29c79368-442b-41c7-bdf8-87d35b64b49a",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "planter": {
+          "url": "/game-modes/variety-art/frostvale/props-planter.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 51156,
+          "sha256": "cc0b1fa1b6cea32c38ba5ee79526cb8f36f68eede96434a353f390288df6db0a",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "dd922cbd-f11e-4c7f-a87b-53d7f3cf0acd",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bench": {
+          "url": "/game-modes/variety-art/frostvale/props-bench.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 35650,
+          "sha256": "819c003ed6fbf637796e264d39c492df32b0dd8bc59376d1b3c58813375bbe31",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "bcf40bba-daa3-442a-bce2-164d2c6e5a1f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "trough": {
+          "url": "/game-modes/variety-art/frostvale/props-trough.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 28302,
+          "sha256": "2b227be8252334c4dd896117adaed0a50bd80904b208e844f74cac2ab86bc5fa",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "7d70893f-c57a-4464-af39-123d0c071f0b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "wall": {
+          "url": "/game-modes/variety-art/frostvale/props-wall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 34188,
+          "sha256": "859791764bd8f1244bfe2e9c35a86c72e10036505ced37194558653127a4a751",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "0f5d6526-baf4-426b-8cd1-b4b6293ebe9d",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "rope": {
+          "url": "/game-modes/variety-art/frostvale/props-rope.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 43290,
+          "sha256": "f3b26ee097131d8fedf5b8d67be597e9a8d52bc7c0ab4f80fbb0d640d241c0fb",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "f327526b-f844-425e-b6c1-b527882c73c1",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/frostvale/props-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45488,
+          "sha256": "1a311bfee2478d291a7cb86180e67f4e983c9defe7eb4a1a8c1d3e0a6ae75139",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "42ced7a8-81c6-4e26-bc50-f2477b7853c4",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "chest": {
+          "url": "/game-modes/variety-art/frostvale/props-chest.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 40882,
+          "sha256": "988b2961653a14feeb992fe9632e49c9c59597334fc9779c5fc21221e034dd2d",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "35f8f7f3-0faa-4725-8a32-5c2d374b4577",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "books": {
+          "url": "/game-modes/variety-art/frostvale/props-books.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 37148,
+          "sha256": "7f17f6989e61238807c46543fb93dbf411a61d0fdc8e9d12fa3d3bfe2efcbca1",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "1192abb8-9518-45bd-8a16-6d892855573b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "lantern": {
+          "url": "/game-modes/variety-art/frostvale/props-lantern.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 21348,
+          "sha256": "38253bff7cdc30f4ce616fbfe4c16da53856d5dd4cc2b802a268515b19a39957",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "a2fbfbe3-2648-4943-95fc-49043368f58d",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sack": {
+          "url": "/game-modes/variety-art/frostvale/props-sack.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 29608,
+          "sha256": "c1b37d24fb09be376d2a94b3faea7d7d09d8d8b61559724edc45fe1649050942",
+          "sourceJobId": "15b02763-c1e2-454e-b97d-e1e704c9d929",
+          "alpha": true,
+          "keyJobId": "9f33ecda-5686-4a64-9550-19c8ee162709",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "craft": {
+        "seed": {
+          "url": "/game-modes/variety-art/frostvale/craft-seed.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 24598,
+          "sha256": "22608d12ac309ff9ecae6399377424dfb54fd8384c940daceb62fde12a8e95d7",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "d4735b72-19f7-4f86-9dd2-8e4ac31e261e",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sapling": {
+          "url": "/game-modes/variety-art/frostvale/craft-sapling.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 26218,
+          "sha256": "5eb466af5d96ddb82b316777455e47707ba4a7934769a7df1bf15acc49781b75",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "f13e43e2-368d-43d2-8cc8-f578c6c23b39",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tree": {
+          "url": "/game-modes/variety-art/frostvale/craft-tree.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45404,
+          "sha256": "a11f47610d7cfde66c899bd66761ad47d316c9ef3be10f2598159b99ba826f5f",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "a850220f-919f-427c-a714-0dc1fda7367e",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "fibre": {
+          "url": "/game-modes/variety-art/frostvale/craft-fibre.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 36202,
+          "sha256": "49081a25703d395c878ff1e85243afeb071dff35ed3be38a93e067083a2cee11",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "b182c8e5-df8e-4d59-9a0a-5333bf55f070",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "spool": {
+          "url": "/game-modes/variety-art/frostvale/craft-spool.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 25320,
+          "sha256": "b3fb3bc7a89b54100b5884717c1483096b8c44eaeb478b2c12d5c9242f00e531",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "513b648d-9fd1-49a7-9a01-5fbc118731cd",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "cloth": {
+          "url": "/game-modes/variety-art/frostvale/craft-cloth.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41220,
+          "sha256": "6f2822adf1a49170a25330f3b8784dcdb55747d9cae614bc4b3712ab4480f3ba",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "709f2f2d-aba1-4efc-bdf8-6faf53648fab",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/frostvale/craft-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 39156,
+          "sha256": "154bd0b53bcc71d63c1602408be64832e687b1b3486821c7b02d52295ab2da32",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "44beecc9-3647-464a-b907-2c5e67d4595b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mechanism": {
+          "url": "/game-modes/variety-art/frostvale/craft-mechanism.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 49404,
+          "sha256": "0e23068c6966cb1b9b28d2e6b42b77fd0f02a90062ed961e0dfcc1c388f95f45",
+          "sourceJobId": "17c013a3-760e-4a8e-99cf-6f1b79997910",
+          "alpha": true,
+          "keyJobId": "204c3687-48bc-4206-aa85-19edbdc0a7ca",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "cards": {
+        "steam": {
+          "url": "/game-modes/variety-art/frostvale/cards-steam.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 48324,
+          "sha256": "b995bc1971e00d706b6d60b70ae5cfe68bb0187cbbd82d29255d8b23af33b80e",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "waterwheel": {
+          "url": "/game-modes/variety-art/frostvale/cards-waterwheel.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 52090,
+          "sha256": "60215952a4ead908eea39e3615df44a00b624bf1ac92feca32416757332a8479",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "canal": {
+          "url": "/game-modes/variety-art/frostvale/cards-canal.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 57816,
+          "sha256": "63fd32751af43a7bfd0c852ddfbe3d2aa184c15d1d50c28790f593025d8637f5",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "rail": {
+          "url": "/game-modes/variety-art/frostvale/cards-rail.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 46154,
+          "sha256": "5cbc606a05f287148a60e9151461f57b9193ca3ac33b0a3a2433ff9e28e8c502",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "loom": {
+          "url": "/game-modes/variety-art/frostvale/cards-loom.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 58176,
+          "sha256": "5dfcb7d8f3468c742d1e08ef507087bc0e90d9dbbaac5a893c1f8b6f261ee8a1",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "iron": {
+          "url": "/game-modes/variety-art/frostvale/cards-iron.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 54716,
+          "sha256": "d7c0d17f06cbeb3557a3e1ec1c6ec7a43eb8cc5a1b74ed1077d5a73c0015b5ec",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "workers": {
+          "url": "/game-modes/variety-art/frostvale/cards-workers.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 52014,
+          "sha256": "24cfa000ee43e6ca0ebdf658e04c4af40e028305749498cb1ce252d3e185357d",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "school": {
+          "url": "/game-modes/variety-art/frostvale/cards-school.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 46574,
+          "sha256": "2d446ca5f0cb39ab85b4a1a42132eb672f0bb8532fc3fe0a5585b123539d16ac",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "inspector": {
+          "url": "/game-modes/variety-art/frostvale/cards-inspector.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 59098,
+          "sha256": "8f17f6c73ec25cc8fd3c8452e2698544499597d27b98d627aa73bf492da53ede",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "trees": {
+          "url": "/game-modes/variety-art/frostvale/cards-trees.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 54906,
+          "sha256": "48a13f538739ea400a795fb7eb0a1b5ec26e49ee3f1e323dc9585159109ee34c",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "water": {
+          "url": "/game-modes/variety-art/frostvale/cards-water.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 50934,
+          "sha256": "c42182086508925e050a9f19688ca6b615cf936ead41bc444bf7b48ff15f61cb",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "soil": {
+          "url": "/game-modes/variety-art/frostvale/cards-soil.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 44814,
+          "sha256": "5ebeb50dd5b7b162c845d184058604942004ec51c88559f856d61bd7950fb91b",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "geology": {
+          "url": "/game-modes/variety-art/frostvale/cards-geology.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 44264,
+          "sha256": "5edc1733e206743444bbcdf91ece223b0ab336f6bf5f191e3feb21e63460b4e4",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "river": {
+          "url": "/game-modes/variety-art/frostvale/cards-river.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 46660,
+          "sha256": "d77aabb8af6ca720f4c39a6b6d6aadea38bb50cc678cedaa90e2e1f3a881f25e",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "library": {
+          "url": "/game-modes/variety-art/frostvale/cards-library.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 46462,
+          "sha256": "c7302112121ccec94745cbbf8bdb567cad93d53eff3efaf39b795854f647a7f5",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        },
+        "forge": {
+          "url": "/game-modes/variety-art/frostvale/cards-forge.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 39786,
+          "sha256": "b7f0ff170f7872cbb1dbfb309286764d1470de593ef64c58934e3edb5ffa7678",
+          "sourceJobId": "2c405405-8814-4cff-8d88-b81b909511ea"
+        }
+      }
+    },
+    "copperfield": {
+      "scenes": {
+        "workshop": {
+          "url": "/game-modes/variety-art/copperfield/scenes-workshop.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 306386,
+          "sha256": "8f057e4a6fe44b8e57677bd0a35bc5a3de063ea8f6fe95469e9a03863519e036",
+          "sourceJobId": "5413cbcf-4c46-48ab-a070-a343397a0ef9"
+        },
+        "woods": {
+          "url": "/game-modes/variety-art/copperfield/scenes-woods.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 233044,
+          "sha256": "ceb49ded1e36f07cc6795bf57461de1f1840ffa5496d67554b3175a451a9dcfc",
+          "sourceJobId": "9c51880d-01af-45de-979f-03d68138856c"
+        },
+        "archive": {
+          "url": "/game-modes/variety-art/copperfield/scenes-archive.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 181454,
+          "sha256": "3089b90b837ab13c11d1d974ff8f8adcdfe64e788f8a17461d578e65f8405529",
+          "sourceJobId": "bd6e24ba-d8c9-4549-a729-c58fa95cd217"
+        },
+        "quay": {
+          "url": "/game-modes/variety-art/copperfield/scenes-quay.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 216298,
+          "sha256": "2febd8a21eee529fb37e955943556ca51ba3632edae741c9a4653cb0d86dca19",
+          "sourceJobId": "405f123b-a17e-453d-8c67-d354a729b37f"
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/copperfield/scenes-garden.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 344976,
+          "sha256": "a944d08478831ed1770e16d854c01f50ff52c020a7c565b2f6c422661fed9a49",
+          "sourceJobId": "17a955e8-25fb-4a98-bcdc-aebc685c9256"
+        },
+        "tower": {
+          "url": "/game-modes/variety-art/copperfield/scenes-tower.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 354002,
+          "sha256": "98a8b9b0668a9eedbddbed848e1735f35b00165adc3c15204087be424062d877",
+          "sourceJobId": "eb2a40e4-ddf6-40c2-96bc-b2d255710e0b"
+        },
+        "sports": {
+          "url": "/game-modes/variety-art/copperfield/scenes-sports.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 193488,
+          "sha256": "ec44985080f3720743a31ab5139eb60c9d60e312b6feff88ce394a8aa12702b0",
+          "sourceJobId": "c0df8fc8-90b4-432b-a9ea-f47f0445fc56"
+        },
+        "merge": {
+          "url": "/game-modes/variety-art/copperfield/scenes-merge.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 184462,
+          "sha256": "e5712a44a2b00ca7acb46e108c8337deb12a9e9f3d5c043b13095cce77df5af0",
+          "sourceJobId": "0463796e-29af-4399-b003-75c508e57ec7"
+        },
+        "town": {
+          "url": "/game-modes/variety-art/copperfield/scenes-town.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 284356,
+          "sha256": "cfd71acfbf0a9b866ac53ad328f70708325a3b075cba212adc1102719478c90a",
+          "sourceJobId": "cdb6bed7-8514-4e37-a34b-3470a2c38acd"
+        }
+      },
+      "town": {
+        "hall": {
+          "url": "/game-modes/variety-art/copperfield/town-hall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 50876,
+          "sha256": "dfe44f2965bb5222da87b5b91cb061076dd34d5e8bd214d332f64b3714e5dc53",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "63b1cfe5-80fe-4c7e-8ab9-73c6accb8a46",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "home": {
+          "url": "/game-modes/variety-art/copperfield/town-home.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 39190,
+          "sha256": "270bff273d6650190b6073cb3f3dc9018d071a14bec8dfbc22f2248275981211",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "f67f30eb-a286-4a99-88ee-1c9e34c72366",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "workshop": {
+          "url": "/game-modes/variety-art/copperfield/town-workshop.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 50282,
+          "sha256": "a352335227e5e0e9d678f6d48e3e5a896497d933417b87f235d6666b4ddc603c",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "f61e3b79-3626-4e9f-afc9-0ed7042450b0",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "market": {
+          "url": "/game-modes/variety-art/copperfield/town-market.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 51548,
+          "sha256": "eb3c0becabd072ba5698855a1e2743da7a3e83b66fe0aba154f417b8866aca33",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "7534e3de-3fbb-4615-a180-e698c462d26f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "warehouse": {
+          "url": "/game-modes/variety-art/copperfield/town-warehouse.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45308,
+          "sha256": "4323e60068249d8f3f6cdb1a08aa7c845c671748417cc60a8446067c7ea51c83",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "492a263d-c6ba-4aca-b94e-f07b5d28c148",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "school": {
+          "url": "/game-modes/variety-art/copperfield/town-school.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48850,
+          "sha256": "82f00f601c8f97723dc553c2ac19d4e2e441217ec7361b5872b2352291608da8",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "35364406-b709-4ad9-963c-48d0568efa98",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "clinic": {
+          "url": "/game-modes/variety-art/copperfield/town-clinic.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48204,
+          "sha256": "dbabb19d762b557e7cf43a5d614597a57acaea1db7e3d1a2b6bf953602f9e195",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "9eebb426-38cc-4448-a609-8b8eeb720ad9",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "garden": {
+          "url": "/game-modes/variety-art/copperfield/town-garden.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48256,
+          "sha256": "5b8a5bca49d3bde545a5bfed10230b3097228f526f5d8cfc1bf5107e0e56045e",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "0a206ef2-1276-4107-9c78-e70b399c2ce6",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "power": {
+          "url": "/game-modes/variety-art/copperfield/town-power.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 41462,
+          "sha256": "3d5c12da57d8c1ecfbc76c8294273ed2ae96e4e1c438fab050e29350ef3c3fb6",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "fce65aa2-b347-4587-9b29-89c3bfc744a5",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "water": {
+          "url": "/game-modes/variety-art/copperfield/town-water.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 30084,
+          "sha256": "179187b7b63b9dc52635ca265d34324547e269c203759e2101d8df09c9976672",
+          "sourceJobId": "066c4804-046d-4319-8f42-874a8de5af5b",
+          "alpha": true,
+          "keyJobId": "72b7eca6-1157-4af6-a9eb-ec56c9e51edc",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "farm": {
+          "url": "/game-modes/variety-art/copperfield/town-farm.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 49276,
+          "sha256": "8aadbb58efc0a44ef9f6556c6344a662b1ad1a16aab129417e944e7ad15d82bc",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "74f2dbdd-43b6-4e9a-9c64-018df0d19677",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mill": {
+          "url": "/game-modes/variety-art/copperfield/town-mill.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 37450,
+          "sha256": "a6f4bee0b603474041ea640a73d07a2ad27baab5765192f02a3cf91a3acb7c47",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "7dda09cf-950c-4ec8-aebb-5e2d7f9ccd0e",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bakery": {
+          "url": "/game-modes/variety-art/copperfield/town-bakery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 47450,
+          "sha256": "abf71f130ca8709556af83ee644c50e632fb8f221cba0f714726ad4a4cd48b02",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "6d4cd4cf-322c-4bc8-90c0-1c26b7a6feb8",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "forestry": {
+          "url": "/game-modes/variety-art/copperfield/town-forestry.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 58872,
+          "sha256": "ae8fc54858f066248483df40775e5e0f48cea91027aa2c0304b1e78c756a4acf",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "c35093e0-cf70-4912-a001-5232bbbdee72",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mine": {
+          "url": "/game-modes/variety-art/copperfield/town-mine.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 48058,
+          "sha256": "c153e308953293c9ca60874ba00de73d323179f0f5af48b6f8a5b50fea59cf3c",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "2f324cac-1123-4854-952e-3c0c1d8c2e25",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "toolworks": {
+          "url": "/game-modes/variety-art/copperfield/town-toolworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 52070,
+          "sha256": "8ae571a213760314fc95ebc3a8e8a88ee6b25e4b74c6108ebb810df4ba866b0c",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "22c43317-2a40-4a98-8ee2-e906f8e87b04",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sheep": {
+          "url": "/game-modes/variety-art/copperfield/town-sheep.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 53054,
+          "sha256": "04e9720bd28d80b1137e676263e1b71854fa8f166b86c793e0b5675684ff4f2b",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "8f85fccd-d914-4a49-9db5-1e8a4d81bd4f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "weavery": {
+          "url": "/game-modes/variety-art/copperfield/town-weavery.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 47818,
+          "sha256": "9f15caaba12290bd4a021b777393e1c5d13eb1f57166611e20a57dfce8958549",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "cc65e2f1-1acd-4350-902f-37692cfb7fdc",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tailor": {
+          "url": "/game-modes/variety-art/copperfield/town-tailor.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 54464,
+          "sha256": "7096b4e5cdf389c749518c66e9255c272180c698a8d0a58a477e0032c04804f9",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "d9c3ec81-c49f-4ae7-9d08-5b453e658147",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "furnitureworks": {
+          "url": "/game-modes/variety-art/copperfield/town-furnitureworks.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 46716,
+          "sha256": "af83ec3c7d71d899df52c55c34df71a02caac4305c565286864a2447f7034877",
+          "sourceJobId": "b76b2992-589a-474b-b0bc-dc666c4d0c26",
+          "alpha": true,
+          "keyJobId": "9e14008f-7b67-4996-8ff0-617e0d156139",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "props": {
+        "crate": {
+          "url": "/game-modes/variety-art/copperfield/props-crate.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 60346,
+          "sha256": "1937dac24e7062c4ea2f2b99905680b797ad0aae9bd3cfad7f2edfff12525321",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "0209d1da-365c-4225-85ec-ac59a914def8",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "barrel": {
+          "url": "/game-modes/variety-art/copperfield/props-barrel.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 52342,
+          "sha256": "0c6b7f34d7a86f3c302c2f30560d10c57d5c3037f810f5c0c4099e491ccdcf47",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "10413954-ccb1-4c20-b277-f5f3df1f8139",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "planter": {
+          "url": "/game-modes/variety-art/copperfield/props-planter.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 74690,
+          "sha256": "2a38ee064e587189ae10e4216900bc230c0b1040412ac04b626c88bea880dce7",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "bcef095a-289b-437c-8f13-5710e91193b3",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "bench": {
+          "url": "/game-modes/variety-art/copperfield/props-bench.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 54420,
+          "sha256": "1134b3c94f6617f1dc64a01411cd37fa66175273132776c527764b9cdcbfa568",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "31cfe4cb-6d41-4981-9cdb-71ee14146c6e",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "trough": {
+          "url": "/game-modes/variety-art/copperfield/props-trough.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 45486,
+          "sha256": "a977438fb10c7b075ba11855ae1e272368d9ccda9acf064cf80c67d69582f1b1",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "dd5223b9-90e2-4d2a-9f72-5a71c3821681",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "wall": {
+          "url": "/game-modes/variety-art/copperfield/props-wall.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 49820,
+          "sha256": "7c8d644b400aff2633f626c70c8dc4d4b8e2e695156e200d2711dfaf3fcec80d",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "6242ff22-c6c2-4f83-927d-f8a84136d504",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "rope": {
+          "url": "/game-modes/variety-art/copperfield/props-rope.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 56936,
+          "sha256": "f523856f63d5999858528367e7cf52d1077619adb00a6968cfb8b5eeea08ffaa",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "161677e3-a122-4480-bac5-701c42948e19",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/copperfield/props-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 61648,
+          "sha256": "d90e71ececf5fcb08b0dfb30d76d95e719ee2166886c6c7861b070058fda746b",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "a4da59e3-e21e-4375-acf7-61fbaae6048a",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "chest": {
+          "url": "/game-modes/variety-art/copperfield/props-chest.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 58572,
+          "sha256": "dc0eae5fc61d5fe2fc9d49590f471228366633a4de69b42ccb8c27c5eeaf94f2",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "76e7f583-527a-4cc8-aa66-36a829ffd10f",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "books": {
+          "url": "/game-modes/variety-art/copperfield/props-books.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 68372,
+          "sha256": "bb22c1d287a72f4aeeaa286c6a6d007c2f4676691ecd86707cd0674a3c1584f7",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "5862b6a8-8dcf-4493-afa8-94e10b52756b",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "lantern": {
+          "url": "/game-modes/variety-art/copperfield/props-lantern.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 21056,
+          "sha256": "897dea5c9bb707527b818d81ebd1f6cf8ffd4cf8b4f4c448199ff266c294adeb",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "0c8907e0-ece6-4038-a491-5a09d30f1887",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sack": {
+          "url": "/game-modes/variety-art/copperfield/props-sack.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 54490,
+          "sha256": "f3be32ffbeffafb4efcaa98366c5ef4cb69abcfe3501b6afb23c0a61068f8ce2",
+          "sourceJobId": "8401d458-0600-43bd-bee1-5672aa91192f",
+          "alpha": true,
+          "keyJobId": "584f5f34-8bdd-4318-8130-bfc6be267110",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "craft": {
+        "seed": {
+          "url": "/game-modes/variety-art/copperfield/craft-seed.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 37912,
+          "sha256": "9f9bd617de1b906ff333f5d66767e06c0bf0ef2113c710d23f72195acb06f3f5",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "1e2e0330-7534-4f11-8f99-beb9b2469f06",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "sapling": {
+          "url": "/game-modes/variety-art/copperfield/craft-sapling.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 40726,
+          "sha256": "bea238ad91a078ab5399d0494328233a696ea03b3da97455b4a2950380fbb135",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "f6bdd6b4-497f-46df-8a46-7ca75847d8dc",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "tree": {
+          "url": "/game-modes/variety-art/copperfield/craft-tree.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 70842,
+          "sha256": "a38596c871fd1a54fb145d12e88b4efdb4a2f95619ab5a08e230b7f26b1005ee",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "7a142e7a-58ae-44ea-a2ae-05815453a4a9",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "fibre": {
+          "url": "/game-modes/variety-art/copperfield/craft-fibre.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 55928,
+          "sha256": "f85a0feb67c823544a631150724cac545874c45cf2a1ee66ff6d3ed042dde398",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "fc0b43f2-1d17-4518-ad10-f4463b4937ec",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "spool": {
+          "url": "/game-modes/variety-art/copperfield/craft-spool.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 44948,
+          "sha256": "e84615139693dd925d3f97521b1d3927c57b49e6eedda3a5ff327aa2b1475782",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "db4cbd6b-a718-4210-b4fc-8715a4d68890",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "cloth": {
+          "url": "/game-modes/variety-art/copperfield/craft-cloth.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 47862,
+          "sha256": "0c98f12be27ec8c448d3b0b976d281ebefb01fda1f0b0a71014eb8939a58d677",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "dd620b60-2665-41aa-94b9-92aae4aa75cf",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "gear": {
+          "url": "/game-modes/variety-art/copperfield/craft-gear.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 67296,
+          "sha256": "597c29cb126bde226b081e369e4b2759c4ca5ed82dd630cc44e5b6d8c26224fd",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "827027c5-2a98-4444-9a4d-68324ed195f9",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        },
+        "mechanism": {
+          "url": "/game-modes/variety-art/copperfield/craft-mechanism.webp",
+          "width": 512,
+          "height": 512,
+          "bytes": 65592,
+          "sha256": "cbb6875e2a1de59156ee9ce4174c0d008939967e65de5835abfcee5f3879597a",
+          "sourceJobId": "c7a91fd2-c9ef-41a6-a6cc-240f75de2eeb",
+          "alpha": true,
+          "keyJobId": "5725ea7d-c42b-40dc-9b96-9017c221b12e",
+          "anchor": [
+            0.5,
+            0.94
+          ]
+        }
+      },
+      "cards": {
+        "steam": {
+          "url": "/game-modes/variety-art/copperfield/cards-steam.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 41830,
+          "sha256": "43cc9d2a287b2ff62a2b23632df140ec713937563e070d8d897fda5824020fe1",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "waterwheel": {
+          "url": "/game-modes/variety-art/copperfield/cards-waterwheel.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 52400,
+          "sha256": "804309114cc66814ad6eb1cfc0913cb67b3791dae1a3f23937c6dbd5b225c314",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "canal": {
+          "url": "/game-modes/variety-art/copperfield/cards-canal.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 45294,
+          "sha256": "a6eede1aa53af2d3f4e962efd2784990344073964ced74495f5b6b17a4e839cd",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "rail": {
+          "url": "/game-modes/variety-art/copperfield/cards-rail.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 40772,
+          "sha256": "88a760f6117ba3e344a94f5cdf63fb34fa86f5b295b36cdbe00fcfb1ccb8e740",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "loom": {
+          "url": "/game-modes/variety-art/copperfield/cards-loom.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 55500,
+          "sha256": "98d49318b381a3646713f51de1febd2cd50b5acf1581f8a0f2d84e33dfb71bd2",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "iron": {
+          "url": "/game-modes/variety-art/copperfield/cards-iron.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 47740,
+          "sha256": "7699ca706a35b7171c2117a3985133e1b43d7f362048855a1a3d2e1a1b183bd6",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "workers": {
+          "url": "/game-modes/variety-art/copperfield/cards-workers.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 42752,
+          "sha256": "9c5e303270633324368288c4019094a226fdfe40850d9b661abc59fd540e7ba1",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "school": {
+          "url": "/game-modes/variety-art/copperfield/cards-school.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 41242,
+          "sha256": "69c64d1860becce268537925f70c2601f206d42a55d29b3df47e7f38fb4619f8",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "inspector": {
+          "url": "/game-modes/variety-art/copperfield/cards-inspector.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 47806,
+          "sha256": "9ab1f86b403d111fb147e8e16c7e96bc960b3b3c1280abc410f2381a9a358ea4",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "trees": {
+          "url": "/game-modes/variety-art/copperfield/cards-trees.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 51080,
+          "sha256": "5e814437bbe1c40cd20d1b0cba669328b10293b01ef754394a8c39e15c6f39b4",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "water": {
+          "url": "/game-modes/variety-art/copperfield/cards-water.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 45902,
+          "sha256": "d7ed7d47e8a96a43bcf248025acd5fdb5808ddbb370cfa96edd8689fd8217c8a",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "soil": {
+          "url": "/game-modes/variety-art/copperfield/cards-soil.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 38398,
+          "sha256": "ce4b01ac0bcfa2624e15fd15746760bb55a8abb0b170066a82eea74463a94a49",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "geology": {
+          "url": "/game-modes/variety-art/copperfield/cards-geology.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 41182,
+          "sha256": "885882303e3a5ad85ebad5ce09a967b81ac5002c7dd2aabade5a87c4143bd31f",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "river": {
+          "url": "/game-modes/variety-art/copperfield/cards-river.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 42584,
+          "sha256": "059413819e5a662a34a4925f4ee78ecc69a2ea542687d787a539ef140691c378",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "library": {
+          "url": "/game-modes/variety-art/copperfield/cards-library.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 49450,
+          "sha256": "14002a62a4d30a400c3801a92344893fcc180f6d4ed91bf088db1d6d01e6b0fe",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        },
+        "forge": {
+          "url": "/game-modes/variety-art/copperfield/cards-forge.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 30850,
+          "sha256": "6eb6f6b25ad60341c285fd92b1d78c82cf1e338bdea7d32203da7eee339576e7",
+          "sourceJobId": "7c0585a7-c924-4bbe-97de-bcd3311f6344"
+        }
+      }
+    }
+  }
+}
