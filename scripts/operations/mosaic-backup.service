@@ -1,0 +1,10 @@
+[Unit]
+Description=Mosaic encrypted storage backup and restore verification
+After=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/lib/mosaic-operations/backup_runner.py
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+TimeoutStartSec=25min

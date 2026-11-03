@@ -2,11 +2,15 @@ import {closureQueue} from './account-closure.js';
 import {noStore,readJSON} from './ncb-auth.js';
 import {digest} from './content-service.js';
 import {sqlDB,need,parse,auditEvent,controlScopes} from './data-control.js';
-export async function operationsAPI(req,env,{now=()=>Date.now()}={}){try{
+import {operationsHealth,recoveryExport} from './recovery-operations.js';
+export async function operationsAPI(req,env,{now=()=>Date.now(),store}={}){try{
  need(env.MAINTENANCE_SECRET?.length>=32,'Operations authentication is not configured.',503);
  need(await digest(req.headers.get('Authorization')||'')===await digest('Bearer '+env.MAINTENANCE_SECRET),'Operations authorization required.',403);
- need(req.headers.get('X-Mosaic-Maintenance')==='closure-v1','Closure operation required.',403);
  const origin=req.headers.get('Origin');need(!origin||origin===new URL(req.url).origin,'Cross-origin operation is not permitted.',403);
+ const purpose=req.headers.get('X-Mosaic-Maintenance');
+ if(purpose==='health-v1'){need(req.method==='GET','Health checks are read only.',405);return noStore(await operationsHealth(env,{now:now(),store}));}
+ if(purpose==='recovery-v1'){need(req.method==='GET','Recovery exports are read only.',405);return await recoveryExport(req,env,now());}
+ need(purpose==='closure-v1','A supported operation is required.',403);
  if(req.method==='GET')return noStore({closures:await closureQueue(env)});
  need(req.method==='POST'&&req.headers.get('content-type')?.startsWith('application/json'),'Use a valid operation request.');
  const input=await readJSON(req,2000);need(input.action==='confirm-provider-deletion'&&/^[a-f0-9]{64}$/.test(input.accountReference)&&input.providerDeleted===true,'Verify NoCodeBackend identity deletion first.');

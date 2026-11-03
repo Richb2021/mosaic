@@ -1,0 +1,10 @@
+[Unit]
+Description=Mosaic external incident and recovery alerts
+After=network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/lib/mosaic-operations/monitor.py
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+TimeoutStartSec=120

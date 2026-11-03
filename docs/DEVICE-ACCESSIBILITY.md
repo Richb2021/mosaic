@@ -18,3 +18,11 @@ Evidence is in `../output/device-accessibility/`: 24 loaded game/viewport cases 
 - Representative learner and assistive-technology user sessions, including full endings and personalised media.
 
 Keep these gates separate from automated tests and viewport emulation. Future changes to modal rendering should test background isolation, every Tab step, reverse Tab from the heading, nested evidence return, close, unmount and an existing save. Do not replace inert with ARIA alone or remove evidence links from the focus cycle.
+
+## 3 November 2026 — launch assurance follow-up
+
+Native Chrome with VoiceOver enabled: completed the VoiceOver startup prompt, confirmed the process running and Accessibility setting On, then used Tab/Return to start Thread Atlas and open an object. Focus moved to the object-panel heading. Escape closed it and returned focus to the triggering object button. VoiceOver was restored to Off afterwards. The available automation could not capture the spoken output/caption panel, so announcement correctness is still unverified.
+
+In-app Chromium: Thread Atlas's Places and objects panel fit a 320×700 viewport (300px panel, no horizontal overflow); keyboard dismissal restored focus. The signed-in programme, evidence view and programme-choice controls fit 320px and 768px, with all active input/select controls labelled and no captured warning/error logs. Testing exposed a misleading cross-topic saved-learning-need label; the wording now makes clear that the current activity and evidence define the focus. No learner answers or preferences were changed during these checks.
+
+No physical mobile device was attached; USB inventory was empty, Android tooling unavailable, and the installed command-line tools did not include `xctrace`. Physical iOS/Android, NVDA/TalkBack and speech-output verification remain open. These checks do not establish WCAG conformance.

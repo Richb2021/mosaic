@@ -1,0 +1,7 @@
+[Unit]
+Description=Verify a Mosaic recovery copy daily
+[Timer]
+OnCalendar=*-*-* 04:15:00 Europe/London
+Persistent=true
+[Install]
+WantedBy=timers.target
