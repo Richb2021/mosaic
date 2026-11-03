@@ -3353,13 +3353,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d6b79a",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 55.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c7a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.52,
@@ -3368,13 +3371,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e0b79d",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 55.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c8a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.53,
@@ -3383,13 +3389,16 @@
               },
               {
                 "mouth": {
-                  "x": 160.0,
-                  "y": 59.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 8.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c7a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 94.44,
@@ -3398,13 +3407,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#bb908c",
-                  "angle": -0.2
+                  "x": 152.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c5a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 101.75,
@@ -3413,13 +3425,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e3bb9a",
-                  "angle": -0.2
+                  "x": 149.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 97.6,
@@ -3428,13 +3443,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ecc59c",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.58,
@@ -3443,13 +3461,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d4b79d",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 100.18,
@@ -3458,13 +3479,16 @@
               },
               {
                 "mouth": {
-                  "x": 159.0,
-                  "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 100.79,
@@ -3473,13 +3497,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 56.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e1a88c",
-                  "angle": -0.2
+                  "x": 149.67,
+                  "y": 55.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 100.31,
@@ -3488,13 +3515,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#debb9c",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 54.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.55,
@@ -3503,13 +3533,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e1b49b",
-                  "angle": -0.2
+                  "x": 149.67,
+                  "y": 53.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c19f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 96.73,
@@ -3518,13 +3551,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#deb195",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 54.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 95.54,
@@ -3533,13 +3569,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d3a290",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 53.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c19f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.79,
@@ -3548,13 +3587,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d6be9b",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 53.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.6,
@@ -3563,13 +3605,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dbb096",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 53.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.37,
@@ -3619,13 +3664,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c39179",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f9cba3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 82.0,
@@ -3634,13 +3682,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dfb99e",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c6a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 146.39,
@@ -3649,13 +3700,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 57.0,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 11.97,
-                  "skin": "#e9c19a",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 9,
+                  "skin": "#f6c4a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 144.74,
@@ -3664,13 +3718,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 56.0,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 8.97,
-                  "skin": "#e0b39b",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 55.33,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 7,
+                  "skin": "#f6c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 144.78,
@@ -3679,13 +3736,16 @@
               },
               {
                 "mouth": {
-                  "x": 150.5,
-                  "y": 55.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 10.47,
-                  "skin": "#ebc29d",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 55.33,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f6c3a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 142.96,
@@ -3694,13 +3754,16 @@
               },
               {
                 "mouth": {
-                  "x": 149.5,
-                  "y": 56.0,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 8.97,
-                  "skin": "#e4b99d",
-                  "angle": -0.2
+                  "x": 149.33,
+                  "y": 55.67,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f8c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 145.21,
@@ -3709,13 +3772,16 @@
               },
               {
                 "mouth": {
-                  "x": 148.5,
-                  "y": 57.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 10.47,
-                  "skin": "#d2ad94",
-                  "angle": -0.2
+                  "x": 148.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 8,
+                  "skin": "#f7c2a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 145.71,
@@ -3724,13 +3790,16 @@
               },
               {
                 "mouth": {
-                  "x": 147.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e9baa3",
-                  "angle": -0.2
+                  "x": 146.67,
+                  "y": 58.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 146.86,
@@ -3739,13 +3808,16 @@
               },
               {
                 "mouth": {
-                  "x": 147.5,
-                  "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#edc09d",
-                  "angle": -0.2
+                  "x": 147.67,
+                  "y": 57.33,
+                  "width": 7.5,
+                  "coverW": 11,
+                  "coverH": 6,
+                  "skin": "#f7c1a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 144.61,
@@ -3754,13 +3826,16 @@
               },
               {
                 "mouth": {
-                  "x": 148.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#b79182",
-                  "angle": -0.2
+                  "x": 148.33,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 148.83,
@@ -3769,13 +3844,16 @@
               },
               {
                 "mouth": {
-                  "x": 150.5,
-                  "y": 57.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 10.47,
-                  "skin": "#ce9890",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f6c2a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 148.57,
@@ -3785,12 +3863,15 @@
               {
                 "mouth": {
                   "x": 151.0,
-                  "y": 57.5,
-                  "width": 11.13,
-                  "coverW": 16.47,
-                  "coverH": 10.47,
-                  "skin": "#e09693",
-                  "angle": -0.2
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f6c1a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 147.22,
@@ -3799,13 +3880,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 56.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 7.47,
-                  "skin": "#e8c29b",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 7,
+                  "skin": "#f7c09e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 143.52,
@@ -3814,13 +3898,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e0c59d",
-                  "angle": -0.2
+                  "x": 151.33,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 145.41,
@@ -3829,13 +3916,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dca981",
-                  "angle": -0.2
+                  "x": 151.33,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 147.78,
@@ -3885,13 +3975,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d7b3a1",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c9a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.26,
@@ -3900,13 +3993,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.0,
-                  "y": 57.5,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 10.47,
-                  "skin": "#deb79f",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 11,
+                  "coverH": 8,
+                  "skin": "#f6c4a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 92.96,
@@ -3915,13 +4011,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.0,
-                  "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 11.97,
-                  "skin": "#e8c198",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 9,
+                  "skin": "#f6c4a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.68,
@@ -3930,13 +4029,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.0,
+                  "x": 151.67,
                   "y": 57.0,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 6.68,
-                  "skin": "#ddb698",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 11,
+                  "coverH": 7,
+                  "skin": "#f7c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 89.27,
@@ -3945,13 +4047,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.0,
-                  "y": 57.5,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 7.47,
-                  "skin": "#efc69e",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 11,
+                  "coverH": 8,
+                  "skin": "#f6c4a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 87.17,
@@ -3962,11 +4067,14 @@
                 "mouth": {
                   "x": 151.0,
                   "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 8.97,
-                  "skin": "#e6be98",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 8,
+                  "skin": "#f7c4a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 85.34,
@@ -3975,13 +4083,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d3b0a0",
-                  "angle": -0.2
+                  "x": 152.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 12,
+                  "coverH": 8,
+                  "skin": "#f6c4a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 83.71,
@@ -3990,13 +4101,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 58.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 10.47,
-                  "skin": "#d4a690",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 10,
+                  "skin": "#f7c3a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 83.47,
@@ -4005,13 +4119,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 58.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 10.47,
-                  "skin": "#dbad98",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f6c1a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 83.3,
@@ -4022,11 +4139,14 @@
                 "mouth": {
                   "x": 151.0,
                   "y": 59.0,
-                  "width": 11.13,
-                  "coverW": 16.47,
-                  "coverH": 14.97,
-                  "skin": "#d0b88a",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 14,
+                  "coverH": 11,
+                  "skin": "#f6c2a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 83.37,
@@ -4035,13 +4155,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.5,
-                  "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 8.97,
-                  "skin": "#d5a693",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 9,
+                  "skin": "#f6c1a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 83.61,
@@ -4050,13 +4173,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.0,
-                  "y": 58.5,
-                  "width": 11.13,
-                  "coverW": 16.47,
-                  "coverH": 13.47,
-                  "skin": "#dcaa8f",
-                  "angle": -0.2
+                  "x": 151.33,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 10,
+                  "skin": "#f6c1a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 84.37,
@@ -4065,13 +4191,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cb7872",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c19b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 90.5,
@@ -4080,13 +4209,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#debd9d",
-                  "angle": -0.2
+                  "x": 151.67,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 89.16,
@@ -4095,13 +4227,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e4ad91",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7bf9b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 92.52,
@@ -4151,13 +4286,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d9b69e",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c79e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.53,
@@ -4166,13 +4304,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dcbf9c",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.54,
@@ -4181,13 +4322,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c29587",
-                  "angle": -0.2
+                  "x": 152.33,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 99.7,
@@ -4196,13 +4340,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e1c19d",
-                  "angle": -0.2
+                  "x": 151.67,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 123.16,
@@ -4211,13 +4358,16 @@
               },
               {
                 "mouth": {
-                  "x": 155.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e6a58c",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 173.8,
@@ -4226,13 +4376,16 @@
               },
               {
                 "mouth": {
-                  "x": 163.5,
-                  "y": 62.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 152.67,
+                  "y": 59.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 200.87,
@@ -4241,13 +4394,16 @@
               },
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cf9d8c",
-                  "angle": -0.2
+                  "x": 155.0,
+                  "y": 59.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 194.24,
@@ -4256,13 +4412,16 @@
               },
               {
                 "mouth": {
-                  "x": 158.15,
-                  "y": 61.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#bc837d",
-                  "angle": -0.2
+                  "x": 156.67,
+                  "y": 60.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 189.47,
@@ -4271,13 +4430,17 @@
               },
               {
                 "mouth": {
-                  "x": 154.5,
-                  "y": 65.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 8.97,
-                  "skin": "#efc4a0",
-                  "angle": -0.2
+                  "x": 153.0,
+                  "y": 63.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c0a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 187.68,
@@ -4286,13 +4449,17 @@
               },
               {
                 "mouth": {
-                  "x": 157.5,
-                  "y": 68.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#cd9a88",
-                  "angle": -0.2
+                  "x": 156.0,
+                  "y": 66.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c1a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 188.27,
@@ -4301,13 +4468,17 @@
               },
               {
                 "mouth": {
-                  "x": 158.0,
-                  "y": 68.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#e39c91",
-                  "angle": -0.2
+                  "x": 157.0,
+                  "y": 66.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c3a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 202.33,
@@ -4316,13 +4487,17 @@
               },
               {
                 "mouth": {
-                  "x": 153.0,
-                  "y": 64.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#f2c7a3",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 62.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c09f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 186.17,
@@ -4331,13 +4506,17 @@
               },
               {
                 "mouth": {
-                  "x": 153.0,
-                  "y": 64.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#f2c5a1",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 62.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 186.77,
@@ -4346,13 +4525,17 @@
               },
               {
                 "mouth": {
-                  "x": 158.0,
-                  "y": 68.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#c38579",
-                  "angle": -0.2
+                  "x": 157.0,
+                  "y": 66.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c2a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 185.44,
@@ -4361,13 +4544,17 @@
               },
               {
                 "mouth": {
-                  "x": 153.0,
-                  "y": 64.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#f0c6a6",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 62.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
+                  "visible": false
                 },
                 "hand": {
                   "x": 186.39,
@@ -4419,11 +4606,14 @@
                 "mouth": {
                   "x": 152.15,
                   "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cda395",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c7a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 86.64,
@@ -4434,11 +4624,14 @@
                 "mouth": {
                   "x": 152.15,
                   "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ceb591",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c59f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.61,
@@ -4449,11 +4642,14 @@
                 "mouth": {
                   "x": 153.15,
                   "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c2a38b",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.17,
@@ -4462,13 +4658,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.5,
-                  "y": 60.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 8.97,
-                  "skin": "#f1bf94",
-                  "angle": -0.2
+                  "x": 155.0,
+                  "y": 59.5,
+                  "width": 7.5,
+                  "coverW": 11,
+                  "coverH": 8,
+                  "skin": "#f5c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 89.77,
@@ -4477,13 +4676,16 @@
               },
               {
                 "mouth": {
-                  "x": 159.5,
-                  "y": 66.5,
-                  "width": 11.13,
-                  "coverW": 15.12,
-                  "coverH": 13.47,
-                  "skin": "#f1c0a3",
-                  "angle": -0.2
+                  "x": 160.0,
+                  "y": 65.5,
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 12,
+                  "skin": "#f6c3a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 82.91,
@@ -4494,11 +4696,14 @@
                 "mouth": {
                   "x": 161.0,
                   "y": 69.0,
-                  "width": 11.13,
-                  "coverW": 16.47,
-                  "coverH": 14.97,
-                  "skin": "#f4c8a3",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 13,
+                  "coverH": 13,
+                  "skin": "#f5c2a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 79.1,
@@ -4507,13 +4712,16 @@
               },
               {
                 "mouth": {
-                  "x": 164.0,
+                  "x": 164.5,
                   "y": 73.0,
-                  "width": 11.13,
-                  "coverW": 16.47,
-                  "coverH": 14.97,
-                  "skin": "#efae95",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 14,
+                  "coverH": 13,
+                  "skin": "#f8c2a4",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 74.42,
@@ -4523,12 +4731,15 @@
               {
                 "mouth": {
                   "x": 165.5,
-                  "y": 73.5,
-                  "width": 11.13,
-                  "coverW": 17.82,
-                  "coverH": 13.47,
-                  "skin": "#f1ba98",
-                  "angle": -0.2
+                  "y": 74.0,
+                  "width": 7.5,
+                  "coverW": 14,
+                  "coverH": 11,
+                  "skin": "#f6c1a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 72.76,
@@ -4539,11 +4750,14 @@
                 "mouth": {
                   "x": 165.5,
                   "y": 73.5,
-                  "width": 11.13,
-                  "coverW": 17.82,
-                  "coverH": 10.47,
-                  "skin": "#deba99",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 14,
+                  "coverH": 10,
+                  "skin": "#f7c0a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 72.54,
@@ -4554,11 +4768,14 @@
                 "mouth": {
                   "x": 164.0,
                   "y": 71.0,
-                  "width": 11.13,
-                  "coverW": 19.17,
-                  "coverH": 8.97,
-                  "skin": "#deb496",
-                  "angle": -0.2
+                  "width": 7.5,
+                  "coverW": 15,
+                  "coverH": 7,
+                  "skin": "#f7c0a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 74.16,
@@ -4567,13 +4784,16 @@
               },
               {
                 "mouth": {
-                  "x": 161.15,
-                  "y": 65.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d2a195",
-                  "angle": -0.2
+                  "x": 158.5,
+                  "y": 63.5,
+                  "width": 7.5,
+                  "coverW": 14,
+                  "coverH": 8,
+                  "skin": "#f7c09f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 78.57,
@@ -4582,13 +4802,16 @@
               },
               {
                 "mouth": {
-                  "x": 158.15,
-                  "y": 61.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e2bd9f",
-                  "angle": -0.2
+                  "x": 152.5,
+                  "y": 59.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c09d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 84.31,
@@ -4597,13 +4820,16 @@
               },
               {
                 "mouth": {
-                  "x": 155.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#be897c",
-                  "angle": -0.2
+                  "x": 149.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c09d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.25,
@@ -4612,13 +4838,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e1bf9a",
-                  "angle": -0.2
+                  "x": 147.5,
+                  "y": 55.5,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c09e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 92.24,
@@ -4627,13 +4856,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c6b095",
-                  "angle": -0.2
+                  "x": 147.0,
+                  "y": 55.5,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7bf9c",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 94.05,
@@ -4683,13 +4915,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d5ba9f",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 55.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c99f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.33,
@@ -4698,13 +4933,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ceb69a",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f7c4a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.51,
@@ -4713,13 +4951,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cd9688",
-                  "angle": -0.2
+                  "x": 149.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c19f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.88,
@@ -4728,13 +4969,16 @@
               },
               {
                 "mouth": {
-                  "x": 151.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c7b09a",
-                  "angle": -0.2
+                  "x": 149.0,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c09b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 85.65,
@@ -4743,13 +4987,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#eaba97",
-                  "angle": -0.2
+                  "x": 152.67,
+                  "y": 59.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c09b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 82.57,
@@ -4758,13 +5005,16 @@
               },
               {
                 "mouth": {
-                  "x": 161.0,
-                  "y": 62.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#d5aa83",
-                  "angle": -0.2
+                  "x": 156.67,
+                  "y": 61.67,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c09e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 77.07,
@@ -4773,13 +5023,16 @@
               },
               {
                 "mouth": {
-                  "x": 171.5,
-                  "y": 67.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#dca694",
-                  "angle": -0.2
+                  "x": 166.33,
+                  "y": 65.33,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c09e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 73.5,
@@ -4788,13 +5041,16 @@
               },
               {
                 "mouth": {
-                  "x": 171.5,
-                  "y": 67.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#d1a28c",
-                  "angle": -0.2
+                  "x": 167.33,
+                  "y": 66.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6bf9d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 72.88,
@@ -4803,13 +5059,16 @@
               },
               {
                 "mouth": {
-                  "x": 171.5,
-                  "y": 67.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#d7c182",
-                  "angle": -0.2
+                  "x": 166.0,
+                  "y": 66.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6bd9b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 73.5,
@@ -4818,13 +5077,16 @@
               },
               {
                 "mouth": {
-                  "x": 168.0,
-                  "y": 64.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#bd958d",
-                  "angle": -0.2
+                  "x": 163.0,
+                  "y": 62.67,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6be9b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 79.14,
@@ -4833,13 +5095,16 @@
               },
               {
                 "mouth": {
-                  "x": 158.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d9b296",
-                  "angle": -0.2
+                  "x": 152.67,
+                  "y": 58.33,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6bf9d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 81.82,
@@ -4848,13 +5113,16 @@
               },
               {
                 "mouth": {
-                  "x": 155.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c9b182",
-                  "angle": -0.2
+                  "x": 152.33,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f5c09e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 90.75,
@@ -4863,13 +5131,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cb857a",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 94.06,
@@ -4878,13 +5149,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d4a796",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f6c19f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.81,
@@ -4893,13 +5167,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#efc59f",
-                  "angle": -0.2
+                  "x": 150.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 20,
+                  "coverH": 11,
+                  "skin": "#f5c1a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": false,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.59,
@@ -4949,13 +5226,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d1977f",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c9a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 86.0,
@@ -4964,13 +5244,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d6a78d",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c6a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.0,
@@ -4979,13 +5262,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.15,
-                  "y": 56.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#edb491",
-                  "angle": -0.2
+                  "x": 153.33,
+                  "y": 55.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c59f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.34,
@@ -4994,13 +5280,16 @@
               },
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 53.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e0c8a6",
-                  "angle": -0.2
+                  "x": 156.0,
+                  "y": 52.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 95.76,
@@ -5009,13 +5298,16 @@
               },
               {
                 "mouth": {
-                  "x": 165.0,
-                  "y": 58.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 159.0,
+                  "y": 53.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 73.39,
@@ -5024,13 +5316,16 @@
               },
               {
                 "mouth": {
-                  "x": 165.5,
-                  "y": 62.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 10.47,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 159.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 58.0,
@@ -5039,13 +5334,16 @@
               },
               {
                 "mouth": {
-                  "x": 161.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d8c79d",
-                  "angle": -0.2
+                  "x": 160.0,
+                  "y": 58.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c6a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 52.62,
@@ -5054,13 +5352,16 @@
               },
               {
                 "mouth": {
-                  "x": 165.0,
-                  "y": 60.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 10.47,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 159.33,
+                  "y": 54.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 67.45,
@@ -5069,13 +5370,16 @@
               },
               {
                 "mouth": {
-                  "x": 160.15,
-                  "y": 50.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f8cea5",
-                  "angle": -0.2
+                  "x": 158.67,
+                  "y": 50.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.5,
@@ -5084,13 +5388,16 @@
               },
               {
                 "mouth": {
-                  "x": 165.5,
-                  "y": 61.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 10.47,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 159.33,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c4a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 131.73,
@@ -5099,13 +5406,16 @@
               },
               {
                 "mouth": {
-                  "x": 166.0,
-                  "y": 63.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 160.33,
+                  "y": 59.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c4a5",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 149.67,
@@ -5114,13 +5424,16 @@
               },
               {
                 "mouth": {
-                  "x": 166.0,
-                  "y": 60.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 161.67,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a5",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 116.51,
@@ -5129,13 +5442,16 @@
               },
               {
                 "mouth": {
-                  "x": 165.0,
-                  "y": 55.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#aba276",
-                  "angle": -0.2
+                  "x": 159.33,
+                  "y": 50.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 154.5,
@@ -5144,13 +5460,16 @@
               },
               {
                 "mouth": {
-                  "x": 164.5,
-                  "y": 58.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 7.47,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 159.0,
+                  "y": 53.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c4a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 153.4,
@@ -5159,13 +5478,16 @@
               },
               {
                 "mouth": {
-                  "x": 160.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e6bf91",
-                  "angle": -0.2
+                  "x": 158.67,
+                  "y": 57.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 149.61,
@@ -5215,13 +5537,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f1c59b",
-                  "angle": -0.2
+                  "x": 150.33,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c69d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.43,
@@ -5230,13 +5555,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f2c8a7",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c59c",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.18,
@@ -5245,13 +5573,16 @@
               },
               {
                 "mouth": {
-                  "x": 161.15,
-                  "y": 62.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f2c8a9",
-                  "angle": -0.2
+                  "x": 160.33,
+                  "y": 61.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c59d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 107.69,
@@ -5260,13 +5591,16 @@
               },
               {
                 "mouth": {
-                  "x": 172.15,
-                  "y": 63.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d8c39c",
-                  "angle": -0.2
+                  "x": 171.33,
+                  "y": 62.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c59d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.84,
@@ -5275,13 +5609,16 @@
               },
               {
                 "mouth": {
-                  "x": 176.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e0af9c",
-                  "angle": -0.2
+                  "x": 175.33,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c19b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 75.99,
@@ -5290,13 +5627,16 @@
               },
               {
                 "mouth": {
-                  "x": 182.0,
-                  "y": 67.0,
-                  "width": 11.13,
-                  "coverW": 13.77,
-                  "coverH": 14.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 174.67,
+                  "y": 62.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 69.65,
@@ -5305,13 +5645,16 @@
               },
               {
                 "mouth": {
-                  "x": 179.15,
-                  "y": 63.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#cf9788",
-                  "angle": -0.2
+                  "x": 177.67,
+                  "y": 63.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 129.88,
@@ -5320,13 +5663,16 @@
               },
               {
                 "mouth": {
-                  "x": 182.15,
-                  "y": 56.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#debfa2",
-                  "angle": -0.2
+                  "x": 181.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c3a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 190.11,
@@ -5335,13 +5681,16 @@
               },
               {
                 "mouth": {
-                  "x": 183.15,
-                  "y": 64.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c1a686",
-                  "angle": -0.2
+                  "x": 182.0,
+                  "y": 63.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 186.94,
@@ -5350,13 +5699,16 @@
               },
               {
                 "mouth": {
-                  "x": 180.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f3c5a0",
-                  "angle": -0.2
+                  "x": 179.0,
+                  "y": 58.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 88.67,
@@ -5365,13 +5717,16 @@
               },
               {
                 "mouth": {
-                  "x": 178.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dbb68d",
-                  "angle": -0.2
+                  "x": 176.67,
+                  "y": 59.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c39e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 75.99,
@@ -5380,13 +5735,16 @@
               },
               {
                 "mouth": {
-                  "x": 178.15,
-                  "y": 65.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d2bc91",
-                  "angle": -0.2
+                  "x": 176.33,
+                  "y": 64.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 107.69,
@@ -5395,13 +5753,16 @@
               },
               {
                 "mouth": {
-                  "x": 187.0,
-                  "y": 64.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2
+                  "x": 180.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 190.11,
@@ -5410,13 +5771,16 @@
               },
               {
                 "mouth": {
-                  "x": 183.15,
-                  "y": 64.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#debdac",
-                  "angle": -0.2
+                  "x": 181.67,
+                  "y": 64.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 183.77,
@@ -5425,13 +5789,16 @@
               },
               {
                 "mouth": {
-                  "x": 181.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dbae89",
-                  "angle": -0.2
+                  "x": 179.67,
+                  "y": 60.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c49e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 95.01,
@@ -5483,13 +5850,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dabc93",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c89f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.4,
@@ -5498,13 +5868,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d9ab94",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c59f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 107.25,
@@ -5513,13 +5886,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d0a99a",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c59e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 109.99,
@@ -5528,13 +5904,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#efc1a0",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c49f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 123.69,
@@ -5543,13 +5922,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d5ac9b",
-                  "angle": -0.2
+                  "x": 153.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c49f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 108.75,
@@ -5558,13 +5940,16 @@
               },
               {
                 "mouth": {
-                  "x": 155.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d1af8f",
-                  "angle": -0.2
+                  "x": 153.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 142.78,
@@ -5573,13 +5958,16 @@
               },
               {
                 "mouth": {
-                  "x": 156.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d2b793",
-                  "angle": -0.2
+                  "x": 154.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 152.61,
@@ -5588,13 +5976,16 @@
               },
               {
                 "mouth": {
-                  "x": 156.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dab89f",
-                  "angle": -0.2
+                  "x": 154.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c39e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 179.97,
@@ -5603,13 +5994,16 @@
               },
               {
                 "mouth": {
-                  "x": 156.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c2a894",
-                  "angle": -0.2
+                  "x": 154.33,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 185.5,
@@ -5618,13 +6012,16 @@
               },
               {
                 "mouth": {
-                  "x": 156.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c6ad8d",
-                  "angle": -0.2
+                  "x": 154.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 175.0,
@@ -5633,13 +6030,16 @@
               },
               {
                 "mouth": {
-                  "x": 155.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#dab49c",
-                  "angle": -0.2
+                  "x": 153.67,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 179.5,
@@ -5648,13 +6048,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d9c199",
-                  "angle": -0.2
+                  "x": 153.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c39f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 168.0,
@@ -5663,13 +6066,16 @@
               },
               {
                 "mouth": {
-                  "x": 154.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#debc94",
-                  "angle": -0.2
+                  "x": 152.67,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 140.2,
@@ -5678,13 +6084,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#b18b74",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c49f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 142.0,
@@ -5693,13 +6102,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e7c89d",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c49f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 103.91,
@@ -5749,13 +6161,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ebc0a2",
-                  "angle": -0.2
+                  "x": 150.67,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c79e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.61,
@@ -5764,13 +6179,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d89a92",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c7a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 103.0,
@@ -5779,13 +6197,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d0a985",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c49e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 87.11,
@@ -5794,13 +6215,16 @@
               },
               {
                 "mouth": {
-                  "x": 159.15,
-                  "y": 67.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e0a573",
-                  "angle": -0.2
+                  "x": 158.0,
+                  "y": 66.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c69f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 60.25,
@@ -5809,13 +6233,16 @@
               },
               {
                 "mouth": {
-                  "x": 170.15,
-                  "y": 82.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c7b087",
-                  "angle": -0.2
+                  "x": 168.67,
+                  "y": 82.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c3a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 61.2,
@@ -5824,13 +6251,16 @@
               },
               {
                 "mouth": {
-                  "x": 177.15,
-                  "y": 74.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#b19a7f",
-                  "angle": -0.2
+                  "x": 176.0,
+                  "y": 74.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c9a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 173.0,
@@ -5839,13 +6269,16 @@
               },
               {
                 "mouth": {
-                  "x": 179.15,
-                  "y": 51.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f3c8a7",
-                  "angle": -0.2
+                  "x": 177.67,
+                  "y": 53.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 164.16,
@@ -5854,13 +6287,16 @@
               },
               {
                 "mouth": {
-                  "x": 180.15,
-                  "y": 50.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ab928b",
-                  "angle": -0.2
+                  "x": 178.0,
+                  "y": 50.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c7a6",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 172.0,
@@ -5869,13 +6305,16 @@
               },
               {
                 "mouth": {
-                  "x": 179.15,
-                  "y": 55.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#b89e7f",
-                  "angle": -0.2
+                  "x": 177.0,
+                  "y": 56.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c6a5",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 171.6,
@@ -5884,13 +6323,16 @@
               },
               {
                 "mouth": {
-                  "x": 178.15,
-                  "y": 65.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c79e88",
-                  "angle": -0.2
+                  "x": 176.0,
+                  "y": 65.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c3a2",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 170.14,
@@ -5899,13 +6341,16 @@
               },
               {
                 "mouth": {
-                  "x": 176.15,
-                  "y": 90.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ddb899",
-                  "angle": -0.2
+                  "x": 174.67,
+                  "y": 95.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 161.03,
@@ -5914,13 +6359,16 @@
               },
               {
                 "mouth": {
-                  "x": 172.15,
-                  "y": 94.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c3b88a",
-                  "angle": -0.2
+                  "x": 171.0,
+                  "y": 94.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 159.17,
@@ -5929,13 +6377,16 @@
               },
               {
                 "mouth": {
-                  "x": 164.15,
-                  "y": 76.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#deaf9d",
-                  "angle": -0.2
+                  "x": 162.33,
+                  "y": 76.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c5a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 157.7,
@@ -5944,13 +6395,16 @@
               },
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ccb894",
-                  "angle": -0.2
+                  "x": 156.33,
+                  "y": 61.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c5a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 148.94,
@@ -5959,13 +6413,16 @@
               },
               {
                 "mouth": {
-                  "x": 152.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#ddba9d",
-                  "angle": -0.2
+                  "x": 151.0,
+                  "y": 56.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c39c",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 147.06,
@@ -6015,13 +6472,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f4c7a4",
-                  "angle": -0.2
+                  "x": 155.33,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.38,
@@ -6030,13 +6490,16 @@
               },
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#eac39a",
-                  "angle": -0.2
+                  "x": 155.33,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29a",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.28,
@@ -6045,13 +6508,16 @@
               },
               {
                 "mouth": {
-                  "x": 157.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e7c39f",
-                  "angle": -0.2
+                  "x": 155.33,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29c",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 93.21,
@@ -6060,13 +6526,16 @@
               },
               {
                 "mouth": {
-                  "x": 163.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#b9967b",
-                  "angle": -0.2
+                  "x": 162.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 95.88,
@@ -6075,13 +6544,16 @@
               },
               {
                 "mouth": {
-                  "x": 167.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c28984",
-                  "angle": -0.2
+                  "x": 166.0,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c29d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 96.6,
@@ -6090,13 +6562,16 @@
               },
               {
                 "mouth": {
-                  "x": 170.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#bf9485",
-                  "angle": -0.2
+                  "x": 168.0,
+                  "y": 59.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c39d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.46,
@@ -6105,13 +6580,16 @@
               },
               {
                 "mouth": {
-                  "x": 172.15,
-                  "y": 60.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d7a197",
-                  "angle": -0.2
+                  "x": 170.33,
+                  "y": 60.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 84.24,
@@ -6120,13 +6598,16 @@
               },
               {
                 "mouth": {
-                  "x": 173.15,
-                  "y": 61.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e2c39e",
-                  "angle": -0.2
+                  "x": 171.33,
+                  "y": 61.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c19d",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 82.64,
@@ -6135,13 +6616,16 @@
               },
               {
                 "mouth": {
-                  "x": 173.15,
-                  "y": 61.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#c2ad9a",
-                  "angle": -0.2
+                  "x": 171.33,
+                  "y": 60.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f5c29c",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 80.25,
@@ -6150,13 +6634,16 @@
               },
               {
                 "mouth": {
-                  "x": 173.15,
-                  "y": 61.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#a88b74",
-                  "angle": -0.2
+                  "x": 172.0,
+                  "y": 61.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 75.75,
@@ -6165,13 +6652,16 @@
               },
               {
                 "mouth": {
-                  "x": 168.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d6b899",
-                  "angle": -0.2
+                  "x": 167.0,
+                  "y": 59.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c3a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 86.34,
@@ -6180,13 +6670,16 @@
               },
               {
                 "mouth": {
-                  "x": 169.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d4c095",
-                  "angle": -0.2
+                  "x": 167.0,
+                  "y": 59.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 86.45,
@@ -6195,13 +6688,16 @@
               },
               {
                 "mouth": {
-                  "x": 169.15,
-                  "y": 59.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#bda48a",
-                  "angle": -0.2
+                  "x": 167.0,
+                  "y": 59.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c49f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 84.4,
@@ -6210,13 +6706,16 @@
               },
               {
                 "mouth": {
-                  "x": 164.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#daaf9d",
-                  "angle": -0.2
+                  "x": 162.0,
+                  "y": 58.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c4a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 89.28,
@@ -6225,13 +6724,16 @@
               },
               {
                 "mouth": {
-                  "x": 159.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f3b79d",
-                  "angle": -0.2
+                  "x": 158.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c29f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 92.59,
@@ -6282,13 +6784,16 @@
             "anchors": [
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d7bc9f",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c59f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.18,
@@ -6297,13 +6802,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f6caa1",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 56.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c5a0",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 98.18,
@@ -6312,13 +6820,16 @@
               },
               {
                 "mouth": {
-                  "x": 176.0,
-                  "y": 70.0,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 11.97,
-                  "skin": "#b02224",
-                  "angle": -0.2
+                  "x": 169.33,
+                  "y": 67.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c6a1",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 106.11,
@@ -6327,13 +6838,16 @@
               },
               {
                 "mouth": {
-                  "x": 198.15,
-                  "y": 104.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#d1925f",
-                  "angle": -0.2
+                  "x": 198.0,
+                  "y": 107.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8bd8f",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 137.81,
@@ -6342,13 +6856,16 @@
               },
               {
                 "mouth": {
-                  "x": 204.15,
-                  "y": 158.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f0b696",
-                  "angle": -0.2,
+                  "x": 204.0,
+                  "y": 158.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c2a3",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6358,13 +6875,16 @@
               },
               {
                 "mouth": {
-                  "x": 211.15,
-                  "y": 214.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#eac2a4",
-                  "angle": -0.2,
+                  "x": 211.0,
+                  "y": 214.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7caa4",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6374,13 +6894,16 @@
               },
               {
                 "mouth": {
-                  "x": 243.15,
-                  "y": 215.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#a16535",
-                  "angle": -0.2,
+                  "x": 243.0,
+                  "y": 215.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#ffde7b",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6390,13 +6913,16 @@
               },
               {
                 "mouth": {
-                  "x": 191.15,
-                  "y": 404.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#977b70",
-                  "angle": -0.2,
+                  "x": 191.0,
+                  "y": 404.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8c29e",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6406,13 +6932,16 @@
               },
               {
                 "mouth": {
-                  "x": 245.15,
-                  "y": 223.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#98462d",
-                  "angle": -0.2,
+                  "x": 245.0,
+                  "y": 223.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#ffcc88",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6422,13 +6951,16 @@
               },
               {
                 "mouth": {
-                  "x": 241.15,
-                  "y": 177.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#a75112",
-                  "angle": -0.2,
+                  "x": 241.0,
+                  "y": 177.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#ffd271",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6438,13 +6970,16 @@
               },
               {
                 "mouth": {
-                  "x": 104.15,
-                  "y": 401.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2,
+                  "x": 104.0,
+                  "y": 401.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f4caa8",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6455,12 +6990,15 @@
               {
                 "mouth": {
                   "x": 207.0,
-                  "y": 94.5,
-                  "width": 11.13,
-                  "coverW": 12.8,
-                  "coverH": 6.68,
-                  "skin": "#e5ab8a",
-                  "angle": -0.2,
+                  "y": 94.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f1be96",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true,
                   "visible": false
                 },
                 "hand": {
@@ -6470,13 +7008,16 @@
               },
               {
                 "mouth": {
-                  "x": 175.15,
-                  "y": 68.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#eab49d",
-                  "angle": -0.2
+                  "x": 174.33,
+                  "y": 69.33,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f7c194",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 99.77,
@@ -6485,13 +7026,16 @@
               },
               {
                 "mouth": {
-                  "x": 159.15,
-                  "y": 58.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f6cb9c",
-                  "angle": -0.2
+                  "x": 158.0,
+                  "y": 57.67,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f8bf98",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 95.01,
@@ -6500,13 +7044,16 @@
               },
               {
                 "mouth": {
-                  "x": 153.15,
-                  "y": 57.87,
-                  "width": 11.13,
-                  "coverW": 13.91,
-                  "coverH": 8.35,
-                  "skin": "#f1c098",
-                  "angle": -0.2
+                  "x": 152.0,
+                  "y": 57.0,
+                  "width": 7.5,
+                  "coverW": 10,
+                  "coverH": 6,
+                  "skin": "#f6c299",
+                  "angle": 0.14,
+                  "heightScale": 0.65,
+                  "restBaked": true,
+                  "softEdge": true
                 },
                 "hand": {
                   "x": 91.84,

@@ -49,3 +49,18 @@ test('Field Notes contact follows its animated hand and kick rotates a leg',asyn
 });
 
 test('ground interactions retain visible contacts and keep the bystander out of the action',()=>{const s=read('comedy'),state=stagePropStates(s)[9],stage=stageAtTime({segment:s.segments[9],duration:10,elapsed:4.21,propState:state,contactOffset:118}),actor=stage.actors.find(a=>a.speaker==='learner');assert.equal(stage.shot,'wide');assert.equal(actor.x,state.before.ground.x+118);assert(Math.abs(stage.actors[0].x-stage.actors[1].x)>=250);});
+
+test('reviewed anime resting mouths are not painted twice and hidden lips stay hidden',async()=>{
+ const {drawSpriteMouth}=await import('../src/studio/media/cartoon-mouth.js'),m=JSON.parse(fs.readFileSync(new URL('../public/cartoon-art/manifest.json',import.meta.url))),clip=m.styles.anime.cast.learner.idle,calls=[];
+ const ctx=new Proxy({},{set:()=>true,get:(_,k)=>(...a)=>{calls.push([k,...a]);if(k==='createRadialGradient')return {addColorStop(){}};}});
+ for(let n=0;n<clip.frames;n++){drawSpriteMouth(ctx,clip,n,301,480,'X','anime');assert.equal(calls.length,0);}
+ drawSpriteMouth(ctx,clip,0,301,480,'D','anime');assert(calls.some(([k])=>k==='fill'));assert(calls.some(([k,x,y])=>k==='scale'&&x===1&&y===.65));
+ calls.length=0;drawSpriteMouth(ctx,m.styles.anime.cast.learner.think,10,301,480,'D','anime');assert.equal(calls.length,0);
+});
+
+test('anime listeners use a resting pose while speaker visemes remain isolated',async()=>{
+ const {drawLibraryScene,validateCartoonLibrary}=await import('../src/studio/media/cartoon-library.js'),manifest=JSON.parse(fs.readFileSync(new URL('../public/cartoon-art/manifest.json',import.meta.url)));
+ for(const speaker of ['guide','learner']){const pack=validateCartoonLibrary(manifest,'anime'),draws=[],ctx=new Proxy({},{set:()=>true,get:(_,k)=>(...a)=>{if(k==='drawImage')draws.push(a[0]);if(k==='createRadialGradient')return {addColorStop(){}};}});pack.images=new Map([...Object.values(pack.backgrounds),...Object.values(pack.cast).flatMap(Object.values)].map(a=>[a.url,a.url]));drawLibraryScene(ctx,pack,{segment:{scene:'city',speaker,action:'talk',direction:{blocking:'face-off',shot:'wide',pace:'calm'}},elapsed:7.7,duration:10,mouth:'D'});const listener=speaker==='guide'?'learner':'guide';assert(draws.includes(pack.cast[listener].idle.url));assert(!draws.includes(pack.cast[listener].react.url));assert(draws.includes(pack.cast[speaker].talk.url));}
+});
+
+test('facial correction metadata is bounded and typed',async()=>{const {validateCartoonLibrary}=await import('../src/studio/media/cartoon-library.js');const m=JSON.parse(fs.readFileSync(new URL('../public/cartoon-art/manifest.json',import.meta.url)));for(const bad of [{heightScale:Infinity},{heightScale:3},{restBaked:'yes'},{softEdge:42}]){const changed=structuredClone(m);Object.assign(changed.styles.anime.cast.learner.idle.anchors[0].mouth,bad);assert.throws(()=>validateCartoonLibrary(changed,'anime'));}});
