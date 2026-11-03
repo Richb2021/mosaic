@@ -2,12 +2,13 @@ import {profileContext} from '../studio/profile.js';
 import {validateRPGSave} from '../rpg-progress.js';
 import {draftHash,draftPhase,validateDraftState} from './draft-engine.js';
 import {validateAdventureSave} from './adventure-engine.js';
+import {restoreEconomy,encodeEconomy} from './economy-engine.js';
 import {restoreTown,encodeTown} from './town-engine.js';
 import {validateExtendedState,extendedView} from './extended-engine.js';
 import {validateJourney,journeyLearning} from './journey-engine.js';
-export const LEARNING_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','novel-v1','quiz-v1','sports-v1','merge-v1'];
+export const LEARNING_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','economy-v1','novel-v1','quiz-v1','sports-v1','merge-v1'];
 const need=(value,message)=>{if(!value)throw Error(message)};
-export function normaliseProfile(raw={}){need(raw&&typeof raw==='object'&&!Array.isArray(raw),'Invalid learning profile.');const text=(v,n)=>{need(typeof v==='string'&&v.length<=n,'Learning profile text is too long.');return v.trim();};const formats=raw.formats??[];need(Array.isArray(formats)&&formats.length<=8&&formats.every(t=>LEARNING_TEMPLATES.includes(t)),'Choose available game formats.');return {goal:text(raw.goal??'',1200),context:text(raw.context??'',240),formats:[...new Set(formats)],...profileContext(raw,text,need)};}
+export function normaliseProfile(raw={}){need(raw&&typeof raw==='object'&&!Array.isArray(raw),'Invalid learning profile.');const text=(v,n)=>{need(typeof v==='string'&&v.length<=n,'Learning profile text is too long.');return v.trim();};const formats=raw.formats??[];need(Array.isArray(formats)&&formats.length<=LEARNING_TEMPLATES.length&&formats.every(t=>LEARNING_TEMPLATES.includes(t)),'Choose available game formats.');return {goal:text(raw.goal??'',1200),context:text(raw.context??'',240),formats:[...new Set(formats)],...profileContext(raw,text,need)};}
 export const sourceIdentity=s=>draftHash([s.title.trim(),s.locator.trim(),s.excerpt.trim()]);
 export const progressIdentity=(pack,kind)=>`${pack.id}:${draftHash(pack)}:${kind}`;
 export function validPracticeRecord(r){
@@ -24,6 +25,8 @@ export function observeProgress(pack,kind,raw){
   snapshot=validateDraftState(raw,pack);completed=draftPhase(snapshot)==='complete';engagement=snapshot.picks.length;items=pack.scenarios.flatMap((q,i)=>snapshot.reflections[i].length?[{key:q.id,sourceRefs:q.sourceRefs,attempts:snapshot.reflections[i].length,correct:snapshot.reflections[i].includes(q.solution),assisted:false}]:[]);
  }else if(kind==='classic'&&pack.template==='adventure-v1'){
   snapshot=validateAdventureSave(raw,pack);need(snapshot,'Invalid adventure save.');completed=snapshot.completed;engagement=snapshot.visited.length;items=snapshot.attempts?[{key:'sequence',sourceRefs:pack.sequence.sourceRefs,attempts:snapshot.attempts,correct:snapshot.solved,assisted:snapshot.hints.includes('sequence')}]:[];if(pack.world&&snapshot.world.field.attempts)items.push({key:'field',sourceRefs:pack.world.field.sourceRefs,attempts:snapshot.world.field.attempts,correct:snapshot.world.field.solved,assisted:snapshot.world.field.hinted});
+ }else if(kind==='classic'&&pack.template==='economy-v1'){
+  const state=restoreEconomy(raw,pack);snapshot=encodeEconomy(pack,state);completed=state.status!=='playing';engagement=state.month;items=state.decisions.map(d=>({key:`council-${d.event}`,sourceRefs:pack.events[d.event].choices[d.choice].sourceRefs,attempts:0,correct:null,assisted:false}));
  }else if(kind==='classic'&&pack.template==='town-v1'){
   const state=restoreTown(raw,pack);snapshot=encodeTown(pack,state);completed=state.status!=='playing';engagement=state.month;items=state.decisions.map(d=>({key:`council-${d.event}`,sourceRefs:pack.events[d.event].choices[d.choice].sourceRefs,attempts:0,correct:null,assisted:false}));
  }else throw Error('This game does not yet support a shared practice record.');

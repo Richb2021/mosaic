@@ -7,7 +7,7 @@ export function learningActivities(p){
  if(p.questions)return p.questions.map((q,i)=>({key:`question-${i}`,label:q.prompt,sourceRefs:q.sourceRefs}));
  if(p.template==='draft-v1')return p.scenarios.map(q=>({key:q.id,label:q.title,sourceRefs:q.sourceRefs}));
  if(p.template==='adventure-v1')return [{key:'sequence',label:p.sequence.title,sourceRefs:p.sequence.sourceRefs},...(p.world?[{key:'field',label:p.world.field.title,sourceRefs:p.world.field.sourceRefs}]:[])];
- if(p.template==='town-v1')return p.events.map((q,i)=>({key:`council-${i}`,label:q.title,sourceRefs:[...new Set(q.choices.flatMap(c=>c.sourceRefs))]}));
+ if(['town-v1','economy-v1'].includes(p.template))return p.events.map((q,i)=>({key:`council-${i}`,label:q.title,sourceRefs:[...new Set(q.choices.flatMap(c=>c.sourceRefs))]}));
  if(p.template==='merge-v1')return p.recipes.map((q,i)=>({key:`recipe-${i}`,label:p.items[i+2].name,sourceRefs:q.sourceRefs}));
  if(p.template==='novel-v1')return p.nodes.map((q,i)=>({key:`scene-${i}`,label:q.title,sourceRefs:q.sourceRefs}));
  return [];

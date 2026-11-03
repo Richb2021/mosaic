@@ -4,9 +4,10 @@ import {journeyKey} from './journey-engine.js';
 import {extendedSaveKey} from './extended-engine.js';
 import {adventureSaveKey} from './adventure-engine.js';
 import {draftSaveKey,draftHash} from './draft-engine.js';
+import {economySaveKey} from './economy-engine.js';
 import {townSaveKey} from './town-engine.js';
 const PROFILE='mosaic:learning-profile:v1',RUNS='mosaic:practice-journal:v1';
-export const gameSaveKey=(pack,kind)=>kind==='rpg'?rpgSaveKey(pack):kind==='journey'?journeyKey(pack):pack.template==='adventure-v1'?adventureSaveKey(pack):pack.template==='draft-v1'?draftSaveKey(pack):pack.template==='town-v1'?townSaveKey(pack):extendedSaveKey(pack);
+export const gameSaveKey=(pack,kind)=>kind==='rpg'?rpgSaveKey(pack):kind==='journey'?journeyKey(pack):pack.template==='adventure-v1'?adventureSaveKey(pack):pack.template==='draft-v1'?draftSaveKey(pack):pack.template==='economy-v1'?economySaveKey(pack):pack.template==='town-v1'?townSaveKey(pack):extendedSaveKey(pack);
 export class LearningJournal{
  constructor(){this.user=null;this.profile=normaliseProfile();this.profileVersion=0;this.records=[];this.notice='';this.listeners=new Set();this.inflight=new Map();this.timers=new Map();this.loadLocal();}
  get prefix(){return this.user?'mosaic:account:'+this.user.id+':':'';}

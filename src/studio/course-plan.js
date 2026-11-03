@@ -1,7 +1,7 @@
 // A course plan proposes a route. It is never a grade, prerequisite lock or
 // claim of curriculum coverage. Citations always come from the saved packet.
 import {unitKey,answerResult} from './programme.js';
-export const PLAN_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','quiz-v1','novel-v1','merge-v1','sports-v1'];
+export const PLAN_TEMPLATES=['underlight-v1','adventure-v1','draft-v1','town-v1','economy-v1','quiz-v1','novel-v1','merge-v1','sports-v1'];
 const need=(x,m)=>{if(!x)throw Error(m)};
 const txt=(v,n)=>{need(typeof v==='string'&&v.trim().length>0&&v.length<=n,'Check the plan text length.');return v.trim()};
 const array=(v,max)=>{need(Array.isArray(v)&&v.length<=max,'Too many plan entries.');return v};

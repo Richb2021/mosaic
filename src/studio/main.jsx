@@ -20,7 +20,7 @@ import {extractDocument,DOCUMENT_ACCEPT} from '../document-extraction.js';
 import './studio.css';
 
 const client=new StudioClient();
-const art=t=>t==='adventure-v1'?'/game-modes/art/room-workshop.webp':t==='draft-v1'?'/game-modes/art/table-draft.webp':t==='town-v1'?'/game-modes/art/room-woods.webp':t==='underlight-v1'?'/game-modes/art/room-archive.webp':`/game-modes/extended-art/backgrounds/${({'novel-v1':'vn','quiz-v1':'quiz','sports-v1':'sports','merge-v1':'merge'})[t]}.webp`;
+const art=t=>t==='adventure-v1'?'/game-modes/art/room-workshop.webp':t==='draft-v1'?'/game-modes/art/table-draft.webp':t==='economy-v1'?'/game-modes/expansion-art/novel-foundry.webp':t==='town-v1'?'/game-modes/art/room-woods.webp':t==='underlight-v1'?'/game-modes/art/room-archive.webp':`/game-modes/extended-art/backgrounds/${({'novel-v1':'vn','quiz-v1':'quiz','sports-v1':'sports','merge-v1':'merge'})[t]}.webp`;
 function Source({source}){return <blockquote><p>{source.excerpt}</p><cite>{source.title} — {source.locator}</cite></blockquote>}
 function Badge({children}){return <span className="badge">{children}</span>}
 function App(){

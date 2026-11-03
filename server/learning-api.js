@@ -16,12 +16,13 @@ import {NCBStore,StoreError} from './ncb-store.js';
 import {normaliseProfile,observeProgress,progressIdentity,validPracticeRecord} from '../src/game-modes/learning-model.js';
 import {ADVENTURE_PACKS} from '../src/game-modes/adventure-content.js';
 import {DRAFT_PACKS} from '../src/game-modes/draft-content.js';
+import {ECONOMY_PACKS} from '../src/game-modes/economy-packs.js';
 import {TOWN_PACKS} from '../src/game-modes/town-packs.js';
 import {EXTENDED_PACKS} from '../src/game-modes/extended-packs.js';
 import {validatePlayableContent} from '../src/game-modes/content-registry.js';
 import {digest} from './content-service.js';
 import {draftHash} from '../src/game-modes/draft-engine.js';
-const packs=[...RPG_PACKS,...WORLD_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...EXTENDED_PACKS];
+const packs=[...RPG_PACKS,...WORLD_PACKS,...ADVENTURE_PACKS,...DRAFT_PACKS,...TOWN_PACKS,...ECONOMY_PACKS,...EXTENDED_PACKS];
 const need=(x,m,status=400)=>{if(!x)throw new StoreError(m,status)};
 export async function canonicalPack(id,hash,req,env,workspace,learner){
  let pack=packs.find(p=>p.id===id&&draftHash(p)===hash);

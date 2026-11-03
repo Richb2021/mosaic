@@ -8,7 +8,7 @@ export const emptyStudio=()=>({schemaVersion:1,active:null,units:[]});
 export const unitKey=p=>`${p.id}:${draftHash(p)}`;
 export const contentOf=p=>p.chapter||p;
 export const activitiesOf=p=>learningActivities(contentOf(p));
-export const formatName=t=>({'underlight-v1':'Role-playing adventure','adventure-v1':'2D adventure','draft-v1':'Subject draft','town-v1':'Town simulation','novel-v1':'Visual novel','quiz-v1':'Quiz expedition','sports-v1':'Football tactics','merge-v1':'Merge & crafting'}[t]||'Learning game');
+export const formatName=t=>({'underlight-v1':'Role-playing adventure','adventure-v1':'2D adventure','draft-v1':'Subject draft','town-v1':'Town simulation','economy-v1':'Economic strategy campaign','novel-v1':'Visual novel','quiz-v1':'Quiz expedition','sports-v1':'Football tactics','merge-v1':'Merge & crafting'}[t]||'Learning game');
 export function questionsOf(pack,keys){
  const p=contentOf(pack),list=p.questions?.map((q,i)=>({...q,key:`question-${i}`,options:q.options.map(o=>typeof o==='string'?o:o.label)}))||p.scenarios?.map(q=>({...q,prompt:q.question,key:q.id}))||[];
  return list.filter(q=>!keys||keys.includes(q.key));
