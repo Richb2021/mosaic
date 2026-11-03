@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "mosaic-cartoon-sample",
+  "kind": "cartoon",
+  "title": "One whole, two ways to see it",
+  "summary": "A short conversation about equal parts, and the detail to check before comparing fractions.",
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "guide",
+      "text": "One half and two quarters name the same amount of the same whole. The denominator tells us how many equal parts make that whole. Before you compare fractions, check that their wholes are the same size.",
+      "sourceRefs": [
+        "source-fractions"
+      ],
+      "scene": "workshop",
+      "action": "talk"
+    },
+    {
+      "id": "segment-2",
+      "speaker": "learner",
+      "text": "So the number of pieces can change, but the amount we started with stays the same. What would happen if those pieces were not equal?",
+      "sourceRefs": [
+        "source-fractions"
+      ],
+      "scene": "garden",
+      "action": "think"
+    }
+  ],
+  "question": {
+    "prompt": "What must you check before comparing a half and two quarters?",
+    "answer": "Check that both fractions describe the same whole and that its parts are equal.",
+    "sourceRefs": [
+      "source-fractions"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-fractions",
+      "title": "Mosaic authored fraction note",
+      "locator": "Passage 1",
+      "excerpt": "A fraction describes equal parts of a whole. One half and two quarters represent the same amount when their wholes are the same size. The denominator names the number of equal parts in the whole."
+    }
+  ]
+}
