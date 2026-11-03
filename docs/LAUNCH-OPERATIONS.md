@@ -14,6 +14,7 @@ Rehearsals use a separate named state and explicitly labelled messages:
 python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inject failure
 python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inject failure
 python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inject healthy
+python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inject healthy
 ```
 
 Mail credentials stay in the existing Baldur secret store. A test is complete only after matching Message-IDs are found in the recipient mailbox, not merely after SMTP accepts a message. This monitor shares the Baldur operations host; an independent off-host uptime monitor is still needed to detect loss of that entire host or its mail route.

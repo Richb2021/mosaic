@@ -5,6 +5,7 @@ import {sqlDB,readControls} from '../server/data-control.js';
 import {metaUsage,costRates,estimateMicros,startCost,finishCost,costSummary} from '../server/cost-ledger.js';
 import {creativeResult} from '../server/creative-provider.js';
 import {maintenanceAPI,registerRetentionSubject} from '../server/background-retention.js';
+import {dataAPI} from '../server/data-lifecycle.js';
 test('token cache and UTF-8 byte costs use snapshot rates, idempotent receipts and explicit unknowns',async()=>{
  const env={DB:new D1()},now=10000,siteOwner='site',learnerOwner='learner',usage=metaUsage({input_tokens:1000,output_tokens:100,input_tokens_details:{cached_tokens:500}});
  assert.equal(estimateMicros('muse-wonder-1.0',usage,costRates(env)),4100);
@@ -26,6 +27,9 @@ test('unattended retention clears aged R2 under saved policy, respects foreign s
  assert.equal((await maintenanceAPI(request('POST',{},'{"delete":"all"}'),env,{store,now:()=>now})).status,400);
  const run=await (await maintenanceAPI(request(),env,{store,now:()=>now})).json();assert.equal(run.status,'complete');assert.equal(run.processed,2);assert.equal(await env.BUCKET.head('aged'),null);assert(await env.BUCKET.head('foreign'));
  const read=await (await maintenanceAPI(request('GET'),env,{store,now:()=>now})).json();assert.equal(read.lastRun.runId,run.runId);
+ const learner=await (await dataAPI(new Request('https://site.test/api/learning/data'),env,{siteOwner,owner,store,now:()=>now})).json();
+ assert.deepEqual(learner.maintenance,{enabled:true,lastRun:{at:now,status:'complete'}});
+ assert.equal('runId' in learner.maintenance.lastRun,false);
 });
 test('failed background deletion remains visible and resumes without a new retention policy or inference',async()=>{
  const now=10*86400000,env={DB:new D1(),BUCKET:new Bucket(),RETENTION_BACKGROUND_ENABLED:'true',MAINTENANCE_SECRET:'test-secret-'.repeat(4)},db=sqlDB(env.DB),owner='a',siteOwner='s',store={allRows:async()=>[],deleteRows:async()=>{}};
@@ -34,6 +38,9 @@ test('failed background deletion remains visible and resumes without a new reten
  const request=()=>new Request('https://site.test/api/maintenance',{method:'POST',headers:{Authorization:'Bearer '+env.MAINTENANCE_SECRET,'X-Mosaic-Maintenance':'retention-v1'}});env.BUCKET.failDelete=true;
  let result=await (await maintenanceAPI(request(),env,{store,now:()=>now})).json();assert.equal(result.status,'attention');assert.equal(result.failed,1);
  assert.deepEqual(result.errors,[{code:'storage-or-provider-unavailable'}]);assert.equal(result.pending,1);
+ // The learner gets only the service timestamp/state, never other tenants' counts or errors.
+ const pending=await (await dataAPI(new Request('https://site.test/api/learning/data'),env,{owner:'unaffected',siteOwner:'other',store,now:()=>now})).json();
+ assert.deepEqual(pending.maintenance.lastRun,{at:now,status:'needs attention'});
  env.BUCKET.failDelete=false;result=await (await maintenanceAPI(request(),env,{store,now:()=>now+1})).json();assert.equal(result.status,'complete');assert.equal(await env.BUCKET.head('aged'),null);
 });
 
@@ -42,5 +49,7 @@ test('a multi-batch retention sweep reuses one cutoff and terminates despite a m
  for(let i=0;i<7;i++)await registerRetentionSubject(env,{siteOwner:'personal:'+i,owner:String(i),now:10});
  const req=()=>new Request('https://site.test/api/maintenance',{method:'POST',headers:{Authorization:'Bearer '+env.MAINTENANCE_SECRET,'X-Mosaic-Maintenance':'retention-v1'}});
  const first=await (await maintenanceAPI(req(),env,{store,now:()=>10000})).json();assert.equal(first.processed,5);assert.equal(first.more,true);
+ const partial=await (await dataAPI(new Request('https://site.test/api/learning/data'),env,{owner:'0',siteOwner:'personal:0',store,now:()=>10000})).json();
+ assert.deepEqual(partial.maintenance.lastRun,{at:10000,status:'in progress'});
  const second=await (await maintenanceAPI(req(),env,{store,now:()=>11000})).json();assert.equal(second.processed,2);assert.equal(second.more,false);
 });
