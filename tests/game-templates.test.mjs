@@ -10,7 +10,7 @@ import {validatePlayableContent} from '../src/game-modes/content-registry.js';
 import {ECONOMY_PACKS} from '../src/game-modes/economy-packs.js';
 import {TOWN_PACKS} from '../src/game-modes/town-packs.js';
 import {EXTENDED_PACKS} from '../src/game-modes/extended-packs.js';
-const packs=[ADVENTURE_PACKS[0],DRAFT_PACKS[0],TOWN_PACKS[0],ECONOMY_PACKS[0],...['novel-v1','quiz-v1','sports-v1','merge-v1'].map(t=>EXTENDED_PACKS.find(p=>p.template===t))];
+const packs=[ADVENTURE_PACKS[0],DRAFT_PACKS[0],TOWN_PACKS[0],ECONOMY_PACKS[0],ECONOMY_PACKS[2],...['novel-v1','quiz-v1','sports-v1','merge-v1'].map(t=>EXTENDED_PACKS.find(p=>p.template===t))];
 function jobFor(pack){return {template:pack.template,chapterId:'generated-game',topicId:'test-topic',goal:'Understand the concepts and apply the evidence',level:'Beginner',evidence:structuredClone(pack.sources)}}
 function output(pack,job){return {...structuredClone(pack),id:job.chapterId,topicId:job.topicId,revision:1}}
 for(const pack of packs){

@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import * as E from '../src/game-modes/economy-engine.js';
-import {ECONOMY_PACKS} from '../src/game-modes/economy-packs.js';
+import {CLASSIC_ECONOMY_PACKS as ECONOMY_PACKS} from '../src/game-modes/economy-packs.js';
 import {validateEconomyContent,ECONOMY_ENDING} from '../src/game-modes/economy-content.js';
 import {playCampaign} from './fixtures/economy-run.mjs';
 import {observeProgress,normaliseProfile,LEARNING_TEMPLATES} from '../src/game-modes/learning-model.js';

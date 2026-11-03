@@ -1,6 +1,6 @@
 // Editable copy of a validated chapter. Identity, evidence and asset identifiers
 // remain fixed; all edited values still pass the canonical server validator.
-const locked=new Set(['learningMap','id','topicId','schemaVersion','template','revision','sources','sourceRefs','asset','icon','art','image','type']);
+const locked=new Set(['learningMap','id','topicId','schemaVersion','rulesVersion','template','revision','sources','sourceRefs','asset','icon','art','image','type']);
 const label=s=>/^\d+$/.test(s)?String(Number(s)+1):s.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/^./,x=>x.toUpperCase());
 export function revisionFields(content){
  const fields=[];

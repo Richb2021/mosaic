@@ -1,31 +1,48 @@
 # The Living Economy
 
-`economy-v1` adds a complete 24-month campaign alongside the unchanged `town-v1` game. The library contains The Rivergate Company (enterprise) and A Region Transformed (regional development with reviewed historical context). New packs can be generated from reviewed sources through the existing Muse Wonder workflow, inspected and published before play.
+The library now offers **Rivals on the River** and **Threads of Industry**, expanded 24-month campaigns with two adaptive competitors and four retail industries. The original Rivergate Company and A Region Transformed remain available, with their exact original rules and saves.
 
-## Authored rules
+## Choose a strategy
 
-Three 6×6 district boards provide 108 tiles. Roads connect facilities to their district hall. River tiles, occupied land, locked regions, resource locations and research prerequisites are enforced by the reducer, not just the UI. Existing town saves retain their original engine, fingerprint and storage key.
+Build connected districts, manage a shared workforce and keep enough cash for materials, wages, upkeep and interest. Ten goods support four retail sectors:
 
-Six goods form two chains: grain → flour → bread, and timber + iron → tools. Production uses connected staffed shifts, bounded wage effects, inventory and per-good storage capacity. Paused factories avoid wages while retaining upkeep. Prices change demand against one scripted rival; this is not an AI competitor or a market forecast. Marketing, taxes, services, environmental pressure, limited transport, bid/ask spreads, loan principal and interest are explicit rules. Three research projects take time and unlock production/logistics improvements. Six deadline contracts, six council meetings and four known shocks create decisions across the campaign.
+| Sector | Production | Research |
+| --- | --- | --- |
+| Food | grain → flour → bread | Machinery improves mills and bakeries |
+| Tools | timber + iron → tools | Workshop machinery |
+| Textiles | two wool → one cloth → one garment | Textile workshops |
+| Upholstery | two timber + one cloth → one furniture item | Upholstered furniture |
 
-Starting cash is 300. The ledger separates construction, trades, contracts and financing from operating income and expenses. End-of-month negative cash ends a run. At month 24, all preset goals determine completion or a review outcome. Source-backed explanations and council observations are separate from success; no outcome is a mastery grade.
+Seventeen facility types include sheep pastures, weaving houses, tailor shops and furniture works. Five research projects unlock production and logistics improvements. Six timed contracts now cover bread, tools, clothing and furniture. Existing treasury, district, service, nature and research goals are joined by diversification: manufacture at least four units in three of the four retail sectors. Reselling purchases does not establish an industry.
 
-## Dynamic content boundary
+Production runs raw materials first, then flour/cloth, then bread/tools/garments/furniture. Staff are shared across connected districts. Garments use cloth before furniture; expand weaving or pause a tailor if upholstery needs more material. Buildings incur upkeep even while disconnected or paused. Wages still apply to staffed shifts with missing inputs. Warehouse capacity is per good; excess after production is lost before retail.
 
-`economy-content.js` supplies the strict schema and validator. A topic pack selects `enterprise` or `regional`, supplies three region descriptions, four concept notes, six two-option council scenes and a debrief, with exact source references. It cannot change coefficients, map geometry, goods, event effects, executable code or arbitrary asset URLs. The server attaches reviewed excerpts and preserves the existing refusal, review, ownership, cost and quota controls. Generated wording still needs semantic review for alignment with the displayed rules.
+## Competing companies
 
-The included historical scenario explicitly distinguishes the fictional food/tool economy from the textile histories in its museum and Parliament sources. It includes affected people, factory inspection, education and the connection between cotton and enslaved labour. It does not claim to reconstruct a historical economy or establish causation from game scores.
+Meridian Trading pursues volume. Bramble & Co. starts with higher quality and prioritises a quality upgrade. Both fund production, upkeep and upgrades from their own treasuries; they cannot inspect learner data or receive hidden cash injections. Their current prices and capacities are visible, alongside recent decisions and reconciled cash movements.
 
-## Storage and learning integration
+Finite customer pools allocate whole-unit sales between the player and both rivals. Lower prices, quality and promotion increase relative appeal. Stock and shop capacity cap sales; unfilled orders can go to another supplier. Ties rotate deterministically by month. Market-share bars include text equivalents and distinguish current forecasts from actual final-month results.
 
-Saves contain a bounded action history tied to pack ID, revision and fingerprint. Server-side replay reconstructs cash, inventory, decisions and outcome; client-supplied scores cannot award progress. The same owner-scoped NoCodeBackend learner-save table, version conflicts, deletion, retention and export controls apply. No database migration or new provider is added. Account format preferences and course planning include the new format. Council activities connect to source support and the learning trail without correct/incorrect grading.
+After a month ends, rivals adjust next-month prices by at most one based on public sales and the player's price. Every third month a rival with at least 190 cash may invest 80 in a sold-out product's capacity; Bramble first spends 85 to improve quality to its cap of two. Production and upkeep must still be funded. The history records opening funds, production, upkeep, revenue, investment and closing funds.
 
-## Art and controls
+The player can upgrade each product's quality twice, for 35 then 70 cash. Each sold unit also incurs its quality level in finishing costs. Marketing adds eight appeal points for one month; council fairs add six for three months. Neither guarantees customers or sales. Prices, demand, outputs and other values are fictional teaching assumptions, not real-world forecasts.
 
-The game uses the existing painterly town and expansion asset library. Its board, inspector, market, research and ledger views share that art direction. Keyboard arrows navigate tiles; a labelled tile list provides another route. Dialogs use the shared inert/focus helpers, announcements persist across renders and smaller screens stack the panels. Tables scroll within their own containers.
+## Dynamic topics and source review
 
-## Verification and limits
+The `economy-v1` schema now generates `rulesVersion: 2`. The same reviewed-evidence → Muse Wonder → strict validation → human review → private publication pipeline applies. Source-backed packs select a fixed enterprise or regional preset, supply three district descriptions, four concept notes, six two-option council scenes and a debrief. They cannot author economic rules, rival policies, geometry, recipes, asset URLs or executable code. Manual revisions cannot change the rules version or the engine-owned ending.
 
-The workspace evidence is in `../output/economy/`. Unit checks cover cash/stock conservation, no immediate trade arbitrage, staffing, connection/placement rules, research timing, contracts, insolvent and review outcomes, action-tamper rejection, generated schema/source constraints and owner-isolated cloud saves. Both authored campaigns have been played through normal browser controls and restored after reload. Five views are checked at 320×740, 768×1024 and 844×390, with native Safari keyboard/dialog checks.
+Six council activities retain their existing learning-trail keys and source-support links. Winning, producing, selling or outperforming a rival never establishes subject mastery. Historical framing distinguishes this fictional wool economy from the cited history of cotton textiles and includes affected people rather than treating profit as justification for historical harm.
 
-This is an authored economic strategy campaign, not Capitalism II or Civilization feature parity. There is one scripted rival, a fixed goods/rules library and two authored goal presets. No diplomacy, warfare, stock market, multiplayer or arbitrary historical simulation. Real mobile hardware and spoken assistive-technology journeys remain unverified; viewport/AX testing does not establish conformance.
+## Compatibility and storage
+
+`economy-engine.js` dispatches validated packs to `economy-classic.js` or `economy-industry.js`. The classic engine is byte-identical to the v54 implementation. Old packs omit `rulesVersion`; their hashes, storage keys and replay outcomes are unchanged. Expanded campaigns have distinct IDs and encode version two in the action-history envelope. Cross-version replays are rejected.
+
+The existing owner-scoped NoCodeBackend learner-save table, optimistic versions, export, deletion and retention apply. Server replay derives progress from permitted actions, never client-supplied outcomes. No database migration, new provider, permission expansion or additional per-turn model call is introduced. Rival simulation runs deterministically on the device and during server replay.
+
+## Art, controls and scope
+
+The expanded industries reuse the painterly town asset library, with product labels on the new buildings. The district board, inspector, recipe guide, market controls and competition exchange retain the existing visual system. Tile arrows, the tile list, visible focus, modal containment, persistent announcements and responsive panels remain available.
+
+Evidence is in `../output/economy-expansion/`. Tests cover old replay compatibility, full campaign balance, conservation, finite market allocation, pricing/quality influence, rival finances, research, input/worker/road constraints, manufacturing-only goals, schema/source binding and reviewed generation. Browser evidence records normal-control playthroughs, reloads, responsive layouts and keyboard checks.
+
+This release adds two deterministic competitors and four retail industries. It does not add takeovers, diplomacy, warfare, stock exchanges, multiplayer or arbitrary economic simulation. Physical mobile hardware and spoken screen-reader journeys remain unverified; browser viewport and accessibility-tree checks do not establish conformance.
