@@ -17,7 +17,19 @@ python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inj
 python3 ~/.local/lib/mosaic-operations/monitor.py --rehearsal example-test --inject healthy
 ```
 
-Mail credentials stay in the existing Baldur secret store. A test is complete only after matching Message-IDs are found in the recipient mailbox, not merely after SMTP accepts a message. This monitor shares the Baldur operations host; an independent off-host uptime monitor is still needed to detect loss of that entire host or its mail route.
+Mail credentials stay in the existing Baldur secret store. A test is complete only after matching Message-IDs are found in the recipient mailbox, not merely after SMTP accepts a message. The separate 20i watcher below covers loss of the entire Baldur host.
+
+## Independent Baldur reachability alerts
+
+20i package `3955773` runs `scripts/operations/baldur_watch.php` outside the web document root. Production scheduled task `351265` runs every five minutes; labelled rehearsal task `351267` is disabled after verification. Neither the check nor email delivery requires Baldur or the Mac to be online.
+
+The watcher connects to Baldur's public SSH service and requires an SSH protocol banner, without authenticating. Two consecutive failures, or three failures in five checks, queue an incident; two healthy checks queue a recovery. This detects loss of host/service reachability, not its cause: a firewall or SSH-only failure can also alert. A healthy SSH banner does not prove application health; the existing application monitor remains necessary. Scheduler delays and mail delivery mean the check interval is not a delivery SLA.
+
+Authenticated SMTP uses the existing `GG_SMTP_HOST`, `GG_SMTP_PORT`, `GG_SMTP_USER` and `GG_SMTP_PASS` literals already stored in this package's `public_html/wp-config.php`. No additional credential file is created. The reader does not execute that file or bootstrap WordPress. It permits only the expected SMTP host, account and TLS ports. PHPMailer is loaded from the existing WordPress installation, with certificate and hostname verification enabled. Changes to that installation or to the literal configuration format require re-verification. Native PHP sendmail returned failure on this package; cron-output delivery was not verified, so neither is the alert transport.
+
+State lives in `.mosaic-baldur-watch/production.json` under the hosting account home (directory 0700, files 0600). A lock prevents overlapping state updates. Pending events are persisted before SMTP submission, keep their original receipt, and retry at most once per hour. Stable Message-IDs help identify retries, but an ambiguous acknowledgement can still lead to duplicate delivery. `lastQueuedAt` records SMTP acceptance, not inbox delivery. Healthy checks produce no routine emails. Both monitors still depend on 20i mail service availability.
+
+The rehearsal uses two real refused connections to a closed loopback port, followed by two real Baldur checks. It never stops a production service. On 3 November, the SMTP incident and recovery were both found in `contact@graysongames.com` by exact Message-ID. Evidence, task configuration, source hash and remaining device gates are in `../output/independent-alerts/`. Rehearsals must use a separate named state and be disabled after testing; never overwrite production state to simulate an outage.
 
 ## Backup and restore
 
