@@ -1,3 +1,4 @@
+import {STORY_PROPS,PERFORMANCE_MOVES,PROP_INTERACTIONS,validatePerformance,validatePerformances} from '../cartoon-performance.js';
 import {validatePractice,practiceSchema} from './learning-loop.js';
 import {supportActivity} from './support-model.js';
 import {contentOf,activitiesOf} from './programme.js';
@@ -35,21 +36,22 @@ export function validateCreative(raw,job){
   const sources=evidence.filter(s=>refs.includes(s.id));if(raw.sources!==undefined)need(JSON.stringify(raw.sources)===JSON.stringify(sources),'Citation text cannot be edited or generated.');
   return {status:raw.status,message:text(raw.message,1400,'Tutor reply'),question:text(raw.question,400,'Next question'),sourceRefs:refs,sources};
  }
- const narrative=job.storyVersion===2;
+ const narrative=[2,3].includes(job.storyVersion),performed=job.storyVersion===3&&job.kind==='cartoon';
  only(raw,['schemaVersion','id','kind','title','summary','segments','question','sources',...(narrative?['story']:[])]);
- need(raw.schemaVersion===(narrative?2:1)&&raw.id===job.id&&raw.kind===job.kind,'The generated media identity changed.');
+ need(raw.schemaVersion===(narrative?job.storyVersion:1)&&raw.id===job.id&&raw.kind===job.kind,'The generated media identity changed.');
  need(Array.isArray(raw.segments)&&raw.segments.length>=(narrative?6:4)&&raw.segments.length<=(narrative?12:8),narrative?'A story needs six to twelve short scenes.':'An episode needs four to eight short scenes.');
  let story;
  if(narrative){
-  const brief=storyBrief(job.context.story);only(raw.story,['genre','interest','premise','want','stakes','obstacle','turn','payoff','learningConnection']);
+  const brief=storyBrief(job.context.story);only(raw.story,['genre','interest','premise','want','stakes','obstacle','turn','payoff','learningConnection',...(performed?['prop']:[])]);
   need(raw.story.genre===brief.genre&&raw.story.interest===brief.interest,'The story changed the requested genre or interest.');
-  story={...brief};for(const k of ['premise','want','stakes','obstacle','turn','payoff','learningConnection'])story[k]=text(raw.story[k],400,'Story '+k);
+  story={...brief,...(performed?{prop:raw.story.prop}:{})};for(const k of ['premise','want','stakes','obstacle','turn','payoff','learningConnection'])story[k]=text(raw.story[k],400,'Story '+k);
  }
  const segments=raw.segments.map((s,i)=>{
-  only(s,['id','speaker','text','sourceRefs','scene','action',...(narrative?['beat',...(job.kind==='cartoon'?['direction']:[])]:[])]);need(s.id===`segment-${i+1}`,'Scenes must have consecutive identities.');need(SPEAKERS.includes(s.speaker)&&SCENES.includes(s.scene)&&['talk','think','celebrate'].includes(s.action),'Choose a preset presenter, scene and action.');
+  only(s,['id','speaker','text','sourceRefs','scene','action',...(narrative?['beat',...(job.kind==='cartoon'?['direction',...(performed?['performance']:[])]:[])]:[])]);need(s.id===`segment-${i+1}`,'Scenes must have consecutive identities.');need(SPEAKERS.includes(s.speaker)&&SCENES.includes(s.scene)&&['talk','think','celebrate'].includes(s.action),'Choose a preset presenter, scene and action.');
   if(narrative){need(STORY_BEATS.includes(s.beat),'Choose a story beat.');need(typeof s.text==='string'&&!/\b(?:Mira|Kit|guide|learner)\s*:/i.test(s.text),'Each scene must contain only its designated character’s spoken line, without speaker labels.');}
-  return {id:s.id,speaker:s.speaker,text:text(s.text,500,'Spoken passage'),sourceRefs:references(s.sourceRefs,evidence),scene:s.scene,action:s.action,...(narrative?{beat:s.beat,...(job.kind==='cartoon'?{direction:validateDirection(s.direction)}:{})}:{})};
+  return {id:s.id,speaker:s.speaker,text:text(s.text,500,'Spoken passage'),sourceRefs:references(s.sourceRefs,evidence),scene:s.scene,action:s.action,...(narrative?{beat:s.beat,...(job.kind==='cartoon'?{direction:validateDirection(s.direction),...(performed?{performance:validatePerformance(s.performance)}:{})}:{})}:{})};
  });
+ if(performed)validatePerformances(segments,story.prop);
  if(narrative){
   need(segments[0].beat==='hook'&&segments.at(-1).beat==='payoff','Begin with a hook and end with a payoff.');
   for(const beat of ['setback','discovery','choice'])need(segments.some(s=>s.beat===beat),'The story needs a '+beat+' beat.');
@@ -62,7 +64,7 @@ export function validateCreative(raw,job){
  const refs=new Set([...segments.flatMap(s=>s.sourceRefs),...question.sourceRefs]);
  const sources=evidence.filter(s=>refs.has(s.id)).map(s=>({...s}));
  if(raw.sources!==undefined)need(JSON.stringify(raw.sources)===JSON.stringify(sources),'Citation text cannot be edited or generated.');
- return {schemaVersion:narrative?2:1,id:job.id,kind:job.kind,title:text(raw.title,120,'Episode title'),summary:text(raw.summary,400,'Episode summary'),...(story?{story}:{}),segments,question,sources};
+ return {schemaVersion:narrative?job.storyVersion:1,id:job.id,kind:job.kind,title:text(raw.title,120,'Episode title'),summary:text(raw.summary,400,'Episode summary'),...(story?{story}:{}),segments,question,sources};
 }
 export function integrityResponse(message){
  if(/\b(write|complete|do|finish)\b.{0,40}\b(my|this|the)\s+(essay|assignment|coursework|exam|homework)|\b(just|only)\s+(give|tell).{0,20}\b(answer|solution)|ignore.{0,30}(instruction|source|rule)|system prompt|api.?key/i.test(message))return {status:'scaffold',message:'Let’s build your own answer. Identify the task, choose a supporting passage, and explain the relationship in your words. I can help you plan or examine a step, but I will not write a submission or provide an answer to copy.',question:'Which part have you tried, and which step is uncertain?',sourceRefs:[]};
@@ -73,9 +75,10 @@ export function creativeSchema(job){
  if(job.kind==='practice')return practiceSchema(job);
  const refs=arr({type:'string',enum:job.context.evidence.map(s=>s.id)});
  if(job.kind==='tutor')return obj({status:{type:'string',enum:['hint','scaffold','unsupported']},message:str,question:str,sourceRefs:refs});
- if(job.storyVersion===2){
+ if([2,3].includes(job.storyVersion)){
+  const performed=job.storyVersion===3&&job.kind==='cartoon';
   const brief=storyBrief(job.context.story);
-  return obj({schemaVersion:{type:'integer',enum:[2]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:[job.kind]},title:str,summary:str,story:obj({genre:{type:'string',enum:[brief.genre]},interest:{type:'string',enum:[brief.interest]},premise:str,want:str,stakes:str,obstacle:str,turn:str,payoff:str,learningConnection:str}),segments:arr(obj({id:str,speaker:{type:'string',enum:SPEAKERS},text:str,sourceRefs:refs,scene:{type:'string',enum:SCENES},action:{type:'string',enum:['talk','think','celebrate']},beat:{type:'string',enum:STORY_BEATS},...(job.kind==='cartoon'?{direction:obj({blocking:{type:'string',enum:STORY_BLOCKING},shot:{type:'string',enum:STORY_SHOTS},pace:{type:'string',enum:STORY_PACES}})}:{})})),question:obj({prompt:str,answer:str,sourceRefs:refs})});
+  return obj({schemaVersion:{type:'integer',enum:[job.storyVersion]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:[job.kind]},title:str,summary:str,story:obj({genre:{type:'string',enum:[brief.genre]},interest:{type:'string',enum:[brief.interest]},premise:str,want:str,stakes:str,obstacle:str,turn:str,payoff:str,learningConnection:str,...(performed?{prop:{type:'string',enum:STORY_PROPS}}:{})}),segments:arr(obj({id:str,speaker:{type:'string',enum:SPEAKERS},text:str,sourceRefs:refs,scene:{type:'string',enum:SCENES},action:{type:'string',enum:['talk','think','celebrate']},beat:{type:'string',enum:STORY_BEATS},...(job.kind==='cartoon'?{direction:obj({blocking:{type:'string',enum:STORY_BLOCKING},shot:{type:'string',enum:STORY_SHOTS},pace:{type:'string',enum:STORY_PACES}}),...(performed?{performance:obj({actor:{type:'string',enum:SPEAKERS},move:{type:'string',enum:PERFORMANCE_MOVES},interaction:{type:'string',enum:PROP_INTERACTIONS}})}:{})}:{})})),question:obj({prompt:str,answer:str,sourceRefs:refs})});
  }
  return obj({schemaVersion:{type:'integer',enum:[1]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:[job.kind]},title:str,summary:str,segments:arr(obj({id:str,speaker:{type:'string',enum:SPEAKERS},text:str,sourceRefs:refs,scene:{type:'string',enum:SCENES},action:{type:'string',enum:['talk','think','celebrate']}})),question:obj({prompt:str,answer:str,sourceRefs:refs})});
 }

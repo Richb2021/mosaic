@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 3,
+  "id": "creative-performance-comedy",
+  "kind": "cartoon",
+  "title": "A Very Small Trophy",
+  "summary": "Kit has a brilliant shortcut. Unfortunately, the shortcut has other ideas. A football, a closing gate and an argument about equal distance.",
+  "story": {
+    "genre": "comedy",
+    "interest": "Football",
+    "prop": "football",
+    "premise": "Mira and Kit must carry one football across one whole pitch route and through the garden gate before the closing bell.",
+    "want": "Kit wants to beat the bell and score the final goal; Mira wants them to reach the gate without another detour.",
+    "stakes": "If they waste time on Kit’s detour, the gate closes and their kickabout is over.",
+    "obstacle": "Kit treats the number of pieces as the amount and runs an unnecessary loop, wasting the little time before the gate closes.",
+    "turn": "Kit realizes that smaller pieces change the piece count, not the total amount, when the whole stays the same.",
+    "payoff": "Kit chooses the straight route, adds one quarter to two quarters to make three quarters, and kicks the football through the garden gate before the final bell.",
+    "learningConnection": "Kit mistakes two quarters for more than one half because two is the larger count. Comparing equal parts of the same whole pitch shows that one of two equal parts and two of four equal parts cover the same amount, changing Kit’s route choice."
+  },
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "guide",
+      "text": "Last bell in one minute! Kit, grab the ball. The shortcut to the garden gate is half the marked route.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "hook",
+      "direction": {
+        "blocking": "arrive",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "pick-up"
+      }
+    },
+    {
+      "id": "segment-2",
+      "speaker": "learner",
+      "text": "I'll take the two-quarter path. Two beats one. This is why they call me a tactical genius.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-3",
+      "speaker": "guide",
+      "text": "Nobody calls you that! You're running the wrong way. The arrows, Kit—the arrows!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "travel-left",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "run",
+        "interaction": "none"
+      }
+    },
+    {
+      "id": "segment-4",
+      "speaker": "learner",
+      "text": "Fine, wrong arrow. But two quarters is still more than one half. Surely I get extra distance for confidence?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "think",
+      "beat": "setback",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "reaction",
+        "pace": "calm"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-5",
+      "speaker": "guide",
+      "text": "Same whole route. One half and two quarters cover the same distance. Confidence adds no metres, unfortunately.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "think",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "speaker",
+        "pace": "calm"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-6",
+      "speaker": "learner",
+      "text": "Right. Same distance, smaller pieces. You take the ball. I'll be over here retiring from tactics.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "approach",
+        "shot": "reaction",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "pass"
+      }
+    },
+    {
+      "id": "segment-7",
+      "speaker": "guide",
+      "text": "Garden gate ahead! Your retirement lasted three seconds. We still need your right foot.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "run",
+        "interaction": "none"
+      }
+    },
+    {
+      "id": "segment-8",
+      "speaker": "learner",
+      "text": "We've covered two quarters of the marked route; this next quarter takes us to three quarters. Is that right—or am I being a genius again?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-9",
+      "speaker": "guide",
+      "text": "That part's right. Ball down. One quarter left to the gate. Please aim at the opening.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "approach",
+        "shot": "speaker",
+        "pace": "calm"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "natural",
+        "interaction": "place"
+      }
+    },
+    {
+      "id": "segment-10",
+      "speaker": "learner",
+      "text": "Straight through! No detour. No extra metres. I demand a very small trophy.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "approach",
+        "shot": "speaker",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "kick"
+      }
+    },
+    {
+      "id": "segment-11",
+      "speaker": "guide",
+      "text": "We'll give you half of one. Or two quarters, if you want more pieces to carry.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "separate",
+        "shot": "reaction",
+        "pace": "calm"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "jump",
+        "interaction": "none"
+      }
+    }
+  ],
+  "question": {
+    "prompt": "How do equivalent fractions describe the same amount?",
+    "answer": "Equivalent fractions describe the same amount when they refer to wholes of the same size. A fraction uses equal parts of one whole: the denominator shows how many equal parts make the whole, and the numerator shows how many are selected. One half selects one of two equal parts. Two quarters selects two of four equal parts. Cutting the whole into more equal pieces changes the number and size of the pieces, not the total amount, so one half and two quarters cover the same amount.",
+    "sourceRefs": [
+      "source-5cc6cc4e7289-1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-5cc6cc4e7289-1",
+      "title": "Mosaic authored notes — equal parts and equivalent fractions",
+      "locator": "Paragraph 1",
+      "excerpt": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make that whole; the numerator tells how many of those parts are selected. One half and two quarters represent the same amount when their wholes are the same size. Three quarters is one quarter less than one whole. Two equal halves make one whole. Quantities cannot be compared from their fractions alone if the original wholes differ in size. For example, half of a large container can exceed half of a small container. Cutting a whole into more equal pieces changes the piece count but not the original total amount. Adding fractions with the same denominator adds the numerators while keeping the denominator. One quarter plus two quarters is three quarters. An equal share requires equal amounts, not simply an equal number of differently sized pieces."
+    }
+  ]
+}

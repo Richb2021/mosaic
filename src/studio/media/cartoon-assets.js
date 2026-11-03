@@ -1,3 +1,4 @@
+import {drawViseme} from './cartoon-mouth.js';
 // Original Mosaic cutout artwork. Authored shapes, not generated facts or geometry.
 export const CARTOON_SCENES = Object.freeze({
  observatory:{label:'The observatory',sky:'#344b78',floor:'#a0a5c0',accent:'#f5cf77'},
@@ -60,18 +61,19 @@ function city(c){
  plant(c,163,422,1.2,'#5c837d');plant(c,1117,422,1.2,'#5c837d');
 }
 export function drawBackground(c,scene){if(!CARTOON_SCENES[scene])throw Error('Choose an available cartoon setting.');({observatory,workshop,garden,city}[scene])(c);}
-function arm(c,x,y,angle,color,skin){c.save();c.translate(x,y);c.rotate(angle);path(c,[[-10,0],[17,2],[21,58],[-11,65]],color,ink,3);oval(c,6,68,14,15,skin,ink,3);line(c,14,63,18,66,'#a86d58',2);c.restore()}
-export function drawCharacter(c,{speaker,x,y,scale=1,active=false,action='talk',time=0,moving=true}){
+function arm(c,x,y,angle,color,skin,extension=1){c.save();c.translate(x,y);c.rotate(angle);c.scale(1,extension);path(c,[[-10,0],[17,2],[21,58],[-11,65]],color,ink,3);oval(c,6,68,14,15,skin,ink,3);line(c,14,63,18,66,'#a86d58',2);c.restore()}
+export function drawCharacter(c,{speaker,x,y,scale=1,active=false,action='talk',time=0,moving=true,mouth='X',motion='idle'}){
  const p=CARTOON_CAST[speaker];if(!p)throw Error('Choose an available cartoon speaker.');
  const t=moving?time:0,talk=active&&moving,wiggle=talk?Math.sin(t*5)*.022:0,bob=talk?Math.sin(t*3)*2:0;
  c.save();c.translate(x,y);c.scale(scale,scale);oval(c,0,4,74,12,'#253b5124');
- c.save();c.translate(0,bob);c.rotate(wiggle);
+ const phase=Math.sin(Math.min(1,t/2)*Math.PI),lift=bob+(motion==='jump'?-phase*40:0),squash=motion==='pickup'?1-phase*.35:1;
+ c.save();c.translate(0,lift);c.rotate(wiggle);c.scale(1,squash);
  // Shoes, trousers, shaped jacket and open book / notebook silhouette.
- path(c,[[-36,-98],[-3,-98],[-7,-12],[-38,-12]],'#334f68');path(c,[[3,-98],[36,-98],[41,-12],[9,-12]],'#334f68');
- oval(c,-27,-8,24,11,'#294252',ink);oval(c,29,-8,24,11,'#294252',ink);line(c,-45,-3,-10,-3,'#b6c4c7',3);line(c,12,-3,48,-3,'#b6c4c7',3);
+ for(const side of [-1,1]){const stride=['walk','run'].includes(motion)?Math.sin(t*(motion==='run'?10:6))*side*.45:motion==='kick'&&side===1?-phase*1.15*(speaker==='guide'?1:-1):0;c.save();c.translate(side*21,-98);c.rotate(stride);path(c,[[-16,0],[16,0],[18,86],[-16,86]],'#334f68');oval(c,0,90,24,11,'#294252',ink);line(c,-17,95,17,95,'#b6c4c7',3);c.restore();}
  path(c,[[-40,-191],[39,-191],[53,-91],[-50,-91]],p.coat,ink,4);path(c,[[-15,-188],[15,-188],[24,-95],[-22,-95]],p.shirt,null);line(c,-23,-178,-32,-100,'#ffffff55',2);
- const gesture=action==='celebrate'?-2.5:action==='think'?2.2:active?-.65+Math.sin(t*2)*.12:.2;
- arm(c,-43,-181,.12,p.coat,p.skin);if(action!=='think')arm(c,44,-181,gesture,p.coat,p.skin);
+ const extension=motion==='pickup'?1+phase*1.55:1;
+ const gesture=motion==='pickup'?0:motion==='reach'?-.95:action==='celebrate'?-2.5:action==='think'?2.2:active?-.65+Math.sin(t*2)*.12:.2;
+ arm(c,-43,-181,.12,p.coat,p.skin);if(action!=='think')arm(c,44,-181,gesture,p.coat,p.skin,extension);
  if(speaker==='guide'){path(c,[[-13,-187],[30,-180],[24,-157],[-10,-163]],p.accent,ink,2);path(c,[[19,-169],[32,-167],[25,-125],[12,-130]],p.accent,ink,2);}
  else{line(c,-15,-178,-10,-151,p.accent,3);line(c,16,-178,11,-151,p.accent,3);}
  oval(c,0,-196,17,21,p.skin,ink);oval(c,-57,-243,13,20,p.skin,ink);oval(c,57,-243,13,20,p.skin,ink);
@@ -85,10 +87,11 @@ export function drawCharacter(c,{speaker,x,y,scale=1,active=false,action='talk',
  const raised=action==='think'?5:action==='celebrate'?7:active?3:0;
  line(c,-35,-272-raised,-15,-276-raised,p.hair,4);line(c,14,-276-raised,34,-272-raised,p.hair,4);
  c.beginPath();c.moveTo(0,-249);c.lineTo(-4,-236);c.quadraticCurveTo(0,-233,6,-237);c.strokeStyle='#9e6357';c.lineWidth=2.5;c.stroke();
- if(talk&&Math.sin(t*15)>.1){oval(c,1,-218,12,6+Math.abs(Math.sin(t*13))*4,'#753f43',ink,2);line(c,-6,-221,7,-221,'#fff1df',3)}else{c.beginPath();c.moveTo(-11,-220);c.quadraticCurveTo(0,action==='think'?-221:-209,13,-221);c.strokeStyle=ink;c.lineWidth=3;c.stroke()}
+ drawViseme(c,{x:1,y:-218,width:24,shape:mouth,paper:true});
  oval(c,-39,-233,10,5,'#dc927744');oval(c,39,-233,10,5,'#dc927744');
  if(speaker==='guide'){oval(c,-58,-225,5,5,p.accent);oval(c,58,-225,5,5,p.accent);}
  else{rect(c,-39,-130,36,29,'#5b8394',ink,2);line(c,-33,-122,-10,-122,'#c5e0dc',2);line(c,-33,-115,-18,-115,'#c5e0dc',2);}
- if(action==='think')arm(c,44,-181,gesture,p.coat,p.skin);
- c.restore();c.restore();
+ if(action==='think')arm(c,44,-181,gesture,p.coat,p.skin,extension);
+ const hx=44+6*Math.cos(gesture)-68*extension*Math.sin(gesture),hy=(-181+6*Math.sin(gesture)+68*extension*Math.cos(gesture))*squash;
+ c.restore();c.restore();return {hand:{x:x+scale*(hx*Math.cos(wiggle)-hy*Math.sin(wiggle)),y:y+scale*(hx*Math.sin(wiggle)+hy*Math.cos(wiggle)+lift)}};
 }

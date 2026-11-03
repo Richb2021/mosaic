@@ -1,17 +1,19 @@
+import {drawSpriteMouth} from './cartoon-mouth.js';
+import {drawStoryProp,propAtTime} from './cartoon-props.js';
 import {stageAtTime} from './cartoon-director.js';
 // Closed, decorative art library. Reviewed source/script IDs never change.
 export const CARTOON_STYLES=Object.freeze({anime:'Prism anime',paper:'Paper comedy',original:'Field Notes'});
 export const SETTING_EDITIONS=Object.freeze(['Original setting','Alternate setting','Further afield']);
-export const CARTOON_MOTIONS=Object.freeze(['idle','talk','explain','think','react','celebrate','walk']);
+export const CARTOON_MOTIONS=Object.freeze(['idle','talk','explain','think','react','celebrate','walk','run','reach','jump','kick','pickup']);
 const SCENES=['observatory','workshop','garden','city'],CAST=['guide','learner'],ROOT='/cartoon-art/';
 const invalid=()=>{throw Error('The cartoon artwork library could not be verified.');};
 export function validateCartoonLibrary(value,style,edition=0){
- if(!['anime','paper'].includes(style)||![0,1,2].includes(edition)||value?.version!==1)invalid();
- const pack=value.styles?.[style];if(!pack)invalid();let pixels=0;
- const check=(a,sprite=false)=>{if(!a||typeof a.url!=='string'||!new RegExp('^/cartoon-art/'+style+'/[a-z0-9-]+\\.webp$').test(a.url)||!Number.isInteger(a.width)||!Number.isInteger(a.height)||a.width<1||a.height<1||a.width>4096||a.height>4096)invalid();pixels+=a.width*a.height;
-  if(sprite&&(!Number.isInteger(a.frameWidth)||!Number.isInteger(a.frameHeight)||a.frameWidth<1||a.frameHeight<1||!Number.isInteger(a.columns)||a.columns<1||!Number.isInteger(a.frames)||a.frames<2||a.frames>40||a.frameWidth*a.columns!==a.width||a.frameHeight*Math.ceil(a.frames/a.columns)!==a.height||!Number.isFinite(a.fps)||a.fps<1||a.fps>30))invalid();return a;};
+ if(!['anime','paper'].includes(style)||![0,1,2].includes(edition)||![1,2].includes(value?.version))invalid();
+ const pack=value.styles?.[style];if(!pack)invalid();let pixels=0;const seen=new Map();
+ const check=(a,sprite=false)=>{if(!a||typeof a.url!=='string'||!new RegExp('^/cartoon-art/'+style+'/[a-z0-9-]+\\.webp$').test(a.url)||!Number.isInteger(a.width)||!Number.isInteger(a.height)||a.width<1||a.height<1||a.width>4096||a.height>4096)invalid();const identity=a.width+'x'+a.height;if(seen.has(a.url)&&seen.get(a.url)!==identity)invalid();if(!seen.has(a.url)){seen.set(a.url,identity);pixels+=a.width*a.height;}
+  if(sprite&&(!Number.isInteger(a.frameWidth)||!Number.isInteger(a.frameHeight)||a.frameWidth<1||a.frameHeight<1||!Number.isInteger(a.columns)||a.columns<1||!Number.isInteger(a.frames)||a.frames<2||a.frames>40||a.frameWidth*a.columns!==a.width||a.frameHeight*Math.ceil(a.frames/a.columns)!==a.height||!Number.isFinite(a.fps)||a.fps<1||a.fps>30))invalid();if(sprite){for(const field of ['contactFrame','loopStart'])if(a[field]!==undefined&&(!Number.isInteger(a[field])||a[field]<0||a[field]>=a.frames-1))invalid();}if(sprite&&value.version===2){if(!Array.isArray(a.anchors)||a.anchors.length!==a.frames)invalid();for(const anchor of a.anchors){const m=anchor?.mouth,h=anchor?.hand;if(!m||!h||(m.visible!==undefined&&typeof m.visible!=='boolean')||!/^#[0-9a-f]{6}$/.test(m.skin)||!['x','y','width','coverW','coverH','angle'].every(k=>Number.isFinite(m[k]))||m.x<0||m.x>a.frameWidth||m.y<0||m.y>a.frameHeight||m.width<=0||m.width>a.frameWidth/3||m.coverW<=0||m.coverW>a.frameWidth/2||m.coverH<=0||m.coverH>a.frameHeight/3||Math.abs(m.angle)>1||![h.x,h.y].every(Number.isFinite)||h.x<0||h.x>a.frameWidth||h.y<0||h.y>a.frameHeight)invalid();}}return a;};
  const backgrounds=Object.fromEntries(SCENES.map(id=>[id,check(pack.backgrounds?.[id]?.[edition])])),cast=Object.fromEntries(CAST.map(id=>[id,Object.fromEntries(CARTOON_MOTIONS.map(m=>[m,check(pack.cast?.[id]?.[m],true)]))]));
- if(pixels*4>190*1024*1024)invalid();return {style,edition,backgrounds,cast};
+ if(pixels*4>240*1024*1024)invalid();return {style,edition,backgrounds,cast};
 }
 const abortError=()=>Object.assign(Error('Artwork loading cancelled.'),{name:'AbortError'});
 export function loadCartoonImage(asset,{signal,ImageClass=globalThis.Image}={}){
@@ -27,17 +29,25 @@ export async function loadCartoonLibrary(style,edition,{signal,fetcher=globalThi
   if(controller.signal.aborted)throw abortError();return {...pack,images};
  }catch(error){controller.abort();if(timedOut)throw Error('Cartoon artwork took too long to load. Please retry.');throw error;}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
 }
-export function drawLibraryScene(ctx,pack,{segment,elapsed,index,duration=12,still=false}){
+export function performanceFrame(clip,actor){
+ if(Number.isInteger(clip.contactFrame)&&['pickup','kick'].includes(actor.motion)){const u=Math.max(0,Math.min(1,actor.time/2)),n=u<=.5?u*2*clip.contactFrame:clip.contactFrame+(u-.5)*2*(clip.frames-1-clip.contactFrame);return Math.min(clip.frames-1,Math.floor(n));}
+ const start=clip.loopStart||0;return Math.min(clip.frames-1,start+Math.floor(actor.time*clip.fps)%(clip.frames-start));
+}
+export function drawLibraryScene(ctx,pack,{segment,elapsed,index,duration=12,still=false,mouth='X',prop=null,propState=null}){
  const bg=pack.backgrounds[segment.scene],background=pack.images.get(bg.url);if(!background)throw Error('The selected cartoon setting is not loaded.');
- const stage=stageAtTime({segment,elapsed,index,duration,still});
+ const contactOffset=segment.performance?.interaction==='kick'?(pack.style==='anime'?118:125):32;
+ const stage=stageAtTime({segment,elapsed,index,duration,still,propState,contactOffset});
  ctx.save();ctx.beginPath();ctx.rect(0,0,1280,540);ctx.clip();
  ctx.translate(stage.camera.x,stage.camera.y);ctx.scale(stage.camera.scale,stage.camera.scale);
  ctx.drawImage(background,0,0,bg.width,bg.height,0,-180,1280,720);
+ const hands={};
  for(const actor of [...stage.actors].sort((a,b)=>a.y-b.y)){
   const clip=pack.cast[actor.speaker][actor.motion],img=pack.images.get(clip.url);if(!img)throw Error('The selected cartoon performance is not loaded.');
-  const n=Math.min(clip.frames-1,Math.floor(actor.time*clip.fps)%clip.frames),h=(pack.style==='anime'?480:415)*(1+(actor.y-520)/260),w=h*clip.frameWidth/clip.frameHeight;
+  const n=performanceFrame(clip,actor),h=(pack.style==='anime'?480:415)*(1+(actor.y-520)/260),w=h*clip.frameWidth/clip.frameHeight;
   ctx.fillStyle='rgba(20,30,40,.15)';ctx.beginPath();ctx.ellipse(actor.x,actor.y-7,w*.24,9,0,0,Math.PI*2);ctx.fill();
-  ctx.save();ctx.translate(actor.x,actor.y);ctx.scale(actor.facing,1);ctx.drawImage(img,n%clip.columns*clip.frameWidth,Math.floor(n/clip.columns)*clip.frameHeight,clip.frameWidth,clip.frameHeight,-w/2,-h,w,h);ctx.restore();
+  ctx.save();ctx.translate(actor.x,actor.y);ctx.scale(actor.facing,1);ctx.drawImage(img,n%clip.columns*clip.frameWidth,Math.floor(n/clip.columns)*clip.frameHeight,clip.frameWidth,clip.frameHeight,-w/2,-h,w,h);drawSpriteMouth(ctx,clip,n,w,h,still||!actor.active?'X':mouth,pack.style);ctx.restore();
+  const anchor=clip.anchors?.[n]?.hand||{x:clip.frameWidth*.65,y:clip.frameHeight*.54};hands[actor.speaker]={x:actor.x+actor.facing*(-w/2+anchor.x*w/clip.frameWidth),y:actor.y-h+anchor.y*h/clip.frameHeight};
  }
+ drawStoryProp(ctx,propAtTime({prop,state:propState,performance:stage.performance,actors:stage.actors,hands,still}),pack.style);
  ctx.restore();return stage;
 }

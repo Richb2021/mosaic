@@ -1,0 +1,33 @@
+{
+  "package": "lip-sync-engine",
+  "version": "1.0.3",
+  "source": "https://github.com/biolimbo/lip-sync-engine",
+  "upstream": "https://github.com/DanielSWolf/rhubarb-lip-sync",
+  "dataSha256": "70cdab484b820d34e63d33d5df5eef5265eebae926d6b962da243c4368a69a52",
+  "files": {
+    "lip-sync-engine.wasm": {
+      "bytes": 1890181,
+      "sha256": "1846795c8f25b5069416d00f5053c40514725ad0899a9c3e2da6065dce54fa5a"
+    },
+    "lip-sync-engine.js": {
+      "bytes": 79739,
+      "sha256": "078c9cb6b2daa1a01bd1894962c298387b341fbec6697ef611f201e384c60c3e"
+    },
+    "model-0.bin": {
+      "bytes": 16777216,
+      "sha256": "c650b11aac1bb788349675262fe0acf475158dc148fe76e6eb417f9b8c378a55"
+    },
+    "model-1.bin": {
+      "bytes": 16777216,
+      "sha256": "0b39edab9d276a6352dff3d009483150b79cec5f13e885d225a66728bb895aaa"
+    },
+    "LICENSE.txt": {
+      "bytes": 1228,
+      "sha256": "e0ab0406c00e7ea556982ed3e964d235f2b4433ec634ba8cf15f9795371b3614"
+    },
+    "model-2.bin": {
+      "bytes": 4298846,
+      "sha256": "fea30a357b87ece75c64aed1bc434b37e7608c282962d57fa95fee33995247fb"
+    }
+  }
+}

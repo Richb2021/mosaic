@@ -2,3 +2,4 @@
 @media(max-width:800px){.creative-layout{grid-template-columns:1fr}.creative-heading{display:block}.creative-heading h2{font-size:1.8rem}.creative-format{grid-template-columns:1fr}.creative-format button+button{border-left:0;border-top:1px solid #c4d2e6}.creative-library{border-top:1px solid #c4d2e6;padding-top:1rem}.creative-budget{white-space:normal}}
 
 .programme-layout.creative-wide{grid-template-columns:minmax(0,1fr)}.programme-layout.creative-wide>aside{display:none}
+.creative-performance{display:flex;flex-wrap:wrap;gap:12px;padding:12px 0}.creative-performance label{min-width:145px;flex:1}.creative-performance select{display:block;width:100%;margin-top:5px}

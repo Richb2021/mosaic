@@ -1,0 +1,94 @@
+[
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/LICENSE",
+    "file": "LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/cppformat/LICENSE.rst",
+    "file": "lib--cppformat--LICENSE.rst.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/flite-1.4/COPYING",
+    "file": "lib--flite-1.4--COPYING.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/gsl/LICENSE",
+    "file": "lib--gsl--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/pocketsphinx-rev13216/LICENSE",
+    "file": "lib--pocketsphinx-rev13216--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/soundchange/LICENSE.md",
+    "file": "lib--soundchange--LICENSE.md.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/sphinxbase-rev13216/LICENSE",
+    "file": "lib--sphinxbase-rev13216--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/tclap-1.2.1/COPYING",
+    "file": "lib--tclap-1.2.1--COPYING.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/utf8proc-2.2.0/LICENSE.md",
+    "file": "lib--utf8proc-2.2.0--LICENSE.md.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/COPYING",
+    "file": "lib--webrtc-8d2248ff--COPYING.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/LICENSE",
+    "file": "lib--webrtc-8d2248ff--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/LICENSE_THIRD_PARTY",
+    "file": "lib--webrtc-8d2248ff--LICENSE_THIRD_PARTY.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/license_template.txt",
+    "file": "lib--webrtc-8d2248ff--license_template.txt.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/talk/COPYING",
+    "file": "lib--webrtc-8d2248ff--talk--COPYING.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/talk/LICENSE_THIRD_PARTY",
+    "file": "lib--webrtc-8d2248ff--talk--LICENSE_THIRD_PARTY.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/third_party/gflags/LICENSE",
+    "file": "lib--webrtc-8d2248ff--third_party--gflags--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/third_party/gtest-parallel/LICENSE",
+    "file": "lib--webrtc-8d2248ff--third_party--gtest-parallel--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/webrtc/LICENSE",
+    "file": "lib--webrtc-8d2248ff--webrtc--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/webrtc/LICENSE_THIRD_PARTY",
+    "file": "lib--webrtc-8d2248ff--webrtc--LICENSE_THIRD_PARTY.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/webrtc/examples/androidapp/third_party/autobanh/LICENSE",
+    "file": "lib--webrtc-8d2248ff--webrtc--examples--androidapp--third_party--autobanh--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/webrtc/examples/androidapp/third_party/autobanh/LICENSE.md",
+    "file": "lib--webrtc-8d2248ff--webrtc--examples--androidapp--third_party--autobanh--LICENSE.md.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/webrtc-8d2248ff/webrtc/examples/objc/AppRTCDemo/third_party/SocketRocket/LICENSE",
+    "file": "lib--webrtc-8d2248ff--webrtc--examples--objc--AppRTCDemo--third_party--SocketRocket--LICENSE.txt"
+  },
+  {
+    "source": "https://raw.githubusercontent.com/biolimbo/lip-sync-engine/main/lib/whereami/LICENSE",
+    "file": "lib--whereami--LICENSE.txt"
+  }
+]

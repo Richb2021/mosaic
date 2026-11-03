@@ -1,3 +1,4 @@
+import {drawStoryProp,propAtTime} from './cartoon-props.js';
 import {stageAtTime} from './cartoon-director.js';
 import {drawLibraryScene} from './cartoon-library.js';
 import {CARTOON_SCENES,CARTOON_CAST,drawBackground,drawCharacter} from './cartoon-assets.js';
@@ -24,19 +25,21 @@ export function sceneAtTime(offsets,durations,seconds){
  if(!Array.isArray(offsets)||!offsets.length||offsets.length!==durations.length||offsets.some((x,i)=>!Number.isFinite(x)||x<0||i&&x<offsets[i-1])||durations.some(x=>!Number.isFinite(x)||x<=0))throw Error('The narration timeline is invalid.');
  let index=0;for(let i=1;i<offsets.length;i++){if(seconds>=offsets[i])index=i;else break}return {index,elapsed:clamp(seconds-offsets[index],0,durations[index]),duration:durations[index]};
 }
-export function drawCartoonFrame(ctx,{segment,index=0,count=1,elapsed=0,duration=10,playing=false,reducedMotion=false,captions=true,art=null}){
+export function drawCartoonFrame(ctx,{segment,index=0,count=1,elapsed=0,duration=10,playing=false,reducedMotion=false,captions=true,art=null,mouth='X',prop=null,propState=null}){
  if(!segment||!CARTOON_SCENES[segment.scene]||!CARTOON_CAST[segment.speaker])throw Error('This scene does not use an available setting and presenter.');
  if(!['talk','think','celebrate'].includes(segment.action))throw Error('This scene uses an unavailable action.');
  const t=clamp(elapsed,0,Math.max(0,duration)),moving=!reducedMotion;
- const stage=stageAtTime({segment,elapsed:t,index,duration,still:reducedMotion});
+ const stage=stageAtTime({segment,elapsed:t,index,duration,still:reducedMotion,propState});
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,FRAME_WIDTH,FRAME_HEIGHT);
- if(art)drawLibraryScene(ctx,art,{segment,elapsed:t,index,duration,still:reducedMotion});
+ if(art)drawLibraryScene(ctx,art,{segment,elapsed:t,index,duration,still:reducedMotion,mouth,prop,propState});
  else{
  ctx.save();ctx.beginPath();ctx.rect(0,0,1280,540);ctx.clip();ctx.translate(stage.camera.x,stage.camera.y);ctx.scale(stage.camera.scale,stage.camera.scale);drawBackground(ctx,segment.scene);
+ const hands={};
  for(const a of [...stage.actors].sort((a,b)=>a.y-b.y)){
   ctx.save();ctx.translate(a.x,a.y);ctx.scale(a.facing*(a.speaker==='learner'?-1:1),1);
-  drawCharacter(ctx,{speaker:a.speaker,x:0,y:0,scale:a.speaker==='guide'?1.03:.94,active:a.active,action:a.active?segment.action:'think',time:a.time,moving});ctx.restore();
+  const pose=drawCharacter(ctx,{speaker:a.speaker,x:0,y:0,scale:a.speaker==='guide'?1.03:.94,active:a.active,action:a.active?segment.action:'think',time:a.time,moving,mouth:reducedMotion||!a.active?'X':mouth,motion:a.motion});hands[a.speaker]={x:a.x+a.facing*(a.speaker==='learner'?-1:1)*pose.hand.x,y:a.y+pose.hand.y};ctx.restore();
  }
+ drawStoryProp(ctx,propAtTime({prop,state:propState,performance:stage.performance,actors:stage.actors,hands,still:reducedMotion}));
  ctx.restore();}
  ctx.fillStyle='#223851';ctx.fillRect(0,540,1280,180);
  ctx.fillStyle='#f2d198';ctx.font='700 18px Studio, Arial, sans-serif';ctx.textBaseline='top';ctx.textAlign='left';ctx.fillText(CARTOON_CAST[segment.speaker].name,42,560);

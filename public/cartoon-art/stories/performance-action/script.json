@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 3,
+  "id": "creative-performance-action",
+  "kind": "cartoon",
+  "title": "Six Minutes to Orbit",
+  "summary": "One battery, two flashing systems and a launch they are about to miss. The mistake is not where Mira and Kit expect it.",
+  "story": {
+    "genre": "action",
+    "interest": "Space",
+    "prop": "battery",
+    "premise": "In a fictional space observatory, Mira and Kit race one battery's whole charge to a shuttle before its launch window closes.",
+    "want": "Mira and Kit want to power both the beacon and heater fairly and launch before the deadline.",
+    "stakes": "If they misjudge the split, one system will seem favoured and they may waste the countdown hunting for a battery that does not exist.",
+    "obstacle": "Kit assumes two quarters provide more than one half because two pieces outnumber one, threatening an unbalanced split.",
+    "turn": "They realise one half of this same battery equals two quarters; cutting it into more equal pieces changes the count, not the amount.",
+    "payoff": "They set the beacon to two quarters and the heater to one half, share the charge equally, and launch on time.",
+    "learningConnection": "Kit's mistaken piece-count plan fails; comparing one half with two quarters of the same battery whole reveals equivalence and drives the equal-share choice that powers the launch."
+  },
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "learner",
+      "text": "Launch locks in six minutes! There’s the battery. The beacon and heater are both flashing at us.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "hook",
+      "direction": {
+        "blocking": "arrive",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "pick-up"
+      }
+    },
+    {
+      "id": "segment-2",
+      "speaker": "guide",
+      "text": "Workshop, now! One whole charge to share. The beacon dial uses quarters; the heater uses halves.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "run",
+        "interaction": "none"
+      }
+    },
+    {
+      "id": "segment-3",
+      "speaker": "learner",
+      "text": "Two quarters for the beacon, one half for the heater. Hang on—that gives the beacon two pieces and the heater only one. We've made it unfair!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "run",
+        "interaction": "none"
+      }
+    },
+    {
+      "id": "segment-4",
+      "speaker": "guide",
+      "text": "Then I'll add some to the heater—wait. There's no spare charge. Pass it here. What are we missing?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "approach",
+        "shot": "two-shot",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "pass"
+      }
+    },
+    {
+      "id": "segment-5",
+      "speaker": "learner",
+      "text": "The marks! Half this same battery is exactly two quarters of it. More pieces, same amount. We nearly missed launch fixing a split that was already fair.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "think",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "reaction",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-6",
+      "speaker": "guide",
+      "text": "Keep the settings. Equal shares, no extra battery. Next time we panic, let's do it while running.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "speaker",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "natural",
+        "interaction": "hold"
+      }
+    },
+    {
+      "id": "segment-7",
+      "speaker": "learner",
+      "text": "Deal. Give it back—I'll take the launch rail. You clear the doors!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "approach",
+        "shot": "two-shot",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "natural",
+        "interaction": "pass"
+      }
+    },
+    {
+      "id": "segment-8",
+      "speaker": "guide",
+      "text": "Thirty seconds! Left door's open. Kit, don't stop for your victory speech!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "travel-left",
+        "shot": "wide",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "run",
+        "interaction": "none"
+      }
+    },
+    {
+      "id": "segment-9",
+      "speaker": "learner",
+      "text": "Battery down. Two quarters to the beacon, one half to the heater. Both lights green!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "approach",
+        "shot": "speaker",
+        "pace": "urgent"
+      },
+      "performance": {
+        "actor": "learner",
+        "move": "natural",
+        "interaction": "place"
+      }
+    },
+    {
+      "id": "segment-10",
+      "speaker": "guide",
+      "text": "We're away! Your victory speech has been rescheduled for somewhere with chairs.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "separate",
+        "shot": "wide",
+        "pace": "calm"
+      },
+      "performance": {
+        "actor": "guide",
+        "move": "jump",
+        "interaction": "none"
+      }
+    }
+  ],
+  "question": {
+    "prompt": "How do equivalent fractions describe the same amount?",
+    "answer": "A fraction describes equal parts of one whole: the denominator tells how many equal parts make the whole, and the numerator tells how many are selected. One half and two quarters are equivalent when their wholes are the same size, because cutting the whole into more equal pieces changes the piece count without changing the total amount. So two quarters selected from a whole equals one half of that same whole. Fractions from differently sized wholes cannot be compared by the fractions alone.",
+    "sourceRefs": [
+      "source-5cc6cc4e7289-1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-5cc6cc4e7289-1",
+      "title": "Mosaic authored notes — equal parts and equivalent fractions",
+      "locator": "Paragraph 1",
+      "excerpt": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make that whole; the numerator tells how many of those parts are selected. One half and two quarters represent the same amount when their wholes are the same size. Three quarters is one quarter less than one whole. Two equal halves make one whole. Quantities cannot be compared from their fractions alone if the original wholes differ in size. For example, half of a large container can exceed half of a small container. Cutting a whole into more equal pieces changes the piece count but not the original total amount. Adding fractions with the same denominator adds the numerators while keeping the denominator. One quarter plus two quarters is three quarters. An equal share requires equal amounts, not simply an equal number of differently sized pieces."
+    }
+  ]
+}
