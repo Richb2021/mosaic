@@ -160,3 +160,11 @@ test('explicit evidence is owner-bound, confirmed, stable across click order and
  const result=await h.call('jobs',base);assert.equal(result.status,201);assert.equal(result.job.coverage.omittedPassages,1);const retry=await h.call('jobs',{...base,evidenceIds:[...base.evidenceIds].reverse()});assert.equal(retry.job.id,result.job.id);
  await h.call('jobs/'+result.job.id+'/run',{});assert.deepEqual(new Set(h.calls[0].evidence.map(x=>x.id)),new Set(base.evidenceIds));assert.equal(h.calls.length,1);
 });
+
+test('game story intent survives queue and provider and cannot mutate through a reused request key',async()=>{
+ const h=harness(),r=await reviewed(h),input={topicId:template.topicId,goal:'Explain water changes and allocate the town supply',level:'Starting out',resourceIds:[r.id],requestKey:'game-story',story:{genre:'mystery',interest:'Building & business'}};
+ const created=await h.call('jobs',input);assert.equal(created.status,201);assert.deepEqual(created.job.story,input.story);
+ assert.equal((await h.call('jobs',{...input,story:{...input.story,genre:'comedy'}})).status,409);
+ assert.equal((await h.call('jobs',{...input,requestKey:'bad-story',story:{genre:'external-script',interest:''}})).status,400);
+ await h.call('jobs/'+created.job.id+'/run',{});assert.deepEqual(h.calls[0].story,input.story);assert.deepEqual(JSON.parse(generationRequest(h.calls[0]).input[1].content).story,input.story);
+});

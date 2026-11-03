@@ -1,3 +1,4 @@
+import {stageAtTime} from './cartoon-director.js';
 import {drawLibraryScene} from './cartoon-library.js';
 import {CARTOON_SCENES,CARTOON_CAST,drawBackground,drawCharacter} from './cartoon-assets.js';
 export {CARTOON_SCENES,CARTOON_CAST};
@@ -26,14 +27,16 @@ export function sceneAtTime(offsets,durations,seconds){
 export function drawCartoonFrame(ctx,{segment,index=0,count=1,elapsed=0,duration=10,playing=false,reducedMotion=false,captions=true,art=null}){
  if(!segment||!CARTOON_SCENES[segment.scene]||!CARTOON_CAST[segment.speaker])throw Error('This scene does not use an available setting and presenter.');
  if(!['talk','think','celebrate'].includes(segment.action))throw Error('This scene uses an unavailable action.');
- const t=clamp(elapsed,0,Math.max(0,duration)),moving=playing&&!reducedMotion;
+ const t=clamp(elapsed,0,Math.max(0,duration)),moving=!reducedMotion;
+ const stage=stageAtTime({segment,elapsed:t,index,duration,still:reducedMotion});
  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,FRAME_WIDTH,FRAME_HEIGHT);
- if(art)drawLibraryScene(ctx,art,{segment,elapsed:t,index,still:reducedMotion});
- else{drawBackground(ctx,segment.scene);
- // The scene is a fictional framing device, with no generated factual labels.
- const drift=moving?Math.sin(t*.35)*2:0;ctx.save();ctx.translate(drift,0);
- drawCharacter(ctx,{speaker:'guide',x:370,y:511,scale:1.03,active:segment.speaker==='guide',action:segment.speaker==='guide'?segment.action:'think',time:t,moving});
- drawCharacter(ctx,{speaker:'learner',x:906,y:511,scale:.94,active:segment.speaker==='learner',action:segment.speaker==='learner'?segment.action:'talk',time:t+1,moving});
+ if(art)drawLibraryScene(ctx,art,{segment,elapsed:t,index,duration,still:reducedMotion});
+ else{
+ ctx.save();ctx.beginPath();ctx.rect(0,0,1280,540);ctx.clip();ctx.translate(stage.camera.x,stage.camera.y);ctx.scale(stage.camera.scale,stage.camera.scale);drawBackground(ctx,segment.scene);
+ for(const a of [...stage.actors].sort((a,b)=>a.y-b.y)){
+  ctx.save();ctx.translate(a.x,a.y);ctx.scale(a.facing*(a.speaker==='learner'?-1:1),1);
+  drawCharacter(ctx,{speaker:a.speaker,x:0,y:0,scale:a.speaker==='guide'?1.03:.94,active:a.active,action:a.active?segment.action:'think',time:a.time,moving});ctx.restore();
+ }
  ctx.restore();}
  ctx.fillStyle='#223851';ctx.fillRect(0,540,1280,180);
  ctx.fillStyle='#f2d198';ctx.font='700 18px Studio, Arial, sans-serif';ctx.textBaseline='top';ctx.textAlign='left';ctx.fillText(CARTOON_CAST[segment.speaker].name,42,560);

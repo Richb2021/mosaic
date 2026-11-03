@@ -1,3 +1,4 @@
+import {storyBrief} from '../src/story-direction.js';
 import {resourcePage,resourceSearch,RESOURCE_LIMIT} from './resource-library.js';
 import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
@@ -9,7 +10,7 @@ async function body(req){const reader=req.body?.getReader();requireValue(reader,
 const publicResource=r=>({id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:JSON.parse(r.payload).units});
 const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
-const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
+const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,story:JSON.parse(r.payload).story||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null}={}){
  try{
@@ -56,7 +57,8 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    requireValue(Array.isArray(input.resourceIds)&&input.resourceIds.length>0&&input.resourceIds.length<=3&&input.resourceIds.every(safeId)&&new Set(input.resourceIds).size===input.resourceIds.length,'Select one to three different reviewed resources.');
    const template=input.template||'underlight-v1';requireValue(TEMPLATE_IDS.includes(template),'Choose a supported game format.');
    if(input.evidenceIds!==undefined){requireValue(input.evidenceConfirmed===true,'Review the selected evidence packet before generation.');requireValue(Array.isArray(input.evidenceIds)&&input.evidenceIds.length>=1&&input.evidenceIds.length<=12&&input.evidenceIds.every(id=>typeof id==='string')&&new Set(input.evidenceIds).size===input.evidenceIds.length,'Choose one to twelve unique evidence passages.');}
-   const normalized={...(input.evidenceIds!==undefined?{evidenceIds:input.evidenceIds.slice().sort()}:{}),...(template==='underlight-v1'?{}:{template}),topicId:input.topicId,goal:input.goal.trim(),level:input.level.trim(),resourceIds:input.resourceIds.slice().sort()},requestHash=await digest(JSON.stringify(normalized)),existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
+   let story;try{story=input.story===undefined?undefined:storyBrief(input.story)}catch(e){throw new WorkshopError(e.message)}
+   const normalized={...(story?{story}:{}),...(input.evidenceIds!==undefined?{evidenceIds:input.evidenceIds.slice().sort()}:{}),...(template==='underlight-v1'?{}:{template}),topicId:input.topicId,goal:input.goal.trim(),level:input.level.trim(),resourceIds:input.resourceIds.slice().sort()},requestHash=await digest(JSON.stringify(normalized)),existing=await one('SELECT * FROM workshop_jobs WHERE owner=? AND request_key=?',owner,input.requestKey);
    if(existing){requireValue(existing.request_hash===requestHash,'This request identity belongs to different inputs.',409);return json({job:await publicJob(existing,now())})}
    requireValue(env.META_API_KEY,'Muse Wonder is not connected. Configure the server’s META_API_KEY first.',503);
    const budget=await generationBudget(one,owner,env,now());requireValue(!budget.configurationError,budgetMessage(budget),503);requireValue(budget.remaining>0,budgetMessage(budget),429);

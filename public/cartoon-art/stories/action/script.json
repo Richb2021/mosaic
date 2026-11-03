@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 2,
+  "id": "creative-story-action-revised",
+  "kind": "cartoon",
+  "title": "The Beacon Run",
+  "summary": "A launch, two packs and an argument they cannot afford. Mira and Kit have to spot the mistake before they miss their beacon run.",
+  "story": {
+    "genre": "action",
+    "interest": "Space",
+    "premise": "Mira and Kit must split one whole tank of beacon gel fairly between two carrying packs and reach the beacons before a fictional launch.",
+    "want": "Carry equal shares to the two beacons and make the launch together.",
+    "stakes": "Their argument could cost them the chance to join the launch.",
+    "obstacle": "Kit mistakes two quarter portions for more gel than one half portion.",
+    "turn": "The measuring mat shows two quarters and one half cover the same amount from the same whole.",
+    "payoff": "They leave the already-equal shares alone, light both beacons and arrive for launch.",
+    "learningConnection": "Comparing amounts against the same whole resolves their false fairness problem and lets them act."
+  },
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "guide",
+      "text": "Six minutes until launch — grab our one tank of beacon gel! We need equal amounts in both carrying packs. Come on!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "hook",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-2",
+      "speaker": "learner",
+      "text": "Done — one half in your pack, two quarters in mine. Wait, mine has two pieces, so I've taken more! We can't leave it unfair.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "two-shot",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-3",
+      "speaker": "guide",
+      "text": "Hold on — I'll top mine up. If yours has extra, the tank should still— it's empty? We've already used the whole tank?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "separate",
+        "shot": "reaction",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-4",
+      "speaker": "learner",
+      "text": "Then we haven't lost any gel. Quick, the measuring mat in the workshop — let's line our marked amounts up!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "think",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-5",
+      "speaker": "guide",
+      "text": "Your two quarters cover my one half, edge to edge. Same whole tank, same amount. We were trying to fix a problem we never had.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "approach",
+        "shot": "speaker",
+        "pace": "calm"
+      }
+    },
+    {
+      "id": "segment-6",
+      "speaker": "learner",
+      "text": "Leave the packs as they are. One half and two quarters are equal shares. No more swapping — we go, now!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "two-shot",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-7",
+      "speaker": "guide",
+      "text": "Back to the launch rail! I'll take the left beacon, you take the right. Ready?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "travel-left",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-8",
+      "speaker": "learner",
+      "text": "Both lit! And we made the launch. Next time, remind me to count what we've got before I start a rescue mission for it.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "observatory",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    }
+  ],
+  "question": {
+    "prompt": "How do one half and two quarters describe the same amount in the story?",
+    "answer": "One half and two quarters describe the same amount when they come from wholes of the same size. The denominator tells how many equal parts make the whole, and the numerator tells how many of those parts are selected. Cutting a whole into more, smaller equal pieces changes the number of pieces but not the total amount, so an equal share means equal amounts, not simply the same number of pieces. Fractions cannot be compared from the fractions alone if the original wholes are different sizes.",
+    "sourceRefs": [
+      "source-5cc6cc4e7289-1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-5cc6cc4e7289-1",
+      "title": "Mosaic authored notes — equal parts and equivalent fractions",
+      "locator": "Paragraph 1",
+      "excerpt": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make that whole; the numerator tells how many of those parts are selected. One half and two quarters represent the same amount when their wholes are the same size. Three quarters is one quarter less than one whole. Two equal halves make one whole. Quantities cannot be compared from their fractions alone if the original wholes differ in size. For example, half of a large container can exceed half of a small container. Cutting a whole into more equal pieces changes the piece count but not the original total amount. Adding fractions with the same denominator adds the numerators while keeping the denominator. One quarter plus two quarters is three quarters. An equal share requires equal amounts, not simply an equal number of differently sized pieces."
+    }
+  ]
+}

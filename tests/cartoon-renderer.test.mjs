@@ -37,3 +37,12 @@ test('recorded WebM receives finite duration without rewriting encoded audio or 
  const again=await finaliseCartoonVideo(output,10);assert.equal(again.size,output.size);assert.equal(new DataView(await again.arrayBuffer()).getFloat64(at+3,false),10000);
  await assert.rejects(()=>finaliseCartoonVideo(new Blob(['not a video']),2));await assert.rejects(()=>finaliseCartoonVideo(input,Infinity));await assert.rejects(()=>finaliseCartoonVideo(input,0));
 });
+
+test('pause preserves the rendered pose and fallback pupils face the direction of travel',()=>{
+ const segment={...base,direction:{blocking:'travel-right',shot:'wide',pace:'calm'}},a=context(),b=context();
+ drawCartoonFrame(a,{segment,elapsed:3,duration:12,playing:true});drawCartoonFrame(b,{segment,elapsed:3,duration:12,playing:false});assert.deepEqual(a.commands,b.commands);
+ function gaze(commands){let m=[1,0,0,1,0,0],stack=[],eyes=[],pupils=[];const multiply=n=>{const [a,b,c,d,e,f]=m,[A,B,C,D,E,F]=n;m=[a*A+c*B,b*A+d*B,a*C+c*D,b*C+d*D,a*E+c*F+e,b*E+d*F+f]};for(const [op,...v] of commands){if(op==='save')stack.push([...m]);if(op==='restore')m=stack.pop();if(op==='setTransform')m=v;if(op==='translate')multiply([1,0,0,1,...v]);if(op==='scale')multiply([v[0],0,0,v[1],0,0]);if(op==='rotate'){const s=Math.sin(v[0]),c=Math.cos(v[0]);multiply([c,s,-s,c,0,0])}if(op==='ellipse'){const x=m[0]*v[0]+m[2]*v[1]+m[4];if(v[2]===9&&v[3]===12)eyes.push(x);if(v[2]===4.2&&v[3]===6.5)pupils.push(x)}}assert.equal(eyes.length,4);return pupils.map((x,i)=>Math.sign(x-eyes[i]))}
+ assert.deepEqual(gaze(a.commands),[1,1,1,1]);
+ const left=context();drawCartoonFrame(left,{segment:{...segment,direction:{...segment.direction,blocking:'travel-left'}},elapsed:3,duration:12,playing:true});assert.deepEqual(gaze(left.commands),[-1,-1,-1,-1]);
+ const rest=context();drawCartoonFrame(rest,{segment:{...segment,direction:{...segment.direction,blocking:'face-off'}},elapsed:6,duration:12,playing:true});assert.deepEqual(gaze(rest.commands),[1,1,-1,-1]);
+});

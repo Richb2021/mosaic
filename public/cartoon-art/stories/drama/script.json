@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 2,
+  "id": "creative-story-drama",
+  "kind": "podcast",
+  "title": "The Bridge Before the Bell",
+  "summary": "Two musicians have one hour to save their duet — and decide what matters more than a perfect solo.",
+  "story": {
+    "genre": "drama",
+    "interest": "Music",
+    "premise": "Mira and Kit, two musicians sharing one whole rehearsal hour before a city hall duet, argue over what counts as a fair share.",
+    "want": "Both want the bridge to work without either person losing a fair turn before they must leave for the performance.",
+    "stakes": "If they split the hour unfairly or skip shared practice, the duet and their trust could crack on stage.",
+    "obstacle": "Kit counts two quarter pieces against Mira's one half piece and assumes that more pieces means more time.",
+    "turn": "Lining up their time strips shows that one half and two quarters match when both come from the same whole hour.",
+    "payoff": "They rehearse for three quarters of the hour, use the last quarter to travel, and play the bridge together.",
+    "learningConnection": "Equal parts, equivalent fractions for the same whole, and adding quarters help Mira and Kit share one rehearsal hour fairly."
+  },
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "learner",
+      "text": "Stop the track, Mira! One rehearsal hour left, and the bridge still falls apart every time.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "hook"
+    },
+    {
+      "id": "segment-2",
+      "speaker": "guide",
+      "text": "You want half the hour for your solo. I want half for mine. That leaves nothing for us. For the bridge.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "setback"
+    },
+    {
+      "id": "segment-3",
+      "speaker": "learner",
+      "text": "I marked mine as two quarters. Two turns for me, one for you. That sounds unfair — and I don't want this song to cost us our friendship.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "setback"
+    },
+    {
+      "id": "segment-4",
+      "speaker": "guide",
+      "text": "Put your two quarter strips beside my half strip. They end at the same place. Two quarters and one half, from the same hour. Equal time.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "think",
+      "beat": "discovery"
+    },
+    {
+      "id": "segment-5",
+      "speaker": "learner",
+      "text": "So I wasn't taking more. I just cut my share into smaller pieces. We've been fighting over nothing.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "think",
+      "beat": "discovery"
+    },
+    {
+      "id": "segment-6",
+      "speaker": "guide",
+      "text": "Not nothing. We still have to choose: perfect solos, or a bridge we can actually play together?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "setback"
+    },
+    {
+      "id": "segment-7",
+      "speaker": "learner",
+      "text": "The bridge. One quarter warming up, two quarters together. That's three quarters rehearsing, with the last quarter to get there.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice"
+    },
+    {
+      "id": "segment-8",
+      "speaker": "guide",
+      "text": "Then my solo can be imperfect. I'd rather walk on stage with someone I trust.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice"
+    },
+    {
+      "id": "segment-9",
+      "speaker": "learner",
+      "text": "Mira — we stayed together! Right where it always broke. Did you hear them clap?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "celebrate",
+      "beat": "payoff"
+    },
+    {
+      "id": "segment-10",
+      "speaker": "guide",
+      "text": "I heard you. That's what I was listening for.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "celebrate",
+      "beat": "payoff"
+    }
+  ],
+  "question": {
+    "prompt": "How do equivalent fractions describe the same amount?",
+    "answer": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make the whole, and the numerator tells how many parts are selected. One half and two quarters describe the same amount when the wholes are the same size, because cutting a whole into more equal pieces changes the number of pieces but not the total amount. Fractions can only be compared in this way when the original wholes are the same size.",
+    "sourceRefs": [
+      "source-5cc6cc4e7289-1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-5cc6cc4e7289-1",
+      "title": "Mosaic authored notes — equal parts and equivalent fractions",
+      "locator": "Paragraph 1",
+      "excerpt": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make that whole; the numerator tells how many of those parts are selected. One half and two quarters represent the same amount when their wholes are the same size. Three quarters is one quarter less than one whole. Two equal halves make one whole. Quantities cannot be compared from their fractions alone if the original wholes differ in size. For example, half of a large container can exceed half of a small container. Cutting a whole into more equal pieces changes the piece count but not the original total amount. Adding fractions with the same denominator adds the numerators while keeping the denominator. One quarter plus two quarters is three quarters. An equal share requires equal amounts, not simply an equal number of differently sized pieces."
+    }
+  ]
+}

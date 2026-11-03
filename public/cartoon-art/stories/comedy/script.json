@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 2,
+  "id": "creative-story-comedy-revised",
+  "kind": "cartoon",
+  "title": "Half-time, Whole Trouble",
+  "summary": "A runaway football. One orange. A star striker with a very questionable theory about fair shares.",
+  "story": {
+    "genre": "comedy",
+    "interest": "Football",
+    "premise": "During a fictional football half-time, Mira and Kit share one orange while chasing a runaway ball.",
+    "want": "Catch the ball and share their snack fairly before play restarts.",
+    "stakes": "They risk missing the restart while arguing about their shares.",
+    "obstacle": "Kit cuts his half into two quarters and mistakes more pieces for more orange.",
+    "turn": "Kit presses his two quarters together and sees that they match Mira’s half.",
+    "payoff": "They catch the ball and return with equal shares; Mira teases Kit about his failed trick.",
+    "learningConnection": "Comparing a half with two quarters of the same orange corrects the piece-count trick and settles the sharing argument."
+  },
+  "segments": [
+    {
+      "id": "segment-1",
+      "speaker": "guide",
+      "text": "Kit, the match ball is escaping toward the street, half-time is ending, and we still have one whole orange to share!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "talk",
+      "beat": "hook",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-2",
+      "speaker": "learner",
+      "text": "I'll cut my half into two quarters and leave your half in one piece. Two beats one. Extra orange for the star striker!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-3",
+      "speaker": "guide",
+      "text": "Cup those pieces before you drop them! Press your two quarters together. See how they line up exactly against my half?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "travel-left",
+        "shot": "reaction",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-4",
+      "speaker": "learner",
+      "text": "They match? But I had more pieces. Oh. Same orange, smaller pieces. My tactical genius has let me down.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "think",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "speaker",
+        "pace": "calm"
+      }
+    },
+    {
+      "id": "segment-5",
+      "speaker": "guide",
+      "text": "Same whole, same amount. Your two quarters equal my half. Now can your tactical genius catch that ball?",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "discovery",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "two-shot",
+        "pace": "calm"
+      }
+    },
+    {
+      "id": "segment-6",
+      "speaker": "learner",
+      "text": "You can split your half too — then we each carry two quarters. Fair shares, secure grip. I'm calling that a tactical recovery!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "workshop",
+      "action": "talk",
+      "beat": "choice",
+      "direction": {
+        "blocking": "separate",
+        "shot": "speaker",
+        "pace": "calm"
+      }
+    },
+    {
+      "id": "segment-7",
+      "speaker": "guide",
+      "text": "Ball past the workshop door! Orange in one hand, other hand free. Go, go, go!",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "city",
+      "action": "talk",
+      "beat": "setback",
+      "direction": {
+        "blocking": "pursuit",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-8",
+      "speaker": "learner",
+      "text": "Caught it! Equal orange, ball saved. Please tell me the team didn't hear my two-beats-one theory.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "travel-right",
+        "shot": "wide",
+        "pace": "urgent"
+      }
+    },
+    {
+      "id": "segment-9",
+      "speaker": "guide",
+      "text": "Of course not. I only told the referee. Come on, star striker — you've still got a whole match to explain yourself.",
+      "sourceRefs": [
+        "source-5cc6cc4e7289-1"
+      ],
+      "scene": "garden",
+      "action": "celebrate",
+      "beat": "payoff",
+      "direction": {
+        "blocking": "face-off",
+        "shot": "two-shot",
+        "pace": "calm"
+      }
+    }
+  ],
+  "question": {
+    "prompt": "How do equivalent fractions describe the same amount?",
+    "answer": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make the whole, and the numerator tells how many parts are selected. One half and two quarters are equivalent when the wholes are the same size because two quarters cover the same amount as one half. Cutting a whole into more pieces changes the piece count, not the total amount, so an equal share needs equal amounts, not just an equal number of pieces. Fractions also cannot be compared by themselves when the original wholes differ in size.",
+    "sourceRefs": [
+      "source-5cc6cc4e7289-1"
+    ]
+  },
+  "sources": [
+    {
+      "id": "source-5cc6cc4e7289-1",
+      "title": "Mosaic authored notes — equal parts and equivalent fractions",
+      "locator": "Paragraph 1",
+      "excerpt": "A fraction describes equal parts of one whole. The denominator tells how many equal parts make that whole; the numerator tells how many of those parts are selected. One half and two quarters represent the same amount when their wholes are the same size. Three quarters is one quarter less than one whole. Two equal halves make one whole. Quantities cannot be compared from their fractions alone if the original wholes differ in size. For example, half of a large container can exceed half of a small container. Cutting a whole into more equal pieces changes the piece count but not the original total amount. Adding fractions with the same denominator adds the numerators while keeping the denominator. One quarter plus two quarters is three quarters. An equal share requires equal amounts, not simply an equal number of differently sized pieces."
+    }
+  ]
+}

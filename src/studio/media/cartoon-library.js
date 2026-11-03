@@ -1,3 +1,4 @@
+import {stageAtTime} from './cartoon-director.js';
 // Closed, decorative art library. Reviewed source/script IDs never change.
 export const CARTOON_STYLES=Object.freeze({anime:'Prism anime',paper:'Paper comedy',original:'Field Notes'});
 export const SETTING_EDITIONS=Object.freeze(['Original setting','Alternate setting','Further afield']);
@@ -26,26 +27,17 @@ export async function loadCartoonLibrary(style,edition,{signal,fetcher=globalThi
   if(controller.signal.aborted)throw abortError();return {...pack,images};
  }catch(error){controller.abort();if(timedOut)throw Error('Cartoon artwork took too long to load. Please retry.');throw error;}finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
 }
-// Timing comes only from the narration clock, including seek and playback rate.
-export function cartoonPerformance({speaker,active,action,elapsed,index=0,still=false}){
- const t=Number.isFinite(elapsed)?Math.max(0,elapsed):0;
- if(still)return {motion:active?(action==='talk'?'talk':action):'idle',time:0,entrance:1};
- if(index===0&&t<2)return {motion:'walk',time:t,entrance:Math.min(1,t/2)};
- const beat=index===0?Math.max(0,t-2):t;
- if(!active)return {motion:beat%10>=4&&beat%10<6?'react':'idle',time:beat%2,entrance:1};
- if(action==='think')return {motion:'think',time:Math.min(beat,.95),entrance:1};
- if(action==='celebrate'&&beat<2)return {motion:'celebrate',time:beat,entrance:1};
- const motion=beat%8>=2&&beat%8<4?'explain':'talk';return {motion,time:beat%2,entrance:1};
-}
-export function drawLibraryScene(ctx,pack,{segment,elapsed,index,still=false}){
+export function drawLibraryScene(ctx,pack,{segment,elapsed,index,duration=12,still=false}){
  const bg=pack.backgrounds[segment.scene],background=pack.images.get(bg.url);if(!background)throw Error('The selected cartoon setting is not loaded.');
- ctx.save();ctx.beginPath();ctx.rect(0,0,1280,540);ctx.clip();ctx.drawImage(background,0,0,bg.width,bg.height,0,-180,1280,720);
- // A gentle stage shadow grounds feet without altering source illustrations.
- for(const [speaker,x,mirror] of [['guide',365,false],['learner',915,true]]){
-  const p=cartoonPerformance({speaker,active:speaker===segment.speaker,action:segment.action,elapsed,index,still}),clip=pack.cast[speaker][p.motion],img=pack.images.get(clip.url);if(!img)throw Error('The selected cartoon performance is not loaded.');
-  const close=!still&&(index>0||elapsed>=4),floor=close?(pack.style==='anime'?700:650):535;
-  const n=Math.min(clip.frames-1,Math.floor(p.time*clip.fps)%clip.frames),h=pack.style==='anime'?(close?680:485):(close?550:420),w=h*clip.frameWidth/clip.frameHeight,px=x+(speaker==='guide'?-1:1)*(1-p.entrance)*110;
-  if(!close){ctx.fillStyle='rgba(20,30,40,.15)';ctx.beginPath();ctx.ellipse(px,524,w*.24,10,0,0,Math.PI*2);ctx.fill();}ctx.save();ctx.translate(px,floor);ctx.scale(mirror?-1:1,1);ctx.drawImage(img,n%clip.columns*clip.frameWidth,Math.floor(n/clip.columns)*clip.frameHeight,clip.frameWidth,clip.frameHeight,-w/2,-h,w,h);ctx.restore();
+ const stage=stageAtTime({segment,elapsed,index,duration,still});
+ ctx.save();ctx.beginPath();ctx.rect(0,0,1280,540);ctx.clip();
+ ctx.translate(stage.camera.x,stage.camera.y);ctx.scale(stage.camera.scale,stage.camera.scale);
+ ctx.drawImage(background,0,0,bg.width,bg.height,0,-180,1280,720);
+ for(const actor of [...stage.actors].sort((a,b)=>a.y-b.y)){
+  const clip=pack.cast[actor.speaker][actor.motion],img=pack.images.get(clip.url);if(!img)throw Error('The selected cartoon performance is not loaded.');
+  const n=Math.min(clip.frames-1,Math.floor(actor.time*clip.fps)%clip.frames),h=(pack.style==='anime'?480:415)*(1+(actor.y-520)/260),w=h*clip.frameWidth/clip.frameHeight;
+  ctx.fillStyle='rgba(20,30,40,.15)';ctx.beginPath();ctx.ellipse(actor.x,actor.y-7,w*.24,9,0,0,Math.PI*2);ctx.fill();
+  ctx.save();ctx.translate(actor.x,actor.y);ctx.scale(actor.facing,1);ctx.drawImage(img,n%clip.columns*clip.frameWidth,Math.floor(n/clip.columns)*clip.frameHeight,clip.frameWidth,clip.frameHeight,-w/2,-h,w,h);ctx.restore();
  }
- ctx.restore();
+ ctx.restore();return stage;
 }
