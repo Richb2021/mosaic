@@ -7,7 +7,7 @@ export function revisionFields(content){
  const at=path=>path.reduce((v,key)=>v?.[key],content);
  function walk(value,path=[]){
   for(const [key,item] of Object.entries(value)){
-   if(locked.has(key)||(content.template==='town-v1'&&key==='ending'))continue;
+   if(locked.has(key)||(['town-v1','economy-v1'].includes(content.template)&&key==='ending'))continue;
    const next=[...path,key];
    if(item&&typeof item==='object')walk(item,next);
    else if(typeof item==='string'||typeof item==='number'){

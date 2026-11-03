@@ -42,7 +42,7 @@ export class ResourceWorkshop {
   if(m?.kind!=='resource-job'||m.job.id!==id||!['starting','running'].includes(m.job.status))return;
   this.timer=setTimeout(async()=>{
    if(this.g.modal!==m)return;
-   try{const data=await this.request('jobs/'+id+'/check',{});if(this.g.modal===m){m.job=data.job;this.g.renderModal();this.poll(id)}}
+   try{const data=await this.request('jobs/'+id+'/check',{});if(this.g.modal===m){m.job=data.job;m.feedback='';this.g.renderModal();this.poll(id)}}
    catch(e){if(this.g.modal===m){m.feedback=e.message+' Checking this saved request again shortly.';this.g.renderModal();this.poll(id,15000)}}
   },delay);
  }
