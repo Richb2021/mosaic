@@ -2,7 +2,7 @@
 import argparse, datetime, email.message, fcntl, hashlib, json, os, pathlib, shlex, smtplib, ssl, urllib.request
 
 RECIPIENT = 'contact@graysongames.com'
-ORIGIN = 'https://mosaic-lanternbound-rpg.rbuk2025.chatgpt.site'
+ORIGIN = 'https://mosaic.richardbatt.com'
 KNOWN = {'database', 'mediaWorker', 'mediaQueue', 'mediaFailures', 'retention', 'learnerStorage', 'files', 'endpoint', 'backup'}
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs): return None
@@ -14,7 +14,6 @@ def probe(config):
     try:
         assert config['url'] == ORIGIN
         request = urllib.request.Request(ORIGIN + '/api/operations', headers={
-            'OAI-Sites-Authorization':'Bearer ' + config['token'],
             'Authorization':'Bearer ' + config['maintenanceSecret'], 'X-Mosaic-Maintenance':'health-v1'})
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=45) as r: result=json.load(r)
         assert result['schemaVersion'] == 1 and isinstance(result['issues'], list)

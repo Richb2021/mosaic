@@ -1,5 +1,7 @@
 # Four further game formats
 
+> Historical milestone record. For current features, hosting and remaining limits, read the [application README](../README.md), [scope](SCOPE.md) and [deployment guide](DEPLOYMENT.md). Absence statements and test counts below describe this milestone.
+
 The default play experience has since been expanded. See [Game depth and accounts](GAME-DEPTH-AND-ACCOUNTS.md) for the current journeys, cloud progress and chapter revision workflow. The mechanics below describe the retained classic engines.
 
 The library now contains eight formats: the existing 3D RPG, 2D adventure,

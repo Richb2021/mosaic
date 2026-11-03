@@ -1,5 +1,7 @@
 # Personal learning studio
 
+> Historical milestone record. For current features, hosting and remaining limits, read the [application README](../README.md), [scope](SCOPE.md) and [deployment guide](DEPLOYMENT.md). Absence statements and test counts below describe this milestone.
+
 Open `/studio.html` from the game library or account page. The studio connects the existing reviewed game catalogue to learner-controlled goals, a small starting check, source reading, practice, game play and reflection.
 
 ## Implemented

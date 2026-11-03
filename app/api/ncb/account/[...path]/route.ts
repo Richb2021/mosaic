@@ -1,8 +1,10 @@
+import {retiredHost} from "../../../../../server/retired-host.js";
 import {env} from 'cloudflare:workers';
 import {createNcbAccountProxy} from '@nocodebackend/account-react/next';
 import {checkOrigin,authCookies,noStore,readJSON} from '../../../../../server/ncb-auth.js';
 export const dynamic='force-dynamic';
 async function handle(request:Request){try{
+ const retired=retiredHost(env);if(retired)return retired;
  checkOrigin(request);
  if(!env.NCB_INSTANCE||!env.NCB_SECRET_KEY)return noStore({error:'Learner accounts are unavailable.'},503);
  const headers=new Headers(request.headers);headers.set('cookie',authCookies(request));headers.delete('authorization');

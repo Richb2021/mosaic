@@ -1,0 +1,22 @@
+[Unit]
+Description=Mosaic learning application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/services/mosaic/current
+EnvironmentFile=%h/.config/mosaic/app.env
+ExecStart=/usr/bin/node server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=65
+UMask=0077
+NoNewPrivileges=true
+MemoryHigh=512M
+MemoryMax=1G
+CPUQuota=100%
+TasksMax=128
+
+[Install]
+WantedBy=default.target

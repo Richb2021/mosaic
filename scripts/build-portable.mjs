@@ -1,0 +1,12 @@
+import {build} from 'esbuild';
+import {mkdir,cp,writeFile,rm} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const output=resolve('portable');
+await mkdir(output,{recursive:true});
+await build({entryPoints:['server/node/start.mjs'],outfile:output+'/server.mjs',bundle:true,platform:'node',format:'esm',target:'node22',external:['node:*'],banner:{js:"import {createRequire} from 'node:module'; const require=createRequire(import.meta.url);"}});
+await build({entryPoints:['scripts/import-portable.mjs'],outfile:output+'/import.mjs',bundle:true,platform:'node',format:'esm',target:'node22',external:['node:*']});
+await rm(output+'/public',{recursive:true,force:true});
+await cp('public',output+'/public',{recursive:true});
+await cp('drizzle',output+'/drizzle',{recursive:true});
+await writeFile(output+'/package.json',JSON.stringify({name:'mosaic-portable',private:true,type:'module',engines:{node:'>=22.23'},scripts:{start:'node server.mjs'}},null,2)+'\n');
+console.log('Portable app built: server.mjs, public assets and existing SQL migrations. No runtime secrets or learner data included.');

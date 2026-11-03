@@ -1,5 +1,7 @@
 # Dynamic content and ownership integration
 
+> Historical milestone record. For current features, hosting and remaining limits, read the [application README](../README.md), [scope](SCOPE.md) and [deployment guide](DEPLOYMENT.md). Absence statements and test counts below describe this milestone.
+
 **Scope clarification, 31 October 2026:** the user means dynamic game content. The implemented resource-to-chapter workflow and its current boundaries are in [DYNAMIC-CONTENT.md](DYNAMIC-CONTENT.md). Workspace administration and transfers below are retained as later architecture, not the current implementation priority.
 
 The game is prepared for both content generated from uploaded learning resources and ownership by individuals, teachers and institutions. The deployed preview still stores authored content and saves in the browser. Browser labels and imported JSON never authorize access to a school, class or another person’s resources.

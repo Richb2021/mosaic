@@ -2,8 +2,8 @@
 
 This pass checks the existing individual, school and family release paths. It
 does not widen the Site audience, assert accessibility conformance, or establish
-classroom-scale capacity. The site is still owner-private; NoCodeBackend
-admission remains a separate application boundary.
+classroom-scale capacity. At this milestone the site was owner-private; NoCodeBackend
+admission remains a separate application boundary. See [current deployment](DEPLOYMENT.md) for the later external-hosting migration.
 
 ## Corrections
 

@@ -1,5 +1,7 @@
 # Source review, concept practice and RPG cloud progress
 
+> Historical milestone record. For current features, hosting and remaining limits, read the [application README](../README.md), [scope](SCOPE.md) and [deployment guide](DEPLOYMENT.md). Absence statements and test counts below describe this milestone.
+
 This phase extends the existing owner-private site and NoCodeBackend account system. It adds no database tables, migrations, sharing changes or quota increases. The original full-product plan remains broader than this implementation.
 
 ## What changes

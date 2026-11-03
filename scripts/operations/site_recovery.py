@@ -6,7 +6,7 @@ from monitor import ORIGIN,NoRedirect
 from ncb_recovery import ROOT,write,read,digest
 
 def site_get(config,query=''):
- req=urllib.request.Request(ORIGIN+'/api/operations'+query,headers={'OAI-Sites-Authorization':'Bearer '+config['token'],'Authorization':'Bearer '+config['maintenanceSecret'],'X-Mosaic-Maintenance':'recovery-v1'})
+ req=urllib.request.Request(ORIGIN+'/api/operations'+query,headers={'Authorization':'Bearer '+config['maintenanceSecret'],'X-Mosaic-Maintenance':'recovery-v1'})
  with urllib.request.build_opener(NoRedirect()).open(req,timeout=90) as r:
   b=r.read(64*1024*1024+1);assert len(b)<=64*1024*1024,'Object exceeds backup bound';return b
 

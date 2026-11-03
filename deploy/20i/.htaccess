@@ -1,0 +1,17 @@
+Options -Indexes
+DirectoryIndex index.html
+RewriteEngine On
+RewriteRule ^api/ api.php [L]
+RewriteRule ^studio/?$ studio.html [L]
+RewriteRule ^account/?$ account.html [L]
+RewriteRule ^welcome/?$ welcome.html [L]
+RewriteRule ^cartoons/?$ cartoons.html [L]
+<FilesMatch "^\.">
+Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+Header always set X-Content-Type-Options "nosniff"
+<FilesMatch "\.(html|php)$">
+Header set Cache-Control "no-store"
+</FilesMatch>
+</IfModule>

@@ -4,7 +4,7 @@ import {renderEpisode} from './render.mjs';
 const configPath=process.env.MOSAIC_MEDIA_CONFIG||path.join(os.homedir(),'.config/mosaic-pilot/media.json'),config=JSON.parse(await readFile(configPath,'utf8'));
 const origin=new URL(config.url);if(origin.protocol!=='https:'&&!['127.0.0.1','localhost'].includes(origin.hostname))throw Error('Use the configured HTTPS origin.');
 const state=process.env.MOSAIC_MEDIA_STATE||path.join(os.homedir(),'.local/state/mosaic-media');await mkdir(state,{recursive:true,mode:0o700});
-const headers={'OAI-Sites-Authorization':'Bearer '+config.siteToken,Authorization:'Bearer '+config.maintenanceSecret,'X-Mosaic-Maintenance':'media-v1'};
+const headers={...(config.gatewayKey?{'X-Mosaic-Gateway':config.gatewayKey}:{}),...(config.siteToken?{'OAI-Sites-Authorization':'Bearer '+config.siteToken}:{}),Authorization:'Bearer '+config.maintenanceSecret,'X-Mosaic-Maintenance':'media-v1'};
 async function request(body,binary){const url=new URL('/api/media-worker',origin);if(binary)url.search=new URLSearchParams(body);const r=await fetch(url,{method:'POST',redirect:'error',headers:{...headers,'Content-Type':binary?'application/octet-stream':'application/json'},body:binary||JSON.stringify(body),signal:AbortSignal.timeout(binary?120000:90000)});if(!r.ok)throw Error('Worker request failed: HTTP '+r.status);return r}
 const receipt=async value=>{await writeFile(path.join(state,'last.tmp'),JSON.stringify({at:new Date().toISOString(),...value}),{mode:0o600});await (await import('node:fs/promises')).rename(path.join(state,'last.tmp'),path.join(state,'last.json'))};
 // A crashed process can leave temporary audio. Remove only this worker's scratch directories.

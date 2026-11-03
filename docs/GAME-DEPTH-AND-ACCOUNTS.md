@@ -1,5 +1,7 @@
 # Game depth, learner accounts and reviewed copies
 
+> Historical milestone record. For current features, hosting and remaining limits, read the [application README](../README.md), [scope](SCOPE.md) and [deployment guide](DEPLOYMENT.md). Absence statements and test counts below describe this milestone.
+
 This phase adds NoCodeBackend sign-in and cloud progress for the seven illustrated game formats, expands four game loops, and lets a creator revise a stored chapter without changing the original. The existing private Sites audience remains in place. It is still a bounded learning-game platform, not an unrestricted game generator or a complete school management system.
 
 ## The four expanded journeys

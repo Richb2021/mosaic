@@ -1,8 +1,8 @@
 """Deterministic daily retention runner. Credentials stay on the operations host."""
 import pathlib,json,urllib.request,urllib.error,hashlib,datetime,sys
 home=pathlib.Path.home();directory=home/'.local/state/mosaic-pilot';directory.mkdir(parents=True,exist_ok=True);directory.chmod(0o700)
-config=json.loads((home/'.config/mosaic-pilot/maintenance.json').read_text());origin='https://mosaic-lanternbound-rpg.rbuk2025.chatgpt.site';assert config['url']==origin
-headers={'OAI-Sites-Authorization':'Bearer '+config['token'],'Authorization':'Bearer '+config['maintenanceSecret'],'X-Mosaic-Maintenance':'retention-v1'}
+config=json.loads((home/'.config/mosaic-pilot/maintenance.json').read_text());origin='https://mosaic.richardbatt.com';assert config['url']==origin
+headers={'Authorization':'Bearer '+config['maintenanceSecret'],'X-Mosaic-Maintenance':'retention-v1'}
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*args,**kwargs):return None
 client=urllib.request.build_opener(NoRedirect())

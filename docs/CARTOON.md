@@ -24,7 +24,7 @@ The synthetic QA fixture exercises the player; root integration acceptance separ
 
 ## Cartoon art collection — 3 November 2026
 
-`cartoon-library.js` maps the same four reviewed scene IDs and two presenter IDs onto two curated visual treatments: **Prism anime** and **Paper comedy**. No source words, source references, model prompt, approved identity, stored audio key or game rules are rewritten by this selection. The media script schema is unchanged. `public/cartoons.html` is an owner-private Site preview of the production component with the short authored fractions sample.
+`cartoon-library.js` maps the same four reviewed scene IDs and two presenter IDs onto two curated visual treatments: **Prism anime** and **Paper comedy**. No source words, source references, model prompt, approved identity, stored audio key or game rules are rewritten by this selection. The media script schema is unchanged. `public/cartoons.html` is an authored showcase of the production component with the short authored fractions sample.
 
 The production inventory is 24 backgrounds (three alternatives for each of four settings in each style) and 28 transparent animation sheets (Mira and Kit × two styles × idle, talk, explain, think, react, celebrate, walk). Raw high-resolution originals and resumable provider receipts remain in `../output/cartoon-variety/raw/`. Images use Sorceress GPT Image 2.5 Sunburst; animations use Wan 2.7 and Sorceress Corridor Key. Two initial Imagine 1.5 pilots failed with a reported provider outage; the successful replacement pilots are independently identified. Generated visual media is decorative, fictional scene framing, never a factual diagram or evidence source.
 

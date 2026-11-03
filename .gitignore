@@ -15,3 +15,7 @@ public/game.js*
 public/game.css*
 public/index.html
 public/extraction/
+
+# Portable self-hosted build and private runtime
+portable/
+.mosaic-data/

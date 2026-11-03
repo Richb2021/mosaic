@@ -4,7 +4,7 @@ For the latest concurrency checks, grant corrections and remaining external
 release gates, see [release acceptance](RELEASE-ACCEPTANCE.md). Historical counts
 and gaps below should be read alongside the newer launch-operations evidence.
 
-This release uses NoCodeBackend for sign-in, email verification, recovery and learner records. The application enforces resource ownership and managed-learning permissions around the verified NCB identity. The Site audience remains owner-private until named pilot access is explicitly authorised.
+This release uses NoCodeBackend for sign-in, email verification, recovery and learner records. The application enforces resource ownership and managed-learning permissions around the verified NCB identity. Public hosting is being migrated to the 20i-managed domain; see [deployment status](DEPLOYMENT.md). NoCodeBackend admission is separate from whether the website can be reached.
 
 ## Accounts and ownership
 
@@ -53,7 +53,7 @@ Closure completion removes identity details from its control record and removes 
 - Stop new generation with the administrator control when provider spend or content generation needs investigation. Existing playback stays available.
 - Inspect the saved job/provider ID before retrying. A timeout is not permission to issue another paid request.
 - For storage trouble, leave the current record intact and use its saved version/conflict response. Do not replace unreadable learner records with empty defaults.
-- Download a workspace and learner export before a destructive change. Exports include extracted sources and original media; original uploaded documents are not retained by this app. Restore learning through the validated source-review/programme/save interfaces; never insert untrusted export JSON directly into production tables.
+- Download a workspace and learner export before a destructive change. Exports include extracted sources and original media; optionally retained originals follow the [knowledge-library export bounds](KNOWLEDGE-PROGRAMME.md). Restore learning through the validated source-review/programme/save interfaces; never insert untrusted export JSON directly into production tables.
 - Application rollback uses a previously saved Sites version and preserves the existing access policy. A source-version rollback is not a database restore. Infrastructure-level D1/NCB/R2 restoration must be arranged and tested with the hosting providers before claiming a production disaster-recovery SLA.
 - Account-recovery email is an independently tested external dependency. NCB sign-in rate limits remain authoritative; preserve Retry-After and wait instead of trying alternate identities to evade throttling.
 
