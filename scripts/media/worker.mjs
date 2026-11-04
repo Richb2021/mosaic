@@ -14,7 +14,9 @@ async function tick(){let job,directory,timer;
  try{({job}=await (await request({action:'claim'})).json());if(!job){await receipt({status:'idle'});return false}directory=await mkdtemp(path.join(state,'render-'));await receipt({status:'running',jobId:job.id});
   let leaseError;timer=setInterval(()=>{request({action:'renew',id:job.id,token:job.token}).catch(e=>{leaseError=e})},60000);
   const clips=[];for(let index=0;index<job.total;index++){if(leaseError)throw leaseError;const r=await request({action:'audio',id:job.id,token:job.token,index}),file=path.join(directory,`clip-${index}.mp3`);await writeFile(file,new Uint8Array(await r.arrayBuffer()),{mode:0o600});clips.push(file)}
-  const rendered=await renderEpisode({job,clips,directory,assets:config.assets,onProgress:async()=>{if(leaseError)throw leaseError}});if(leaseError)throw leaseError;
+  // Story backdrops are optional: any that fail to download fall back to the library setting.
+  const backdrops={};for(const scene of Object.keys(job.backdrops||{})){try{const r=await request({action:'backdrop',id:job.id,token:job.token,scene}),file=path.join(directory,`backdrop-${scene}.webp`);await writeFile(file,new Uint8Array(await r.arrayBuffer()),{mode:0o600});backdrops[scene]={file,...job.backdrops[scene]}}catch{}}
+  const rendered=await renderEpisode({job,clips,directory,assets:config.assets,backdrops,onProgress:async()=>{if(leaseError)throw leaseError}});if(leaseError)throw leaseError;
   await request({action:'complete',id:job.id,token:job.token},await readFile(rendered.output));await receipt({status:'complete',jobId:job.id,duration:rendered.duration,frames:rendered.frames});return true;
  }catch(e){if(job)await request({action:'fail',id:job.id,token:job.token}).catch(()=>{});await receipt({status:'attention',jobId:job?.id||null,error:e.message.startsWith('Worker request')?e.message:'Media render failed; check worker dependencies and saved job.'});return false;
  }finally{clearInterval(timer);if(directory)await rm(directory,{recursive:true,force:true})}

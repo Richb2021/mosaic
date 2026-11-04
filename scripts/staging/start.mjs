@@ -26,7 +26,7 @@ if(!origin)throw Error('MOSAIC_PUBLIC_ORIGIN is required');if(key.length<32)thro
 const DB=new SQLStore(resolve(data,'application.sqlite'),{migrations:resolve(root,'drizzle')}),BUCKET=new ObjectStore(resolve(data,'objects.sqlite')),store=new StagingLearnerStore(resolve(data,'learner-store.sqlite'));
 // Only these settings reach the app. NCB, gateway and maintenance secrets never do, even if present.
 // AI keys are optional; staging has its own, lower spending caps (see docs/STAGING.md).
-const PASS=['META_API_KEY','FISH_AUDIO_API_KEY','FISH_AUDIO_GUIDE_VOICE','FISH_AUDIO_LEARNER_VOICE','PILOT_DAILY_BUDGET_USD','PILOT_GLOBAL_DAILY_BUDGET_USD','WORKSHOP_GENERATION_LIMIT','MEDIA_WORKER_ENABLED','MAINTENANCE_SECRET','PILOT_OPEN_SIGNUP'];
+const PASS=['META_API_KEY','FISH_AUDIO_API_KEY','FISH_AUDIO_GUIDE_VOICE','FISH_AUDIO_LEARNER_VOICE','PILOT_DAILY_BUDGET_USD','PILOT_GLOBAL_DAILY_BUDGET_USD','WORKSHOP_GENERATION_LIMIT','MEDIA_WORKER_ENABLED','MAINTENANCE_SECRET','PILOT_OPEN_SIGNUP','CARTOON_BACKDROPS'];
 const env={DB,BUCKET,PILOT_ENABLED:'true',PILOT_ADMIN_OWNER:await learnerOwner(personaUser(SEED_PEOPLE[0])),...Object.fromEntries(PASS.filter(k=>process.env[k]).map(k=>[k,process.env[k]]))};
 if(env.META_API_KEY&&!env.PILOT_GLOBAL_DAILY_BUDGET_USD)throw Error('Set staging spending caps before adding AI keys');
 // Background work (generation jobs) runs after the response, as on live.
