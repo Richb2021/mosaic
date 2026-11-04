@@ -122,3 +122,7 @@ button.cl-kpi{cursor:pointer}
 .cl-board li.is-waiting .cl-rank{background:transparent!important;color:var(--ll-ink-soft)}
 .cl-board li.is-waiting .cl-steps{font-size:.82rem;color:var(--ll-ink-soft)}
 .cl-kpi small{font-weight:500;opacity:.75}
+.cl-chip.is-code{background:var(--ll-teal-soft,#E3F4F1);color:#0E7468}
+.cl-chip.is-elsewhere{background:var(--ll-paper,#F3EBDB);color:var(--ll-ink-soft)}
+.cl-assign{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ll-cream);border-radius:14px;padding:10px 14px;margin:0 0 12px}
+.cl-assign p{margin:0;font-size:.88rem;color:var(--ll-ink-soft)}

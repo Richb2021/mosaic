@@ -41,7 +41,31 @@ export function CourseDelivery({course,job,data,client,onReload,onAssigned}){
  <p className="cd-note">Each learner receives the exact published activities in their assigned learning shelf. Your personal plan context, source library and private answers stay private. Learners receive a saved course route and choose whether to share their own status or help requests. Sending a changed course version replaces the previous assignment and turns sharing off for that new version.</p>
  {delivery.ready&&<><fieldset disabled={busy||receipts.length>0}><legend>Choose learners · up to 20 per delivery</legend>{learners.length?<div className="cd-learners">{learners.map(m=><label className="check" key={m.accountReference}><input type="checkbox" checked={selected.includes(m.accountReference)} disabled={!selected.includes(m.accountReference)&&selected.length>=20} onChange={e=>{setSelected(v=>e.target.checked?[...v,m.accountReference]:v.filter(id=>id!==m.accountReference));setReview(false)}}/><span><b>{m.label||'Learner '+m.accountReference.slice(0,8)}</b>{m.group&&<small>{m.group}</small>}</span></label>)}</div>:<p>No active learners in your group. <a href="/welcome.html">Invite learners</a> before assigning.</p>}</fieldset>
  {!receipts.length&&<label className="check cd-confirm"><input type="checkbox" checked={review} disabled={busy||!selected.length} onChange={e=>setReview(e.target.checked)}/>I checked the objectives, published activities, selected question sets and learners.</label>}
- <div className="cd-actions"><button className="primary" disabled={busy||complete||!selected.length||!review} onClick={send}>{busy?'Assigning activities…':complete?'All deliveries confirmed':receipts.length?'Retry unconfirmed deliveries':'Assign course activities'}</button>{receipts.length>0&&!busy&&<button onClick={()=>{setReceipts([]);setSelected([]);setReview(false);setError('')}}>Choose another group</button>}</div></>}
+ <div className="cd-actions"><button className="primary" disabled={busy||complete||!selected.length||!review} onClick={send}>{busy?'Assigning activities…':complete?'All deliveries confirmed':receipts.length?'Retry unconfirmed deliveries':'Assign course activities'}</button>{receipts.length>0&&!busy&&<button onClick={()=>{setReceipts([]);setSelected([]);setReview(false);setError('')}}>Choose another group</button>}</div><ClassDelivery client={client} course={course} job={job} locked={busy} body={{questionBanks,learningResources,settings:{instructions,dueAt:due?new Date(due).getTime():null}}}/></>}
  <div className="cd-results" aria-live="polite">{error&&<p className="message error" role="alert">{error}</p>}{receipts.length>0&&<><p><b>{confirmed} of {receipts.length} deliveries confirmed.</b> {complete?'Learners can open the activities in Studio.':busy?'Keep this course open while delivery finishes.':'Delivery stopped. Confirmed courses stay assigned. You can retry the remaining items.'}</p><p className="cd-note">These receipts last while this course view is open. An unconfirmed request may have reached the server; retrying the same version safely replaces the same assignment.</p><ul>{receipts.map(r=><li key={r.key}><div><b>{r.label}</b><span>{r.title}</span></div><span>{r.status==='confirmed'?'Confirmed':r.status==='pending'?'Not sent':'Unconfirmed'}</span>{r.error&&<p role="alert">{r.error}</p>}</li>)}</ul></>}</div>
  </section>;
+}
+
+// Whole-class delivery: the server assigns each class member the same reviewed
+// version and reports who received it, who already had it, and who was skipped.
+export function ClassDelivery({client,course,job,body,locked}){
+ const [classes,setClasses]=useState(null),[classId,setClassId]=useState(''),[ok,setOk]=useState(false),[busy,setBusy]=useState(false),[results,setResults]=useState([]),[error,setError]=useState(''),[done,setDone]=useState(false);
+ useEffect(()=>{let live=true;client.journal.request('classes').then(d=>{if(live)setClasses((d.teaching||[]).filter(c=>!c.archived))}).catch(()=>{if(live)setClasses([])});return()=>{live=false}},[]);
+ if(!classes)return null;
+ if(!classes.length)return <p className="cd-note cd-class-empty">Teach a class? Create one in Classes and you can assign this course to everyone in it at once.</p>;
+ async function send(){
+  setBusy(true);setError('');setResults([]);setDone(false);
+  try{let cursor=null,all=[];do{const r=await client.journal.request('course-sharing',{action:'assign-class',classId,courseId:course.id,planHash:job.draftHash,...body,...(cursor?{cursor}:{})});all=[...all,...r.results];setResults(all);cursor=r.nextCursor}while(cursor);setDone(true)}
+  catch(e){setError(e.message)}finally{setBusy(false)}
+ }
+ const count=k=>results.filter(r=>r.status===k).length,label={assigned:'Assigned',unchanged:'Already has this version',skipped:'Not assigned'};
+ return <fieldset className="cd-class" disabled={locked||busy}><legend>Or assign to a whole class</legend>
+  <p>Everyone in the class gets the same reviewed version, activities, instructions and due date chosen above. Learners who join later can be added by sending again; anyone who already has this version is left as is. Leaving the class ends a class assignment.</p>
+  <label>Class<select value={classId} onChange={e=>{setClassId(e.target.value);setOk(false);setResults([]);setDone(false)}}><option value="">Choose a class</option>{classes.map(c=><option key={c.id} value={c.id}>{c.name} · {c.learners} {c.learners===1?'learner':'learners'}</option>)}</select></label>
+  <label className="check"><input type="checkbox" checked={ok} disabled={!classId} onChange={e=>setOk(e.target.checked)}/>I checked the objectives, activities and class.</label>
+  <div className="cd-actions"><button className="primary" disabled={!classId||!ok||busy} onClick={send}>{busy?'Assigning to the class…':done?'Send again':'Assign to class'}</button></div>
+  <div className="cd-results" aria-live="polite">{error&&<p className="message error" role="alert">{error}</p>}
+  {results.length>0&&<><p><b>{count('assigned')} assigned · {count('unchanged')} already had it · {count('skipped')} not assigned.</b>{busy?' Keep this course open while the class is assigned.':''}</p>
+  <ul>{results.map((r,i)=><li key={i}><div><b>{r.label}</b>{r.reason&&<span>{r.reason}</span>}</div><span className={'cd-status is-'+r.status}>{label[r.status]}</span></li>)}</ul></>}</div>
+ </fieldset>;
 }

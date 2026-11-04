@@ -10,6 +10,13 @@ Added 4 November 2026 on branch `redesign/lantern-light`. Backend: `server/class
 - **Leaderboard.** Off by default; the teacher turns it on per class. Learners opt in with a nickname (2–20 letters or numbers). It shows nicknames and the steps each learner finished this week (counted on their device, sent only after opting in), resets every Monday (UTC), and is visible only to that class and its teacher.
 - **Shared explanations.** From the Trail, a learner can share one "explain it back" text with a class after previewing it. The teacher replies with what worked, an optional next step and an optional sticker. Stopping sharing removes the copy straight away.
 
+- **Assign a course to a whole class** (Courses › a ready course › *Or assign to a whole class*; server action `assign-class` in `server/course-sharing-api.js`). Every active member gets the same reviewed version, activities, instructions and due date, 25 per request, and the teacher sees who was assigned, who already had that version and who was skipped and why.
+  - Learners in the teacher's own group get an ordinary course grant.
+  - Self-directed adults (individual context, organised by someone else) get a **class grant**: it records `classId` and a binding to their membership, and `activeCourseGrant` accepts it only while they remain in that class. Leaving, removal or deleting the class revokes it; rejoining does not revive it.
+  - Learners whose access a school or family arranged through another organiser are skipped ("Managed elsewhere"), so a class code can't route content to someone else's managed learner. The administrator can move them into the teacher's group.
+  - The class overview labels each learner "Joined by code" or "Managed elsewhere"; learners see "From your class · NAME" on the course. Teachers still never receive a class learner's account reference.
+- **Invite into a class, in bulk** (Welcome › Invite). One to 30 emails, one per line, each with its own private link (no email is sent). An optional class is joined when the invitation is accepted, so the learner is in the teacher's group and the class at once.
+
 ## Rules this follows
 
 - Only learner-chosen data reaches the teacher: shared course reports (existing consent flow), shared explanations, and opted-in leaderboard steps. "Last update shared" is the only activity signal; not sharing is shown as "Not shared yet", never as inactive.
@@ -44,4 +51,4 @@ All rows live in `data_controls` (SQLite on Baldur, D1 in the Worker build); no 
 
 ## Not yet included
 
-Co-teachers, moving learners between classes, and assigning courses to a whole class at once. Learners who joined by code but were not invited by this teacher only contribute shared explanations and leaderboard steps; shared course reports still need the existing invitation and assignment flow.
+Co-teachers and moving learners between classes. A learner managed by another school or family organiser can join a class and share explanations, but class assignments skip them until the administrator moves them to this teacher's group.

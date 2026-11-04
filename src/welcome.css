@@ -2,7 +2,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--ll-cream);color:var(--ll-ink);font-family:var(--ll-body);font-size:16px;line-height:1.6}
 a{color:var(--ll-violet-ink);text-underline-offset:4px}
-button,input,select{font:inherit}
+button,input,select,textarea{font:inherit}
 button,.primary{border:0;background:var(--ll-amber);color:var(--ll-ink);border-radius:999px;min-height:48px;padding:12px 22px;font-weight:700;cursor:pointer;display:inline-block;text-decoration:none;box-shadow:0 4px 0 var(--ll-amber-deep);transition:transform .15s var(--ll-spring),background .15s}
 button:disabled{opacity:.55;cursor:wait;box-shadow:none}
 button:hover,.primary:hover{background:#FFC266;color:var(--ll-ink)}
@@ -44,7 +44,7 @@ h4{font-size:16px}
 .card{border:1px solid var(--ll-line);padding:26px;border-radius:24px;margin:24px 0;background:var(--ll-white)}
 .card h3{margin-top:0}
 label{display:block;font-size:14px;font-weight:700;margin-bottom:18px}
-input:not([type=checkbox]),select{display:block;width:100%;border:1.5px solid #D8CCB3;border-radius:14px;background:var(--ll-white);padding:12px 14px;color:var(--ll-ink);margin-top:8px;min-height:50px}
+input:not([type=checkbox]),select,textarea{display:block;width:100%;border:1.5px solid #D8CCB3;border-radius:14px;background:var(--ll-white);padding:12px 14px;color:var(--ll-ink);margin-top:8px;min-height:50px}
 .check{display:flex;gap:10px;align-items:flex-start;font-weight:500}
 .check input{width:20px;height:20px;flex-shrink:0;margin-top:3px;accent-color:var(--ll-ink)}
 .note,.support{font-size:14px;color:var(--ll-ink-soft)}
@@ -88,3 +88,8 @@ code{overflow-wrap:anywhere;font-size:12px}
   .support .notice{display:block}
 }
 @media (prefers-reduced-motion:reduce){.welcome-fox{animation:none}button,.primary{transition:none}}
+textarea{resize:vertical;line-height:1.5}
+label small{font-weight:400;color:var(--ll-ink-soft)}
+.notice.invites ul{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.notice.invites li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.86rem;border-top:1px solid var(--ll-line);padding-top:6px}
+.notice.invites button{margin-top:4px}

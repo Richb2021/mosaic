@@ -26,10 +26,23 @@ export async function withGrantLease(env,g,now,handler){
   return await handler(state);
  }finally{for(const id of leases)await db.run('DELETE FROM data_leases WHERE id=?',id)}
 }
+// Class grants: a teacher may assign a course to a class they own. The class, not
+// the organiser relationship, authorises it, so it ends when the learner leaves or is
+// removed. Only the learner's own group, or self-directed adult learners (individual
+// context), can receive work this way; learners whose access a school or family
+// arranged stay with that organiser.
+export const classGrantKey=(c,m)=>digest(JSON.stringify(['class-grant',c.id,c.created,m.joined]));
+export const classAssignable=(learner,principal)=>learner.admitted&&learner.role==='learner'&&(learner.manager===principal||learner.context==='individual');
+async function classMembership(env,g){
+ if(typeof g.classId!=='string'||typeof g.classBinding!=='string')return false;
+ const db=sqlDB(env.DB),c=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class:'+g.classId))?.policy),m=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class-member:'+g.classId+':'+g.learner))?.policy);
+ return c.owner===g.manager&&c.siteOwner===g.siteOwner&&m.status==='active'&&await classGrantKey(c,m)===g.classBinding;
+}
 export async function activeCourseGrant(env,g){
  if(!g||g.revoked||!Array.isArray(g.steps)||!g.steps.length||g.steps.length>6)return false;
  const learner=await admission(env,g.learner),manager=await admission(env,g.manager);
- if(!learner.admitted||learner.role!=='learner'||learner.manager!==g.manager||!manager.admitted||!['administrator','teacher','guardian'].includes(manager.role))return false;
+ if(!learner.admitted||learner.role!=='learner'||!manager.admitted||!['administrator','teacher','guardian'].includes(manager.role))return false;
+ if(learner.manager!==g.manager&&!(g.classId&&learner.context==='individual'&&await classMembership(env,g)))return false;
  return (await memberBinding(env,g.learner)).key===g.learnerBinding&&(await memberBinding(env,g.manager)).key===g.managerBinding;
 }
 export async function grantChapters(env,g){
@@ -42,7 +55,7 @@ export async function grantChapters(env,g){
 export async function learnerCourseGrants(env,learner){
  return (await sqlDB(env.DB).all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.revoked')=0 ORDER BY scope LIMIT 25",learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
 }
-export function publicCourseGrant(g){return {id:g.id,revision:g.revision,title:g.title,courseId:g.courseId,planId:g.planId,planHash:g.planHash,assignedAt:g.assignedAt,settings:assignmentSettings(g.settings),steps:g.steps.map(({id,objective,jobId,hash,title,topicTitle,questionBank,learningResources})=>({id,objective,jobId,hash,title,topicTitle,...(questionBank?{questionBank:publicQuestionBank(questionBank)}:{}),...(learningResources?{learningResources:learningResources.map(publicLearningResource)}:{})}))};}
+export function publicCourseGrant(g){return {id:g.id,revision:g.revision,title:g.title,...(g.className?{className:g.className}:{}),courseId:g.courseId,planId:g.planId,planHash:g.planHash,assignedAt:g.assignedAt,settings:assignmentSettings(g.settings),steps:g.steps.map(({id,objective,jobId,hash,title,topicTitle,questionBank,learningResources})=>({id,objective,jobId,hash,title,topicTitle,...(questionBank?{questionBank:publicQuestionBank(questionBank)}:{}),...(learningResources?{learningResources:learningResources.map(publicLearningResource)}:{})}))};}
 // Existing export/deletion flows use this owner-scoped inventory. It contains no
 // other learner's report payload; those remain in their NCB account.
 export async function courseGrantRecords(env,owner,siteOwner){

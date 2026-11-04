@@ -1,4 +1,4 @@
-import {leaveClassesOf} from './classes-api.js';
+import {leaveClassesOf,addToClass,ownedClass} from './classes-api.js';
 import {requestClosure,closureQueue} from './account-closure.js';
 import {maintenanceStatus} from './background-retention.js';
 import {budgetStatus} from './cost-ledger.js';
@@ -74,19 +74,30 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   const accepted=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+owner))?.policy);
   need(accepted.invite===scope,'Another invitation was accepted first. Reload to review your access arrangement.',409);
   need((await admission(env,owner)).admitted,'Access has been withdrawn. Contact your organiser.',403);
-  await auditEvent(env,'pilot-member:'+owner,'invitation-accepted',{role:member.role,context:member.context},now());return noStore({admitted:true});
+  const joinedClass=invite.classId?await addToClass(env,{classId:invite.classId,manager:invite.manager,learner:owner,user,now:now()}):false;
+  await auditEvent(env,'pilot-member:'+owner,'invitation-accepted',{role:member.role,context:member.context},now());return noStore({admitted:true,joinedClass});
  }
- if(input.action==='invite'){
+ if(input.action==='invite'||input.action==='invite-many'){
   need(manages,'Only an authorised organiser can create invitations.',403);
-  need(typeof input.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)&&input.email.length<=254,'Enter the learner’s sign-in email address.');
+  const emails=input.action==='invite'?[input.email]:input.emails;
+  need(Array.isArray(emails)&&emails.length>=1&&emails.length<=30,'Add between 1 and 30 email addresses, one per line.');
+  const list=[...new Set(emails.map(e=>typeof e==='string'?e.trim().toLowerCase():''))];
+  const bad=list.filter(e=>!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)||e.length>254);need(!bad.length,bad.length===1&&list.length===1?'Enter the learner’s sign-in email address.':'Check these email addresses: '+bad.slice(0,3).join(', ')+(bad.length>3?'…':''));
   const role=input.role||'learner',context=input.context||'individual';need(['learner','teacher','guardian'].includes(role)&&['individual','school','family'].includes(context),'Choose a supported role and setting.');
   need(access.admin||role==='learner','Only the administrator can authorise teachers and guardians.',403);
   need(access.admin||(access.role==='teacher'?context==='school':context==='family'),'Use the setting you are authorised to manage.',403);
   need(context==='individual'||input.managedApproval===true,'Confirm the school or guardian has authorised this learner’s access.');
+  // Optionally join one of this organiser's own classes when the invitation is accepted.
+  const cls=input.classId?await ownedClass(env,input.classId,owner):null;need(!input.classId||cls&&role==='learner','Choose one of your open classes for learners.',403);
   const clean=(v,n)=>typeof v==='string'?v.trim().slice(0,n):'';
-  const bytes=crypto.getRandomValues(new Uint8Array(32)),code=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join(''),expires=now()+7*86400000;
-  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(input.email.trim().toLowerCase()),expires,manager:owner,role,context,group:clean(input.group,80),label:clean(input.label,60),managedApproval:context!=='individual'&&input.managedApproval===true,tutorAllowed:input.tutorAllowed===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true}),now());
-  await auditEvent(env,'pilot-member:'+owner,'invitation-created',{role,context,expires},now());return noStore({code,expires,url:new URL('/welcome.html#invite='+code,req.url).href});
+  const invites=[];
+  for(const email of list){
+   const bytes=crypto.getRandomValues(new Uint8Array(32)),code=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join(''),expires=now()+7*86400000;
+   await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(email),expires,manager:owner,role,context,group:clean(input.group,80),label:list.length===1?clean(input.label,60):'',managedApproval:context!=='individual'&&input.managedApproval===true,tutorAllowed:input.tutorAllowed===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true,...(cls?{classId:cls.id}:{})}),now());
+   invites.push({email,code,expires,url:new URL('/welcome.html#invite='+code,req.url).href});
+  }
+  await auditEvent(env,'pilot-member:'+owner,'invitation-created',{role,context,count:invites.length,toClass:!!cls},now());
+  return noStore(input.action==='invite'?{code:invites[0].code,expires:invites[0].expires,url:invites[0].url,className:cls?.name||null}:{invites,className:cls?.name||null});
  }
  if(input.action==='tutor-access'){
   need(manages,'Only an authorised organiser can manage tutor access.',403);
