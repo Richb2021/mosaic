@@ -27,6 +27,9 @@ Added 4 November 2026 on branch `redesign/lantern-light`. Backend: `server/class
 - **Your data.** Export includes class memberships, leaderboard entries, shared explanations (with feedback) and classes you teach. The deletion preview counts class rows. Shared explanations and leaderboard rows follow the learner's progress-retention setting.
 - **Counts.** Course-report counts (sharing, help) are worked out per page of 20 and labelled "this page" when a class has more learners.
 
+- **Leaderboard fixes (4 November, after the grokcc/muse gap review).** Only steps reported this week are ranked; an opted-in learner with no report this week is listed as "Not reported yet this week", never as zero. A device can only raise this week's total, so a second device starting at zero cannot wipe it. Steps are posted to every class the learner opted into. The teacher sees every opted-in learner; learners see the top ten plus themselves.
+- **Overview accuracy.** Course reports read all of a learner's grants from this teacher (up to the 24-grant cap), newest first. The review queue is the teacher's own drafts across all classes and is labelled that way (`reviewScope:'workshop'`); the unused class-wide "live" count was removed.
+
 ## Storage
 
 All rows live in `data_controls` (SQLite on Baldur, D1 in the Worker build); no migration is needed.

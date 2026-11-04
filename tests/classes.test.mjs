@@ -26,7 +26,7 @@ async function setup(){
  const teacher=user('teacher','Sam Patel'),other=user('teacher-2','Jo Lee'),a=user('learner-a','Amelia Hughes'),b=user('learner-b','Ben Carter'),c=user('learner-c','Chloe Lewis');
  await join(teacher,{role:'teacher',context:'school',managedApproval:true});await join(other,{role:'teacher',context:'school',managedApproval:true});
  for(const l of [a,b,c])await join(l);
- return {env,store,teacher,other,a,b,c,classes,tick:ms=>{clock+=ms},now:()=>clock};
+ return {env,store,teacher,other,a,b,c,classes,join,user,tick:ms=>{clock+=ms},now:()=>clock};
 }
 
 test('teachers create separate classes with their own join codes', async () => {
@@ -71,7 +71,9 @@ test('the leaderboard is off until the teacher enables it, and only opted-in lea
  assert.deepEqual(board.entries.map(e=>[e.nickname,e.tiles]),[['Lamp',9],['River Fox',6]]);assert.equal(board.you.rank,2);
  assert.ok(!JSON.stringify(board).includes(h.a.id)&&!JSON.stringify(board).includes('Amelia'),'only nicknames are shown');
  h.tick(7*86400000);assert.ok(weekOf(h.now())>board.week);
- assert.deepEqual((await h.classes(h.a,undefined,'?view=board&id='+c.id)).leaderboard.entries.map(e=>e.tiles),[0,0],'a new week starts from zero');
+ const fresh=(await h.classes(h.a,undefined,'?view=board&id='+c.id)).leaderboard;
+ assert.deepEqual(fresh.entries.map(e=>[e.rank,e.tiles]),[[null,null],[null,null]],'no report this week is not reported, never zero');
+ assert.equal(fresh.reported,0);assert.equal(fresh.you.rank,null);
  await h.classes(h.b,{action:'board',id:c.id,optIn:false});
  assert.deepEqual((await h.classes(h.a,undefined,'?view=board&id='+c.id)).leaderboard.entries.map(e=>e.nickname),['River Fox']);
  assert.equal((await h.classes(h.other,undefined,'?view=board&id='+c.id)).status,403,'non-members cannot see the board');
@@ -184,4 +186,33 @@ test('learners export their class data and retention expires old shares', async 
  assert.equal(out.memberships[0].className,'Year 8 History');assert.equal(out.sharedExplanations[0].text,'Rivers drop.');
  await expireClassData(h.env,ref,7,h.now()+8*86400000);
  assert.equal((await exportClassData(h.env,ref)).sharedExplanations.length,0);
+});
+
+test('a second device cannot lower this week\'s steps, and a new week starts again', async () => {
+ const h=await setup(),c=(await h.classes(h.teacher,{action:'create',name:'Year 8 History'})).class;
+ await h.classes(h.a,{action:'join',code:c.code});await h.classes(h.teacher,{action:'leaderboard',id:c.id,enabled:true});
+ await h.classes(h.a,{action:'board',id:c.id,optIn:true,nickname:'River Fox'});
+ await h.classes(h.a,{action:'steps',id:c.id,tiles:6});
+ const phone=await h.classes(h.a,{action:'steps',id:c.id,tiles:0});
+ assert.equal(phone.leaderboard.you.tiles,6,'a device that starts at zero keeps the higher total');
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:8})).leaderboard.you.tiles,8);
+ h.tick(7*86400000);
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:2})).leaderboard.you.tiles,2,'the weekly reset still applies');
+});
+
+test('the teacher sees every opted-in learner; learners see the top ten plus themselves', async () => {
+ const h=await setup(),c=(await h.classes(h.teacher,{action:'create',name:'Year 8 History'})).class;
+ await h.classes(h.teacher,{action:'leaderboard',id:c.id,enabled:true});
+ const learners=[];
+ for(let i=0;i<12;i++){const u=h.user('bulk-'+i,'Learner '+i);await h.join(u);learners.push(u);
+  assert.equal((await h.classes(u,{action:'join',code:c.code})).status,200);
+  await h.classes(u,{action:'board',id:c.id,optIn:true,nickname:'Player '+i});
+  if(i<11)await h.classes(u,{action:'steps',id:c.id,tiles:20-i});}
+ const o=await h.classes(h.teacher,undefined,'?view=overview&id='+c.id);
+ assert.equal(o.leaderboard.entries.length,12,'teacher view is not cut at ten');
+ assert.equal(o.leaderboard.reported,11);
+ assert.deepEqual(o.leaderboard.entries.at(-1),{rank:null,nickname:'Player 11',tiles:null,you:false},'opted in without a report is listed, not ranked as zero');
+ assert.equal(o.counts.reviewScope,'workshop');assert.ok(!('live' in o.counts));
+ const mine=(await h.classes(learners[11],undefined,'?view=board&id='+c.id)).leaderboard;
+ assert.equal(mine.entries.length,10);assert.equal(mine.you.nickname,'Player 11');assert.equal(mine.you.rank,null);
 });

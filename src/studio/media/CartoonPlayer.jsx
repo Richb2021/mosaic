@@ -7,9 +7,9 @@ import {CARTOON_STYLES,SETTING_EDITIONS,loadCartoonLibrary} from './cartoon-libr
 import './cartoon.css';
 const audioContext=()=>{const C=globalThis.AudioContext||globalThis.webkitAudioContext;if(!C)throw Error('This browser cannot play generated narration. The transcript remains available.');return new C();};
 const cancelled=()=>Object.assign(Error('Preparation cancelled.'),{name:'AbortError'});
-export function CartoonPlayer({script,audioFor,onStatus=()=>{},reducedMotion=false}){
+export function CartoonPlayer({script,audioFor,onStatus=()=>{},reducedMotion=false,captions:captionsDefault=true}){
  const canvas=useRef(null),ctx=useRef(null),node=useRef(null),decoded=useRef(null),clips=useRef(new Map()),pending=useRef(null),epoch=useRef(0),mounted=useRef(true),clock=useRef({offset:0,start:0,rate:1,playing:false}),recorder=useRef(null),frame=useRef(0),current=useRef(null);
- const [playing,setPlaying]=useState(false),[preparing,setPreparing]=useState(false),[recording,setRecording]=useState(false),[position,setPosition]=useState(0),[selected,setSelected]=useState(0),[ready,setReady]=useState(false),[rate,setRate]=useState(1),[captions,setCaptions]=useState(true),[still,setStill]=useState(()=>reducedMotion||globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false),[message,setMessage]=useState(''),[error,setError]=useState(''),[reveal,setReveal]=useState(false);
+ const [playing,setPlaying]=useState(false),[preparing,setPreparing]=useState(false),[recording,setRecording]=useState(false),[position,setPosition]=useState(0),[selected,setSelected]=useState(0),[ready,setReady]=useState(false),[rate,setRate]=useState(1),[captions,setCaptions]=useState(captionsDefault),[still,setStill]=useState(()=>reducedMotion||globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false),[message,setMessage]=useState(''),[error,setError]=useState(''),[reveal,setReveal]=useState(false);
  const [artStyle,setArtStyle]=useState('anime'),[edition,setEdition]=useState(0),[art,setArt]=useState(null),[artLoading,setArtLoading]=useState(true),[artError,setArtError]=useState(''),[artRetry,setArtRetry]=useState(0);
  const artRef=useRef(null),speechAbort=useRef(null);
  const [speechMessage,setSpeechMessage]=useState(''),[speechFailed,setSpeechFailed]=useState(false);

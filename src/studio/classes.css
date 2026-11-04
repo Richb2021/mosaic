@@ -117,3 +117,8 @@ button.cl-kpi{cursor:pointer}
 @media (max-width:1100px){.cl-layout{grid-template-columns:minmax(0,1fr)}.cl-index{position:static}.cl-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cl-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:600px){.cl-fb{grid-template-columns:1fr}.cl-code strong{font-size:22px}}
 @media (prefers-reduced-motion:reduce){.cl-switch span,.cl-switch span::after{transition:none}}
+/* Opted in, but nothing reported yet this week: no rank, never shown as zero */
+.cl-board li.is-waiting{background:transparent;border:1px dashed var(--ll-line)}
+.cl-board li.is-waiting .cl-rank{background:transparent!important;color:var(--ll-ink-soft)}
+.cl-board li.is-waiting .cl-steps{font-size:.82rem;color:var(--ll-ink-soft)}
+.cl-kpi small{font-weight:500;opacity:.75}

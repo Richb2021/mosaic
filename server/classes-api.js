@@ -83,18 +83,20 @@ export async function exportClassData(env,learner){
  return {memberships,leaderboard,sharedExplanations,teaching};
 }
 
-async function leaderboard(db,c,now,me){
+async function leaderboard(db,c,now,me,all=false){
  if(!c.leaderboard)return {enabled:false,entries:[],you:null};
  const week=weekOf(now),active=new Set((await members(db,c.id)).map(m=>m.learner));
  const rows=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-board:'+c.id+':%')).map(r=>parse(r.policy)).filter(b=>b.optIn&&active.has(b.learner));
- const ranked=rows.map(b=>({...b,tiles:b.week===week?b.tiles:0})).sort((a,b)=>b.tiles-a.tiles||a.updated-b.updated);
- const entries=ranked.map((b,i)=>({rank:i+1,nickname:b.nickname,tiles:b.tiles,you:b.learner===me}));
- return {enabled:true,week,entries:entries.slice(0,10),you:entries.find(e=>e.you)||null,players:entries.length};
+ // Only steps reported this week are ranked. No report this week is "not reported", never zero.
+ const ranked=rows.filter(b=>b.week===week).sort((a,b)=>b.tiles-a.tiles||a.updated-b.updated).map((b,i)=>({rank:i+1,nickname:b.nickname,tiles:b.tiles,you:b.learner===me}));
+ const waiting=rows.filter(b=>b.week!==week).sort((a,b)=>a.nickname.localeCompare(b.nickname)).map(b=>({rank:null,nickname:b.nickname,tiles:null,you:b.learner===me}));
+ const entries=[...ranked,...waiting];
+ return {enabled:true,week,entries:all?entries:entries.slice(0,10),you:entries.find(e=>e.you)||null,players:entries.length,reported:ranked.length};
 }
 
 // Shared course reports for learners this teacher manages: objective status and help requests only.
 async function reportSummary(env,store,db,principal,siteOwner,learner,now){
- const grants=(await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND json_extract(policy,'$.learner')=? LIMIT 6",principal,siteOwner,learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
+ const grants=(await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND json_extract(policy,'$.learner')=? ORDER BY updated DESC LIMIT 24",principal,siteOwner,learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
  let updated=null,latest=null,help=false;
  for(const g of grants){
   try{if(!await activeCourseGrant(env,g)||!(await grantChapters(env,g)).length)continue;const rep=await readSharedReport(env,store,g,now);
@@ -130,15 +132,14 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   }
   const review=await db.all("SELECT id,draft FROM workshop_jobs WHERE owner=? AND status='review' ORDER BY updated DESC LIMIT 5",siteOwner);
   const reviewCount=(await db.one("SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND status='review'",siteOwner))?.n||0;
-  const live=(await db.one("SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND status='published'",siteOwner))?.n||0;
   const labels=new Map(all.map(m=>[m.learner,m.label]));
   const recent=[];for(const s of shares.sort((a,b)=>b.shared-a.shared).slice(0,20))recent.push({handle:await handleOf(c.id,s.learner),label:labels.get(s.learner)||'Learner',key:s.key,title:s.title,text:s.text,shared:s.shared,feedback:s.feedback||null});
   await auditEvent(env,'learner:'+owner,'class-overview-viewed',{},at);
   // Course-report counts are read for this page only; explanation counts cover the whole class.
-  return noStore({class:publicClass(c),counts:{learners:all.length,pageStart:start,pageSize:page.length,partial:page.length<all.length,sharing:learners.filter(l=>l.lastShared).length,help:learners.filter(l=>l.help).length,explaining:all.filter(m=>sharers.has(m.learner)).length,explanations:shares.length,unread:shares.filter(s=>!s.feedback).length,review:reviewCount,live},
+  return noStore({class:publicClass(c),counts:{learners:all.length,pageStart:start,pageSize:page.length,partial:page.length<all.length,sharing:learners.filter(l=>l.lastShared).length,help:learners.filter(l=>l.help).length,explaining:all.filter(m=>sharers.has(m.learner)).length,explanations:shares.length,unread:shares.filter(s=>!s.feedback).length,review:reviewCount,reviewScope:'workshop'},
    learners,nextCursor:start+20<all.length?String(start+20):null,
    review:review.map(j=>{let d={};try{d=JSON.parse(j.draft||'{}')}catch{}return {id:j.id,title:d.title||'Untitled chapter',template:d.template||null,sources:Array.isArray(d.sources)?d.sources.length:0}}),
-   shares:recent,leaderboard:await leaderboard(db,c,at,null)});
+   shares:recent,leaderboard:await leaderboard(db,c,at,null,true)});
  }
  if(req.method==='GET'&&input.view==='board'){
   const {c}=await loadClass(db,input.id),isOwner=c.owner===principal&&c.siteOwner===siteOwner;
@@ -223,7 +224,7 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   need(c.leaderboard,'Your teacher hasn’t turned on the leaderboard for this class.',409);
   need(input.optIn===true,'Choose whether to join the leaderboard.');need(nicknameOk(input.nickname),'Choose a nickname of 2 to 20 letters or numbers.');
   const prev=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',boardScope(c.id,principal)))?.policy),week=weekOf(at);
-  await upsert(db,boardScope(c.id,principal),{classId:c.id,learner:principal,optIn:true,nickname:input.nickname.trim(),week,tiles:prev.week===week?prev.tiles||0:0,updated:at},at);
+  await upsert(db,boardScope(c.id,principal),{classId:c.id,learner:principal,optIn:true,nickname:input.nickname.trim(),week:prev.week===week?week:null,tiles:prev.week===week?prev.tiles||0:null,updated:at},at); // no steps until the device reports them
   return noStore({optIn:true,leaderboard:await leaderboard(db,c,at,principal)});
  }
  if(action==='steps'){
@@ -231,7 +232,8 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   need(Number.isInteger(input.tiles)&&input.tiles>=0&&input.tiles<=500,'Send a whole number of steps.');
   const row=c.leaderboard&&await db.one('SELECT policy FROM data_controls WHERE scope=?',boardScope(c.id,principal));if(!row)return noStore({stored:false});
   const b=parse(row.policy),week=weekOf(at);
-  if(!(b.week===week&&b.tiles===input.tiles))await upsert(db,boardScope(c.id,principal),{...b,week,tiles:input.tiles,updated:at},at);
+  const tiles=b.week===week?Math.max(b.tiles||0,input.tiles):input.tiles;
+  if(!(b.week===week&&b.tiles===tiles))await upsert(db,boardScope(c.id,principal),{...b,week,tiles,updated:at},at);
   return noStore({stored:true,leaderboard:await leaderboard(db,c,at,principal)});
  }
  if(action==='share'){

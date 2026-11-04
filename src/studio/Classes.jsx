@@ -21,7 +21,7 @@ function Board({board,compact}){
  if(!board?.enabled)return null;
  if(!board.entries.length)return <p className="cl-muted">No one has joined the leaderboard yet this week.</p>;
  const rows=compact?board.entries.slice(0,5):board.entries;
- return <ol className="cl-board">{rows.map(e=><li key={e.rank} className={e.you?'is-you':''}><span className="cl-rank">{e.rank}</span><span className="cl-nick">{e.nickname}{e.you&&<small> · you</small>}</span><span className="cl-steps"><b>{e.tiles}</b> steps</span></li>)}{board.you&&!rows.some(r=>r.you)&&<li className="is-you"><span className="cl-rank">{board.you.rank}</span><span className="cl-nick">{board.you.nickname} <small>· you</small></span><span className="cl-steps"><b>{board.you.tiles}</b> steps</span></li>}</ol>;
+ return <ol className="cl-board">{rows.map((e,i)=><li key={i} className={(e.you?'is-you ':'')+(e.rank?'':'is-waiting')}><span className="cl-rank">{e.rank||'·'}</span><span className="cl-nick">{e.nickname}{e.you&&<small> · you</small>}</span><span className="cl-steps">{e.rank?<><b>{e.tiles}</b> steps</>:'Not reported yet this week'}</span></li>)}{board.you&&!rows.some(r=>r.you)&&<li className="is-you"><span className="cl-rank">{board.you.rank||'·'}</span><span className="cl-nick">{board.you.nickname} <small>· you</small></span><span className="cl-steps">{board.you.rank?<><b>{board.you.tiles}</b> steps</>:'Not reported yet this week'}</span></li>}</ol>;
 }
 
 /* ---------------- Teacher ---------------- */
@@ -53,7 +53,7 @@ export function TeacherClasses({client,onCourses}){
       <div className="cl-code"><span>Join code</span><strong>{pretty(c.code)}</strong><button onClick={()=>copy(c.code)}>Copy</button><button className="text-button" disabled={busy} onClick={()=>act({action:'code',id:c.id},'New code ready. The old one no longer works.')}>New code</button></div>
      </header>
      <div className="cl-kpis">
-      <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber">✓</span><span>Waiting for your review</span><b>{o.counts.review}</b></button>
+      <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber">✓</span><span>Your chapters to review <small>(all classes)</small></span><b>{o.counts.review}</b></button>
       <div className="cl-kpi"><span className="cl-kpi-icon is-teal">◆</span><span>Sharing updates{o.counts.partial?' (this page)':''}</span><b>{o.counts.sharing} <small>of {o.counts.partial?o.counts.pageSize:o.counts.learners}</small></b></div>
       <div className="cl-kpi"><span className="cl-kpi-icon is-coral">♥</span><span>Asked for help{o.counts.partial?' (this page)':''}</span><b>{o.counts.help}</b></div>
       <div className="cl-kpi"><span className="cl-kpi-icon is-violet">✎</span><span>Explanations to read</span><b>{o.counts.unread}</b></div>
@@ -81,7 +81,7 @@ export function TeacherClasses({client,onCourses}){
       <div className="cl-card-head"><h3 id="cl-ex-h">Explanations shared with you</h3><span>{o.counts.explanations} shared</span></div>
       {!o.shares.length?<p className="cl-muted">When a learner shares an "explain it back", it appears here for you to respond to.</p>:o.shares.map(s=><Explanation key={s.handle+s.key} s={s} busy={busy} onSend={f=>act({action:'feedback',id:c.id,handle:s.handle,key:s.key,...f},'Feedback sent to '+s.label+'.')}/>)}
      </section>
-     {o.review.length>0&&<section className="cl-card" aria-labelledby="cl-rev-h"><div className="cl-card-head"><h3 id="cl-rev-h">Chapters waiting for your review</h3><button className="text-button" onClick={onCourses}>Open Courses</button></div><ul className="cl-review">{o.review.map(r=><li key={r.id}><strong>{r.title}</strong><span>{r.sources} {r.sources===1?'source':'sources'}</span></li>)}</ul></section>}
+     {o.review.length>0&&<section className="cl-card" aria-labelledby="cl-rev-h"><div className="cl-card-head"><h3 id="cl-rev-h">Your chapters waiting for review <small className="cl-muted">· across all your classes</small></h3><button className="text-button" onClick={onCourses}>Open Courses</button></div><ul className="cl-review">{o.review.map(r=><li key={r.id}><strong>{r.title}</strong><span>{r.sources} {r.sources===1?'source':'sources'}</span></li>)}</ul></section>}
      <div className="cl-danger">
       <button disabled={busy} onClick={()=>act({action:c.archived?'restore':'archive',id:c.id},c.archived?'Class reopened.':'Class archived. The join code stops working.')}>{c.archived?'Reopen class':'Archive class'}</button>
       <button className="text-button danger" disabled={busy} onClick={()=>{if(window.confirm?.('Delete '+c.name+'? Members, shared explanations and the leaderboard are removed. This cannot be undone.')!==false)act({action:'delete',id:c.id,confirmed:true},'Class deleted.')}}>Delete class</button>
@@ -146,14 +146,17 @@ function LeaderboardOptIn({j,busy,board,onSave}){
 export function ClassBoardCard({client,weekSteps}){
  const [state,setState]=useState(null);
  useEffect(()=>{if(!client.journal.user)return;let live=true;(async()=>{try{
-  const d=await client.journal.request('classes'),j=(d.joined||[]).find(j=>j.leaderboard&&j.optIn&&!j.archived)||(d.joined||[]).find(j=>j.leaderboard&&!j.archived);
+  const d=await client.journal.request('classes'),open=(d.joined||[]).filter(j=>j.leaderboard&&!j.archived),opted=open.filter(j=>j.optIn),j=opted[0]||open[0];
   if(!j){if(live)setState({joined:(d.joined||[]).length});return}
-  const r=j.optIn?await client.journal.request('classes',{action:'steps',id:j.id,tiles:Math.min(500,weekSteps)}):await client.journal.request('classes?view=board&id='+j.id);
-  if(live)setState({j,board:r.leaderboard,joined:d.joined.length});
+  // Steps go to every class where the learner opted in; the card shows the first.
+  let board=null;
+  for(const k of opted){const r=await client.journal.request('classes',{action:'steps',id:k.id,tiles:Math.min(500,weekSteps)});if(k===j)board=r.leaderboard;}
+  if(!j.optIn)board=(await client.journal.request('classes?view=board&id='+j.id)).leaderboard;
+  if(live)setState({j,board,joined:d.joined.length,more:opted.length-1});
  }catch{}})();return()=>{live=false}},[client.journal.user?.id,weekSteps]);
  if(!client.journal.user||!state)return null;
  if(!state.j)return state.joined?null:<section className="lh-class lh-class-join"><h2>Got a class code?</h2><p>Join your teacher's class in Me › Classes.</p></section>;
- return <section className="lh-class" aria-labelledby="lh-class-h"><div className="lh-class-head"><h2 id="lh-class-h">{state.j.name}</h2><span>This week</span></div>{state.j.optIn?<Board board={state.board} compact/>:<p className="cl-muted">Your class has a leaderboard. Join it with a nickname in Me › Classes.</p>}</section>;
+ return <section className="lh-class" aria-labelledby="lh-class-h"><div className="lh-class-head"><h2 id="lh-class-h">{state.j.name}</h2><span>This week{state.more>0?` · +${state.more} more ${state.more===1?'class':'classes'}`:''}</span></div>{state.j.optIn?<Board board={state.board} compact/>:<p className="cl-muted">Your class has a leaderboard. Join it with a nickname in Me › Classes.</p>}</section>;
 }
 
 /* ---------------- Share an explanation ---------------- */
