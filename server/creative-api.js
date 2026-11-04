@@ -1,4 +1,5 @@
 import {connectedProgrammeAPI} from './connected-programme-api.js';
+import {PROGRAMME_FORMATS} from '../src/studio/connected-programme.js';
 import {creativePermissions} from './tutor-access.js';
 import {tutorSpeechSegments} from '../src/studio/voice-format.js';
 import {startCost,finishCost} from './cost-ledger.js';
@@ -7,7 +8,7 @@ import {StoreError} from './ncb-store.js';
 import {digest,MODEL} from './content-service.js';
 import {generationBudget,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {validateUnit,applyUnitAction} from '../src/studio/programme.js';
-import {creativeContext,validateCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
+import {creativeContext,validateCreative,reviewCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
 import {submitCreative,checkCreative,creativeRequest} from './creative-provider.js';
 import {synthesizeSpeech,speechConfiguration} from './media-audio.js';
 import {persistentAudio,AUDIO_RECIPE} from './persistent-audio.js';
@@ -32,6 +33,12 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
   const state=JSON.parse(row.payload).studio,next=applyUnitAction(unit,pack,{type:'support-ai',key},now());
   await store.write('learner_profiles',owner,'studio',row.version,{studio:{...state,units:state.units.map(u=>u.id===unit.id?next:u)}},now());
  };
+ // An approved resource fills its own empty programme step through the same 'choose' save as the programme panel. Existing choices and unchosen formats are left alone; failure leaves the manual choice.
+ const linkApproved=async(id,hash,kind)=>{try{
+  const ids={packId:input.packId,contentHash:input.contentHash},call=async body=>(await connectedProgrammeAPI(new Request(new URL('/api/learning/programme'+(body?'':'?'+new URLSearchParams(ids)),req.url),body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...ids,...body})}:undefined),env,{store,owner,principal,siteOwner,resolve,now})).json();
+  const d=await call(),r=d.resources.find(r=>r.id===id&&r.hash===hash&&r.kind===kind&&!r.assigned);
+  if(r&&d.state.formats.includes(kind)&&!d.state.links.some(l=>l.kind===kind))await call({action:'choose',expectedVersion:d.version,formats:d.state.formats,links:[...d.state.links,{id,hash,kind}]});
+ }catch{}};
  const load=async id=>{need(typeof id==='string'&&id.length<=100,'Choose a saved request.');const j=await one(`SELECT * FROM workshop_jobs WHERE id=? AND owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=?`,id,siteOwner,'creative',owner,input.packId,input.contentHash);need(j,'Creative request not found.',404);return j;};
  const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,story:p.context?.story||null,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};
  const result=async extra=>{const jobs=await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash),selected=extra?.jobId||input.selectedJob||input.id;if(selected&&!jobs.some(j=>j.id===selected))jobs.push(await load(selected));const voiceInputs=await all(`SELECT id,status,draft,payload FROM workshop_jobs WHERE owner=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? AND json_extract(payload,'$.voiceTutor')=1 ORDER BY created DESC LIMIT 5`,siteOwner,owner,input.packId,input.contentHash);return noStore({voiceInputs:voiceInputs.map(v=>({id:v.id,status:v.status.replace(/^knowledge-/,''),activityKey:JSON.parse(v.payload).activityKey,text:v.draft?JSON.parse(v.draft).text:''})),jobs:await Promise.all(jobs.map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:!!env.BUCKET,capabilities,...extra})};
@@ -80,7 +87,7 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
  need(p.kind==='tutor'?capabilities.canTutor:capabilities.canAuthor,'Ask your organiser to enable the appropriate learning tools.',403);
  const settle=async(out,from)=>{
   await finishCost(env,{id:j.id,siteOwner,usage:out.usage,status:out.status,now:now()});
-  const content=out.content?validateCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);
+  const content=out.content?reviewCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);
   await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-'+status,content?JSON.stringify(content):null,out.providerId||j.provider_id,out.error||null,now(),j.id,siteOwner,from);
  };
  const fail=async(error,from)=>{await finishCost(env,{id:j.id,siteOwner,usage:error.usage,status:'unknown',now:now()});const uncertain=['TypeError','TimeoutError','AbortError'].includes(error.name);await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'creative-interrupted':'creative-failed',uncertain?'The submission acknowledgement was lost. No automatic repeat was sent.':error.status?error.message:'The request could not be completed. No automatic repeat was sent.',error.providerId||j.provider_id,now(),j.id,siteOwner,from)};
@@ -96,11 +103,12 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
  }
  need(p.kind!=='tutor'&&!p.local,'Tutor replies cannot be edited or approved as reviewed content.');need(j.draft&&input.draftHash===await digest(j.draft),'The script changed. Reload before making this change.',409);
  if(input.action==='edit'){
-  need(j.status==='creative-review','Reopen the reviewed script before editing.',409);const draft=validateCreative(input.draft,p);const saved=await run('UPDATE workshop_jobs SET draft=?,updated=? WHERE id=? AND owner=? AND status=? AND draft=?',JSON.stringify(draft),now(),j.id,siteOwner,j.status,j.draft);need(saved.meta.changes===1,'Another window saved this script first. Reload before changing it.',409);return result();
+  need(j.status==='creative-review','Reopen the reviewed script before editing.',409);const draft=reviewCreative(input.draft,p);const saved=await run('UPDATE workshop_jobs SET draft=?,updated=? WHERE id=? AND owner=? AND status=? AND draft=?',JSON.stringify(draft),now(),j.id,siteOwner,j.status,j.draft);need(saved.meta.changes===1,'Another window saved this script first. Reload before changing it.',409);return result();
  }
  if(input.action==='review'||input.action==='reopen'){
-  const review=input.action==='review';need(j.status===(review?'creative-review':'creative-published'),'This script is no longer in that state.',409);need(!review||input.confirmed===true,'Check the exact script before approval.');validateCreative(JSON.parse(j.draft),p);
-  const saved=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=? AND draft=?',review?'creative-published':'creative-review',now(),j.id,siteOwner,j.status,j.draft);need(saved.meta.changes===1,'Another window changed this script first.',409);return result();
+  const review=input.action==='review';need(j.status===(review?'creative-review':'creative-published'),'This script is no longer in that state.',409);need(!review||input.confirmed===true,'Check the exact script before approval.');(review?reviewCreative:validateCreative)(JSON.parse(j.draft),p);
+  const saved=await run('UPDATE workshop_jobs SET status=?,updated=? WHERE id=? AND owner=? AND status=? AND draft=?',review?'creative-published':'creative-review',now(),j.id,siteOwner,j.status,j.draft);need(saved.meta.changes===1,'Another window changed this script first.',409);
+  if(review&&PROGRAMME_FORMATS.includes(p.kind))await linkApproved(j.id,await digest(j.draft),p.kind);return result();
  }
  throw new StoreError('Creative route not found.',404);
 }

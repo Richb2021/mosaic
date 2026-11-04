@@ -1,6 +1,6 @@
 import {validateExplore,exploreSchema} from './explore-model.js';
 import {STORY_PROPS,PERFORMANCE_MOVES,PROP_INTERACTIONS,validatePerformance,validatePerformances} from '../cartoon-performance.js';
-import {validatePractice,practiceSchema} from './learning-loop.js';
+import {validatePractice,practiceSchema,practiceQuality} from './learning-loop.js';
 import {supportActivity} from './support-model.js';
 import {contentOf,activitiesOf} from './programme.js';
 import {storyBrief,validateDirection,STORY_BEATS,STORY_BLOCKING,STORY_SHOTS,STORY_PACES} from '../story-direction.js';
@@ -22,11 +22,15 @@ export function creativeContext(pack,unit,kind,key,story){
  need(CREATIVE_KINDS.includes(kind),'Choose a supported learning format.');
  need(!['tutor','practice','explore'].includes(kind)||unit.activityKeys.includes(key),'Choose an activity in your programme focus.');
  const keys=['tutor','practice','explore'].includes(kind)?[key]:unit.activityKeys;
+ // A practice cycle spreads its four questions across the chosen focus and up to three more programme focuses, while the evidence stays small.
+ if(kind==='practice')for(const k of unit.activityKeys){if(keys.length>=4)break;if(keys.includes(k))continue;try{if(creativeEvidence(pack,[...keys,k]).reduce((n,s)=>n+s.excerpt.length,0)<=12000)keys.push(k)}catch{}}
  const evidence=creativeEvidence(pack,keys),profile=unit.profile;
  const brief=story!==undefined&&['podcast','cartoon'].includes(kind)?storyBrief(story,profile.interests):null;
  const interests=brief?.interest?[brief.interest,...profile.interests.filter(i=>i!==brief.interest)].slice(0,2):profile.interests.slice(0,2);
  return {kind,title:pack.title,activities:keys.map(k=>{const a=supportActivity(pack,k);return {key:k,prompt:a.prompt,objective:a.objective,scope:a.scope};}),evidence,learner:{level:profile.level,interests,focus:profile.struggles.slice(0,500),goal:profile.goal.slice(0,500),stage:profile.stage,context:profile.context,exam:profile.exam,minutes:profile.minutes,access:profile.access},...(brief?{story:brief}:{})};
 }
+// New, edited and approved content also meets the practice quality rules; saved reviewed content is read with validateCreative alone.
+export function reviewCreative(raw,job){const content=validateCreative(raw,job);return job.kind==='practice'?practiceQuality(content,job):content}
 function references(value,evidence,optional=false){need(Array.isArray(value)&&value.length<=12&&(optional||value.length>0)&&new Set(value).size===value.length&&value.every(id=>evidence.some(s=>s.id===id)),'Every factual passage needs references from this exact source packet.');return [...value];}
 export function validateCreative(raw,job){
  const evidence=job.context.evidence;

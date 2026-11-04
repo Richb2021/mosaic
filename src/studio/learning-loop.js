@@ -11,11 +11,13 @@ export function validatePractice(raw,job){
  const evidence=job.context.evidence,refs=v=>{need(Array.isArray(v)&&v.length>0&&v.length<=12&&new Set(v).size===v.length&&v.every(id=>evidence.some(s=>s.id===id)),'Practice needs exact reviewed source references.');return [...v]};
  need(Array.isArray(raw.questions)&&raw.questions.length===4,'Use four fresh questions: starting check, practice, transfer and revisit.');
  const questions=raw.questions.map((q,i)=>{
-  only(q,['stage','prompt','options','answer','feedback','hint','sourceRefs']);need(q.stage===LOOP_STAGES[i],'Practice stages must stay in order.');
+  only(q,['stage','activityKey','prompt','options','answer','feedback','hint','sourceRefs']);need(q.stage===LOOP_STAGES[i],'Practice stages must stay in order.');
+  // Older banks have no per-question focus; assigned snapshots are read without the activity list.
+  need(q.activityKey===undefined||typeof q.activityKey==='string'&&(!job.context.activities.length||job.context.activities.some(a=>a.key===q.activityKey)),`Question ${i+1} names a focus outside this cycle.`);
   need(Array.isArray(q.options)&&q.options.length===3&&new Set(q.options.map(normal)).size===3,'Use three distinct answer choices.');
   need(Number.isInteger(q.answer)&&q.answer>=0&&q.answer<3,'Choose a valid reviewed answer.');
   need(Array.isArray(q.feedback)&&q.feedback.length===3,`Question ${i+1} needs exactly three choice-specific feedback explanations.`);
-  return {stage:q.stage,prompt:text(q.prompt,600),options:q.options.map(v=>text(v,240)),answer:q.answer,feedback:q.feedback.map(v=>text(v,700)),hint:text(q.hint,500),sourceRefs:refs(q.sourceRefs)};
+  return {stage:q.stage,...(q.activityKey===undefined?{}:{activityKey:q.activityKey}),prompt:text(q.prompt,600),options:q.options.map(v=>text(v,240)),answer:q.answer,feedback:q.feedback.map(v=>text(v,700)),hint:text(q.hint,500),sourceRefs:refs(q.sourceRefs)};
  });
  need(new Set(questions.map(q=>normal(q.prompt))).size===4,'Each stage needs a different question.');
  need(!questions.some(q=>job.context.activities.some(a=>normal(a.prompt)===normal(q.prompt))),'Use fresh questions, not the existing game question.');
@@ -23,9 +25,42 @@ export function validatePractice(raw,job){
  if(raw.sources!==undefined)need(JSON.stringify(raw.sources)===JSON.stringify(sources),'Practice citation text cannot be changed.');
  return {schemaVersion:1,id:job.id,kind:'practice',title:text(raw.title,120),objective:text(raw.objective,240),explanation:text(raw.explanation,1600),sourceRefs,questions,sources};
 }
+// Quality rules for new or edited cycles (generation, edit, approval). Saved published banks are read with validatePractice alone.
+const MASK='…_*•',words=s=>s.normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+// The whole answer as a word sequence; very short answers (No, 4) are too common to check.
+export const namesAnswer=(t,answer)=>{const a=words(answer).join(' ');return a.replace(/ /g,'').length>=3&&(' '+words(t).join(' ')+' ').includes(' '+a+' ')};
+// A masked partial such as 'ph…synthesis', 'p_______s' or 'photo…'. Returns the token, or undefined.
+export function maskedAnswer(t,answer){
+ const targets=[...new Set([...words(answer),words(answer).join('')])].filter(w=>w.length>=4),m=new RegExp(`[${MASK}]+`,'gu');
+ return t.normalize('NFKC').toLowerCase().replace(/\.{2,}/g,'…').split(new RegExp(`[^\\p{L}\\p{N}${MASK}]+`,'u')).find(tok=>{
+  if(!new RegExp(`[${MASK}]`,'u').test(tok)||!/[\p{L}\p{N}]/u.test(tok))return false;
+  const shown=tok.replace(m,''),inner=!new RegExp(`^[${MASK}]|[${MASK}]$`,'u').test(tok),pattern=new RegExp('^'+tok.replace(m,'[\\p{L}\\p{N}]*')+'$','u');
+  // One-sided cuts ('in…') need a real chunk of the word before they count.
+  return targets.some(w=>pattern.test(w)&&shown.length<w.length&&(inner||shown.length>=3&&shown.length*3>=w.length));
+ });
+}
+const list=n=>n.length<2?n.join(''):n.slice(0,-1).join(', ')+' and '+n.at(-1);
+export function practiceIssues(bank,job){
+ const issues=[],qs=bank.questions,answers=qs.map(q=>q.options[q.answer]),keys=job.context.activities.map(a=>a.key);
+ // Spread the four questions across the selected focuses.
+ // The prompt asks for every focus; only a cycle stuck on one focus is turned back, so near misses still reach the author.
+ if(keys.length>1){const used=new Set(qs.map(q=>q.activityKey).filter(k=>keys.includes(k)));
+  if(used.size<2)issues.push(used.size?`The questions only test one focus; spread them across the ${keys.length} selected focuses instead of repeating the first.`:`Tag each question with the focus it tests, and spread them across the ${keys.length} selected focuses.`);}
+ // Each question needs its own correct answer.
+ const groups=new Map();answers.forEach((a,i)=>groups.set(normal(a),[...(groups.get(normal(a))||[]),i+1]));
+ for(const [k,n] of groups)if(k&&n.length>1)issues.push(`Questions ${list(n)} share the correct answer “${answers[n[0]-1]}”; give each question a different correct answer.`);
+ // Hints and the explanation are read before answering; choice feedback is read after and may name the answer.
+ qs.forEach((q,i)=>{const leak=namesAnswer(q.hint,answers[i])?answers[i]:answers.map(a=>maskedAnswer(q.hint,a)).find(Boolean);if(leak)issues.push(`Question ${i+1}’s hint gives the answer away (“${leak}”); hints are shown before answering, so point to the reasoning or source instead.`)});
+ // The explanation teaches the idea, so it may use the topic's terms; only a masked giveaway is turned back.
+ const hidden=answers.map(a=>maskedAnswer(bank.explanation,a)).find(Boolean);
+ if(hidden)issues.push(`The explanation gives an answer away (“${hidden}”); it can be read before answering.`);
+ for(const [field,t] of [['title',bank.title],['objective',bank.objective],...qs.map((q,i)=>[`question ${i+1}`,q.prompt])]){const leak=answers.map(a=>maskedAnswer(t,a)).find(Boolean);if(leak)issues.push(`The ${field} shows a masked answer (“${leak}”).`)}
+ return issues;
+}
+export function practiceQuality(bank,job){const issues=practiceIssues(bank,job);need(!issues.length,'These questions need another version: '+issues.join(' '));return bank}
 const str={type:'string'},obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
-export function practiceSchema(job){const refs={type:'array',items:{type:'string',enum:job.context.evidence.map(s=>s.id)}};return obj({schemaVersion:{type:'integer',enum:[1]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:['practice']},title:str,objective:str,explanation:str,sourceRefs:refs,questions:{type:'array',minItems:4,maxItems:4,items:obj({stage:{type:'string',enum:LOOP_STAGES},prompt:str,options:{type:'array',minItems:3,maxItems:3,items:str},answer:{type:'integer',minimum:0,maximum:2},feedback:{type:'array',minItems:3,maxItems:3,items:str},hint:str,sourceRefs:refs})}})}
-export const PRACTICE_BRIEF='Create a learning cycle for the ONE selected activity and its reviewed evidence. Four different three-choice questions in order: diagnostic, practice, transfer, revisit. Each has stage, prompt <=600, three options <=240, zero-based answer index, three choice-specific corrective feedback explanations <=700 each, hint <=500 and sourceRefs. Use plausible misconceptions as distractors. The practice question tests the same relationship with different wording and quantities; transfer applies it to a genuinely different, explicitly fictional scenario; revisit is a fresh delayed retrieval question. Never repeat a prompt from the game or another stage. Avoid clues to future answers in earlier feedback. Adapt language/scaffolding to the chosen starting point and optional interests; preserve source facts and label fictional examples. Provide title<=120, source-supported objective<=240, a clear substantive explanation<=1600 and sourceRefs. No additional objective beyond the packet. Return schemaVersion=1, kind=practice and the supplied id.';
+export function practiceSchema(job){const refs={type:'array',items:{type:'string',enum:job.context.evidence.map(s=>s.id)}};return obj({schemaVersion:{type:'integer',enum:[1]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:['practice']},title:str,objective:str,explanation:str,sourceRefs:refs,questions:{type:'array',minItems:4,maxItems:4,items:obj({stage:{type:'string',enum:LOOP_STAGES},activityKey:{type:'string',enum:job.context.activities.map(a=>a.key)},prompt:str,options:{type:'array',minItems:3,maxItems:3,items:str},answer:{type:'integer',minimum:0,maximum:2},feedback:{type:'array',minItems:3,maxItems:3,items:str},hint:str,sourceRefs:refs})}})}
+export const PRACTICE_BRIEF='Create a learning cycle for the selected programme focuses (context.activities; the learner\'s chosen focus is first) and their reviewed evidence. Four different three-choice questions in order: diagnostic, practice, transfer, revisit. Each has stage, activityKey, prompt <=600, three options <=240, zero-based answer index, three choice-specific corrective feedback explanations <=700 each, hint <=500 and sourceRefs. Spread the questions across the focuses in turn: question n tests activities[(n-1) mod count] and its activityKey is that focus\'s key; never give every question the first focus unless only one focus is supplied. Every question needs a different correct answer: no correct option may repeat another question\'s correct option, ignoring case and punctuation. Use plausible misconceptions as distractors. The practice question uses fresh wording and quantities; transfer applies its focus to a genuinely different, explicitly fictional scenario; revisit is a fresh delayed retrieval question. Never repeat a prompt from the game or another stage. Hints and the cycle explanation are read BEFORE answering: never state any correct option in them, nor a partial or masked form of it (for example its first or last letters with an ellipsis or blanks); point to the reasoning or the source instead. Choice feedback is read after answering and may name the answer. Avoid clues to future answers in earlier feedback. Adapt language/scaffolding to the chosen starting point and optional interests; preserve source facts and label fictional examples. Provide title<=120, source-supported objective<=240, a clear substantive explanation<=1600 and sourceRefs. No additional objective beyond the packet. Return schemaVersion=1, kind=practice and the supplied id.';
 export const emptyLoop=(bank,hash)=>({schemaVersion:1,bankId:bank.id,bankHash:hash,answers:[],help:[],teachBack:'',gameOpened:false,dueAt:null});
 export function validateLoop(bank,hash,state){
  need(state&&state.schemaVersion===1&&state.bankId===bank.id&&state.bankHash===hash,'This saved cycle belongs to another question version.');
