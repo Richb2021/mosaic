@@ -58,14 +58,14 @@ export function ClassDelivery({client,course,job,body,locked}){
   try{let cursor=null,all=[];do{const r=await client.journal.request('course-sharing',{action:'assign-class',classId,courseId:course.id,planHash:job.draftHash,...body,...(cursor?{cursor}:{})});all=[...all,...r.results];setResults(all);cursor=r.nextCursor}while(cursor);setDone(true)}
   catch(e){setError(e.message)}finally{setBusy(false)}
  }
- const count=k=>results.filter(r=>r.status===k).length,label={assigned:'Assigned',unchanged:'Already has this version',skipped:'Not assigned'};
+ const count=k=>results.filter(r=>r.status===k).length,label={assigned:'Assigned',unchanged:'Already has this version',kept:'Kept their own version',skipped:'Not assigned'};
  return <fieldset className="cd-class" disabled={locked||busy}><legend>Or assign to a whole class</legend>
-  <p>Everyone in the class gets the same reviewed version, activities, instructions and due date chosen above. Learners who join later can be added by sending again; anyone who already has this version is left as is. Leaving the class ends a class assignment.</p>
+  <p>Everyone in the class gets the same reviewed version, activities, instructions and due date chosen above. Send again to reach learners who join later; anyone who already has this version is left as is. A changed version replaces what this class was sent before and turns sharing off for it, so learners choose again. Learners in your group keep any version you assigned to them individually. Leaving the class ends a class assignment.</p>
   <label>Class<select value={classId} onChange={e=>{setClassId(e.target.value);setOk(false);setResults([]);setDone(false)}}><option value="">Choose a class</option>{classes.map(c=><option key={c.id} value={c.id}>{c.name} · {c.learners} {c.learners===1?'learner':'learners'}</option>)}</select></label>
   <label className="check"><input type="checkbox" checked={ok} disabled={!classId} onChange={e=>setOk(e.target.checked)}/>I checked the objectives, activities and class.</label>
   <div className="cd-actions"><button className="primary" disabled={!classId||!ok||busy} onClick={send}>{busy?'Assigning to the class…':done?'Send again':'Assign to class'}</button></div>
   <div className="cd-results" aria-live="polite">{error&&<p className="message error" role="alert">{error}</p>}
-  {results.length>0&&<><p><b>{count('assigned')} assigned · {count('unchanged')} already had it · {count('skipped')} not assigned.</b>{busy?' Keep this course open while the class is assigned.':''}</p>
+  {results.length>0&&<><p><b>{count('assigned')} assigned · {count('unchanged')} already had it{count('kept')?' · '+count('kept')+' kept their own version':''} · {count('skipped')} not assigned.</b>{busy?' Keep this course open while the class is assigned.':''}</p>
   <ul>{results.map((r,i)=><li key={i}><div><b>{r.label}</b>{r.reason&&<span>{r.reason}</span>}</div><span className={'cd-status is-'+r.status}>{label[r.status]}</span></li>)}</ul></>}</div>
  </fieldset>;
 }

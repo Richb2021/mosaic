@@ -96,10 +96,11 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   const via=cls&&!inGroup?{classId:cls.c.id,className:cls.c.name,classBinding:await classGrantKey(cls.c,cls.m)}:{};
   const bindings={learnerBinding:(await memberBinding(env,learnerId)).key,managerBinding:(await memberBinding(env,principal)).key},signature=await digest(JSON.stringify({...route,...bindings,...via}));
   if(saved&&!old.revoked&&old.signature===signature)return {status:'unchanged',assignment:publicCourseGrant({...old,id})};
-  // A whole-class send deliberately replaces each learner's current version.
+  // A class send replaces versions it sent before, never one the teacher assigned to this learner individually.
+  if(cls&&inGroup&&saved&&!old.revoked&&old.sentToClass!==cls.c.id&&await activeCourseGrant(env,{...old,id}))return {status:'kept'};
   if(!cls)need((input.expectedRevision||null)===(old.revision||null),'This assignment changed. Reload before replacing its reviewed version.',409);
 
-  const g={...route,...bindings,...via,owner,manager:principal,learner:learnerId,siteOwner,signature,revision:crypto.randomUUID(),assignedAt:now(),revoked:false};
+  const g={...route,...bindings,...via,...(cls?{sentToClass:cls.c.id}:{}),owner,manager:principal,learner:learnerId,siteOwner,signature,revision:crypto.randomUUID(),assignedAt:now(),revoked:false};
   return withGrantLease(env,g,now,async()=>{
    need(await activeCourseGrant(env,g),'The learner group changed. Reload before assigning.',409);
    need((await grantChapters(env,g)).length,'The reviewed sources or chapters changed. Reload before assigning.',409);
@@ -107,7 +108,8 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
    // The cap is checked in the same SQL statement as the mutation, including
    // reactivating a withdrawn assignment. Independent requests cannot overfill it.
    const cap="(SELECT COUNT(*) FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.revoked')=0 AND scope!=?)<24";
-   const value=JSON.stringify(g),r=saved?await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=? AND '+cap,value,now(),scope,saved.policy,learnerId,scope):await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) SELECT ?,?,? WHERE '+cap,scope,value,now(),learnerId,scope);need(r.meta.changes===1,'The assignment changed or this learner has 24 courses. Reload and withdraw an old course if needed.',409);
+   const value=JSON.stringify(g),r=saved?await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=? AND '+cap,value,now(),scope,saved.policy,learnerId,scope):await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) SELECT ?,?,? WHERE '+cap,scope,value,now(),learnerId,scope);if(r.meta.changes!==1){const now2=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',scope))?.policy);if(!now2.revoked&&now2.signature===signature)return {status:'unchanged',assignment:publicCourseGrant({...now2,id})}}
+   need(r.meta.changes===1,'The assignment changed or this learner has 24 courses. Reload and withdraw an old course if needed.',409);
    await db.run('DELETE FROM data_controls WHERE scope=?',consentScope(id));await auditEvent(env,'learner:'+owner,'course-assigned',{objectives:g.steps.length},now());
    return {status:'assigned',assignment:publicCourseGrant({...g,id})};
   });
@@ -123,15 +125,21 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   need(typeof input.classId==='string'&&/^[a-f0-9]{16}$/.test(input.classId),'Choose a class.');
   const c=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class:'+input.classId))?.policy);
   need(c.owner===principal&&c.siteOwner===siteOwner,'Only this class’s teacher can assign work to it.',403);need(!c.archived,'This class is archived. Restore it before assigning new work.',409);
-  const all=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ? ORDER BY scope",'class-member:'+c.id+':%')).map(r=>parse(r.policy)).filter(m=>m.status==='active');
-  const start=Math.max(0,Number.parseInt(input.cursor||'0',10)||0),page=all.slice(start,start+25);
+  // Pages of ten, ordered by the per-class handle so a learner leaving mid-send can't make the next page skip someone.
+  const handle=async l=>(await digest('class-handle:'+c.id+':'+l)).slice(0,32);
+  need(!input.cursor||/^[a-f0-9]{32}$/.test(input.cursor),'Invalid class page.');
+  const all=[];for(const m of (await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-member:'+c.id+':%')).map(r=>parse(r.policy)).filter(m=>m.status==='active'))all.push({...m,handle:await handle(m.learner)});
+  all.sort((a,b)=>a.handle.localeCompare(b.handle));
+  const rest=input.cursor?all.filter(m=>m.handle>input.cursor):all,page=rest.slice(0,10);
   const base=await reviewedRoute(env,{owner,siteOwner,store,courseId:input.courseId,planHash:input.planHash}),results=[];
   for(const m of page){
-   try{const r=await assignOne(base,m.learner,{c,m});results.push({label:m.label||'Learner',status:r.status})}
-   catch(e){results.push({label:m.label||'Learner',status:'skipped',reason:e.status?e.message:'Could not assign. Try again.'})}
+   const a=await admission(env,m.learner),own=a.admitted&&a.role==='learner'&&a.manager===principal;
+   try{const r=await assignOne(base,m.learner,{c,m});results.push({label:m.label||'Learner',status:r.status,...(r.status==='kept'?{reason:'Has a version you assigned to them individually. Update it from your learner list.'}:{})})}
+   // Outside the teacher's own group, only the "managed elsewhere" reason is shown; other details stay private.
+   catch(e){results.push({label:m.label||'Learner',status:'skipped',reason:own||e.status===403?(e.status?e.message:'Could not assign. Try again.'):'Not assigned right now. Try sending again later.'})}
   }
   await auditEvent(env,'learner:'+owner,'class-course-assigned',{learners:results.filter(r=>r.status==='assigned').length},now());
-  return noStore({results,learners:all.length,nextCursor:start+25<all.length?String(start+25):null});
+  return noStore({results,learners:all.length,nextCursor:rest.length>10?page.at(-1).handle:null});
  }
  const {row,g}=await load(input.id);
  if(input.action==='revoke'){

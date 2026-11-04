@@ -1,4 +1,4 @@
-import {leaveClassesOf,addToClass,ownedClass} from './classes-api.js';
+import {leaveClassesOf,addToClass,ownedClass,revokeLearnerClassGrants} from './classes-api.js';
 import {requestClosure,closureQueue} from './account-closure.js';
 import {maintenanceStatus} from './background-retention.js';
 import {budgetStatus} from './cost-ledger.js';
@@ -34,7 +34,7 @@ export async function admission(env,owner){
   const manager=parse((await sqlDB(env.DB).one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+member.manager))?.policy);
   admitted=manager.status==='active'&&['teacher','guardian'].includes(manager.role);
  }
- return {admitted,admin,tutorAllowed:member.tutorAllowed===true,canAuthor:admin||['teacher','guardian'].includes(member.role)||member.authoringAllowed===true,role:admin?'administrator':member.role||'learner',context:member.context||'individual',manager:member.manager||null,group:member.group||null,status:member.status||'invitation-required'};
+ return {admitted,admin,tutorAllowed:member.tutorAllowed===true,canAuthor:admin||['teacher','guardian'].includes(member.role)||member.authoringAllowed===true,role:admin?'administrator':member.role||'learner',context:member.context||'individual',managedApproval:member.managedApproval===true,manager:member.manager||null,group:member.group||null,status:member.status||'invitation-required'};
 }
 export async function requireAdmission(env,owner,{store,onboarding=false,storageOwner=owner}={}){
  const a=await admission(env,owner);need(a.admitted,'Open Welcome to accept your invitation or check access with your organiser.',403);
@@ -57,7 +57,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   return noStore({user:{id:user.id,name:user.name,email:user.email,emailVerified:user.emailVerified===true},accountReference:owner,...access,manages,enabled:env.PILOT_ENABLED==='true',noticeVersion:PILOT_NOTICE,onboarding:row?parse(row.payload).onboarding:null,version:row?.version||0,supportEmail:env.PILOT_SUPPORT_EMAIL||null,roster,operations,budget,closure:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-close:'+owner))?.policy).status||null});
  }
  need(req.method==='POST','Pilot route not found.',404);need(req.headers.get('X-Mosaic-Learner')===user.id,'Your account changed. Reload before continuing.',401);
- const input=await readJSON(req,6000);
+ const input=await readJSON(req,12000);
  if(input.action==='claim'){
   need(user.emailVerified===true,'Verify your email by signing in with an email code, then accept your invitation.',403);
   need(typeof input.code==='string'&&/^[a-f0-9]{64}$/.test(input.code),'Enter the complete invitation code.');
@@ -88,7 +88,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(access.admin||(access.role==='teacher'?context==='school':context==='family'),'Use the setting you are authorised to manage.',403);
   need(context==='individual'||input.managedApproval===true,'Confirm the school or guardian has authorised this learner’s access.');
   // Optionally join one of this organiser's own classes when the invitation is accepted.
-  const cls=input.classId?await ownedClass(env,input.classId,owner):null;need(!input.classId||cls&&role==='learner','Choose one of your open classes for learners.',403);
+  const cls=input.classId?await ownedClass(env,input.classId,owner,siteOwner):null;need(!input.classId||cls&&role==='learner','Choose one of your open classes for learners.',403);
   const clean=(v,n)=>typeof v==='string'?v.trim().slice(0,n):'';
   const invites=[];
   for(const email of list){
@@ -122,7 +122,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
   const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,tutorAllowed:false,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
-  await leaveClassesOf(env,input.accountReference,member.manager);
+  await leaveClassesOf(env,input.accountReference,member.manager);await revokeLearnerClassGrants(env,input.accountReference);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
  }
  if(input.action==='restore-access'){
@@ -131,6 +131,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(member.status==='revoked'&&(access.admin||member.manager===owner),'Choose a withdrawn learner in your group.',403);
   const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
+  await revokeLearnerClassGrants(env,input.accountReference);
   await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
  }
  if(input.action==='revoke'){
@@ -139,7 +140,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(['active','revoked'].includes(member.status),'This account is closing or already closed.',409);
   const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
-  await leaveClassesOf(env,input.accountReference,member.manager);
+  await leaveClassesOf(env,input.accountReference,member.manager);await revokeLearnerClassGrants(env,input.accountReference);
   await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true});
  }
  if(input.action==='close'){

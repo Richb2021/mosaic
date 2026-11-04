@@ -70,9 +70,14 @@ export async function addToClass(env,{classId,manager,learner,user,now}){
  await upsert(db,memberScope(c.id,learner),{classId:c.id,learner,label:displayLabel(user),joined:now,status:'active'},now);
  await auditEvent(env,'learner:'+learner,'class-joined',{via:'invitation'},now);return true;
 }
-export async function ownedClass(env,classId,owner){
+export async function ownedClass(env,classId,owner,siteOwner){
  if(!env.DB||!idOk(classId))return null;const c=parse((await sqlDB(env.DB).one('SELECT policy FROM data_controls WHERE scope=?',classScope(classId)))?.policy);
- return c.owner===owner&&!c.archived?c:null;
+ return c.owner===owner&&c.siteOwner===siteOwner&&!c.archived?c:null;
+}
+// Revoking, restoring or transferring a learner ends all their class grants (they stop working anyway; this frees their course slots).
+export async function revokeLearnerClassGrants(env,learner){
+ if(!env.DB)return;const db=sqlDB(env.DB);
+ for(const r of await db.all("SELECT DISTINCT json_extract(policy,'$.classId') AS id FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.classId') IS NOT NULL",learner))await revokeClassGrants(db,r.id,learner);
 }
 // Removes everything a learner contributed to classes, and classes a teacher owns.
 export async function deleteClassData(env,principal){

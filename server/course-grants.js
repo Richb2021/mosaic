@@ -32,7 +32,8 @@ export async function withGrantLease(env,g,now,handler){
 // context), can receive work this way; learners whose access a school or family
 // arranged stay with that organiser.
 export const classGrantKey=(c,m)=>digest(JSON.stringify(['class-grant',c.id,c.created,m.joined]));
-export const classAssignable=(learner,principal)=>learner.admitted&&learner.role==='learner'&&(learner.manager===principal||learner.context==='individual');
+export const selfDirected=learner=>learner.context==='individual'&&learner.managedApproval!==true;
+export const classAssignable=(learner,principal)=>learner.admitted&&learner.role==='learner'&&(learner.manager===principal||selfDirected(learner));
 async function classMembership(env,g){
  if(typeof g.classId!=='string'||typeof g.classBinding!=='string')return false;
  const db=sqlDB(env.DB),c=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class:'+g.classId))?.policy),m=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class-member:'+g.classId+':'+g.learner))?.policy);
@@ -42,7 +43,7 @@ export async function activeCourseGrant(env,g){
  if(!g||g.revoked||!Array.isArray(g.steps)||!g.steps.length||g.steps.length>6)return false;
  const learner=await admission(env,g.learner),manager=await admission(env,g.manager);
  if(!learner.admitted||learner.role!=='learner'||!manager.admitted||!['administrator','teacher','guardian'].includes(manager.role))return false;
- if(learner.manager!==g.manager&&!(g.classId&&learner.context==='individual'&&await classMembership(env,g)))return false;
+ if(learner.manager!==g.manager&&!(g.classId&&selfDirected(learner)&&await classMembership(env,g)))return false;
  return (await memberBinding(env,g.learner)).key===g.learnerBinding&&(await memberBinding(env,g.manager)).key===g.managerBinding;
 }
 export async function grantChapters(env,g){

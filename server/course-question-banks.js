@@ -67,4 +67,4 @@ export async function assignedQuestionBanks(env,learner,filter={}){
 export function preserveQuestionBanks(route,previous){
  for(const step of route.steps){const old=previous.steps?.find(s=>s.id===step.id&&s.jobId===step.jobId&&s.hash===step.hash);if(old?.questionBank)step.questionBank=structuredClone(old.questionBank)}
 }
-export const signedCourseRoute=g=>({courseId:g.courseId,title:g.title,planId:g.planId,planHash:g.planHash,sources:g.sources,steps:g.steps,...(g.settings?{settings:g.settings}:{}),learnerBinding:g.learnerBinding,managerBinding:g.managerBinding});
+export const signedCourseRoute=g=>({courseId:g.courseId,title:g.title,planId:g.planId,planHash:g.planHash,sources:g.sources,steps:g.steps,...(g.settings?{settings:g.settings}:{}),learnerBinding:g.learnerBinding,managerBinding:g.managerBinding,...(g.classId?{classId:g.classId,className:g.className,classBinding:g.classBinding}:{})});

@@ -200,7 +200,8 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
  }
  need(!Object.values(state.controls).some(c=>c.operation),'Resume the saved cleanup first.',423);
  need(input.epoch===state.epoch,'Your data changed. Refresh this screen before continuing.',409);
- if(input.action==='preview'){const plan=await deletionPlan(env,{...ctx,mode:input.mode,id:input.id,now:now()});return noStore({preview:plan});}
+ // The preview shows counts only. Raw rows can name other learners (for example class members).
+ if(input.action==='preview'){const plan=await deletionPlan(env,{...ctx,mode:input.mode,id:input.id,now:now()});return noStore({preview:{mode:plan.mode,id:plan.id,hash:plan.hash,counts:plan.counts}});}
  if(input.action==='delete'){
   need(input.confirmed===true&&typeof input.hash==='string','Review and confirm this deletion first.');const plan=await deletionPlan(env,{...ctx,mode:input.mode,id:input.id,now:now()});need(plan.hash===input.hash,'Data changed since the preview. Review it again.',409);return noStore({operation:await startDeletion(env,ctx,plan)});
  }
@@ -230,7 +231,7 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
   const rows=await db.all('SELECT id,script_id,script_hash,segment,status,bytes,created FROM media_assets WHERE site_owner=? AND learner_owner=? ORDER BY id',siteOwner,owner);
   const safeRow=r=>({slot:r.slot_key,version:r.version,updated:Number(r.updated_ms),data:parse(r.payload)});
   const sharingRecords=await courseGrantRecords(env,owner,siteOwner);
-  const courseAssignments=sharingRecords.grants.filter(r=>!workspace||parse(r.policy).siteOwner===siteOwner).map(r=>{const g={...parse(r.policy),id:r.scope.slice(13)};return {...publicCourseGrant(g),revoked:!!g.revoked,...(g.learner!==owner?{learner:g.learner}:{})}});
+  const courseAssignments=sharingRecords.grants.filter(r=>!workspace||parse(r.policy).siteOwner===siteOwner).map(r=>{const g={...parse(r.policy),id:r.scope.slice(13)};return {...publicCourseGrant(g),revoked:!!g.revoked,...(g.learner!==owner&&!g.classId?{learner:g.learner}:{})}});
   const sharingSettings=workspace?[]:sharingRecords.consents.map(r=>({assignmentId:r.scope.slice(15),...parse(r.policy)}));
   const knowledge=jobs.filter(j=>parse(j.payload).recordType==='knowledge'&&parse(j.payload).learnerOwner===owner).map(j=>({id:j.id,status:j.status,created:j.created,payload:parse(j.payload),draft:parse(j.draft)}));
   const workSharing=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'course-work:%' AND json_extract(policy,'$.learner')=?",owner)).map(r=>parse(r.policy));
