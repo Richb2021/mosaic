@@ -11,7 +11,7 @@ import {maintenanceAPI} from '../background-retention.js';
 import {mediaWorkerAPI} from '../media-jobs.js';
 import {operationsAPI} from '../launch-operations.js';
 
-const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.map':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.glb':'model/gltf-binary','.mp3':'audio/mpeg','.wav':'audio/wav','.mp4':'video/mp4','.woff2':'font/woff2','.ttf':'font/ttf','.wasm':'application/wasm'};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.map':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.glb':'model/gltf-binary','.mp3':'audio/mpeg','.wav':'audio/wav','.mp4':'video/mp4','.woff2':'font/woff2','.ttf':'font/ttf','.wasm':'application/wasm'};
 const aliases={'/':'/index.html','/rpg':'/rpg.html','/studio':'/studio.html','/account':'/account.html','/welcome':'/welcome.html','/cartoons':'/cartoons.html'};
 
 async function accountProxy(request,env) {

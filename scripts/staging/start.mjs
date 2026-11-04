@@ -9,6 +9,7 @@ import {createHTTPServer} from '../../server/node/http.mjs';
 import {pilotAPI,learnerOwner} from '../../server/pilot-access.js';
 import {learningAPI} from '../../server/learning-api.js';
 import {workshopGateway} from '../../server/workshop-gateway.js';
+import {mediaWorkerAPI} from '../../server/media-jobs.js';
 import {StagingLearnerStore} from './learner-store.mjs';
 import {seedStaging,SEED_PEOPLE,personaUser} from './seed.mjs';
 import {installMetaRelay} from '../../server/node/meta-relay.mjs';
@@ -21,7 +22,7 @@ if(!origin)throw Error('MOSAIC_PUBLIC_ORIGIN is required');if(key.length<32)thro
 const DB=new SQLStore(resolve(data,'application.sqlite'),{migrations:resolve(root,'drizzle')}),BUCKET=new ObjectStore(resolve(data,'objects.sqlite')),store=new StagingLearnerStore(resolve(data,'learner-store.sqlite'));
 // Only these settings reach the app. NCB, gateway and maintenance secrets never do, even if present.
 // AI keys are optional; staging has its own, lower spending caps (see docs/STAGING.md).
-const PASS=['META_API_KEY','FISH_AUDIO_API_KEY','FISH_AUDIO_GUIDE_VOICE','FISH_AUDIO_LEARNER_VOICE','PILOT_DAILY_BUDGET_USD','PILOT_GLOBAL_DAILY_BUDGET_USD','WORKSHOP_GENERATION_LIMIT'];
+const PASS=['META_API_KEY','FISH_AUDIO_API_KEY','FISH_AUDIO_GUIDE_VOICE','FISH_AUDIO_LEARNER_VOICE','PILOT_DAILY_BUDGET_USD','PILOT_GLOBAL_DAILY_BUDGET_USD','WORKSHOP_GENERATION_LIMIT','MEDIA_WORKER_ENABLED','MAINTENANCE_SECRET'];
 const env={DB,BUCKET,PILOT_ENABLED:'true',PILOT_ADMIN_OWNER:await learnerOwner(personaUser(SEED_PEOPLE[0])),...Object.fromEntries(PASS.filter(k=>process.env[k]).map(k=>[k,process.env[k]]))};
 if(env.META_API_KEY&&!env.PILOT_GLOBAL_DAILY_BUDGET_USD)throw Error('Set staging spending caps before adding AI keys');
 // Background work (generation jobs) runs after the response, as on live.
@@ -43,6 +44,8 @@ const app=createApp(env,{staticDirectory:resolve(root,'public'),defer});
 
 async function handle(request){
  const url=new URL(request.url),path=url.pathname,c=cookies(request);
+ // The staging cartoon worker authenticates with its own maintenance secret, not the browser access key.
+ if(path==='/api/media-worker')return request.method==='POST'?mediaWorkerAPI(request,env,{store}):Response.json({error:'Method not allowed.'},{status:405}); // staging's own learner store, not NCB
  if(path==='/staging/enter'){if(!same(url.searchParams.get('key')||'',key))return page('Staging','<h1>Wrong staging link</h1>',403);return redirect('/staging',[cookie(ACCESS,mac('access'),30*86400)])}
  if(!c[ACCESS]||!same(c[ACCESS],mac('access')))return path.startsWith('/api/')?Response.json({error:'Private staging site.'},{status:401}):page('Mosaic staging','<h1>Mosaic staging</h1><p>This is a private test copy. Open it with your staging link.</p>',401);
  const user=personOf(c);
@@ -61,7 +64,7 @@ async function handle(request){
   const list=people.prepare('SELECT * FROM staging_people ORDER BY rowid').all();
   return page('Mosaic staging',`<p><span class="tag">STAGING</span></p><h1>Mosaic staging</h1><p>A private test copy running the released code with its own data. Pick a person to sign in as. No passwords; nothing here touches the live site or live accounts.</p>${user?`<p>Signed in as <b>${esc(user.name)}</b>. <a href="/studio.html#today">Open Mosaic</a></p><form method="post" action="/staging/sign-out"><button>Sign out</button></form>`:''}${url.searchParams.get('error')?'<p role="alert">Use 2 to 40 letters for a name.</p>':''}
 <h2>People</h2><ul>${list.map(p=>`<li><div><b>${esc(p.name)}</b><br><small>${esc(p.note)}</small></div><form method="post" action="/staging/sign-in"><input type="hidden" name="id" value="${esc(p.id)}"><button class="primary">Sign in as ${esc(p.name.split(' ')[0])}</button></form></li>`).join('')}</ul>
-<h2>Add a test person</h2><p>Like a new sign-up: they start with no group. Invite them from Welcome, or have them join a class.</p><form class="inline" method="post" action="/staging/people"><input name="name" maxlength="40" placeholder="e.g. Noah Brown" required><button class="primary">Add and sign in</button></form>`);
+<h2>Add a test person</h2><p>Like a new sign-up: they start with no group. Invite them from a teacher's Welcome page (optionally straight into a class); once they've joined, they can add more classes with a class code.</p><form class="inline" method="post" action="/staging/people"><input name="name" maxlength="40" placeholder="e.g. Noah Brown" required><button class="primary">Add and sign in</button></form>`);
  }
  if(path==='/api/auth/get-session')return Response.json({user:user?{id:user.id,email:user.email,name:user.name,emailVerified:true}:null,session:user?{userId:user.id}:null},{headers:{'Cache-Control':'no-store'}});
  if(path==='/api/auth/sign-out')return new Response(JSON.stringify({success:true}),{headers:{'Content-Type':'application/json','Set-Cookie':cookie(PERSON,'',0)}});
@@ -76,6 +79,6 @@ async function handle(request){
  if((res.headers.get('content-type')||'').startsWith('text/html')){const html=(await res.text()).replace('</body>',BANNER+'</body>');const h=new Headers(res.headers);h.delete('content-length');h.set('X-Robots-Tag','noindex');return new Response(html.includes(BANNER)?html:html+BANNER,{status:res.status,headers:h})}
  res.headers.set?.('X-Robots-Tag','noindex');return res;
 }
-const server=createHTTPServer(handle,{origin});
+const server=createHTTPServer(handle,{origin,upstreamHost:'127.0.0.1:'+port}); // the worker calls in over loopback
 server.listen(port,'127.0.0.1',()=>console.log('Mosaic staging listening on loopback port '+port));
 const stop=()=>server.close(async()=>{await Promise.allSettled([...pending]);DB.close();BUCKET.close();store.close();process.exit(0)});process.on('SIGTERM',stop);process.on('SIGINT',stop);

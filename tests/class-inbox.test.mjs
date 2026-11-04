@@ -130,3 +130,15 @@ test('a course that is temporarily unavailable stays in the export as unavailabl
  assert.equal(ada.length,1);assert.equal(ada[0].course,h.course.title);assert.equal(ada[0].sharing,'unavailable');assert.ok(/^[a-f0-9]{6}$/.test(ada[0].key));
  const {rowValues}=await import('../src/studio/class-export.js');assert.equal(rowValues(ada[0])[6],'Not available right now');
 });
+
+test('deleting your learning data keeps the age range, so an under-18 cannot reset it, and Studio stays open', async () => {
+ const {deletionPlan,startDeletion}=await import('../server/data-lifecycle.js');
+ const h=await fixture(),owner=await learnerOwner(h.learner);
+ const before=await h.store.latest('learner_profiles',owner,'onboarding');assert.ok(before);
+ const ctx={owner,siteOwner:'personal:'+owner,store:h.store,now:h.now};
+ const plan=await deletionPlan(h.env,{...ctx,mode:'learner',now:h.now()});await startDeletion(h.env,ctx,plan);
+ const after=await h.store.latest('learner_profiles',owner,'onboarding');assert.ok(after,'setup record kept');assert.equal(JSON.parse(after.payload).onboarding.ageBand,'13to17');
+ assert.equal((await h.call(h.learner,'learning/classes')).http,200,'Studio still opens');
+ const closing=await deletionPlan(h.env,{...ctx,mode:'learner',closing:true,now:h.now()});
+ assert.ok(closing.profiles.includes(after.id),'closing the account removes it');
+});

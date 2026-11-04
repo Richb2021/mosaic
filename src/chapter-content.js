@@ -34,3 +34,11 @@ export function preparePublication(principal,workspace,draft,resources,expectedR
  for(const source of content.sources){const binding=draft.bindings.find(b=>b.sourceId===source.id),resource=resources.find(r=>r.id===binding?.resourceId&&r.version===binding?.resourceVersion);if(!resource||resource.workspaceId!==workspace.id||resource.status!=='reviewed'||!resource.units?.some(u=>u.id===binding.unitId&&u.text===source.excerpt&&u.locator===source.locator))throw Error('Source is missing, unreviewed, changed or out of scope');}
  return {workspaceId:workspace.id,reviewer:access.subject,content,bindings:structuredClone(draft.bindings),expectedRevision};
 }
+// The model sometimes explains a balance puzzle with different numbers from its own answer
+// (for example answer 4 and 8, explanation "7 to the gardens leaves 5"). Flag it for the reviewer.
+export function balanceNumberWarning(c){
+ const b=c?.template==='underlight-v1'?c.challenges?.balance:null;if(!b||!Number.isInteger(b.total)||!Number.isInteger(b.solution))return null;
+ const allowed=new Set([b.total,b.solution,b.total-b.solution]),text=[b.prompt,b.explanation,b.feedback,b.hint,b.objective].filter(v=>typeof v==='string').join(' ');
+ const odd=[...new Set((text.match(/\b\d+\b/g)||[]).map(Number))].filter(n=>n>1&&n<=b.total&&!allowed.has(n));
+ return odd.length?{title:b.title||'Balance',answer:[b.solution,b.total-b.solution],odd}:null;
+}

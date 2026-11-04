@@ -9,6 +9,8 @@ import {NCBStore} from './ncb-store.js';
 import {memberBinding} from './course-grants.js';
 
 export const PILOT_NOTICE='2026-11-01-v2';
+// Bulk invitations have no typed label, so the roster shows the email's name part ("ray.smith@…" → "Ray Smith") instead of "Learner".
+const labelFromEmail=email=>String(email).split('@')[0].replace(/[._+-]+/g,' ').replace(/\d+/g,'').trim().replace(/\b\w/g,c=>c.toUpperCase()).slice(0,60)||'';
 export const learnerOwner=user=>digest('mosaic-learner:'+user.id);
 export const pilotAdmin=(owner,env)=>!!env.PILOT_ADMIN_OWNER&&owner===env.PILOT_ADMIN_OWNER;
 export async function workspaceIdentity(user,env){
@@ -93,7 +95,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   const invites=[];
   for(const email of list){
    const bytes=crypto.getRandomValues(new Uint8Array(32)),code=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join(''),expires=now()+7*86400000;
-   await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(email),expires,manager:owner,role,context,group:clean(input.group,80),label:list.length===1?clean(input.label,60):'',managedApproval:context!=='individual'&&input.managedApproval===true,tutorAllowed:input.tutorAllowed===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true,...(cls?{classId:cls.id}:{})}),now());
+   await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-invite:'+await digest(code),JSON.stringify({emailHash:await digest(email),expires,manager:owner,role,context,group:clean(input.group,80),label:list.length===1?clean(input.label,60):labelFromEmail(email),managedApproval:context!=='individual'&&input.managedApproval===true,tutorAllowed:input.tutorAllowed===true,authoringAllowed:role!=='learner'||context==='individual'||input.adultAuthor===true,...(cls?{classId:cls.id}:{})}),now());
    invites.push({email,code,expires,url:new URL('/welcome.html#invite='+code,req.url).href});
   }
   await auditEvent(env,'pilot-member:'+owner,'invitation-created',{role,context,count:invites.length,toClass:!!cls},now());
@@ -144,7 +146,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true});
  }
  if(input.action==='close'){
-  need(!access.admin,'Transfer administrator ownership before closing the administrator account.',409);need(input.confirmed===true&&input.confirmEmail===user.email,'Confirm your sign-in email before requesting account closure.');
+  need(!access.admin,'Transfer administrator ownership before closing the administrator account.',409);need(input.confirmed===true&&typeof input.confirmEmail==='string'&&input.confirmEmail.trim().toLowerCase()===String(user.email).toLowerCase(),'Confirm your sign-in email before requesting account closure.');
   return noStore({closure:await requestClosure(env,{owner,siteOwner,user,store,now})});
  }
  await requireAdmission(env,owner);

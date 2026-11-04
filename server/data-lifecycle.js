@@ -14,7 +14,11 @@ const choices=new Set([0,7,30,90,365]);
 const sorted=values=>[...new Set(values)].sort();
 const ownedJobs=(db,siteOwner)=>db.all("SELECT * FROM workshop_jobs WHERE owner=? AND status!='usage-only' ORDER BY id",siteOwner);
 const counts=plan=>({...(plan.classRows?{classRows:plan.classRows}:{}),recordings:plan.assets.length,creative:plan.creativeCount,chapters:plan.chapterCount,resources:plan.resources.length,learnerRows:plan.profiles.length+plan.saves.length,providerResponses:plan.providers.length,courseAssignments:(plan.courseGrants||[]).length,sharingSettings:(plan.courseConsents||[]).length,collections:(plan.collectionUpdates||[]).length,assignedQuestionSets:(plan.courseBankUpdates||[]).reduce((n,r)=>n+r.removed.length,0)});
-export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now()}){
+// The setup record (age range, notice acknowledgement) is an account safeguard, not learning data:
+// deleting learning data or expiring progress keeps it, so an under-18 can't reset their age range.
+// Closing the account (closing:true) removes it too.
+const ACCOUNT_SLOTS=new Set(['onboarding']);
+export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.now(),closing=false}){
  const db=sqlDB(env.DB),{controls}=await readControls(env,siteOwner,owner,now),lp=parse(controls.learner.policy),wp=parse(controls.workspace.policy);
  const jobs=await ownedJobs(db,siteOwner),resources=await db.all('SELECT id,created,payload FROM workshop_resources WHERE owner=? ORDER BY id',siteOwner),assets=await db.all('SELECT * FROM media_assets WHERE site_owner=? ORDER BY id',siteOwner);
  let selected=[],sourceIDs=[],assetIDs=[],profiles=[],saves=[],profileRows=[];
@@ -23,7 +27,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  else if(mode==='media'){assetIDs=assets.filter(a=>a.learner_owner===owner&&(id==='all'||a.id===id)).map(a=>a.id);need(id==='all'||assetIDs.length,'Recording not found.',404);}
  else if(mode==='learner'){
   selected=jobs.filter(j=>parse(j.payload).learnerOwner===owner);
-  profiles=(await store.allRows('learner_profiles',owner)).map(r=>r.id);saves=(await store.allRows('learner_saves',owner)).map(r=>r.id);
+  profiles=(await store.allRows('learner_profiles',owner)).filter(r=>closing||!ACCOUNT_SLOTS.has(r.slot_key)).map(r=>r.id);saves=(await store.allRows('learner_saves',owner)).map(r=>r.id);
   assetIDs=assets.filter(a=>a.learner_owner===owner).map(a=>a.id);
  }else if(mode==='resource'||mode==='workspace'){
   sourceIDs=resources.filter(r=>mode==='workspace'||r.id===id).map(r=>r.id);need(mode==='workspace'||sourceIDs.length,'Source not found.',404);
@@ -32,7 +36,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
   assetIDs=assets.filter(a=>a.learner_owner===owner&&expired(a.created,lp.mediaDays)).map(a=>a.id);
   sourceIDs=resources.filter(r=>expired(r.created,wp.resourceDays)).map(r=>r.id);
   selected=jobs.filter(j=>['creative','course-plan','knowledge','media-render'].includes(parse(j.payload).recordType)&&parse(j.payload).learnerOwner===owner&&expired(j.updated,lp.creativeDays)||parse(j.payload).resourceVersions?.some(v=>sourceIDs.includes(v.id)));
-  if(lp.progressDays)for(const table of ['learner_profiles','learner_saves']){const rows=await store.allRows(table,owner),latest=new Map();for(const r of rows)latest.set(r.slot_key,Math.max(latest.get(r.slot_key)||0,Number(r.updated_ms)));const ids=rows.filter(r=>expired(latest.get(r.slot_key),lp.progressDays)).map(r=>r.id);if(table==='learner_profiles'){profiles=ids;profileRows=rows}else saves=ids;}
+  if(lp.progressDays)for(const table of ['learner_profiles','learner_saves']){const rows=await store.allRows(table,owner),latest=new Map();for(const r of rows)latest.set(r.slot_key,Math.max(latest.get(r.slot_key)||0,Number(r.updated_ms)));const ids=rows.filter(r=>!(table==='learner_profiles'&&ACCOUNT_SLOTS.has(r.slot_key))&&expired(latest.get(r.slot_key),lp.progressDays)).map(r=>r.id);if(table==='learner_profiles'){profiles=ids;profileRows=rows}else saves=ids;}
  }else throw Object.assign(Error('Choose a supported data action.'),{status:400});
  selected.push(...jobs.filter(j=>parse(j.payload).recordType==='media-render'&&assetIDs.includes(parse(j.payload).assetId)));
  const importIds=new Set(resources.filter(r=>sourceIDs.includes(r.id)).map(r=>parse(r.payload).provenance?.importJobId).filter(Boolean));selected.push(...jobs.filter(j=>parse(j.payload).recordType==='knowledge'&&importIds.has(j.id)));
@@ -67,7 +71,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
   if(remove||sources.length!==c.sources.length||readers.length!==c.readers.length){const readerBindings=Object.fromEntries(Object.entries(c.readerBindings||{}).filter(([id])=>readers.includes(id)));collectionUpdates.push({scope:r.scope,policy:r.policy,nextPolicy:remove?null:JSON.stringify({...c,sources,readers,readerBindings,revision:'cleanup-'+(await digest(r.policy+sourceIDs.join(',')+mode)).slice(0,32)})})}
  }
  const classRows=mode==='learner'?await countClassRows(env,owner):0;
- const plan={mode,id:id||null,classRows,collectionUpdates,courseGrants,courseBankUpdates,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan','knowledge','media-render'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
+ const plan={mode,...(closing?{closing:true}:{}),id:id||null,classRows,collectionUpdates,courseGrants,courseBankUpdates,courseConsents,jobs:sorted(selected.map(j=>j.id)),resources:sorted(sourceIDs),assets:sorted(assetIDs),profiles:sorted(profiles),saves:sorted(saves),providers:sorted(selected.map(j=>j.provider_id).filter(Boolean)),creativeCount:selected.filter(j=>['creative','course-plan','knowledge','media-render'].includes(parse(j.payload).recordType)).length,chapterCount:selected.filter(j=>!parse(j.payload).recordType).length};
  return {...plan,hash:await digest(JSON.stringify(plan)),counts:counts(plan)};
 }
 export async function deleteProviderResponse(id,env,fetcher=fetch){
@@ -132,7 +136,7 @@ async function lockOperation(env,ctx,op){
 async function prepareOperation(env,ctx,op){
  const db=sqlDB(env.DB);await lockOperation(env,ctx,op);const plan=parse(op.plan);
  if(!plan.started){
-  const fresh=await deletionPlan(env,{...ctx,mode:plan.mode,id:plan.id,now:ctx.now()});
+  const fresh=await deletionPlan(env,{...ctx,mode:plan.mode,id:plan.id,closing:!!plan.closing,now:ctx.now()});
   if(fresh.hash!==plan.hash){await db.run('UPDATE data_controls SET operation=NULL WHERE operation=?',op.id);await db.run('UPDATE data_operations SET status=?,plan=?,updated=? WHERE id=?','cancelled',JSON.stringify({mode:plan.mode,counts:plan.counts}),ctx.now(),op.id);throw Object.assign(Error('Your saved data changed. No deletion started. Preview the deletion again.'),{status:409});}
   await db.run('UPDATE data_controls SET epoch=epoch+1,updated=? WHERE operation=?',ctx.now(),op.id);
   op.plan=JSON.stringify({...fresh,started:true});await db.run('UPDATE data_operations SET plan=?,status=?,updated=? WHERE id=?',op.plan,'cleanup-pending',ctx.now(),op.id);

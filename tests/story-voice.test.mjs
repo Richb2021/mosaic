@@ -41,7 +41,7 @@ test('an interest picks a matching style unless one is chosen; the prompt then a
  assert.equal(suggestStyle('Anime & manga'),'anime');assert.equal(suggestStyle('Fantasy & myths'),'fantasy');assert.equal(suggestStyle('Football'),'sports');assert.equal(suggestStyle('Cooking'),null);
  const anime=generationRequest(job('adventure-v1',{genre:'action',interest:'Anime & manga'})).input[0].content;
  assert.ok(anime.includes('Style: Anime.')&&anime.includes(STORY_STYLES.anime.guide));
- assert.match(anime,/the title and the first sentence of the hook show it and the style/);
+ assert.match(anime,/the title and the opening scene show it and the style naturally/);
  assert.match(anime,/Never copy an existing series/);
  const comic=generationRequest(job('quiz-v1',{genre:'comedy',interest:'Anime & manga',style:'comic'})).input[0].content;
  assert.ok(comic.includes('Style: Comic book')&&!comic.includes('Style: Anime.'),'a chosen style wins');
@@ -71,4 +71,12 @@ test('style touches count for the interest when the interest chose the style; ga
  assert.deepEqual(storyFit(gaming,{interest:'Gaming'}).weak,[],'video-game writing counts as using Gaming');
  assert.deepEqual(storyFit({title:'Food webs',hook:'Plants are producers.'},{interest:'Gaming'}).weak,['interest','style']);
  for(const t of ['quiz-v1','novel-v1','sports-v1','merge-v1'])assert.match(generationRequest(job(t,{genre:'comedy',interest:'Gaming'})).input[0].content,/title that fits the story|should fit the story/,t);
+});
+
+test('learning drives the plot in every format, and coverage shows which source passages a game uses', async () => {
+ const {LEARNING_IN_PLOT,learningCoverage}=await import('../src/story-direction.js');
+ for(const t of TEMPLATE_IDS){const sys=generationRequest(job(t,{genre:'action',interest:'Space'})).input[0].content;assert.ok(sys.includes(LEARNING_IN_PLOT),t);assert.match(sys,/explain why or predict/)}
+ const c={sources:[{id:'a',title:'Producers'},{id:'b',title:'Habitats'}],questions:[{sourceRefs:['a']},{options:[{sourceRefs:['a']}]}]};
+ assert.deepEqual(learningCoverage(c),{total:2,used:1,missing:['Habitats']});
+ assert.deepEqual(learningCoverage({...c,debrief:{sourceRefs:['b']}}).missing,[]);
 });

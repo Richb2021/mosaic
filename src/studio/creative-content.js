@@ -44,8 +44,9 @@ export function validateCreative(raw,job){
  need(Array.isArray(raw.segments)&&raw.segments.length>=(narrative?6:4)&&raw.segments.length<=(narrative?12:8),narrative?'A story needs six to twelve short scenes.':'An episode needs four to eight short scenes.');
  let story;
  if(narrative){
-  const brief=storyBrief(job.context.story);only(raw.story,['genre','interest','premise','want','stakes','obstacle','turn','payoff','learningConnection',...(performed?['prop']:[])]);
-  need(raw.story.genre===brief.genre&&raw.story.interest===brief.interest,'The story changed the requested genre or interest.');
+  const brief=storyBrief(job.context.story);// A saved draft carries the requested style and audience; a fresh model answer doesn't. Both are checked again here.
+  only(raw.story,['genre','interest','audience','style','premise','want','stakes','obstacle','turn','payoff','learningConnection',...(performed?['prop']:[])]);
+  need(raw.story.genre===brief.genre&&raw.story.interest===brief.interest&&(raw.story.style===undefined||raw.story.style===brief.style)&&(raw.story.audience===undefined||raw.story.audience===brief.audience),'The story changed the requested genre or interest.');
   story={...brief,...(performed?{prop:raw.story.prop}:{})};for(const k of ['premise','want','stakes','obstacle','turn','payoff','learningConnection'])story[k]=text(raw.story[k],400,'Story '+k);
  }
  const segments=raw.segments.map((s,i)=>{

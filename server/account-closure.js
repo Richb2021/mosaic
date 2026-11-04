@@ -27,7 +27,7 @@ export async function continueClosure(env,{owner,siteOwner,store,now}){
  const pending=await db.one("SELECT COUNT(*) AS n FROM data_operations WHERE site_owner=? AND learner_owner=? AND status IN ('preparing','cleanup-pending','provider-pending')",siteOwner,owner);
  if(pending.n)return {status:'cleaning'};
  for(const mode of ['workspace','learner']){
-  const plan=await deletionPlan(env,{owner,siteOwner,store,mode,now:now()});
+  const plan=await deletionPlan(env,{owner,siteOwner,store,mode,now:now(),closing:true});
   const operation=await startDeletion(env,{owner,siteOwner,store,now},plan);
   if(operation.status!=='complete')return {status:'cleaning',operation};
  }

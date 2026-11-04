@@ -31,3 +31,25 @@ export function suggestedLearningMap(pack){return learningActivities(pack).slice
 export function learningMapEditor(pack,esc){const map=pack.learningMap||[],activities=learningActivities(pack);return `<details class="review-group learning-map-editor" open><summary>Learning concepts and suggested order</summary><p>Map what each activity actually practises. Check the objective, its supporting passages and any useful preparation. A prerequisite is an optional suggestion; it never locks a game.</p>${map.map((n,i)=>`<section class="concept-editor"><label>Concept ${i+1}<textarea data-concept-objective="${i}" maxlength="240" rows="2">${esc(n.objective)}</textarea></label><fieldset><legend>Activities for this concept</legend>${activities.map(a=>`<label class="workshop-check"><input type="checkbox" data-concept-activity="${i}" value="${esc(a.key)}" ${n.activityKeys.includes(a.key)?'checked':''}>${esc(a.label)}</label>`).join('')}</fieldset><fieldset><legend>Read beforehand (optional)</legend>${map.filter(c=>c.id!==n.id).map(c=>`<label class="workshop-check"><input type="checkbox" data-concept-prerequisite="${i}" value="${esc(c.id)}" ${n.prerequisites.includes(c.id)?'checked':''}>${esc(c.objective)}</label>`).join('')||'<p>No other concepts in this chapter.</p>'}</fieldset><fieldset><legend>Supporting passages</legend>${pack.sources.map(s=>`<label class="workshop-check"><input type="checkbox" data-concept-source="${i}" value="${esc(s.id)}" ${n.sourceRefs.includes(s.id)?'checked':''}>${esc(s.title)} — ${esc(s.locator)}</label>`).join('')}</fieldset></section>`).join('')}${map.length?'<button data-act="resource-map-remove">Remove concept map</button>':'<button data-act="resource-map-add">Prepare an editable concept map</button>'}</details>`;}
 
 export function learningMapReview(pack,esc){return pack.learningMap?`<section class="learning-map-review"><h3>Learning concepts and suggested order</h3><p>Review these objectives and their links to activities and sources. Preparation is optional, never a game lock.</p>${pack.learningMap.map(n=>`<section><h4>${esc(n.objective)}</h4><p>Activities: ${n.activityKeys.map(k=>esc(learningActivities(pack).find(a=>a.key===k).label)).join('; ')}</p>${n.prerequisites.length?`<p>Suggested preparation: ${n.prerequisites.map(k=>esc(pack.learningMap.find(c=>c.id===k).objective)).join('; ')}</p>`:''}<details><summary>Check supporting sources</summary>${n.sourceRefs.map(k=>{const s=pack.sources.find(s=>s.id===k);return `<blockquote>${esc(s.excerpt)}<footer>${esc(s.title)} — ${esc(s.locator)}</footer></blockquote>`}).join('')}</details></section>`).join('')}</section>`:''}
+
+// AI output often maps a concept to an activity that cites a different passage, which the strict check
+// rejects, losing the whole chapter. Before validation, keep only the links that share evidence, drop
+// concepts left with nothing, keep prerequisites acyclic, and fall back to one concept per activity.
+// The teacher still reviews and can edit the map.
+export function repairLearningMap(map,pack){
+ try{
+  const activities=learningActivities(pack),valid=new Set((pack.sources||[]).map(s=>s.id)),maxRefs=pack.template==='adventure-v1'?4:12,seen=new Set();
+  let concepts=(Array.isArray(map)?map:[]).filter(n=>n&&id(n.id)&&typeof n.objective==='string'&&n.objective.trim()&&!seen.has(n.id)&&seen.add(n.id)).slice(0,8).map(n=>{
+   const has=k=>activities.some(a=>a.key===k),refsOf=k=>activities.find(a=>a.key===k).sourceRefs.filter(r=>valid.has(r));
+   let keys=[...new Set(Array.isArray(n.activityKeys)?n.activityKeys:[])].filter(has);
+   let refs=[...new Set((Array.isArray(n.sourceRefs)?n.sourceRefs:[]).filter(r=>valid.has(r)))];
+   if(!refs.length)refs=[...new Set(keys.flatMap(refsOf))];
+   refs=refs.slice(0,maxRefs);keys=keys.filter(k=>refsOf(k).some(r=>refs.includes(r))).slice(0,8);
+   return {id:n.id,objective:n.objective.trim().slice(0,240),activityKeys:keys,sourceRefs:refs,prerequisites:Array.isArray(n.prerequisites)?n.prerequisites:[]};
+  }).filter(n=>n.activityKeys.length&&n.sourceRefs.length);
+  const order=concepts.map(n=>n.id);
+  for(const n of concepts)n.prerequisites=[...new Set(n.prerequisites)].filter(k=>order.includes(k)&&order.indexOf(k)<order.indexOf(n.id)).slice(0,7);
+  if(concepts.length)return concepts;
+  return suggestedLearningMap(pack).map(n=>({...n,sourceRefs:n.sourceRefs.filter(r=>valid.has(r)).slice(0,maxRefs)})).filter(n=>n.sourceRefs.length);
+ }catch{return map}
+}

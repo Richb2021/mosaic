@@ -59,7 +59,7 @@ test('learner export includes reports and sharing settings; deletion removes gra
  const h=await sharingFixture();await h.assignCourse();await h.share();const owner=await learnerOwner(h.learner),siteOwner='personal:'+owner,inv=await h.call(h.learner,'learning/data');
  const exp=await h.call(h.learner,'learning/data',{action:'export',epoch:inv.epoch});assert(exp.export.profiles.some(r=>r.slot.startsWith('course-report:')));assert.equal(exp.export.courseAssignments.length,1);assert.equal(exp.export.sharingSettings[0].enabled,true);
  const ctx={owner,siteOwner,store:h.store,now:h.now},plan=await deletionPlan(h.env,{...ctx,now:h.now(),mode:'learner'});assert.equal(plan.counts.courseAssignments,1);assert.equal(plan.counts.sharingSettings,1);await startDeletion(h.env,ctx,plan);
- assert.equal((await h.report()).assignments.length,0);assert.equal((await h.store.allRows('learner_profiles',owner)).length,0);
+ assert.equal((await h.report()).assignments.length,0);assert.deepEqual((await h.store.allRows('learner_profiles',owner)).map(r=>r.slot_key),['onboarding'],'only the account setup record (age range) remains');
 });
 test('report retention hides expired updates and deletes NCB rows/consent without withdrawing the course',async()=>{
  const h=await sharingFixture();await h.assignCourse();await h.share();const owner=await learnerOwner(h.learner),siteOwner='personal:'+owner,state=await readControls(h.env,siteOwner,owner,h.now());

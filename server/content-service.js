@@ -1,6 +1,6 @@
 import {GAME_STORY_BRIEF,storyBrief,storyCraft} from '../src/story-direction.js';
 import {metaUsage} from './cost-ledger.js';
-import {LEARNING_MAP_SCHEMA} from '../src/learning-map.js';
+import {LEARNING_MAP_SCHEMA,repairLearningMap} from '../src/learning-map.js';
 import {evidencePacket} from '../src/evidence-selection.js';
 import {validateChapterContent} from '../src/chapter-content.js';
 import {ADVENTURE_SCHEMA,ADVENTURE_PROMPT,validateAdventureContent} from '../src/game-modes/adventure-content.js';
@@ -73,6 +73,7 @@ export function validateGenerated(raw,job){
 // Accept only packet IDs; the final chapter still passes strict source equality.
 export function bindGeneratedEvidence(raw,job){
  requireValue(raw&&typeof raw==='object'&&!Array.isArray(raw),'The model returned no chapter object.');
+ if(Array.isArray(raw.learningMap))raw={...raw,learningMap:repairLearningMap(raw.learningMap,{...raw,sources:job.evidence})};
  const references=collectSourceReferences(raw);
  const ids=[...new Set(references)];if(!ids.length||ids.length>12)console.warn('workshop_citation_validation',JSON.stringify({template:templateOf(job),references:ids.length,cards:Array.isArray(raw.cards)?raw.cards.length:null,scenarios:Array.isArray(raw.scenarios)?raw.scenarios.length:null}));requireValue(ids.length>0&&ids.length<=12,'The chapter needs valid source references.');
  const sources=ids.map(id=>{const source=job.evidence.find(s=>s.id===id);requireValue(source,'The draft cites a passage outside the reviewed evidence.');return {...source}});
