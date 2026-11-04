@@ -7,7 +7,8 @@ import {readJSON,noStore} from './ncb-auth.js';
 import {sqlDB,parse,need,DAY,auditEvent} from './data-control.js';
 import {activeCourseGrant,grantChapters,classAssignable} from './course-grants.js';
 import {admission} from './pilot-access.js';
-import {readSharedReport} from './course-sharing-api.js';
+import {readSharedReport,readHelpSeen} from './course-sharing-api.js';
+import {workScope,feedbackSlot} from './teacher-review.js';
 import {digest} from './content-service.js';
 
 export const classScope=id=>'class:'+id;
@@ -122,18 +123,44 @@ async function leaderboard(db,c,now,me,all=false){
  return {enabled:true,week,entries:all?entries:entries.slice(0,10),you:entries.find(e=>e.you)||null,players:entries.length,reported:ranked.length};
 }
 
-// Shared course reports for learners this teacher manages: objective status and help requests only.
-async function reportSummary(env,store,db,principal,siteOwner,learner,now){
- const grants=(await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND json_extract(policy,'$.learner')=? ORDER BY updated DESC LIMIT 24",principal,siteOwner,learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
- let updated=null,latest=null,help=false;
- for(const g of grants){
-  try{if(!await activeCourseGrant(env,g)||!(await grantChapters(env,g)).length)continue;const rep=await readSharedReport(env,store,g,now);
-   if(rep.state!=='shared')continue;updated=Math.max(updated||0,rep.updated);help=help||rep.updates.some(u=>u.help);
-   for(const u of rep.updates)if(STATUS_ORDER.indexOf(u.status)>STATUS_ORDER.indexOf(latest||'not-started'))latest=u.status;
-  }catch{}
- }
- return {updated,latest,help};
+// What one learner chose to share with this teacher, per assigned course: objective
+// statuses and help requests (only while sharing is on) and Explore work they submitted.
+async function sharedWork(store,db,g,now){
+ const row=await db.one('SELECT policy,updated FROM data_controls WHERE scope=?',workScope(g.id)),p=parse(row?.policy);
+ if(!p.enabled||p.revision!==g.revision)return null;
+ const days=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','learner:'+g.learner))?.policy).progressDays||0;
+ if(days&&Number(row.updated)+days*DAY<=now)return null;
+ // Feedback counts as sent only while it is inside the teacher's own retention window (as in teacher-review.js).
+ let feedbackAt=null;try{const r=await store.latest('learner_profiles',g.owner,feedbackSlot(g.id)),f=parse(r?.payload).feedback,keep=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','learner:'+g.owner))?.policy).progressDays||0;if(f?.submissionHash===p.hash&&f.revision===g.revision&&(!keep||Number(r.updated_ms)+keep*DAY>now))feedbackAt=f.sentAt}catch{}
+ return {submittedAt:Number(row.updated),feedbackAt};
 }
+async function learnerCourses(env,store,db,principal,siteOwner,learner,now){
+ const grants=(await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND json_extract(policy,'$.learner')=? AND json_extract(policy,'$.revoked')=0 ORDER BY updated DESC LIMIT 24",principal,siteOwner,learner)).map(r=>({...parse(r.policy),id:r.scope.slice(13)}));
+ const out=[];
+ for(const g of grants){
+  // A course that is temporarily unreadable is listed as unavailable, never dropped (dropping would read as "no course").
+  const unavailable={g,report:{state:'unavailable'},helpObjectives:[],helpSeen:null,work:null};
+  try{if(!await activeCourseGrant(env,g))continue;if(!(await grantChapters(env,g)).length){out.push(unavailable);continue}
+   const {receipt,...report}=await readSharedReport(env,store,g,()=>now); // it takes a clock, not a timestamp
+   const helpObjectives=report.state==='shared'?g.steps.filter(s=>report.updates.find(u=>u.objectiveId===s.id)?.help).map(s=>s.objective):[];
+   out.push({g,report,helpObjectives,helpSeen:helpObjectives.length?await readHelpSeen(env,store,g,receipt,now):null,work:await sharedWork(store,db,g,now)});
+  }catch{out.push(unavailable)}
+ }
+ return out;
+}
+const summarise=courses=>{let updated=null,latest=null,help=false;
+ for(const {report:r} of courses){if(r.state!=='shared')continue;updated=Math.max(updated||0,r.updated);help=help||r.updates.some(u=>u.help);latest=latest||'not-started'; // a shared "not started" is shown as such, not as a blank
+  for(const u of r.updates)if(STATUS_ORDER.indexOf(u.status)>STATUS_ORDER.indexOf(latest||'not-started'))latest=u.status;}
+ return {updated,latest,help};
+};
+const assignmentRef=g=>({id:g.id,revision:g.revision,title:g.title,...(g.className?{className:g.className}:{})});
+// At most four learners are read at once: the learner store is slow and rate-limited under bursts.
+async function readCourses(env,store,db,principal,siteOwner,page,now){
+ const out=new Map();
+ for(let i=0;i<page.length;i+=4)await Promise.all(page.slice(i,i+4).map(async m=>out.set(m.learner,await learnerCourses(env,store,db,principal,siteOwner,m.learner,now))));
+ return out;
+}
+const groupOf=(a,principal)=>a.admitted&&a.role==='learner'&&a.manager===principal?'yours':classAssignable(a,principal)?'class':'elsewhere';
 
 // Learner actions that remove data. They are allowed for withdrawn accounts and in archived classes.
 export const WITHDRAWAL_ACTIONS=input=>['leave','unshare'].includes(input?.action)||input?.action==='board'&&input.optIn===false;
@@ -151,22 +178,26 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   const all=await members(db,c.id),start=Math.max(0,Number.parseInt(input.cursor||'0',10)||0),page=all.slice(start,start+20);
   const shares=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-share:'+c.id+':%')).map(r=>parse(r.policy));
   const sharers=new Set(shares.map(s=>s.learner));
-  // At most four report reads at once: the learner store is slow and rate-limited under bursts.
-  const reports=new Map();
-  for(let i=0;i<page.length;i+=4)await Promise.all(page.slice(i,i+4).map(async m=>reports.set(m.learner,await reportSummary(env,store,db,principal,siteOwner,m.learner,at))));
-  const learners=[];for(const m of page){
-   const r=reports.get(m.learner)||{},mine=shares.filter(s=>s.learner===m.learner),times=[r.updated,...mine.map(s=>s.shared)].filter(Boolean);
-   const a=await admission(env,m.learner);
-   learners.push({handle:await handleOf(c.id,m.learner),label:m.label,joined:m.joined,group:a.admitted&&a.role==='learner'&&a.manager===principal?'yours':classAssignable(a,principal)?'class':'elsewhere',lastShared:times.length?Math.max(...times):null,latest:r.latest||null,help:!!r.help,explanations:mine.length,unread:mine.filter(s=>!s.feedback).length});
+  const courses=await readCourses(env,store,db,principal,siteOwner,page,at),learners=[],inbox=[];
+  for(const m of page){
+   const mine=courses.get(m.learner)||[],r=summarise(mine),own=shares.filter(s=>s.learner===m.learner),times=[r.updated,...own.map(s=>s.shared)].filter(Boolean);
+   const handle=await handleOf(c.id,m.learner),label=m.label||'Learner';
+   learners.push({handle,label,joined:m.joined,group:groupOf(await admission(env,m.learner),principal),lastShared:times.length?Math.max(...times):null,latest:r.latest||null,help:!!r.help,explanations:own.length,unread:own.filter(s=>!s.feedback).length});
+   // The inbox: work learners submitted for feedback, and help they asked for. "Done" means you replied or marked it seen.
+   for(const x of mine){
+    if(x.work)inbox.push({kind:'work',handle,label,assignment:assignmentRef(x.g),at:x.work.submittedAt,done:!!x.work.feedbackAt,doneAt:x.work.feedbackAt});
+    if(x.helpObjectives.length)inbox.push({kind:'help',handle,label,assignment:assignmentRef(x.g),at:x.report.updated,objectives:x.helpObjectives,done:!!x.helpSeen,doneAt:x.helpSeen?.at||null,note:x.helpSeen?.note||null});
+   }
   }
+  inbox.sort((a,b)=>a.done-b.done||b.at-a.at);
   const review=await db.all("SELECT id,draft FROM workshop_jobs WHERE owner=? AND status='review' ORDER BY updated DESC LIMIT 5",siteOwner);
   const reviewCount=(await db.one("SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND status='review'",siteOwner))?.n||0;
   const labels=new Map(all.map(m=>[m.learner,m.label]));
   const recent=[];for(const s of shares.sort((a,b)=>b.shared-a.shared).slice(0,20))recent.push({handle:await handleOf(c.id,s.learner),label:labels.get(s.learner)||'Learner',key:s.key,title:s.title,text:s.text,shared:s.shared,feedback:s.feedback||null});
   await auditEvent(env,'learner:'+owner,'class-overview-viewed',{},at);
   // Course-report counts are read for this page only; explanation counts cover the whole class.
-  return noStore({class:publicClass(c),counts:{learners:all.length,pageStart:start,pageSize:page.length,partial:page.length<all.length,sharing:learners.filter(l=>l.lastShared).length,help:learners.filter(l=>l.help).length,explaining:all.filter(m=>sharers.has(m.learner)).length,explanations:shares.length,unread:shares.filter(s=>!s.feedback).length,review:reviewCount,reviewScope:'workshop'},
-   learners,nextCursor:start+20<all.length?String(start+20):null,
+  return noStore({class:publicClass(c),counts:{learners:all.length,pageStart:start,pageSize:page.length,partial:page.length<all.length,sharing:learners.filter(l=>l.lastShared).length,help:learners.filter(l=>l.help).length,explaining:all.filter(m=>sharers.has(m.learner)).length,explanations:shares.length,unread:shares.filter(s=>!s.feedback).length,review:reviewCount,reviewScope:'workshop',workToReview:inbox.filter(i=>i.kind==='work'&&!i.done).length,helpWaiting:inbox.filter(i=>i.kind==='help'&&!i.done).length},
+   learners,inbox,nextCursor:start+20<all.length?String(start+20):null,
    review:review.map(j=>{let d={};try{d=JSON.parse(j.draft||'{}')}catch{}return {id:j.id,title:d.title||'Untitled chapter',template:d.template||null,sources:Array.isArray(d.sources)?d.sources.length:0}}),
    shares:recent,leaderboard:await leaderboard(db,c,at,null,true)});
  }
@@ -174,6 +205,29 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   const {c}=await loadClass(db,input.id),isOwner=c.owner===principal&&c.siteOwner===siteOwner;
   if(!isOwner)await memberOf(c.id);
   return noStore({class:{id:c.id,name:c.name},leaderboard:await leaderboard(db,c,at,principal)});
+ }
+ if(req.method==='GET'&&input.view==='export'){
+  // A spreadsheet of what learners chose to share with you. Leaderboard nicknames are
+  // left out so they can't be matched to names, and nothing here is a mark.
+  need(teaches,'Only teachers can export a class.',403);const {c}=await ownClass(input.id);
+  need(!input.cursor||handleOk(input.cursor),'Invalid export page.');
+  const all=[];for(const m of await members(db,c.id))all.push({...m,handle:await handleOf(c.id,m.learner)});
+  all.sort((a,b)=>a.handle.localeCompare(b.handle));
+  const rest=input.cursor?all.filter(m=>m.handle>input.cursor):all,page=rest.slice(0,20);
+  const shares=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-share:'+c.id+':%')).map(r=>parse(r.policy));
+  const courses=await readCourses(env,store,db,principal,siteOwner,page,at),rows=[];
+  for(const m of page){
+   const own=shares.filter(s=>s.learner===m.learner),base={learner:m.label||'Learner',key:m.handle.slice(0,6),group:groupOf(await admission(env,m.learner),principal),joined:m.joined,explanations:own.length,explanationsAnswered:own.filter(s=>s.feedback).length};
+   const mine=courses.get(m.learner)||[];
+   if(!mine.length)rows.push({...base,course:null});
+   for(const x of mine){
+    const course={...base,course:x.g.title,sharing:x.report.state,updateSharedAt:x.report.state==='shared'?x.report.updated:null,helpSeenAt:x.helpSeen?.at||null,workSubmittedAt:x.work?.submittedAt||null,feedbackSentAt:x.work?.feedbackAt||null};
+    if(x.report.state!=='shared'){rows.push({...course,objective:null,status:null,help:null});continue}
+    for(const s of x.g.steps){const u=x.report.updates.find(u=>u.objectiveId===s.id);rows.push({...course,objective:s.objective,status:u?.status||null,help:!!u?.help,helpSeenAt:u?.help?course.helpSeenAt:null})}
+   }
+  }
+  await auditEvent(env,'learner:'+owner,'class-exported',{page:!!input.cursor},at);
+  return noStore({class:{id:c.id,name:c.name},learners:all.length,rows,nextCursor:rest.length>20?page.at(-1).handle:null});
  }
  if(req.method==='GET'){
   const owned=teaches?(await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'class:%' AND json_extract(policy,'$.owner')=? AND json_extract(policy,'$.siteOwner')=? ORDER BY updated DESC LIMIT 50",principal,siteOwner)).map(r=>parse(r.policy)):[];

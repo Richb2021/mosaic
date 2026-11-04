@@ -1,0 +1,14 @@
+/* Feedback starters and "help seen" receipts. Lantern Light tokens. */
+.fb-starters{grid-column:1/-1;border:1px solid var(--ll-line);border-radius:14px;background:var(--ll-cream);padding:8px 12px;font-size:13.5px}
+.fb-starters summary{cursor:pointer;font-weight:700;color:var(--ll-ink);min-height:32px;display:flex;align-items:center}
+.fb-starters p{margin:4px 0 8px;color:var(--ll-ink-soft);font-size:13px;line-height:1.5}
+.fb-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--ll-line)}
+.fb-row>span{font-weight:700;font-size:12.5px;color:var(--ll-ink-soft);flex-basis:100%}
+.fb-row button{min-height:32px;padding:4px 11px;border-radius:999px;font-size:13px;font-weight:600;background:var(--ll-white);border:1.5px solid var(--ll-line);color:var(--ll-ink)}
+.fb-row button:hover:not(:disabled){border-color:var(--ll-amber);background:var(--ll-amber-soft)}
+.hs-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-top:6px}
+.hs-form label{display:flex;flex-direction:column;gap:6px;margin:0;font-size:13px;flex:1 1 240px}
+.hs-form select{border-radius:12px;border:1.5px solid #D8CCB3;padding:10px 12px;font:15px var(--ll-body);color:var(--ll-ink);background:var(--ll-white);width:100%}
+.hs-small{flex-basis:100%;margin:0;font-size:12.5px;color:var(--ll-ink-soft)}
+.hs-seen,.cs-seen{margin:6px 0 0;font-size:14px;color:var(--ll-teal-ink,#0E7468);background:var(--ll-teal-soft,#E3F4F1);border-radius:12px;padding:8px 12px}
+.hs-seen span,.cs-seen span{font-weight:800;margin-right:4px}

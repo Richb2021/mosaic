@@ -126,3 +126,19 @@ button.cl-kpi{cursor:pointer}
 .cl-chip.is-elsewhere{background:var(--ll-paper,#F3EBDB);color:var(--ll-ink-soft)}
 .cl-assign{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--ll-cream);border-radius:14px;padding:10px 14px;margin:0 0 12px}
 .cl-assign p{margin:0;font-size:.88rem;color:var(--ll-ink-soft)}
+/* Inbox: work sent for feedback and help requests */
+.cl-inbox-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.cl-inbox-item{border-top:1px solid var(--ll-line);padding:14px 0;display:flex;flex-direction:column;gap:8px}
+.cl-inbox-item:first-child{border-top:0}
+.cl-inbox-item .cl-ex-head>div{flex:1;min-width:0}
+.cl-inbox-item.is-done{opacity:.85}
+.cl-inbox-item .teacher-review{margin:0;border-top:0;padding-top:0}
+.cl-chip.is-work{background:var(--ll-violet-soft,#EEE8FB);color:var(--ll-violet-ink,#5B3FB0)}
+.cl-chip.is-done{background:var(--ll-teal-soft,#E3F4F1);color:#0E7468}
+.cl-help-on{margin:0;font-size:13px;font-weight:700;color:var(--ll-ink-soft)}
+.cl-help-list{margin:0;padding-left:20px;font-size:14.5px;line-height:1.55}
+.cl-inbox .cl-pick{display:flex;gap:6px;flex-wrap:wrap}
+.cl-inbox .cl-pick button{min-height:36px;padding:6px 12px;font-size:13px;border-radius:999px}
+.cl-inbox .cl-pick button[aria-pressed="true"]{background:var(--ll-amber-soft);border-color:var(--ll-amber)}
+@media (max-width:600px){.cl-inbox-item .cl-ex-head{flex-wrap:wrap}}
+.cl-kpi span small{display:block}

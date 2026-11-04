@@ -1,12 +1,17 @@
 import React,{useEffect,useRef,useState} from 'react';
 import './classes.css';
+import {TeacherReview} from './TeacherReview.jsx';
+import {HelpSeen} from './HelpSeen.jsx';
+import {FeedbackStarters,addStarter} from './feedback-starters.jsx';
+import {classCSV,exportName} from './class-export.js';
 
 // Classes: teachers see one dashboard per class; learners join with a code and choose
 // what to share. Nothing here is a grade, and "not shared" is never shown as inactive.
 const STICKERS=[['star','Star'],['lantern','Lantern'],['lightbulb','Bright idea'],['heart','Kind'],['rocket','Big step']];
 const STICKER_ICON={star:'★',lantern:'✦',lightbulb:'☀',heart:'♥',rocket:'➶'};
 const STATUS_LABEL={practised:'Practised',started:'Started','not-started':'Not started'};
-const ago=ms=>{if(!ms)return 'Not shared yet';const d=Math.floor((Date.now()-ms)/86400000);return d<=0?'Shared today':d===1?'Shared yesterday':d<7?'Shared '+d+' days ago':'Shared '+new Date(ms).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+const ago=(ms,verb='Shared')=>{if(!ms)return 'Not shared yet';const d=Math.floor((Date.now()-ms)/86400000);return d<=0?verb+' today':d===1?verb+' yesterday':d<7?verb+' '+d+' days ago':verb+' '+new Date(ms).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+const initials=label=>String(label||'').split(' ').map(w=>w[0]).join('').slice(0,2);
 const pretty=code=>code?code.slice(0,3)+'-'+code.slice(3):'';
 export const shareKey=(kind,unitId,extra='')=>(kind+'-'+unitId+(extra?'-'+extra:'')).replace(/[^A-Za-z0-9:_-]/g,'-').slice(0,80);
 
@@ -31,6 +36,13 @@ export function TeacherClasses({client,onCourses}){
  const open=async(id,c='0')=>{setSelected(id);setCursor(c);setOverview(null);try{setOverview(await client.journal.request('classes?view=overview&id='+id+'&cursor='+c))}catch(e){setError(e.message)}};
  const act=async(body,message)=>{setBusy(true);setError('');setNotice('');try{const r=await client.journal.request('classes',body);if(message)setNotice(message);const d=await load();if(body.action==='create'&&r.class)await open(r.class.id);else if(selected&&body.action!=='delete')await open(selected,cursor);if(body.action==='delete'){setSelected(null);setOverview(null)}return r}catch(e){setError(e.message)}finally{setBusy(false)}};
  useEffect(()=>{if(!selected&&data?.teaching?.length)open(data.teaching[0].id)},[data]);
+ // After a reply from the inbox, update that one item here rather than re-reading every learner's reports.
+ const patchInbox=(k,changes)=>setOverview(o=>{if(!o)return o;const inbox=o.inbox.map(i=>i.kind+i.assignment.id===k?{...i,...changes}:i);return {...o,inbox,counts:{...o.counts,workToReview:inbox.filter(i=>i.kind==='work'&&!i.done).length,helpWaiting:inbox.filter(i=>i.kind==='help'&&!i.done).length}}});
+ const download=async()=>{setBusy(true);setError('');setNotice('');try{
+  const rows=[];let next='';do{const r=await client.journal.request('classes?view=export&id='+selected+(next?'&cursor='+next:''));rows.push(...r.rows);next=r.nextCursor}while(next);
+  const url=URL.createObjectURL(new Blob([classCSV(rows)],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=exportName(overview?.class?.name);document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  setNotice('Spreadsheet downloaded: '+rows.length+(rows.length===1?' row.':' rows.'));
+ }catch(e){setError(e.message)}finally{setBusy(false)}};
  const copy=async code=>{try{await navigator.clipboard.writeText(pretty(code));setNotice('Join code copied.')}catch{setNotice('Join code: '+pretty(code))}};
  if(!client.journal.user)return <section className="empty-state"><h1>Sign in to create classes</h1><p>Classes need your teacher account so learners can join with a code.</p><a className="button primary" href="/account.html">Sign in</a></section>;
  const o=overview,c=o?.class;
@@ -55,13 +67,14 @@ export function TeacherClasses({client,onCourses}){
      <div className="cl-kpis">
       <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber">✓</span><span>Your chapters to review <small>(all classes)</small></span><b>{o.counts.review}</b></button>
       <div className="cl-kpi"><span className="cl-kpi-icon is-teal">◆</span><span>Sharing updates{o.counts.partial?' (this page)':''}</span><b>{o.counts.sharing} <small>of {o.counts.partial?o.counts.pageSize:o.counts.learners}</small></b></div>
-      <div className="cl-kpi"><span className="cl-kpi-icon is-coral">♥</span><span>Asked for help{o.counts.partial?' (this page)':''}</span><b>{o.counts.help}</b></div>
+      <button className="cl-kpi" onClick={()=>document.getElementById('cl-inbox-h')?.scrollIntoView({behavior:'smooth',block:'start'})}><span className="cl-kpi-icon is-coral">♥</span><span>Waiting in your inbox{o.counts.partial?' (this page)':''} <small>{o.counts.workToReview} work · {o.counts.helpWaiting} help</small></span><b>{o.counts.workToReview+o.counts.helpWaiting}</b></button>
       <div className="cl-kpi"><span className="cl-kpi-icon is-violet">✎</span><span>Explanations to read</span><b>{o.counts.unread}</b></div>
      </div>
+     <Inbox o={o} client={client} onPatch={patchInbox}/>
      <div className="cl-grid">
       <section className="cl-card" aria-labelledby="cl-mosaic-h">
        <div className="cl-card-head"><h3 id="cl-mosaic-h">Class mosaic</h3><span>Latest shared update</span></div>
-       {!o.learners.length?<p className="cl-muted">No one has joined yet. Share the code <b>{pretty(c.code)}</b>.</p>:<div className="cl-mosaic">{o.learners.map(l=><span key={l.handle} title={l.label+' · '+ago(l.lastShared)} className={'cl-tile '+(l.help?'is-help':l.latest==='practised'?'is-practised':l.latest==='started'||l.lastShared?'is-started':'is-quiet')}>{l.label.split(' ').map(w=>w[0]).join('').slice(0,2)}</span>)}</div>}
+       {!o.learners.length?<p className="cl-muted">No one has joined yet. Share the code <b>{pretty(c.code)}</b>.</p>:<div className="cl-mosaic">{o.learners.map(l=><span key={l.handle} title={l.label+' · '+ago(l.lastShared)} className={'cl-tile '+(l.help?'is-help':l.latest==='practised'?'is-practised':l.latest==='started'||l.lastShared?'is-started':'is-quiet')}>{initials(l.label)}</span>)}</div>}
        <div className="cl-legend"><span><i className="is-practised"/>Practised</span><span><i className="is-started"/>Started or shared</span><span><i className="is-help"/>Asked for help</span><span><i className="is-quiet"/>Not sharing</span></div>
        <p className="cl-muted">Learners choose what to share. These are their own updates, not grades. Not sharing is never shown as inactive.</p>
       </section>
@@ -71,10 +84,10 @@ export function TeacherClasses({client,onCourses}){
       </section>
      </div>
      <section className="cl-card" aria-labelledby="cl-learners-h">
-      <div className="cl-card-head"><h3 id="cl-learners-h">Learners</h3><span>{o.counts.partial?'Showing '+(o.counts.pageStart+1)+'–'+(o.counts.pageStart+o.counts.pageSize)+' of '+o.counts.learners:o.counts.learners+' in this class'}</span></div>
+      <div className="cl-card-head"><h3 id="cl-learners-h">Learners</h3><span>{o.counts.partial?'Showing '+(o.counts.pageStart+1)+'–'+(o.counts.pageStart+o.counts.pageSize)+' of '+o.counts.learners:o.counts.learners+' in this class'}</span><button className="text-button" disabled={busy||!o.counts.learners} onClick={download} title="A spreadsheet of what learners chose to share with you. Leaderboard nicknames are left out.">Download spreadsheet (CSV)</button></div>
       <div className="cl-assign"><p><b>Set work for the whole class.</b> Open a course, then choose <i>Assign to a whole class</i>. Learners marked “Managed elsewhere” are skipped.</p><button className="text-button" onClick={onCourses}>Open Courses</button></div>
       {!o.learners.length?<p className="cl-muted">Nobody yet.</p>:<div className="cl-table-wrap"><table className="cl-table"><thead><tr><th>Learner</th><th>Last update shared</th><th>Latest</th><th>Explanations</th><th><span className="cl-sr">Actions</span></th></tr></thead><tbody>
-       {o.learners.map(l=><tr key={l.handle}><td><span className="cl-avatar">{l.label.split(' ').map(w=>w[0]).join('').slice(0,2)}</span>{l.label}{l.group==='class'&&<span className="cl-chip is-code" title="Joined with the class code. Class assignments reach them while they stay in the class.">Joined by code</span>}{l.group==='elsewhere'&&<span className="cl-chip is-elsewhere" title="Their school or family organiser manages their access, so class assignments skip them. Ask the administrator to move them to your group.">Managed elsewhere</span>}{l.help&&<span className="cl-chip is-help">Asked for help</span>}</td><td>{ago(l.lastShared)}</td><td>{l.latest?STATUS_LABEL[l.latest]:'—'}</td><td>{l.explanations?l.explanations+(l.unread?' · '+l.unread+' new':''):'—'}</td><td><button className="text-button danger" disabled={busy} onClick={()=>{if(window.confirm?.('Remove '+l.label+' from '+c.name+'? Their shared explanations and leaderboard entry for this class are removed.')!==false)act({action:'remove',id:c.id,handle:l.handle},l.label+' removed from the class.')}}>Remove</button></td></tr>)}
+       {o.learners.map(l=><tr key={l.handle}><td><span className="cl-avatar">{initials(l.label)}</span>{l.label}{l.group==='class'&&<span className="cl-chip is-code" title="Joined with the class code. Class assignments reach them while they stay in the class.">Joined by code</span>}{l.group==='elsewhere'&&<span className="cl-chip is-elsewhere" title="Their school or family organiser manages their access, so class assignments skip them. Ask the administrator to move them to your group.">Managed elsewhere</span>}{l.help&&<span className="cl-chip is-help">Asked for help</span>}</td><td>{ago(l.lastShared)}</td><td>{l.latest?STATUS_LABEL[l.latest]:'—'}</td><td>{l.explanations?l.explanations+(l.unread?' · '+l.unread+' new':''):'—'}</td><td><button className="text-button danger" disabled={busy} onClick={()=>{if(window.confirm?.('Remove '+l.label+' from '+c.name+'? Their shared explanations and leaderboard entry for this class are removed.')!==false)act({action:'remove',id:c.id,handle:l.handle},l.label+' removed from the class.')}}>Remove</button></td></tr>)}
       </tbody></table></div>}
       {(o.nextCursor||cursor!=='0')&&<div className="cl-pager">{cursor!=='0'&&<button onClick={()=>open(c.id,String(Math.max(0,Number(cursor)-20)))}>Previous</button>}{o.nextCursor&&<button onClick={()=>open(c.id,o.nextCursor)}>Next 20</button>}</div>}
      </section>
@@ -93,15 +106,37 @@ export function TeacherClasses({client,onCourses}){
  </div>;
 }
 
+// The inbox: work learners sent for feedback and help they asked for, newest first, waiting items on top.
+function Inbox({o,client,onPatch}){
+ // Items you reply to stay in view (marked done) until you switch the filter, so you can see what happened.
+ const [all,setAll]=useState(false),[kept,setKept]=useState(()=>new Set()),[notice,setNotice]=useState('');
+ const key=i=>i.kind+i.assignment.id,items=all?o.inbox:o.inbox.filter(i=>!i.done||kept.has(key(i))),done=o.inbox.filter(i=>i.done).length;
+ const handled=(i,message)=>async seen=>{setKept(k=>new Set(k).add(key(i)));setNotice(message);onPatch(key(i),{done:true,doneAt:seen?.at||Date.now(),...(i.kind==='help'?{note:seen?.note||null}:{})})};
+ const show=v=>{setAll(v);setKept(new Set());setNotice('')};
+ return <section className="cl-card cl-inbox" aria-labelledby="cl-inbox-h">
+  <div className="cl-card-head"><h3 id="cl-inbox-h">Inbox</h3><div className="cl-pick" role="group" aria-label="Show"><button aria-pressed={!all} onClick={()=>show(false)}>Needs you ({o.inbox.length-done})</button><button aria-pressed={all} onClick={()=>show(true)}>All ({o.inbox.length})</button></div></div>
+  <div aria-live="polite">{notice&&<p className="message success">{notice}</p>}</div>
+  {o.counts.partial&&<p className="cl-muted">For learners {o.counts.pageStart+1}–{o.counts.pageStart+o.counts.pageSize} of {o.counts.learners}. Use Next 20 under Learners to see the rest.</p>}
+  {!items.length?<p className="cl-muted">{o.inbox.length?'You’ve replied to everything here.':'Nothing yet. When learners send work for feedback or ask for help on a course you assigned, it appears here.'}</p>:
+   <ul className="cl-inbox-list">{items.map(i=><li key={key(i)} className={'cl-inbox-item'+(i.done?' is-done':'')}>
+    <div className="cl-ex-head"><span className="cl-avatar">{initials(i.label)}</span><div><strong>{i.label}</strong><small>{i.kind==='work'?'Sent work for feedback':'Asked for help'} · {i.assignment.title} · {ago(i.at,'Sent')}</small></div><span className={'cl-chip '+(i.done?'is-done':i.kind==='help'?'is-help':'is-work')}>{i.done?(i.kind==='work'?'Feedback sent':'Seen'):i.kind==='work'?'Work to review':'Help requested'}</span></div>
+    {i.kind==='help'?<><p className="cl-help-on">Help with:</p><ul className="cl-help-list">{i.objectives.map(t=><li key={t}>{t}</li>)}</ul><HelpSeen client={client} assignment={i.assignment} seen={i.done?{at:i.doneAt,note:i.note}:null} onDone={handled(i,'Marked as seen. '+i.label+' can see that you’ve seen their request.')}/></>:
+     <TeacherReview assignment={i.assignment} client={client} teacher onChange={handled(i,'Feedback sent to '+i.label+'.')}/>}
+   </li>)}</ul>}
+  {o.counts.unread>0&&<p className="cl-muted"><span><a href="#cl-ex-h">{o.counts.unread} {o.counts.unread===1?'explanation':'explanations'} waiting for a reply</a> further down.</span></p>}
+ </section>;
+}
+
 function Explanation({s,busy,onSend}){
  const [strength,setStrength]=useState(''),[next,setNext]=useState(''),[sticker,setSticker]=useState(null);
  return <article className="cl-ex">
-  <div className="cl-ex-head"><span className="cl-avatar">{s.label.split(' ').map(w=>w[0]).join('').slice(0,2)}</span><div><strong>{s.label}</strong><small>{s.title} · {ago(s.shared)}</small></div></div>
+  <div className="cl-ex-head"><span className="cl-avatar">{initials(s.label)}</span><div><strong>{s.label}</strong><small>{s.title} · {ago(s.shared)}</small></div></div>
   <blockquote>{s.text}</blockquote>
   {s.feedback?<div className="cl-sent">{s.feedback.sticker&&<span className="cl-sticker" aria-label={s.feedback.sticker+' sticker'}>{STICKER_ICON[s.feedback.sticker]}</span>}<p><b>What worked:</b> {s.feedback.strength}</p>{s.feedback.nextStep&&<p><b>Next step:</b> {s.feedback.nextStep}</p>}</div>:
   <form className="cl-fb" onSubmit={e=>{e.preventDefault();if(strength.trim())onSend({strength,nextStep:next,sticker})}}>
    <label>What worked<textarea rows={2} maxLength={600} value={strength} onChange={e=>setStrength(e.target.value)}/></label>
    <label>A next step (optional)<textarea rows={2} maxLength={600} value={next} onChange={e=>setNext(e.target.value)}/></label>
+   <FeedbackStarters disabled={busy} onStrength={line=>setStrength(v=>addStarter(v,line).slice(0,600))} onNext={line=>setNext(v=>addStarter(v,line).slice(0,600))}/>
    <div className="cl-stickers" role="group" aria-label="Add a sticker">{STICKERS.map(([id,label])=><button type="button" key={id} aria-pressed={sticker===id} onClick={()=>setSticker(sticker===id?null:id)} title={label}><span aria-hidden="true">{STICKER_ICON[id]}</span><span className="cl-sr">{label}</span></button>)}</div>
    <button className="primary" disabled={busy||!strength.trim()}>Send feedback</button>
   </form>}

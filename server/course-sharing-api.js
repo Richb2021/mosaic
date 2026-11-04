@@ -12,6 +12,20 @@ import {validatePlayableContent} from '../src/game-modes/content-registry.js';
 import {grantScope,consentScope,reportSlot,courseGrantId,memberBinding,withGrantLease,activeCourseGrant,grantChapters,learnerCourseGrants,publicCourseGrant,classGrantKey,classAssignable} from './course-grants.js';
 
 const idOk=id=>typeof id==='string'&&/^[a-f0-9]{64}$/.test(id);
+// "Help seen" receipts live with the teacher's feedback, in the organiser's own store.
+// Each one names the exact update the learner sent (a digest of its sharing receipt), so a new update or stopping sharing clears it.
+export const helpSeenSlot=id=>'helpseen-'+id.slice(0,55);
+const HELP_NOTES={'check-in':'I’ll check in with you next lesson.',feedback:'I’ve left you feedback on your work.','try-again':'Have another go, then send me an update.'};
+export async function readHelpSeen(env,store,g,receipt,now){
+ if(!receipt)return null;
+ try{
+  const r=await store.latest('learner_profiles',g.owner,helpSeenSlot(g.id)),s=parse(r?.payload).helpSeen;
+  if(!s||s.grantId!==g.id||s.revision!==g.revision||s.receipt!==await digest('help-seen:'+receipt))return null;
+  const days=parse((await sqlDB(env.DB).one('SELECT policy FROM data_controls WHERE scope=?','learner:'+g.owner))?.policy).progressDays||0;
+  if(days&&Number(r.updated_ms)+days*DAY<=now)return null;
+  return {at:s.seenAt,note:HELP_NOTES[s.note]||null};
+ }catch{return null}
+}
 const statuses=new Set(['not-started','started','practised']);
 function cleanUpdates(updates,g){
  need(Array.isArray(updates)&&updates.length===g.steps.length,'Choose a status for each course objective.');
@@ -46,7 +60,7 @@ export async function readSharedReport(env,store,g,now){
   const updates=cleanUpdates(payload.updates,g),after=await db.one('SELECT policy FROM data_controls WHERE scope=?',consentScope(g.id)),grant=await db.one('SELECT policy FROM data_controls WHERE scope=?',grantScope(g.id));
   // A withdrawal or version replacement while NCB was responding wins.
   if(after?.policy!==before.policy||parse(grant?.policy).revision!==g.revision||!await activeCourseGrant(env,parse(grant?.policy)))return {state:'off'};
-  return {state:'shared',updated:Number(row.updated_ms),updates};
+  return {state:'shared',updated:Number(row.updated_ms),updates,receipt:consent.token};
  })}catch{return {state:'unavailable'}}
 }
 export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,access,now=()=>Date.now()}){
@@ -67,7 +81,9 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
   const rows=await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.manager')=? AND json_extract(policy,'$.siteOwner')=? AND (?='' OR json_extract(policy,'$.courseId')=?) AND scope>? ORDER BY scope LIMIT 21",principal,siteOwner,input.courseId||'',input.courseId||'',input.cursor?grantScope(input.cursor):'');const assignments=[];
   for(const r of rows.slice(0,20)){const g={...parse(r.policy),id:r.scope.slice(13)},member=(await memberBinding(env,g.learner)).member,viaClass=!!g.classId&&member.manager!==principal,cm=viaClass?parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','class-member:'+g.classId+':'+g.learner))?.policy):null;
    const available=await activeCourseGrant(env,g)&&!!(await grantChapters(env,g)).length;
-   assignments.push({...publicCourseGrant(g),learner:viaClass?null:g.learner,label:!viaClass?(member.manager===principal?member.label||'Learner':'Learner no longer in your group'):cm?.status==='active'?(cm.label||'Learner')+' · '+(g.className||'class'):'Learner no longer in this class',revoked:!!g.revoked,available,report:available?await readSharedReport(env,store,g,now):{state:'unavailable'}});
+   const {receipt,...report}=available?await readSharedReport(env,store,g,now):{state:'unavailable'};
+   const helpSeen=report.state==='shared'&&report.updates.some(u=>u.help)?await readHelpSeen(env,store,g,receipt,now()):null;
+   assignments.push({...publicCourseGrant(g),learner:viaClass?null:g.learner,label:!viaClass?(member.manager===principal?member.label||'Learner':'Learner no longer in your group'):cm?.status==='active'?(cm.label||'Learner')+' · '+(g.className||'class'):'Learner no longer in this class',revoked:!!g.revoked,available,report,helpSeen});
   }
   return noStore({assignments,nextCursor:rows.length>20?rows[19].scope.slice(13):null});
  }
@@ -78,7 +94,8 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
    const control=await db.one('SELECT policy FROM data_controls WHERE scope=?',consentScope(g.id)),consent=parse(control?.policy);
    let report=null,version=0,storageAvailable=true;
    try{const row=await store.latest('learner_profiles',owner,reportSlot(g.id));version=row?.version||0;const saved=parse(row?.payload).report;if(saved?.revision===g.revision&&saved.grantId===g.id)report={updates:cleanUpdates(saved.updates,g)};}catch{storageAvailable=false}
-   assignments.push({...publicCourseGrant(g),available,version,consentToken:consent.token||null,sharing:consent.revision===g.revision&&consent.enabled===true,report,storageAvailable});
+   const sharing=consent.revision===g.revision&&consent.enabled===true,helpSeen=sharing&&report?.updates.some(u=>u.help)?await readHelpSeen(env,store,g,consent.token,now()):null;
+   assignments.push({...publicCourseGrant(g),available,version,consentToken:consent.token||null,sharing,report,storageAvailable,helpSeen});
   }
   return noStore({assignments});
  }
@@ -145,6 +162,17 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
  if(input.action==='revoke'){
   need(manages&&g.manager===principal&&g.siteOwner===siteOwner,'Only this course organiser can withdraw its assignment.',403);need(input.revision===g.revision,'The assignment changed. Reload before withdrawing it.',409);
   return withGrantLease(env,g,now,async()=>{const r=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...g,revoked:true,revision:crypto.randomUUID()}),now(),row.scope,row.policy);need(r.meta.changes===1,'Assignment changed. Reload before continuing.',409);await db.run('DELETE FROM data_controls WHERE scope=?',consentScope(g.id));return noStore({revoked:true})});
+ }
+ if(input.action==='help-seen'){
+  // Tells the learner their help request was seen. It is a receipt, not a reply or a grade.
+  need(manages&&g.manager===principal&&g.siteOwner===siteOwner,'Only this course organiser can mark help as seen.',403);
+  need(input.revision===g.revision&&await activeCourseGrant(env,g),'The assignment changed. Reload before continuing.',409);
+  need(input.note==null||input.note===''||Object.hasOwn(HELP_NOTES,input.note),'Choose one of the short notes, or none.');
+  const report=await readSharedReport(env,store,g,now);need(report.state==='shared'&&report.updates.some(u=>u.help),'The learner changed or stopped sharing this update.',409);
+  const slot=helpSeenSlot(g.id),prev=await store.latest('learner_profiles',g.owner,slot);
+  const helpSeen={schemaVersion:1,grantId:g.id,revision:g.revision,receipt:await digest('help-seen:'+report.receipt),seenAt:now(),note:input.note||null};
+  await store.write('learner_profiles',g.owner,slot,prev?.version||0,{helpSeen},now());
+  await auditEvent(env,'learner:'+owner,'help-seen',{},now());return noStore({seen:{at:helpSeen.seenAt,note:HELP_NOTES[helpSeen.note]||null}});
  }
  need(input.action==='share'&&g.learner===principal&&owner===principal,'Only the assigned learner can choose what to share.',403);
  need(input.revision===g.revision&&await activeCourseGrant(env,g),'This course assignment changed or was withdrawn.',409);need(typeof input.enabled==='boolean','Choose whether to share updates.');

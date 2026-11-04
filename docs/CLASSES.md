@@ -39,6 +39,17 @@ Added 4 November 2026 on branch `redesign/lantern-light`. Backend: `server/class
 - **Leaderboard fixes (4 November, after the grokcc/muse gap review).** Only steps reported this week are ranked; an opted-in learner with no report this week is listed as "Not reported yet this week", never as zero. A device can only raise this week's total, so a second device starting at zero cannot wipe it. Steps are posted to every class the learner opted into. The teacher sees every opted-in learner; learners see the top ten plus themselves.
 - **Overview accuracy.** Course reports read all of a learner's grants from this teacher (up to the 24-grant cap), newest first. The review queue is the teacher's own drafts across all classes and is labelled that way (`reviewScope:'workshop'`); the unused class-wide "live" count was removed.
 
+## Class inbox, help receipts, feedback starters and export (4 November 2026)
+
+- **Inbox** (top of each class): Explore work a learner sent for feedback, and help requests from course updates they chose to share. Waiting items come first. Replying with feedback, or marking help as seen, moves an item to done; it stays in view until the teacher switches the filter. Built in the same pass as the overview (four learners at a time), so the class page doesn't read learner reports twice. Covers the current page of 20 learners.
+- **Help seen**: a receipt, not a reply or a grade. The teacher can add one of three fixed notes. It's stored in the organiser's own store (`helpseen-<grant>`) and names a digest of the learner's sharing receipt, so a new update or stopping sharing clears it. The learner sees "Your teacher for CLASS has seen your help request" on the course card. Also available in Courses › shared updates.
+- **Feedback starters**: sentence openers (clear explanation, uses evidence, shows working, key words, makes links) for "what worked" and "next step". They add editable text; nothing is sent until the teacher sends it. On both explanation feedback and Explore work review.
+- **Spreadsheet (CSV)**: Learners › Download spreadsheet. One row per learner per objective of each course this teacher assigned, plus one row for learners without a course. Statuses are the learner's own self-report; a blank means "not shared", never "not started". It includes help asked/seen, dates for updates, work and feedback, and explanation counts. Leaderboard nicknames and steps are left out so they can't be matched to names. There are no account references. Cells starting with `= + - @` are neutralised. Paged 20 learners at a time (`classes?view=export&cursor=<handle>`).
+- **Fixed along the way**:
+  - The class overview passed a timestamp where `readSharedReport` expects a clock, so every shared update read as unavailable. "Sharing updates", "Latest" and "Asked for help" were always empty before this release.
+  - A shared "Not started" now shows as such.
+  - The learner's "update shared" confirmation no longer disappears when the course card reloads.
+
 ## Storage
 
 All rows live in `data_controls` (SQLite on Baldur, D1 in the Worker build); no migration is needed.
