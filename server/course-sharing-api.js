@@ -5,6 +5,7 @@ import {readJSON,noStore} from './ncb-auth.js';
 import {sqlDB,parse,need,DAY,auditEvent} from './data-control.js';
 import {digest} from './content-service.js';
 import {admission} from './pilot-access.js';
+import {assignedScores} from './assigned-scores.js';
 import {planCurrent} from './course-plan-api.js';
 import {validateCoursePlan} from '../src/studio/course-plan.js';
 import {validateCourses} from '../src/studio/course-model.js';
@@ -83,7 +84,7 @@ export async function courseSharingAPI(req,env,{owner,principal,siteOwner,store,
    const available=await activeCourseGrant(env,g)&&!!(await grantChapters(env,g)).length;
    const {receipt,...report}=available?await readSharedReport(env,store,g,now):{state:'unavailable'};
    const helpSeen=report.state==='shared'&&report.updates.some(u=>u.help)?await readHelpSeen(env,store,g,receipt,now()):null;
-   assignments.push({...publicCourseGrant(g),learner:viaClass?null:g.learner,label:!viaClass?(member.manager===principal?member.label||'Learner':'Learner no longer in your group'):cm?.status==='active'?(cm.label||'Learner')+' · '+(g.className||'class'):'Learner no longer in this class',revoked:!!g.revoked,available,report,helpSeen});
+   assignments.push({...publicCourseGrant(g),learner:viaClass?null:g.learner,label:!viaClass?(member.manager===principal?member.label||'Learner':'Learner no longer in your group'):cm?.status==='active'?(cm.label||'Learner')+' · '+(g.className||'class'):'Learner no longer in this class',revoked:!!g.revoked,available,report,helpSeen,scores:available&&!g.revoked?await assignedScores(env,store,g):{state:'unavailable',steps:[]}});
   }
   return noStore({assignments,nextCursor:rows.length>20?rows[19].scope.slice(13):null});
  }

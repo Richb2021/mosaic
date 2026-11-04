@@ -91,7 +91,7 @@ test('the class export holds only shared data, never account references or leade
  assert.deepEqual(ada.map(r=>[r.objective,r.status,r.help]),[['Identify producers and consumers.','practised',false],['Explain habitat and population.','started',true]]);
  assert.equal(ada[0].group,'class');assert.equal(ada[0].explanations,1);
  const own=e.rows.filter(r=>r.learner==='sharing-learner');
- assert.equal(own.length,1);assert.equal(own[0].sharing,'off');assert.equal(own[0].status,null,'not shared is blank, never "not started"');assert.ok(own[0].workSubmittedAt);
+ assert.equal(own.length,2,'one row per objective, so scores show even when updates are not shared');assert.ok(own.every(r=>r.sharing==='off'&&r.status===null),'not shared is blank, never "not started"');assert.ok(own[0].workSubmittedAt);assert.ok(own.every(r=>r.played===false&&r.answered===null),'no game played yet');
  const other=e.rows.find(r=>r.learner==='sharing-second');assert.equal(other.course,null);assert.equal(other.group,'elsewhere');
  const text=JSON.stringify(e);
  for(const u of [h.adult,h.learner,h.second])assert.ok(!text.includes(await learnerOwner(u)),'no account references');
@@ -127,7 +127,7 @@ test('a course that is temporarily unavailable stays in the export as unavailabl
  const h=await fixture();
  await h.db.run('UPDATE workshop_jobs SET status=? WHERE id=?','draft',h.chapters[1].id);
  const e=await h.exportPage(),ada=e.rows.filter(r=>r.learner==='Ada L.');
- assert.equal(ada.length,1);assert.equal(ada[0].course,h.course.title);assert.equal(ada[0].sharing,'unavailable');assert.ok(/^[a-f0-9]{6}$/.test(ada[0].key));
+ assert.ok(ada.length>=1&&ada.every(r=>r.course===h.course.title&&r.sharing==='unavailable'));assert.ok(/^[a-f0-9]{6}$/.test(ada[0].key));
  const {rowValues}=await import('../src/studio/class-export.js');assert.equal(rowValues(ada[0])[6],'Not available right now');
 });
 
@@ -141,4 +141,14 @@ test('deleting your learning data keeps the age range, so an under-18 cannot res
  assert.equal((await h.call(h.learner,'learning/classes')).http,200,'Studio still opens');
  const closing=await deletionPlan(h.env,{...ctx,mode:'learner',closing:true,now:h.now()});
  assert.ok(closing.profiles.includes(after.id),'closing the account removes it');
+});
+
+test('teachers see scores on assigned games even when the learner shares nothing', async () => {
+ const h=await fixture(),owner=await learnerOwner(h.learner),pack=h.chapters[0].pack,{draftHash}=await import('../src/game-modes/draft-engine.js');
+ await h.store.write('learner_saves',owner,'record-1',0,{key:'record-1',summary:{packId:pack.id,title:pack.title,template:pack.template,contentHash:draftHash(pack),kind:'journey',completed:true,engagement:3,observations:[{key:'q1',correct:true,attempts:1,assisted:false,sources:[]},{key:'q2',correct:true,attempts:2,assisted:false,sources:[]},{key:'q3',correct:true,attempts:1,assisted:true,sources:[]}]}},h.now());
+ const report=(await h.call(h.teacher,'learning/course-sharing?view=organiser&courseId='+h.course.id)).assignments.find(a=>a.label==='sharing-learner');
+ assert.equal(report.report.state,'off','nothing shared');
+ assert.deepEqual(report.scores.steps.map(s=>[s.played,s.completed,s.firstTry,s.answered,s.help]),[[true,true,1,3,1],[false,undefined,undefined,undefined,undefined]]);
+ const o=await h.overview(),row=o.learners.find(l=>l.label==='sharing-learner');assert.deepEqual([row.scores.played,row.scores.total,row.scores.firstTry,row.scores.answered],[1,2,1,3]);
+ const e=await h.exportPage(),r=e.rows.find(r=>r.learner==='sharing-learner'&&r.objective==='Identify producers and consumers.');assert.deepEqual([r.played,r.completed,r.firstTry,r.answered,r.helpUsed],[true,true,1,3,1]);
 });

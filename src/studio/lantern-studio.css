@@ -233,3 +233,7 @@ details>summary{font-weight:700}
 .trail-explanation{background:var(--ll-cream);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .trail-explanation p{margin:0;color:var(--ll-ink);font-size:15px}
 .trail-explanation small{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ll-violet-ink)}
+.trail-extra{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.trail-extra li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 12px;border:1px solid var(--ll-line);border-radius:14px;background:var(--ll-white)}
+.trail-extra li strong{grid-column:1}.trail-extra li span{grid-column:1;font-size:14px;color:var(--ll-ink-soft)}.trail-extra li small{grid-column:2;grid-row:1/3;align-self:center;color:var(--ll-ink-soft)}
+.cs-scores{border-top:1px solid var(--line,#E6DCC8);margin-top:10px;padding-top:8px}.cs-scores h5{margin:0 0 6px;font-size:14px}.cs-scores ul{list-style:none;margin:0;padding:0}.cs-scores li{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:4px 0;font-size:14px}

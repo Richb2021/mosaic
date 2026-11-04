@@ -26,7 +26,9 @@ async function setup(){
  const teacher=user('teacher','Sam Patel'),other=user('teacher-2','Jo Lee'),a=user('learner-a','Amelia Hughes'),b=user('learner-b','Ben Carter'),c=user('learner-c','Chloe Lewis');
  await join(teacher,{role:'teacher',context:'school',managedApproval:true});await join(other,{role:'teacher',context:'school',managedApproval:true});
  for(const l of [a,b,c])await join(l);
- return {env,store,teacher,other,a,b,c,classes,join,user,tick:ms=>{clock+=ms},now:()=>clock};
+ // Saves a game result to the learner's account: n questions answered (the server counts these as steps).
+ const play=async(u,n,slot='game-1')=>{const observations=Array.from({length:n},(_,i)=>({key:'q-'+i,correct:true,attempts:1,assisted:false,sources:[]}));await store.write('learner_saves',await learnerOwner(u),slot,0,{key:slot,summary:{packId:'pack-'+slot,title:'Game',template:'quiz-v1',contentHash:'h',kind:'journey',completed:false,engagement:n,observations}},clock)};
+ return {env,store,teacher,other,a,b,c,classes,join,user,play,tick:ms=>{clock+=ms},now:()=>clock};
 }
 
 test('teachers create separate classes with their own join codes', async () => {
@@ -64,9 +66,9 @@ test('the leaderboard is off until the teacher enables it, and only opted-in lea
  assert.equal((await h.classes(h.a,{action:'board',id:c.id,optIn:true,nickname:'<script>'})).status,400);
  await h.classes(h.a,{action:'board',id:c.id,optIn:true,nickname:'River Fox'});
  await h.classes(h.b,{action:'board',id:c.id,optIn:true,nickname:'Lamp'});
- await h.classes(h.a,{action:'steps',id:c.id,tiles:6});await h.classes(h.b,{action:'steps',id:c.id,tiles:9});
- assert.equal((await h.classes(h.c,{action:'steps',id:c.id,tiles:99})).stored,false,'steps are never stored without opting in');
- assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:501})).status,400);
+ await h.play(h.a,6);await h.play(h.b,9);await h.play(h.c,4);
+ await h.classes(h.a,{action:'steps',id:c.id,tiles:999});await h.classes(h.b,{action:'steps',id:c.id});
+ assert.equal((await h.classes(h.c,{action:'steps',id:c.id})).stored,false,'steps are never stored without opting in');
  const board=(await h.classes(h.a,undefined,'?view=board&id='+c.id)).leaderboard;
  assert.deepEqual(board.entries.map(e=>[e.nickname,e.tiles]),[['Lamp',9],['River Fox',6]]);assert.equal(board.you.rank,2);
  assert.ok(!JSON.stringify(board).includes(h.a.id)&&!JSON.stringify(board).includes('Amelia'),'only nicknames are shown');
@@ -188,16 +190,18 @@ test('learners export their class data and retention expires old shares', async 
  assert.equal((await exportClassData(h.env,ref)).sharedExplanations.length,0);
 });
 
-test('a second device cannot lower this week\'s steps, and a new week starts again', async () => {
+test('steps come from the account, so every device shows the same count, and a new week starts again', async () => {
  const h=await setup(),c=(await h.classes(h.teacher,{action:'create',name:'Year 8 History'})).class;
  await h.classes(h.a,{action:'join',code:c.code});await h.classes(h.teacher,{action:'leaderboard',id:c.id,enabled:true});
  await h.classes(h.a,{action:'board',id:c.id,optIn:true,nickname:'River Fox'});
- await h.classes(h.a,{action:'steps',id:c.id,tiles:6});
- const phone=await h.classes(h.a,{action:'steps',id:c.id,tiles:0});
- assert.equal(phone.leaderboard.you.tiles,6,'a device that starts at zero keeps the higher total');
- assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:8})).leaderboard.you.tiles,8);
+ await h.play(h.a,6);
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:0})).leaderboard.you.tiles,6,'a device with no local count still shows the account total');
+ await h.play(h.a,2,'game-2');
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id})).leaderboard.you.tiles,8,'games played on another device add up');
  h.tick(7*86400000);
- assert.equal((await h.classes(h.a,{action:'steps',id:c.id,tiles:2})).leaderboard.you.tiles,2,'the weekly reset still applies');
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id})).leaderboard.you.tiles,0,'last week\'s games don\'t count this week');
+ await h.play(h.a,2,'game-3');
+ assert.equal((await h.classes(h.a,{action:'steps',id:c.id})).leaderboard.you.tiles,2,'the weekly reset still applies');
 });
 
 test('the teacher sees every opted-in learner; learners see the top ten plus themselves', async () => {
@@ -207,7 +211,7 @@ test('the teacher sees every opted-in learner; learners see the top ten plus the
  for(let i=0;i<12;i++){const u=h.user('bulk-'+i,'Learner '+i);await h.join(u);learners.push(u);
   assert.equal((await h.classes(u,{action:'join',code:c.code})).status,200);
   await h.classes(u,{action:'board',id:c.id,optIn:true,nickname:'Player '+i});
-  if(i<11)await h.classes(u,{action:'steps',id:c.id,tiles:20-i});}
+  if(i<11){await h.play(u,20-i);await h.classes(u,{action:'steps',id:c.id});}}
  const o=await h.classes(h.teacher,undefined,'?view=overview&id='+c.id);
  assert.equal(o.leaderboard.entries.length,12,'teacher view is not cut at ten');
  assert.equal(o.leaderboard.reported,11);

@@ -14,7 +14,7 @@ import {workspaceIdentity,requireAdmission,admission} from './pilot-access.js';
 import {registerRetentionSubject} from './background-retention.js';
 import {learningLoopAPI,assignedLoopList} from './learning-loop-api.js';
 import {studioAPI} from './studio-api.js';
-import {withDataGuard} from './data-control.js';
+import {withDataGuard,sqlDB} from './data-control.js';
 import {dataAPI,enforceRetention} from './data-lifecycle.js';
 import {creativeAPI} from './creative-api.js';
 import {RPG_PACKS,bundlePublishedChapter} from './rpg-catalog.js';
@@ -64,6 +64,13 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  if(path==='course-sharing')return await courseSharingAPI(req,env,{store,owner,principal,siteOwner,access,now});
  if(path==='classes')return await classesAPI(req,env,{store,owner,principal,siteOwner,access,user,now});
  if(path==='loop/banks')return await assignedLoopList(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve});
+ // The learner's own Explore lessons for the Trail: how far they got, never anyone else's.
+ if(req.method==='GET'&&path==='explore-trail'){
+  const db=sqlDB(env.DB),rows=(await store.allRows('learner_profiles',owner)).filter(r=>String(r.slot_key).startsWith('explore-')),lessons=[];
+  for(const r of rows.slice(0,50)){try{const v=JSON.parse(r.payload),e=v.explore;if(!e?.lessonId)continue;const j=await db.one('SELECT draft FROM workshop_jobs WHERE id=?',e.lessonId),d=j?.draft?JSON.parse(j.draft):null;
+   lessons.push({lessonId:e.lessonId,title:d?.title||'Explore lesson',tasks:Array.isArray(d?.assessment)?d.assessment.length:null,answered:(e.answers||[]).length,help:(e.help||[]).length,investigations:(e.investigations||[]).length,reflection:!!e.reflection,updated:Number(r.updated_ms)})}catch{}}
+  lessons.sort((a,b)=>b.updated-a.updated);return noStore({lessons});
+ }
  if(path==='explore')return await exploreAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='loop')return await learningLoopAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='voice-tutor')return await voiceTutorAPI(req,env,{store,owner,siteOwner,access,resolve:scopedResolve,now});

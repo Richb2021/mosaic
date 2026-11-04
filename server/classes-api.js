@@ -9,6 +9,8 @@ import {activeCourseGrant,grantChapters,classAssignable} from './course-grants.j
 import {admission} from './pilot-access.js';
 import {readSharedReport,readHelpSeen} from './course-sharing-api.js';
 import {workScope,feedbackSlot} from './teacher-review.js';
+import {assignedScores,scoreSummary} from './assigned-scores.js';
+import {validPracticeRecord} from '../src/game-modes/learning-model.js';
 import {digest} from './content-service.js';
 
 export const classScope=id=>'class:'+id;
@@ -143,7 +145,7 @@ async function learnerCourses(env,store,db,principal,siteOwner,learner,now){
   try{if(!await activeCourseGrant(env,g))continue;if(!(await grantChapters(env,g)).length){out.push(unavailable);continue}
    const {receipt,...report}=await readSharedReport(env,store,g,()=>now); // it takes a clock, not a timestamp
    const helpObjectives=report.state==='shared'?g.steps.filter(s=>report.updates.find(u=>u.objectiveId===s.id)?.help).map(s=>s.objective):[];
-   out.push({g,report,helpObjectives,helpSeen:helpObjectives.length?await readHelpSeen(env,store,g,receipt,now):null,work:await sharedWork(store,db,g,now)});
+   out.push({g,report,helpObjectives,helpSeen:helpObjectives.length?await readHelpSeen(env,store,g,receipt,now):null,work:await sharedWork(store,db,g,now),scores:await assignedScores(env,store,g)});
   }catch{out.push(unavailable)}
  }
  return out;
@@ -162,6 +164,12 @@ async function readCourses(env,store,db,principal,siteOwner,page,now){
 }
 const groupOf=(a,principal)=>a.admitted&&a.role==='learner'&&a.manager===principal?'yours':classAssignable(a,principal)?'class':'elsewhere';
 
+// Learning steps this week from the learner's account-saved game results: each question answered and each game completed.
+async function accountWeekSteps(store,owner,now){
+ const start=weekOf(now)*7*DAY+4*DAY;let rows=[];try{rows=await store.list(owner)}catch{return 0}
+ let n=0;for(const r of rows){try{if(Number(r.updated_ms)<start)continue;const v={updated:Number(r.updated_ms),...JSON.parse(r.payload)};if(!validPracticeRecord(v))continue;n+=v.summary.observations.filter(o=>o.attempts>0||o.correct!==null).length+(v.summary.completed?1:0)}catch{}}
+ return Math.min(500,n);
+}
 // Learner actions that remove data. They are allowed for withdrawn accounts and in archived classes.
 export const WITHDRAWAL_ACTIONS=input=>['leave','unshare'].includes(input?.action)||input?.action==='board'&&input.optIn===false;
 
@@ -182,7 +190,7 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   for(const m of page){
    const mine=courses.get(m.learner)||[],r=summarise(mine),own=shares.filter(s=>s.learner===m.learner),times=[r.updated,...own.map(s=>s.shared)].filter(Boolean);
    const handle=await handleOf(c.id,m.learner),label=m.label||'Learner';
-   learners.push({handle,label,joined:m.joined,group:groupOf(await admission(env,m.learner),principal),lastShared:times.length?Math.max(...times):null,latest:r.latest||null,help:!!r.help,explanations:own.length,unread:own.filter(s=>!s.feedback).length});
+   learners.push({handle,label,joined:m.joined,group:groupOf(await admission(env,m.learner),principal),scores:mine.length?scoreSummary(mine.map(x=>x.scores||{steps:[]})):null,lastShared:times.length?Math.max(...times):null,latest:r.latest||null,help:!!r.help,explanations:own.length,unread:own.filter(s=>!s.feedback).length});
    // The inbox: work learners submitted for feedback, and help they asked for. "Done" means you replied or marked it seen.
    for(const x of mine){
     if(x.work)inbox.push({kind:'work',handle,label,assignment:assignmentRef(x.g),at:x.work.submittedAt,done:!!x.work.feedbackAt,doneAt:x.work.feedbackAt});
@@ -221,9 +229,10 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
    const mine=courses.get(m.learner)||[];
    if(!mine.length)rows.push({...base,course:null});
    for(const x of mine){
+    const scoreBy=new Map((x.scores?.steps||[]).map(s=>[s.objectiveId,s]));
     const course={...base,course:x.g.title,sharing:x.report.state,updateSharedAt:x.report.state==='shared'?x.report.updated:null,helpSeenAt:x.helpSeen?.at||null,workSubmittedAt:x.work?.submittedAt||null,feedbackSentAt:x.work?.feedbackAt||null};
-    if(x.report.state!=='shared'){rows.push({...course,objective:null,status:null,help:null});continue}
-    for(const s of x.g.steps){const u=x.report.updates.find(u=>u.objectiveId===s.id);rows.push({...course,objective:s.objective,status:u?.status||null,help:!!u?.help,helpSeenAt:u?.help?course.helpSeenAt:null})}
+    // One row per objective, always, so scores show even when the learner doesn't share updates.
+    for(const s of x.g.steps){const u=x.report.state==='shared'?x.report.updates.find(u=>u.objectiveId===s.id):null,sc=scoreBy.get(s.id)||{};rows.push({...course,objective:s.objective,status:u?.status||null,help:u?!!u.help:null,helpSeenAt:u?.help?course.helpSeenAt:null,played:!!sc.played,completed:!!sc.completed,answered:sc.answered??null,firstTry:sc.firstTry??null,helpUsed:sc.help??null})}
    }
   }
   await auditEvent(env,'learner:'+owner,'class-exported',{page:!!input.cursor},at);
@@ -311,11 +320,11 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   return noStore({optIn:true,leaderboard:await leaderboard(db,c,at,principal)});
  }
  if(action==='steps'){
-  // The learner's device reports how many steps it finished this week; stored only when they opted in.
-  need(Number.isInteger(input.tiles)&&input.tiles>=0&&input.tiles<=500,'Send a whole number of steps.');
+  // Steps are counted on the server from the learner's account (questions answered and games completed
+  // this week), so they match on every device. Stored only when the learner opted in.
   const row=c.leaderboard&&await db.one('SELECT policy FROM data_controls WHERE scope=?',boardScope(c.id,principal));if(!row)return noStore({stored:false});
-  const b=parse(row.policy),week=weekOf(at);
-  const tiles=b.week===week?Math.max(b.tiles||0,input.tiles):input.tiles;
+  const b=parse(row.policy),week=weekOf(at),counted=await accountWeekSteps(store,owner,at);
+  const tiles=b.week===week?Math.max(b.tiles||0,counted):counted;
   if(!(b.week===week&&b.tiles===tiles))await upsert(db,boardScope(c.id,principal),{...b,week,tiles,updated:at},at);
   return noStore({stored:true,leaderboard:await leaderboard(db,c,at,principal)});
  }
