@@ -6,6 +6,7 @@ import {creativeAPI} from './creative-api.js';
 import {canonicalPack} from './learning-api.js';
 import {NCBStore} from './ncb-store.js';
 import {requireAdmission} from './pilot-access.js';
+import {approvedBackdrops,backdropBytes} from './cartoon-backdrops.js';
 const RECORD='media-render',LEASE=15*60000;
 const publicJob=j=>{const p=parse(j.payload);return {id:j.id,status:j.status.slice(6),format:p.format,style:p.style,edition:p.edition,done:p.done||0,total:p.total,assetId:p.assetId||null,error:j.error||null,created:j.created,updated:j.updated}};
 async function scriptFor(db,siteOwner,owner,id,hash,env,now){const j=await db.one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,siteOwner),p=parse(j?.payload);need(j?.status==='creative-published'&&p.recordType==='creative'&&p.learnerOwner===owner&&['podcast','cartoon'].includes(p.kind)&&await digest(j.draft)===hash,'The approved script changed or is unavailable.',409);const {controls}=await readControls(env,siteOwner,owner,now());const days=parse(controls.learner.policy).creativeDays||0;need(!days||j.updated+days*DAY>now(),'This script expired. Prepare a new reviewed script.',410);return {j,script:validateCreative(parse(j.draft),p)}}
@@ -17,8 +18,10 @@ export async function mediaJobsAPI(req,env,{owner,principal,siteOwner,access,now
  if(input.action==='create'){
   need(env.MEDIA_WORKER_ENABLED==='true','Background media preparation is not connected.',503);
   const {script}=await scriptFor(db,siteOwner,owner,input.scriptId,input.scriptHash,env,now),format=input.format||'mp3',style=input.style||'anime',edition=input.edition??0;
-  need(['mp3','mp4'].includes(format)&&['anime','paper','original'].includes(style)&&[0,1,2].includes(edition),'Choose a supported media format.');need(format!=='mp4'||script.kind==='cartoon','Video requires a cartoon script.');
-  const state=await readControls(env,siteOwner,owner,now()),id='render-'+await digest(JSON.stringify([siteOwner,owner,input.scriptId,input.scriptHash,format,style,edition,state.epoch,'renderer-v1'])),prior=await db.one('SELECT * FROM workshop_jobs WHERE id=?',id);
+  need(['mp3','mp4'].includes(format)&&['anime','paper','original'].includes(style)&&[0,1,2,3].includes(edition),'Choose a supported media format.');need(format!=='mp4'||script.kind==='cartoon','Video requires a cartoon script.');
+  // Edition 3 uses the episode's approved story backdrops; a new approval makes a new render.
+  const story=edition===3?(await approvedBackdrops(env,{siteOwner,author:owner,scriptId:input.scriptId})).find(b=>b.style===style):null;need(edition!==3||story,'Approve story backdrops in this style first.',409);
+  const state=await readControls(env,siteOwner,owner,now()),id='render-'+await digest(JSON.stringify([siteOwner,owner,input.scriptId,input.scriptHash,format,style,edition,state.epoch,'renderer-v1',...(story?[story.version]:[])])),prior=await db.one('SELECT * FROM workshop_jobs WHERE id=?',id);
   if(prior)return noStore({job:publicJob(prior)});
   const p={id,recordType:RECORD,revisionOf:{freeRender:true},learnerOwner:owner,principal,scriptId:input.scriptId,scriptHash:input.scriptHash,format,style,edition,epoch:state.epoch,total:script.segments.length,done:0};
   const r=await db.run("INSERT OR IGNORE INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COUNT(*) FROM workshop_jobs WHERE owner=? AND json_extract(payload,'$.recordType')=? AND status IN ('media-queued','media-running'))<8",id,siteOwner,id,id,'media-queued',JSON.stringify(p),now(),now(),siteOwner,RECORD);need(r.meta.changes===1,'Eight media jobs are already waiting. Finish or cancel one before adding another.',429);
@@ -37,7 +40,10 @@ export async function mediaWorkerAPI(req,env,{now=()=>Date.now(),store=new NCBSt
  if(input.action==='claim'){
   const j=await db.one("SELECT * FROM workshop_jobs WHERE json_extract(payload,'$.recordType')=? AND (status='media-queued' OR (status='media-running' AND json_extract(payload,'$.until')<?)) ORDER BY created LIMIT 1",RECORD,now());if(!j)return noStore({job:null});
   const p={...parse(j.payload),token:crypto.randomUUID(),until:now()+LEASE};const r=await db.run('UPDATE workshop_jobs SET status=?,payload=?,updated=? WHERE id=? AND payload=? AND status=?','media-running',JSON.stringify(p),now(),j.id,j.payload,j.status);if(!r.meta.changes)return noStore({job:null});
-  try{const access=await requireAdmission(env,p.principal,{store,onboarding:true,storageOwner:p.learnerOwner});need(access.canAuthor&&access.ageBand==='18plus','Author access changed.',403);const state=await readControls(env,j.owner,p.learnerOwner,now());need(state.epoch===p.epoch&&!Object.values(state.controls).some(c=>c.operation),'Media job expired after a data change.',409);const {script}=await scriptFor(db,j.owner,p.learnerOwner,p.scriptId,p.scriptHash,env,now);return noStore({job:{...publicJob({...j,payload:JSON.stringify(p),status:'media-running'}),token:p.token,script}})}catch(e){// Keep the real reason: our own checks carry a readable message; anything else is logged for the operator.
+  try{const access=await requireAdmission(env,p.principal,{store,onboarding:true,storageOwner:p.learnerOwner});need(access.canAuthor&&access.ageBand==='18plus','Author access changed.',403);const state=await readControls(env,j.owner,p.learnerOwner,now());need(state.epoch===p.epoch&&!Object.values(state.controls).some(c=>c.operation),'Media job expired after a data change.',409);const {script}=await scriptFor(db,j.owner,p.learnerOwner,p.scriptId,p.scriptHash,env,now);
+   // Withdrawn or deleted backdrops are not an error: the render uses the library settings.
+   const backdrops=p.edition===3?(await approvedBackdrops(env,{siteOwner:j.owner,author:p.learnerOwner,scriptId:p.scriptId})).find(b=>b.style===p.style)?.scenes||{}:{};
+   return noStore({job:{...publicJob({...j,payload:JSON.stringify(p),status:'media-running'}),token:p.token,script,backdrops}})}catch(e){// Keep the real reason: our own checks carry a readable message; anything else is logged for the operator.
    console.warn(JSON.stringify({event:'media_claim_refused',job:j.id,status:e?.status||null,reason:String(e?.message||e).slice(0,300)}));
    await db.run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND payload=?','media-failed',e?.status?String(e.message).slice(0,300)+' Review the saved job before retrying.':'Source, account or retention settings changed. Review the saved job before retrying.',now(),j.id,JSON.stringify(p));return noStore({job:null,attention:true})}
  }
@@ -55,6 +61,7 @@ export async function mediaWorkerAPI(req,env,{now=()=>Date.now(),store=new NCBSt
    const audio=await creativeAPI(new Request(new URL('/api/learning/creative/audio',req.url),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),env,{store,access,owner:p.learnerOwner,principal:p.principal,siteOwner:j.owner,resolve:(id,hash,r,e)=>resolve(id,hash,r,e,j.owner,p.learnerOwner),now,...(speech?{speech}:{})});
    const r=await active(),next={...parse(r.payload),done:Math.max(parse(r.payload).done||0,input.index+1),until:now()+LEASE};await db.run('UPDATE workshop_jobs SET payload=?,updated=? WHERE id=? AND payload=?',JSON.stringify(next),now(),j.id,r.payload);return audio;
   }
+  if(input.action==='backdrop')return backdropBytes(env,{siteOwner:j.owner,author:p.learnerOwner,scriptId:p.scriptId,style:p.style,scene:input.scene,now:now()});
   if(input.action==='fail'){await db.run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND status=? AND json_extract(payload,\'$.token\')=?','media-failed','Preparation stopped. Retry reuses saved narration; unresolved voice requests need attention in Your data.',now(),j.id,'media-running',input.token);return noStore({failed:true})}
   need(input.action==='complete','Unknown worker action.');need(env.BUCKET,'Media storage unavailable.',503);
   const max=64*1024*1024;need(Number(req.headers.get('content-length'))<=max,'Rendered file too large.',413);

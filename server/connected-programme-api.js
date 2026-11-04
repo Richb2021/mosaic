@@ -12,6 +12,7 @@ import {emptyConnected,validateConnected,connectedRoute,PROGRAMME_FORMATS} from 
 import {assignedLearningResources} from './course-learning-resources.js';
 import {assignedQuestionBanks,assertQuestionGrant} from './course-question-banks.js';
 import {withGrantLease} from './course-grants.js';
+import {approvedBackdrops,backdropBytes} from './cartoon-backdrops.js';
 export async function connectedProgrammeAPI(req,env,{owner,principal=owner,siteOwner,store,resolve,now=()=>Date.now(),adaptationOnly=false}){
  const db=sqlDB(env.DB),url=new URL(req.url),input=req.method==='GET'?Object.fromEntries(url.searchParams):await readJSON(req,12000),pack=await resolve(input.packId,input.contentHash,req,env),studio=await store.latest('learner_profiles',owner,'studio');
  let unit;try{unit=validateUnit(parse(studio?.payload).studio.units.find(u=>u.packId===input.packId&&u.contentHash===input.contentHash),pack)}catch{need(false,'Open this saved programme before connecting formats.',409)}
@@ -43,7 +44,10 @@ export async function connectedProgrammeAPI(req,env,{owner,principal=owner,siteO
     const {controls}=await readControls(env,r.siteOwner,r.author,now()),days=parse(controls.learner.policy).mediaDays||0;need(!days||asset.created+days*DAY>now(),'This recording reached its retention limit.',410);
     const object=await env.BUCKET.get(asset.object_key);need(object,'Saved narration unavailable. No regeneration was requested.',404);if(r.g)await assertQuestionGrant(env,r.g);return new Response(object.body,{headers:{'Content-Type':'audio/mpeg','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Mosaic-Audio':'stored'}});
    }
-   if(r.g)await assertQuestionGrant(env,r.g);return noStore({script:r.content,assigned:!!r.g});
+   // Approved story backdrops for a cartoon; the player falls back to the library for anything missing.
+   if(input.backdrop!==undefined){need(r.kind==='cartoon','Only cartoons have backdrops.');const res=await backdropBytes(env,{siteOwner:r.siteOwner,author:r.author,scriptId:r.id,style:input.backdropStyle,scene:input.backdrop,now:now()});if(r.g)await assertQuestionGrant(env,r.g);return res;}
+   const backdrops=r.kind==='cartoon'?await approvedBackdrops(env,{siteOwner:r.siteOwner,author:r.author,scriptId:r.id}).catch(()=>[]):[];
+   if(r.g)await assertQuestionGrant(env,r.g);return noStore({script:r.content,assigned:!!r.g,backdrops});
   };return r.g?withGrantLease(env,r.g,now,execute):execute();
  }
  if(req.method==='POST'){

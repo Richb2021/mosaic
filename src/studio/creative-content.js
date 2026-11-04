@@ -94,4 +94,4 @@ export function creativeSchema(job){
 }
 // Saved-episode jobs: only video has artwork; audio-only MP3 never shows a style.
 export const MEDIA_STYLES={anime:'Prism anime',paper:'Paper comedy',original:'Field Notes'};
-export const mediaJobLabel=r=>r.format==='mp4'?'MP4 · '+(MEDIA_STYLES[r.style]||r.style):'Podcast MP3';
+export const mediaJobLabel=r=>r.format==='mp4'?'MP4 · '+(MEDIA_STYLES[r.style]||r.style)+(r.edition===3?' · story backdrops':''):'Podcast MP3';

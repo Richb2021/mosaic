@@ -1,8 +1,8 @@
 import {sqlDB,DAY,parse,need} from './data-control.js';
-// Official list prices verified 1 November 2026. These are estimates, not bills.
+// Official list prices verified 1 November 2026 (Muse Image: 4 November 2026, flat $0.01 per returned image). These are estimates, not bills.
 export function costRates(env){
  const value=(key,fallback)=>env[key]===undefined?fallback:/^\d+(\.\d+)?$/.test(String(env[key]))&&Number(env[key])<=1000000?Number(env[key]):null;
- return {version:'2026-11-03',currency:'USD',input:value('COST_META_INPUT_PER_M',4),cached:value('COST_META_CACHED_PER_M',0.2),output:value('COST_META_OUTPUT_PER_M',20),fishBytes:value('COST_FISH_BYTES_PER_M',15),fishASRHour:value('COST_FISH_ASR_PER_HOUR',0.36)};
+ return {version:'2026-11-03',currency:'USD',input:value('COST_META_INPUT_PER_M',4),cached:value('COST_META_CACHED_PER_M',0.2),output:value('COST_META_OUTPUT_PER_M',20),fishBytes:value('COST_FISH_BYTES_PER_M',15),fishASRHour:value('COST_FISH_ASR_PER_HOUR',0.36),image:value('COST_META_IMAGE_PER_IMAGE',0.01)};
 }
 export function metaUsage(raw){
  if(!raw||!['input_tokens','output_tokens'].every(k=>Number.isSafeInteger(raw[k])&&raw[k]>=0))return null;
@@ -14,6 +14,8 @@ export function estimateMicros(model,usage,rates){
  if(!usage)return null;
  if(model==='muse-wonder-1.0'){if([rates.input,rates.cached,rates.output].some(x=>x===null))return null;return Math.round((usage.inputTokens-(usage.cachedTokens||0))*rates.input+(usage.cachedTokens||0)*rates.cached+usage.outputTokens*rates.output);}
  if(model==='s2.1-pro')return rates.fishBytes===null?null:Math.round(usage.inputBytes*rates.fishBytes);
+ // Meta bills only images it returns; refused or failed images are not billed.
+ if(model==='muse-image-1.0')return Number.isFinite(rates.image)&&Number.isSafeInteger(usage.images)&&usage.images>=0&&usage.images<=10?Math.round(usage.images*rates.image*1e6):null;
  if(model==='transcribe-1-pro')return Number.isFinite(rates.fishASRHour)&&Number.isFinite(usage.seconds)&&usage.seconds>=0?Math.round(Math.ceil(usage.seconds)*rates.fishASRHour*1e6/3600):null;
  return null;
 }
@@ -28,6 +30,7 @@ export function reservedCost(model,request,rates){
   return estimateMicros(model,{inputTokens:new TextEncoder().encode(JSON.stringify(request)).length+4096,outputTokens:request.max_output_tokens,cachedTokens:0},rates);
  }
  if(model==='s2.1-pro'){need(Number.isSafeInteger(request?.inputBytes),'Cannot reserve narration cost.',503);return estimateMicros(model,request,rates);}
+ if(model==='muse-image-1.0'){need(Number.isSafeInteger(request?.images)&&request.images>=1&&request.images<=10,'Cannot reserve image cost.',503);return estimateMicros(model,request,rates);}
  if(model==='transcribe-1-pro'){need(Number.isFinite(request?.seconds)&&request.seconds>0&&request.seconds<=3600,'Cannot reserve transcription cost.',503);return estimateMicros(model,request,rates);}
  throw Object.assign(Error('Unpriced provider request is disabled.'),{status:503});
 }

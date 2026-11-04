@@ -8,7 +8,13 @@ import {drawCartoonFrame,sceneAtTime} from '../../src/studio/media/cartoon-rende
 import {validateMouthCues,mouthAtTime} from '../../src/studio/media/lip-sync.js';
 import {stagePropStates} from '../../src/studio/media/prop-staging.js';
 const exec=promisify(execFile),root=path.resolve(import.meta.dirname,'../..');
-export async function renderEpisode({job,clips,directory,assets=path.join(root,'public'),onProgress=()=>{}}){
+// Swap in the episode's approved story backdrops; a missing or unreadable one keeps the library setting.
+export async function withStoryBackdrops(library,backdrops={},load=loadImage){
+ if(!library)return library;const out={...library,backgrounds:{...library.backgrounds},images:new Map(library.images)};
+ for(const [scene,b] of Object.entries(backdrops)){if(!out.backgrounds[scene])continue;try{const img=await load(b.file);if(img.width!==b.width||img.height!==b.height)continue;const url='story:'+scene;out.backgrounds[scene]={url,width:img.width,height:img.height};out.images.set(url,img)}catch{}}
+ return out;
+}
+export async function renderEpisode({job,clips,directory,assets=path.join(root,'public'),backdrops={},onProgress=()=>{}}){
  await mkdir(directory,{recursive:true,mode:0o700});
  const durations=[],offsets=[];let duration=0;
  for(let i=0;i<clips.length;i++){
@@ -22,7 +28,8 @@ export async function renderEpisode({job,clips,directory,assets=path.join(root,'
  const output=path.join(directory,'episode.'+job.format);
  if(job.format==='mp3'){await exec('ffmpeg',['-v','error','-y','-i',audio,'-codec:a','libmp3lame','-b:a','128k',output],{timeout:60000});return {output,duration}}
  GlobalFonts.registerFromPath(path.join(assets,'fonts/studio-manrope.ttf'),'Studio');
- const art=await loadCartoonLibrary(job.style,job.edition,{fetcher:async url=>({ok:true,json:async()=>JSON.parse(await readFile(path.join(assets,url),'utf8'))}),imageLoader:async a=>{const img=await loadImage(path.join(assets,a.url));if(img.width!==a.width||img.height!==a.height)throw Error('Art dimensions changed.');return img}});
+ const library=await loadCartoonLibrary(job.style,job.edition===3?0:job.edition,{fetcher:async url=>({ok:true,json:async()=>JSON.parse(await readFile(path.join(assets,url),'utf8'))}),imageLoader:async a=>{const img=await loadImage(path.join(assets,a.url));if(img.width!==a.width||img.height!==a.height)throw Error('Art dimensions changed.');return img}});
+ const art=await withStoryBackdrops(library,backdrops);
  // Run the same shipped Rhubarb WASM and speech model as the browser, locally.
  const lip=path.join(assets,'lip-sync/v1'),moduleFile=path.join(directory,'lip-engine.cjs');await writeFile(moduleFile,await readFile(path.join(lip,'lip-sync-engine.js')));
  const factory=createRequire(import.meta.url)(moduleFile),model=Buffer.concat(await Promise.all([0,1,2].map(i=>readFile(path.join(lip,`model-${i}.bin`)))));

@@ -17,6 +17,7 @@ import {studioAPI} from './studio-api.js';
 import {withDataGuard,sqlDB} from './data-control.js';
 import {dataAPI,enforceRetention} from './data-lifecycle.js';
 import {creativeAPI} from './creative-api.js';
+import {cartoonBackdropsAPI} from './cartoon-backdrops.js';
 import {RPG_PACKS,bundlePublishedChapter} from './rpg-catalog.js';
 import {ncbSession,noStore,checkOrigin,readJSON} from './ncb-auth.js';
 import {NCBStore,StoreError} from './ncb-store.js';
@@ -74,6 +75,7 @@ export async function learningAPI(req,env,{session=ncbSession,store=new NCBStore
  if(path==='explore')return await exploreAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='loop')return await learningLoopAPI(req,env,{store,owner,principal,siteOwner,resolve:scopedResolve,now});
  if(path==='voice-tutor')return await voiceTutorAPI(req,env,{store,owner,siteOwner,access,resolve:scopedResolve,now});
+ if(path==='creative/backdrops')return await cartoonBackdropsAPI(req,env,{owner,siteOwner,access,now});
  if(['creative','creative/audio','creative/tutor-audio'].includes(path))return await creativeAPI(req,env,{store,owner,principal,siteOwner,access,resolve:scopedResolve,now});
  if(path==='studio'||path.startsWith('studio/'))return await studioAPI(req,env,{path,store,owner,siteOwner,resolve:scopedResolve,included:packs,now});
  if(req.method==='GET'&&path==='journal'){
