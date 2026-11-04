@@ -1,0 +1,49 @@
+/* Score tiles and new progress cards. Lantern Light tokens and motion (ll-drop, ll-card-in, --ll-spring). */
+.sc-tiles{display:inline-flex;align-items:center;gap:3px;vertical-align:middle;flex-wrap:wrap}
+.sc-tile{width:12px;height:12px;border-radius:28%;display:inline-block;background:var(--ll-well);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.14);animation:sc-drop .6s var(--ll-spring,cubic-bezier(.2,.9,.3,1.2)) both;animation-delay:calc(var(--i,0) * 45ms)}
+.sc-tile.is-first{background:var(--ll-teal)}.sc-tile.is-help{background:var(--ll-amber)}.sc-tile.is-retry{background:var(--ll-coral)}.sc-tile.is-explore{background:var(--ll-violet)}
+.sc-tile.is-empty{background:transparent;border:1.5px dashed #B9AD93;box-shadow:none;width:10px;height:10px}
+.sc-more{font-size:11px;font-weight:700;color:var(--ll-ink-soft);margin-left:2px}
+.sc-empty{display:inline-flex;align-items:center;gap:8px;color:var(--ll-ink-soft);font-size:13px}
+@keyframes sc-drop{0%{transform:translateY(-10px) rotate(-12deg) scale(.6);opacity:0}60%{transform:translateY(1px) scale(1.12,.9);opacity:1}100%{transform:none;opacity:1}}
+.sc-cell{display:flex;flex-direction:column;gap:4px;min-width:150px}
+.sc-cell small{font-size:12px;color:var(--ll-ink-soft);font-variant-numeric:tabular-nums}
+.sc-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ll-ink-soft);margin:6px 0 0}
+.sc-legend span{display:inline-flex;align-items:center;gap:5px}.sc-legend i{width:10px;height:10px;border-radius:28%;display:inline-block}
+.sc-legend .is-first{background:var(--ll-teal)}.sc-legend .is-help{background:var(--ll-amber)}.sc-legend .is-retry{background:var(--ll-coral)}
+/* Teacher's per-objective scores (Courses). */
+.cs-scores{border-top:1px solid var(--ll-line,#E2D8C4);margin-top:12px;padding-top:10px}
+.cs-scores h5{margin:0 0 8px;font-size:14px;letter-spacing:.02em}
+.cs-scores ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cs-scores li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 14px;padding:8px 12px;border-radius:14px;background:var(--ll-cream,#FBF6EC);animation:ll-card-in .45s var(--ll-spring,ease) both;animation-delay:calc(var(--i,0) * 60ms)}
+.cs-scores li>span:first-child{font-size:14px}.cs-scores .sc-score{display:flex;align-items:center;gap:10px;justify-content:flex-end;font-size:13px;color:var(--ll-ink-soft);font-variant-numeric:tabular-nums}
+.cs-scores .sc-done{font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;background:#E3F4F1;color:var(--ll-teal-ink,#0E7468)}.cs-scores .sc-doing{font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;background:var(--ll-amber-soft);color:var(--ll-amber-ink)}
+/* Trail: Explore lessons and free play. */
+.trail-extra{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.trail-extra li{display:grid;grid-template-columns:56px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:12px;row-gap:4px;align-items:center;padding:12px;border:1px solid var(--ll-line);border-radius:18px;background:var(--ll-white);animation:ll-card-in .5s var(--ll-spring,ease) both;animation-delay:calc(var(--i,0) * 70ms);transition:transform .2s var(--ll-spring,ease),box-shadow .2s}
+.trail-extra li:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(20,27,52,.08)}
+.trail-extra .te-art{grid-row:1/4;width:56px;height:56px;border-radius:14px;object-fit:cover;background:var(--ll-paper)}
+.trail-extra .te-icon{grid-row:1/4;width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:var(--ll-violet);color:#fff;box-shadow:inset 0 3px 0 rgba(255,255,255,.3),inset 0 -4px 0 rgba(0,0,0,.14)}
+.trail-extra strong{font-size:15px;line-height:1.25}.trail-extra .te-meta{font-size:13px;color:var(--ll-ink-soft)}
+.trail-extra small{font-size:12px;color:var(--ll-ink-soft)}
+.trail-kicker{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ll-ink-soft);margin:0}
+@media (prefers-reduced-motion:reduce){.sc-tile,.cs-scores li,.trail-extra li{animation:none}.trail-extra li{transition:none}}
+.reduce-motion .sc-tile,.reduce-motion .cs-scores li,.reduce-motion .trail-extra li{animation:none}
+.trail-extra .te-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.course-reports .cs-scores>ul>li,.cs-scores>ul>li{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 14px;padding:10px 14px;margin:0;border:0;border-radius:14px;background:var(--ll-cream,#FBF6EC)}
+.course-reports .cs-scores>ul>li>span:first-child{padding:0}
+@media (max-width:600px){.cs-scores>ul>li{grid-template-columns:1fr}.cs-scores .sc-score{justify-content:flex-start}}
+/* Phones: each learner becomes a card instead of a squeezed table row. */
+@media (max-width:640px){
+ .cl-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+ .cl-table-wrap{overflow:visible}
+ .cl-table{min-width:0!important;width:100%!important;table-layout:auto}
+ .cl-table,.cl-table tbody,.cl-table tr,.cl-table td{display:block;width:100%;box-sizing:border-box;white-space:normal}
+ .cl-table tr{border:1px solid var(--ll-line);border-radius:16px;padding:10px 12px;margin:0 0 10px;background:var(--ll-white);animation:ll-card-in .45s var(--ll-spring,ease) both}
+ .cl-table td{border:0;padding:4px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right}
+ .cl-table td:first-child{justify-content:flex-start;text-align:left;font-weight:700;flex-wrap:wrap}
+ .cl-table td[data-label]::before{content:attr(data-label);font-size:12px;font-weight:700;color:var(--ll-ink-soft);text-align:left}
+ .cl-table td:last-child{justify-content:flex-end}
+ .cl-table .sc-cell{align-items:flex-end;min-width:0}
+}
+@media (max-width:640px) and (prefers-reduced-motion:reduce){.cl-table tr{animation:none}}
