@@ -56,10 +56,23 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   const operations=access.admin?{closures:(await closureQueue(env)).map(({userId,siteOwner,...r})=>r),maintenance:await maintenanceStatus(env),paused:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','launch:controls'))?.policy).paused===true,pendingDeletion:(await db.one("SELECT COUNT(*) AS n FROM data_operations WHERE status IN ('preparing','cleanup-pending','provider-pending')")).n}:null;
   const budget=await budgetStatus(env,siteOwner,now());
   const roster=manages?(access.admin?await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' LIMIT 200"):await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' AND json_extract(policy,'$.manager')=? LIMIT 200",owner)).map(r=>({accountReference:r.scope.slice(13),...parse(r.policy)})):[];
-  return noStore({user:{id:user.id,name:user.name,email:user.email,emailVerified:user.emailVerified===true},accountReference:owner,...access,manages,enabled:env.PILOT_ENABLED==='true',noticeVersion:PILOT_NOTICE,onboarding:row?parse(row.payload).onboarding:null,version:row?.version||0,supportEmail:env.PILOT_SUPPORT_EMAIL||null,roster,operations,budget,closure:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-close:'+owner))?.policy).status||null});
+  return noStore({user:{id:user.id,name:user.name,email:user.email,emailVerified:user.emailVerified===true},accountReference:owner,...access,manages,enabled:env.PILOT_ENABLED==='true',openSignup:env.PILOT_OPEN_SIGNUP==='true',noticeVersion:PILOT_NOTICE,onboarding:row?parse(row.payload).onboarding:null,version:row?.version||0,supportEmail:env.PILOT_SUPPORT_EMAIL||null,roster,operations,budget,closure:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-close:'+owner))?.policy).status||null});
  }
  need(req.method==='POST','Pilot route not found.',404);need(req.headers.get('X-Mosaic-Learner')===user.id,'Your account changed. Reload before continuing.',401);
  const input=await readJSON(req,12000);
+ // Optional open sign-up (PILOT_OPEN_SIGNUP=true), for events such as a hackathon. A verified adult with no
+ // access arrangement joins the administrator's "Independent learners" group as a self-directed learner.
+ // The individual setting means onboarding only accepts 18+; daily AI spending caps still apply.
+ if(input.action==='join-open'){
+  need(env.PILOT_OPEN_SIGNUP==='true','Joining needs an invitation from a teacher or organiser.',403);
+  need(user.emailVerified===true,'Verify your email by signing in with an email code first.',403);
+  const current=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+owner))?.policy);
+  need(!current.status,'This account already has an access arrangement. Ask the administrator to review it.',409);
+  const label=String(user.name||'').trim().split(/\s+/).filter(Boolean).map((w,i)=>i?w[0]+'.':w).join(' ').slice(0,60)||'Independent learner';
+  await db.run('INSERT OR IGNORE INTO data_controls(scope,policy,updated) VALUES(?,?,?)','pilot-member:'+owner,JSON.stringify({status:'active',joined:now(),invite:'open-signup',manager:env.PILOT_ADMIN_OWNER,role:'learner',context:'individual',group:'Independent learners',label,managedApproval:false,authoringAllowed:true,tutorAllowed:true}),now());
+  need((await admission(env,owner)).admitted,'Access is not available for this account. Contact the administrator.',403);
+  return noStore({joined:true});
+ }
  if(input.action==='claim'){
   need(user.emailVerified===true,'Verify your email by signing in with an email code, then accept your invitation.',403);
   need(typeof input.code==='string'&&/^[a-f0-9]{64}$/.test(input.code),'Enter the complete invitation code.');

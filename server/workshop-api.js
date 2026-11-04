@@ -24,7 +24,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   const db=env.DB,one=(sql,...v)=>db.prepare(sql).bind(...v).first(),all=async(sql,...v)=>(await db.prepare(sql).bind(...v).all()).results,run=(sql,...v)=>db.prepare(sql).bind(...v).run();
   if(path[0]==='knowledge')return await knowledgeAPI(req,env,{owner,learnerOwner,now,fetcher});
   const resource=async id=>{const r=await one('SELECT * FROM workshop_resources WHERE id=? AND owner=?',id,owner);requireValue(r,'Resource not found.',404);return r};
-  const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'Draft not found.',404);return j};
+  const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'This chapter hasn’t been shared with you. Ask your teacher to assign it, then open it from Today.',404);return j};
   const sweepStarting=()=>run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
   const settle=async(j,result,from)=>{
    await finishCost(env,{id:j.id,siteOwner:owner,usage:result.usage,status:result.status,now:now()});

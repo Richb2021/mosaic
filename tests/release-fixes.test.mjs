@@ -34,3 +34,19 @@ test('a podcast or cartoon with a chosen style survives being checked again afte
  const src=await (await import('node:fs/promises')).readFile(new URL('../src/studio/creative-content.js',import.meta.url),'utf8');
  assert.match(src,/'genre','interest','audience','style','premise'/);
 });
+
+test('open sign-up is off by default; when on, a verified adult joins as an independent learner (18+ only)', async () => {
+ const {sharingFixture}=await import('./helpers/course-sharing.mjs');
+ const h=await sharingFixture(),visitor={id:'visitor-1',email:'visitor@example.test',emailVerified:true,name:'Vera Visitor'};
+ assert.equal((await h.call(visitor,'pilot',{action:'join-open'})).http,403,'off by default');
+ h.env.PILOT_OPEN_SIGNUP='true';
+ const status=await h.call(visitor,'pilot');assert.equal(status.openSignup,true);assert.equal(status.admitted,false);
+ const joined=await h.call(visitor,'pilot',{action:'join-open'});assert.equal(joined.http,200,JSON.stringify(joined));
+ assert.equal((await h.call(visitor,'pilot',{action:'join-open'})).http,409,'only once');
+ const s=await h.call(visitor,'pilot');assert.equal(s.admitted,true);assert.equal(s.context,'individual');
+ assert.notEqual((await h.call(visitor,'pilot',{action:'onboarding',ageBand:'13to17',confirmed:true,noticeVersion:s.noticeVersion,expectedVersion:s.version||0})).http,200,'under-18s cannot self-join');
+ assert.equal((await h.call(visitor,'pilot',{action:'onboarding',ageBand:'18plus',confirmed:true,noticeVersion:s.noticeVersion,expectedVersion:s.version||0})).http,200);
+ assert.equal((await h.call(visitor,'learning/classes')).http,200,'Studio works after joining');
+ const unverified={id:'visitor-2',email:'v2@example.test',emailVerified:false,name:'Uma'};
+ assert.equal((await h.call(unverified,'pilot',{action:'join-open'})).http,403,'email must be verified');
+});
