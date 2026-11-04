@@ -35,3 +35,32 @@ test('podcast and cartoon prompts fix Mira and Kit as adults so the story matche
  assert.match(src,/Mira is a woman and Kit is a man, both friends in their early twenties/);
  assert.match(src,/never write either of them as a child/);
 });
+
+test('an interest picks a matching style unless one is chosen; the prompt then asks for that style', async () => {
+ const {STORY_STYLES,suggestStyle}=await import('../src/story-direction.js');
+ assert.equal(suggestStyle('Anime & manga'),'anime');assert.equal(suggestStyle('Fantasy & myths'),'fantasy');assert.equal(suggestStyle('Football'),'sports');assert.equal(suggestStyle('Cooking'),null);
+ const anime=generationRequest(job('adventure-v1',{genre:'action',interest:'Anime & manga'})).input[0].content;
+ assert.ok(anime.includes('Style: Anime.')&&anime.includes(STORY_STYLES.anime.guide));
+ assert.match(anime,/the title and the first sentence of the hook show it and the style/);
+ assert.match(anime,/Never copy an existing series/);
+ const comic=generationRequest(job('quiz-v1',{genre:'comedy',interest:'Anime & manga',style:'comic'})).input[0].content;
+ assert.ok(comic.includes('Style: Comic book')&&!comic.includes('Style: Anime.'),'a chosen style wins');
+ assert.equal(JSON.parse(generationRequest(job('quiz-v1',{genre:'comedy',interest:'Gaming',style:'retro-game'})).input[1].content).story.style,'retro-game');
+ assert.throws(()=>storyBrief({style:'copy-a-real-show'}));
+ const src=await (await import('node:fs/promises')).readFile(new URL('../server/creative-provider.js',import.meta.url),'utf8');
+ assert.match(src,/styleDirection\(job\.context\?\.story\)/,'podcasts and cartoons get the same style direction');
+});
+
+test('the story-fit check flags drafts that ignore the interest or style', async () => {
+ const {storyFit}=await import('../src/story-direction.js');
+ const good={title:'Rival Dreams in the Anime Club',hook:'The anime club has one chance to win the festival.',dialogue:['My rival trains every day, but our team has a dream!','Sensei smiles: this is our chance.']};
+ const fit=storyFit(good,{interest:'Anime & manga'});assert.deepEqual(fit.weak,[]);assert.equal(fit.style,'anime');assert.ok(fit.interestInOpening);
+ const flat=storyFit({title:'Food webs',hook:'Plants are producers.',feedback:['Correct.']},{interest:'Anime & manga'});
+ assert.deepEqual(flat.weak,['interest','style']);
+ assert.deepEqual(storyFit({title:'x',sources:[{excerpt:'anime anime anime'}]},{interest:'Anime & manga',style:'anime'}).interestHits,0,'source excerpts never count');
+});
+
+test('learners can choose the new interests in their profile', async () => {
+ const {normaliseProfile}=await import('../src/game-modes/learning-model.js');
+ assert.deepEqual(normaliseProfile({interests:['Anime & manga','Gaming','Animals']}).interests,['Anime & manga','Gaming','Animals']);
+});

@@ -5,16 +5,55 @@ export const STORY_BLOCKING=Object.freeze(['arrive','travel-right','travel-left'
 export const STORY_SHOTS=Object.freeze(['wide','two-shot','speaker','reaction']);
 export const STORY_PACES=Object.freeze(['calm','urgent']);
 // Who the story is written for. Sets humour, sentence length and how sharp the stakes are.
+// A style is how the story is told (anime, comic book, fairy tale…), separate from its genre.
+// Each has conventions the writer must use. Characters, names and catchphrases are always original:
+// a style, never a copy of an existing series.
+export const STORY_STYLES=Object.freeze({
+ anime:{label:'Anime',guide:'Write it like an original anime episode: a determined lead with a big dream, a rival who pushes them, a calm mentor with a secret, big emotional reactions and short inner-monologue moments at the decisive point. When the learning clicks, give the plan or move a dramatic name and a moment of "this is our chance!". End scenes on a mini cliffhanger, and win through teamwork. Settings like a school club, a sky city or a spirit-filled town suit it.',words:['anime','manga','rival','dream','sensei','club','episode','power','chance','team','spirit','next time','sky']},
+ comic:{label:'Comic book / superhero',guide:'Write it like an original comic: a hero with a secret identity or gadget, a colourful villain with a scheme, punchy captions, sound-effect words (WHOOSH, KRAK) and a splash-page reveal. The learning is the hero\'s real superpower.',words:['hero','villain','power','gadget','mask','city','whoosh','krak','zap','secret','mission','sidekick']},
+ 'fairy-tale':{label:'Fairy tale / fable',guide:'Write it like a fairy tale or fable: "Once…", a clever ordinary hero, talking animals or objects, a rule of three (three tries, three doors), a trickster and a moral that the learning earns.',words:['once','kingdom','forest','wise','fox','owl','three','spell','castle','fable','king','queen','moral']},
+ 'sci-fi':{label:'Sci-fi',guide:'Write it like sci-fi: a starship, colony or lab crew, a malfunctioning system, a quirky AI or robot crewmate, countdowns and status reports. The learning becomes the engineering fix.',words:['ship','station','captain','crew','robot','planet','signal','system','orbit','launch','galaxy','scanner']},
+ fantasy:{label:'Fantasy quest',guide:'Write it like a fantasy quest: a map, a guild or fellowship, an enchanted object, a riddle-guarding creature and a dragon-sized problem. The learning is the lore that breaks the curse.',words:['quest','dragon','guild','magic','spell','map','knight','wizard','scroll','realm','curse','enchanted']},
+ sports:{label:'Sports drama',guide:'Write it like a sports drama: a team chasing the final, a coach\'s team talk, a rival club, training montages, a last-minute turnaround and commentary. The learning becomes the winning tactic.',words:['team','coach','match','final','goal','score','training','captain','pitch','league','whistle','tactic']},
+ detective:{label:'Detective',guide:'Write it like a detective story: a puzzling case, a sharp-eyed detective and their sidekick, clues and red herrings, a suspect line-up and a reveal where the evidence (the learning) solves the case. Nothing gruesome.',words:['case','clue','detective','suspect','evidence','mystery','solve','notebook','alibi','reveal','witness','missing']},
+ 'retro-game':{label:'Video game',guide:'Write it like a video game: levels, a player character with a health bar and inventory, a quest giver, a boss stage, power-ups and a save point. The learning unlocks the next level.',words:['level','boss','player','quest','power-up','inventory','respawn','checkpoint','save','unlock','score','game']},
+ 'nature-doc':{label:'Nature documentary',guide:'Write it like a nature documentary: a hushed, warm narrator voice, a small animal hero with a big challenge, the seasons turning, and close-up "and look…" moments. The learning explains what the narrator sees.',words:['habitat','wild','creature','season','narrator','burrow','nest','herd','watch','survive','forest','river']},
+ spy:{label:'Spy mission',guide:'Write it like a spy mission: a briefing from HQ, code names, gadgets, a secret base and a double-cross, with a ticking clock and safe, non-violent stakes. The learning cracks the code.',words:['agent','mission','code','briefing','gadget','hq','secret','undercover','decode','base','codename','signal']},
+ sitcom:{label:'Sitcom',guide:'Write it like a sitcom: a small, close group, a misunderstanding that snowballs, running jokes, a ridiculous scheme and a warm ending where they learn something together.',words:['plan','scheme','oops','again','neighbour','flat','family','joke','awkward','mix-up','everyone','sorry']},
+});
+// When no style is chosen, the learner's interest suggests one, so an anime fan gets anime storytelling.
+const STYLE_HINTS=[[/anime|manga/i,'anime'],[/super ?hero|comic/i,'comic'],[/dragon|magic|wizard|fantasy|knight/i,'fantasy'],[/fairy|myth|legend|fable/i,'fairy-tale'],[/space|planet|astronaut|robot|sci-?fi|science/i,'sci-fi'],[/football|soccer|sport|basketball|cricket|rugby|tennis|netball|athletic/i,'sports'],[/myster|detective|puzzle|crime/i,'detective'],[/gaming|video game|minecraft|roblox|games?\b/i,'retro-game'],[/animal|nature|wildlife|ocean|pets?\b/i,'nature-doc'],[/\bspy|secret agent/i,'spy']];
+export function suggestStyle(interest){for(const [re,style] of STYLE_HINTS)if(re.test(interest||''))return style;return null}
+export function styleOf(story){return story?.style||suggestStyle(story?.interest)||null}
+export function styleDirection(story){
+ const style=styleOf(story),interest=story?.interest;
+ const parts=[];
+ if(style)parts.push(`Style: ${STORY_STYLES[style].label}. ${STORY_STYLES[style].guide} Never copy an existing series, its characters, names, catchphrases or logos; make original ones in that style.`);
+ if(interest)parts.push(`Interest: ${interest}. Make it unmistakable: the title and the first sentence of the hook show it${style?' and the style':''}, at least one named character is defined by it, and the setting or central problem comes from it.`);
+ return parts.join(' ');
+}
+// A quick check, shown at review, of whether a draft really uses the interest and style.
+export function storyFit(content,story){
+ const strings=[];const walk=(v,k)=>{if(['sources','sourceRefs','evidence','id','template','schemaVersion'].includes(k))return;if(typeof v==='string')strings.push(v);else if(Array.isArray(v))v.forEach(x=>walk(x));else if(v&&typeof v==='object')for(const [kk,vv] of Object.entries(v))walk(vv,kk)};walk(content);
+ const all=strings.join(' \n ').toLowerCase(),opening=[content?.title,content?.hook,content?.summary,content?.segments?.[0]?.text].filter(Boolean).join(' ').toLowerCase();
+ const interestWords=String(story?.interest||'').toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3&&!['stories','building','things'].includes(w));
+ const count=w=>(all.match(new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length;
+ const interestHits=interestWords.reduce((n,w)=>n+count(w),0),interestInOpening=interestWords.some(w=>opening.includes(w));
+ const style=styleOf(story),styleWords=style?STORY_STYLES[style].words.filter(w=>all.includes(w)):[];
+ const weak=[];if(interestWords.length&&(interestHits<2||!interestInOpening))weak.push('interest');if(style&&styleWords.length<3)weak.push('style');
+ return {style,styleLabel:style?STORY_STYLES[style].label:null,interestHits,interestInOpening,styleWords,weak};
+}
 export const STORY_AUDIENCES=Object.freeze({primary:'Primary (about 5–11)',secondary:'Secondary (about 11–16)',adult:'16+ and adults'});
 const need=(v,m)=>{if(!v)throw Error(m);};
 export function storyBrief(raw={},allowedInterests){
- need(raw&&typeof raw==='object'&&!Array.isArray(raw)&&Object.keys(raw).every(k=>['genre','interest','audience'].includes(k)),'Choose a story style and interest.');
+ need(raw&&typeof raw==='object'&&!Array.isArray(raw)&&Object.keys(raw).every(k=>['genre','interest','audience','style'].includes(k)),'Choose a story style and interest.');
+ need(raw.style===undefined||Object.hasOwn(STORY_STYLES,raw.style),'Choose an available style.');
  need(raw.audience===undefined||Object.hasOwn(STORY_AUDIENCES,raw.audience),'Choose who the story is for.');
  const genre=raw.genre??'adventure',interest=(raw.interest??'');
  need(Object.hasOwn(STORY_GENRES,genre),'Choose an available story style.');
  need(typeof interest==='string'&&interest.length<=120&&!/[\x00-\x1f<>]/.test(interest),'Keep the interest to 120 plain-text characters.');
  const clean=interest.trim();need(!allowedInterests||!clean||allowedInterests.includes(clean),'Choose an interest from this programme profile.');
- return {genre,interest:clean,...(raw.audience?{audience:raw.audience}:{})};
+ return {genre,interest:clean,...(raw.audience?{audience:raw.audience}:{}),...(raw.style?{style:raw.style}:{})};
 }
 export function validateDirection(raw){
  need(raw&&typeof raw==='object'&&!Array.isArray(raw)&&Object.keys(raw).length===3&&Object.keys(raw).every(k=>['blocking','shot','pace'].includes(k)),'Use only the authored scene directions.');
@@ -45,5 +84,5 @@ export const AUDIENCE_GUIDE=Object.freeze({
 export const PLAYER_TEXT_RULE='In all player-facing text (titles, hooks, dialogue, scenes, orders, feedback and endings) write no disclaimers, caveats or meta-commentary such as "this is fictional", "not a real claim" or "this does not prove mastery": the review screen and citations already do that job. Never restate these instructions to the player. Humour comes from characters and situations, never from mocking the learner, mistakes, bodies, accents or any group. Use invented people, teams, brands and places, never real people. When an interest is given, build the setting, a character\'s want or the central problem around it, while every fact still comes from the evidence.';
 export function storyCraft(template,story){
  const audience=AUDIENCE_GUIDE[story?.audience]||'Audience: pitch humour and stakes to the learner context given.';
- return `STORY CRAFT (apply after every rule above; rules win if they conflict). ${VOICE_CARDS[template]||''} ${audience} ${PLAYER_TEXT_RULE}`;
+ return `STORY CRAFT (apply after every rule above; rules win if they conflict). ${VOICE_CARDS[template]||''} ${styleDirection(story)} ${audience} ${PLAYER_TEXT_RULE}`;
 }

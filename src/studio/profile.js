@@ -1,6 +1,6 @@
 export const LEVELS=['Not sure yet','Starting out','Building confidence','Applying ideas independently','Looking for a challenge'];
 export const STAGES=['Independent learning','Primary','Secondary','College','University','Professional learning'];
-export const INTERESTS=['Football','Stories & animation','Cooking','Music','Nature','Space','Building & business','History'];
+export const INTERESTS=['Football','Stories & animation','Cooking','Music','Nature','Space','Building & business','History','Anime & manga','Gaming','Animals','Superheroes & comics','Art & drawing','Science & inventions','Other sports','Fantasy & myths','Mysteries & puzzles','Dance'];
 export function profileContext(raw,text,need){
  const choice=(value,choices,fallback)=>{const v=value??fallback;need(choices.includes(v),'Choose an available profile option.');return v;};
  const interests=raw.interests??[];need(Array.isArray(interests)&&interests.length<=8&&interests.every(i=>INTERESTS.includes(i)),'Choose up to eight interests.');
