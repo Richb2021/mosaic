@@ -66,3 +66,28 @@ test('existing recovery handler exports every application table and private byte
   const bytes=await recoveryExport(new Request('https://mosaic.example/api/operations?object=narration%2Fexample.mp3'),{DB,BUCKET});assert.deepEqual([...new Uint8Array(await bytes.arrayBuffer())],[1,2,3]);
  } finally {DB.close();BUCKET.close();}
 });
+
+test('private playback pulls bounded chunks and preserves every byte',async()=>{
+ const store=new ObjectStore(':memory:');
+ try {
+  const bytes=Uint8Array.from({length:196631},(_,i)=>i%251);
+  await store.put('recording',bytes);
+  const item=await store.get('recording'),reader=item.body.getReader(),chunks=[];
+  for(;;){const {done,value}=await reader.read();if(done)break;assert(value.byteLength<=65536);chunks.push(value);}
+  assert.deepEqual(Buffer.concat(chunks),Buffer.from(bytes));
+  assert.deepEqual(new Uint8Array(await item.arrayBuffer()),bytes);
+  await store.put('empty',new Uint8Array());assert.equal((await (await store.get('empty')).arrayBuffer()).byteLength,0);
+ } finally {store.close();}
+});
+
+test('deleting or replacing a recording interrupts a paused stream without mixing versions',async()=>{
+ for(const change of ['delete','replace']){
+  const store=new ObjectStore(':memory:');
+  try {
+   await store.put('recording',new Uint8Array(4*65536).fill(7));
+   const reader=(await store.get('recording')).body.getReader();assert.equal((await reader.read()).value[0],7);
+   if(change==='delete')await store.delete('recording');else await store.put('recording',new Uint8Array(4*65536).fill(9));
+   await assert.rejects(async()=>{for(;;){const v=await reader.read();if(v.done)break;assert.equal(v.value[0],7);}},/changed during delivery/);
+  } finally {store.close();}
+ }
+});

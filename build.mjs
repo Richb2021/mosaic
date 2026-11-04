@@ -1,6 +1,8 @@
 import {build} from 'esbuild';
-import {copyFile,cp,mkdir} from 'node:fs/promises';
-await copyFile('index.html','public/index.html');
+import {copyFile,cp,mkdir,readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+await copyFile('index.html','public/rpg.html');
+await copyFile('public/studio.html','public/index.html');
 await build({entryPoints:['src/main.js'],bundle:true,external:['/fonts/*','/extraction/*'],minify:true,sourcemap:true,outfile:'public/game.js',target:'es2022'});
 await build({entryPoints:['src/game-modes/main.js'],bundle:true,external:['/fonts/*','/extraction/*'],minify:true,sourcemap:true,outfile:'public/modes.js',target:'es2022'});
 await build({entryPoints:['src/account.jsx'],bundle:true,format:'esm',external:['/fonts/*','/game-modes/*'],minify:true,sourcemap:true,outfile:'public/account.js',target:'es2022'});
@@ -22,3 +24,16 @@ for(const name of ['tesseract-core-lstm.wasm.js','tesseract-core-simd-lstm.wasm.
 await copyFile('node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz','public/extraction/ocr/eng.traineddata.gz');
 await copyFile('node_modules/tesseract.js/LICENSE.md','public/extraction/ocr/TESSERACT-LICENSE.txt');
 await copyFile('node_modules/tesseract.js-core/LICENSE','public/extraction/ocr/CORE-LICENSE.txt');
+
+// Entry HTML is revalidated, but CDN/browser caches may retain same-name JS.
+// Tie entry bundles to their actual bytes so a release cannot mix navigation
+// from an older build with the new homepage. Content assets keep their caching.
+for(const page of ['index','rpg','modes','studio','account','welcome','cartoons']){
+ const path=`public/${page}.html`;let html=await readFile(path,'utf8');
+ const matches=[...html.matchAll(/(?:src|href)="\/(\w[\w-]*\.(?:js|css))(?:\?v=[a-f0-9]+)?"/g)];
+ for(const match of matches){
+  const hash=createHash('sha256').update(await readFile('public/'+match[1])).digest('hex').slice(0,16);
+  html=html.replace(match[0],match[0].replace(/\/(\w[\w-]*\.(?:js|css))(?:\?v=[a-f0-9]+)?/,`/${match[1]}?v=${hash}`));
+ }
+ await writeFile(path,html);
+}

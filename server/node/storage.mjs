@@ -78,7 +78,29 @@ export class ObjectStore {
     return result.changes ? this.head(key) : null;
   }
   async head(key) { checkKey(key); const row=this.db.prepare('SELECT key,size,etag,uploaded,http_metadata,custom_metadata FROM objects WHERE key=?').get(key); return row?metadata(row):null; }
-  async get(key) { checkKey(key); const row=this.db.prepare('SELECT * FROM objects WHERE key=?').get(key); if(!row)return null; const blob=new Blob([row.bytes]); return {...metadata(row),body:blob.stream(),arrayBuffer:()=>blob.arrayBuffer()}; }
+  async get(key) {
+    checkKey(key);
+    const row=this.db.prepare('SELECT key,size,etag,uploaded,http_metadata,custom_metadata FROM objects WHERE key=?').get(key);
+    if(!row)return null;
+    // A slow listener must not pin an entire recording in the Node heap.
+    // SQLite reads only the requested BLOB slice. Check the captured version on
+    // every pull: deletion/replacement must fail, never splice two recordings.
+    const statement=this.db.prepare('SELECT substr(bytes,?,?) AS chunk FROM objects WHERE key=? AND etag=? AND uploaded=?');
+    const stream=()=>{
+      let offset=0;
+      return new ReadableStream({pull(controller){
+        try {
+          const size=Math.min(64*1024,row.size-offset);
+          const value=statement.get(offset+1,size,key,row.etag,row.uploaded);
+          if(!value||(value.chunk?.byteLength||0)!==size)throw Error('Stored object changed during delivery');
+          if(size)controller.enqueue(value.chunk);
+          offset+=size;
+          if(offset===row.size)controller.close();
+        } catch(error) {controller.error(error);}
+      }},{highWaterMark:1});
+    };
+    return {...metadata(row),body:stream(),arrayBuffer:()=>new Response(stream()).arrayBuffer()};
+  }
   async delete(key) { checkKey(key); this.db.prepare('DELETE FROM objects WHERE key=?').run(key); }
   async list({limit=1000,cursor,prefix=''}={}) {
     if(!Number.isInteger(limit)||limit<1||limit>1000||prefix&&!validKey(prefix))throw Error('Invalid object list bounds');

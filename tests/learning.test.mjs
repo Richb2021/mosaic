@@ -66,3 +66,84 @@ test('NCB network interruption is a temporary service error rather than invalid 
  let attempts=0;const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async()=>{attempts++;throw new TypeError('Network unavailable')});
  await assert.rejects(()=>store.latest('learner_profiles','a','profile'),e=>e instanceof StoreError&&e.status===503&&/temporarily unavailable/.test(e.message));assert.equal(attempts,1);
 });
+
+test('saving prunes fifty old versions in one owner-checked request and keeps the confirmed version',async()=>{
+ const calls=[],payload={profile:{goal:'capacity'}},confirmed={id:51,owner_key:'a',slot_key:'profile',version:51,payload:JSON.stringify(payload)};
+ let inserted=false;
+ const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async(url,options)=>{
+  assert(options.signal instanceof AbortSignal);calls.push({url:String(url),method:options.method,body:options.body});
+  if(String(url).includes('/create/')){inserted=true;return Response.json({status:'success'});}
+  if(String(url).includes('/bulk/delete/')){assert.deepEqual(JSON.parse(options.body).ids,Array.from({length:50},(_,i)=>i+1));return Response.json({status:'success'});}
+  const old=new URL(url).searchParams.has('version[lt]');
+  return Response.json({status:'success',data:old?Array.from({length:50},(_,i)=>({id:i+1,owner_key:'a',slot_key:'profile',version:i+1})):[inserted?confirmed:{...confirmed,id:50,version:50,payload:'{}'}]});
+ });
+ assert.equal((await store.write('learner_profiles','a','profile',50,payload)).version,51);
+ assert.equal(calls.length,5);assert.equal(calls.filter(c=>c.method==='DELETE').length,1);
+});
+
+test('a whole-save deadline interrupts confirmation and an acknowledged retry never inserts twice',async t=>{
+ const timeout=AbortSignal.timeout.bind(AbortSignal);
+ t.mock.method(AbortSignal,'timeout',ms=>timeout(ms===55000?25:ms));
+ const payload={profile:{goal:'deadline'}},saved={id:1,owner_key:'a',slot_key:'profile',version:1,payload:JSON.stringify(payload)};
+ let inserts=0,allowRead=false;
+ const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async(url,options)=>{
+  if(options.method==='POST'){inserts++;return Response.json({status:'success'});}
+  if(inserts&&!allowRead)return new Promise((resolve,reject)=>{
+   if(options.signal.aborted)reject(options.signal.reason);else options.signal.addEventListener('abort',()=>reject(options.signal.reason),{once:true});
+  });
+  return Response.json({status:'success',data:inserts?[saved]:[]});
+ });
+ // AbortSignal timers are unref'ed; this keeps the isolated test alive.
+ const keepAlive=setTimeout(()=>{},1000);
+ try {
+  await assert.rejects(store.write('learner_profiles','a','profile',0,payload),e=>e.status===503&&/whether the cloud save completed/.test(e.message));
+  allowRead=true;assert.equal((await store.write('learner_profiles','a','profile',0,payload)).id,1);assert.equal(inserts,1);
+ } finally {clearTimeout(keepAlive);}
+});
+
+test('confirmation avoids cached pre-write latest results but still detects a newer competing version',async()=>{
+ for(const competing of [false,true]){
+  let writes=0,qualified=0;
+  const payload={profile:{goal:'fresh confirmation'}};
+  const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async(url,options)=>{
+   if(options.method==='POST'){writes++;return Response.json({status:'success'});}
+   const q=new URL(url).searchParams;
+   if(q.has('version[gte]')){qualified++;assert.equal(q.get('version[gte]'),writes?'1':'0');if(!writes)return Response.json({status:'success',data:[]});return Response.json({status:'success',data:[{owner_key:'a',slot_key:'profile',version:competing?2:1,payload:competing?'{}':JSON.stringify(payload)}]});}
+   return Response.json({status:'success',data:[]}); // stale pre-write cache
+  });
+  if(competing)await assert.rejects(store.write('learner_profiles','a','profile',0,payload),e=>e.status===409);
+  else assert.equal((await store.write('learner_profiles','a','profile',0,payload)).version,1);
+  assert.equal(writes,1);assert.equal(qualified,2);
+ }
+});
+
+ test('initial save reads include the expected version and reject newer competing writes',async()=>{
+ for(const expected of [0,5]){
+  let requests=0;const payload={profile:{goal:'conflict'}};
+  const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async(url,options)=>{
+   requests++;assert.equal(options.method,'GET');assert.equal(new URL(url).searchParams.get('version[gte]'),String(expected));
+   return Response.json({status:'success',data:[{owner_key:'a',slot_key:'profile',version:expected+1,payload:'{}'}]});
+  });
+  await assert.rejects(store.write('learner_profiles','a','profile',expected,payload),e=>e.status===409);assert.equal(requests,1);
+ }
+});
+
+test('a first save uses different version bounds before and after insertion',async()=>{
+ const cached=new Map();let stored=null;
+ const store=new NCBStore({NCB_INSTANCE:'test',NCB_SECRET_KEY:'not-a-key'},async(url,options)=>{
+  if(options.method==='POST'){stored=JSON.parse(options.body);return Response.json({status:'success'});}
+  const q=new URL(url).searchParams;if(q.has('version[lt]'))return Response.json({status:'success',data:[]});
+  const key=q.get('version[gte]');assert.notEqual(key,null);
+  if(!cached.has(key))cached.set(key,stored?[stored]:[]);
+  return Response.json({status:'success',data:cached.get(key)});
+ });
+ assert.equal((await store.write('learner_profiles','a','profile',0,{profile:{goal:'fresh'}})).version,1);
+ assert.deepEqual([...cached.keys()],['0','1']);
+});
+
+test('upstream account throttling fails closed and logs only status metadata',async t=>{
+ const logs=[];t.mock.method(console,'warn',text=>logs.push(JSON.parse(text)));
+ const request=new Request('https://mosaic.example/api/learning/journal',{headers:{Cookie:'better-auth.session_token=private-cookie'}});
+ await assert.rejects(ncbSession(request,{NCB_INSTANCE:'private-instance',NCB_SECRET_KEY:'private-key'},async()=>new Response('{}',{status:429,headers:{'Retry-After':'30'}})),e=>e.status===503&&/rate-limited/.test(e.message));
+ assert.deepEqual(logs,[{event:'ncb_session_failure',status:429,retryAfterSeconds:30}]);
+});

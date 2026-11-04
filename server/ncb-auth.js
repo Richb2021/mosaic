@@ -7,7 +7,7 @@ export function ncbHeaders(req,env){return {'Content-Type':'application/json','X
 export async function ncbSession(req,env,fetcher=fetch){
  if(!env.NCB_INSTANCE||!env.NCB_SECRET_KEY||!authCookies(req))return null;
  const res=await fetcher(BASE+'/get-session?instance='+encodeURIComponent(env.NCB_INSTANCE)+'&disableCookieCache=true',{headers:ncbHeaders(req,env),cache:'no-store',signal:AbortSignal.timeout(12000)});
- if(!res.ok){if(res.status===401)return null;throw Object.assign(Error('Account service is unavailable. Your device save is safe.'),{status:503});}
+ if(!res.ok){if(res.status===401)return null;const retry=res.headers.get('retry-after');console.warn(JSON.stringify({event:'ncb_session_failure',status:res.status,...(/^\d{1,6}$/.test(retry||'')?{retryAfterSeconds:Number(retry)}:{})}));throw Object.assign(Error(res.status===429?'The sign-in service is temporarily rate-limited. Your device save is safe; wait a moment and retry.':'Account service is unavailable. Your device save is safe.'),{status:503});}
  const data=await res.json();return data?.user&&typeof data.user.id==='string'?{id:data.user.id,name:String(data.user.name||''),email:String(data.user.email||''),emailVerified:data.user.emailVerified===true||data.user.emailverified===true||data.user.emailverified===1}:null;
 }
 const GET_PATHS=new Set(['get-session','providers']);

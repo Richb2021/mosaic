@@ -42,4 +42,4 @@ export async function pilotRequest(body){
 }
 let workshopEpoch='0:0';
 export async function workshopRequest(path,body){const {data,epoch}=await resourceRequest(path,body,{dataEpoch:workshopEpoch});if(!body)workshopEpoch=epoch||workshopEpoch;return data;}
-export function gameURL(item){const p=item.pack;if(p.template==='underlight-v1')return '/?'+new URLSearchParams({rpg:p.id,hash:unitKey(p).slice(p.id.length+1)});return '/modes.html?'+new URLSearchParams(item.jobId?{job:item.jobId}:{game:p.id});}
+export function gameURL(item){const p=item.pack;if(p.template==='underlight-v1')return '/rpg.html?'+new URLSearchParams({rpg:p.id,hash:unitKey(p).slice(p.id.length+1)});return '/modes.html?'+new URLSearchParams(item.jobId?{job:item.jobId}:{game:p.id});}

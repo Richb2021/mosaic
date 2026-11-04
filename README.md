@@ -27,8 +27,11 @@ Support adapts from recorded responses and learner choices, not a fixed “learn
 - `/welcome.html` — invitations, onboarding and learning-group management.
 - `/studio` — personal programme, sources, courses, creative learning and Your data.
 - `/modes.html` — all game formats, including guest examples.
-- `/` — the Lanternbound JRPG.
+- `/` — the personal learning studio.
+- `/rpg.html` — the Lanternbound JRPG.
 - `/cartoons.html` — authored cartoon artwork/player examples, not a personal library.
+
+See [measured public capacity and operating limits](docs/CAPACITY.md) before inviting a concurrent cohort.
 
 Included games can be played as a guest. A new login does not grant access to another person's content or automatically authorise a school/family account. Private features require membership and onboarding. See [permissions](docs/PILOT-LAUNCH.md).
 

@@ -63,11 +63,13 @@ curl_setopt_array($curl, [
     },
 ]);
 if ($method === 'POST') curl_setopt($curl, CURLOPT_POSTFIELDS, $body);
+$started = microtime(true);
 $ok = curl_exec($curl);
+$upstreamMs = (microtime(true) - $started) * 1000;
 curl_close($curl);
 if ($ok === false || $status < 200 || $status >= 300 && $status < 400) {
     fclose($stream);
-    failRequest(503, 'Mosaic is temporarily unavailable. Your saved learning is unchanged.');
+    failRequest(503, 'Mosaic is temporarily unavailable. Your device save is safe; retry to check whether the cloud save completed.');
 }
 foreach ($responseHeaders as [$key, $value]) {
     if ($key === 'content-length' && (int)$value !== $size) {
@@ -80,6 +82,8 @@ foreach ($responseHeaders as [$key, $value]) {
     if ($key !== 'content-length') header($key . ': ' . $value, $key !== 'set-cookie');
 }
 header('Content-Length: ' . $size);
+// Duration only: no identity, upstream address or credentials are exposed.
+header('Server-Timing: upstream;dur=' . number_format($upstreamMs, 1, '.', ''));
 rewind($stream);
 fpassthru($stream);
 fclose($stream);

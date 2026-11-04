@@ -20,6 +20,10 @@ test('portable app keeps private routes protected and static paths contained',as
   const range=await app(new Request('https://mosaic.example/audio.mp3',{headers:{Range:'bytes=1-3'}}));assert.equal(range.status,206);assert.equal(await range.text(),'bcd');
   assert.equal((await app(new Request('https://mosaic.example/audio.mp3',{headers:{Range:'bytes=20-30'}}))).status,416);
   assert.equal(await (await app(new Request('https://mosaic.example/'))).text(),'<h1>Mosaic</h1>');
+  await writeFile(join(dir,'rpg.html'),'<h1>Lanternbound</h1>');
+  assert.equal(await (await app(new Request('https://mosaic.example/rpg'))).text(),'<h1>Lanternbound</h1>');
+  const legacy=await app(new Request('https://mosaic.example/?rpg=chapter&hash=version'));
+  assert.equal(legacy.status,302);assert.equal(legacy.headers.get('location'),'/rpg.html?rpg=chapter&hash=version');
  } finally {await rm(dir,{recursive:true,force:true});await rm(outside,{force:true});}
 });
 

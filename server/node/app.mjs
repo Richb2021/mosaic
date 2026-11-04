@@ -12,7 +12,7 @@ import {mediaWorkerAPI} from '../media-jobs.js';
 import {operationsAPI} from '../launch-operations.js';
 
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.map':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.glb':'model/gltf-binary','.mp3':'audio/mpeg','.wav':'audio/wav','.mp4':'video/mp4','.woff2':'font/woff2','.ttf':'font/ttf','.wasm':'application/wasm'};
-const aliases={'/':'/index.html','/studio':'/studio.html','/account':'/account.html','/welcome':'/welcome.html','/cartoons':'/cartoons.html'};
+const aliases={'/':'/index.html','/rpg':'/rpg.html','/studio':'/studio.html','/account':'/account.html','/welcome':'/welcome.html','/cartoons':'/cartoons.html'};
 
 async function accountProxy(request,env) {
   try {
@@ -30,6 +30,7 @@ export function createApp(env,{staticDirectory,defer=()=>{}}) {
   const root=realpathSync(resolve(staticDirectory));
   return async request=>{
     const url=new URL(request.url),path=url.pathname;
+    if(path==='/'&&url.searchParams.has('rpg'))return new Response(null,{status:302,headers:{Location:'/rpg.html'+url.search,'Cache-Control':'no-store'}});
     if(path.startsWith('/api/')) {
       if(!['GET','POST'].includes(request.method))return noStore({error:'Method not allowed.'},405);
       if(path==='/api/auth-providers'||path.startsWith('/api/auth/'))return authAPI(request,env);

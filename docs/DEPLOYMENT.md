@@ -8,6 +8,8 @@ The existing `richardbatt.com` package is 20i Linux Ultimate shared hosting. It 
 
 Acceptance verified public NCB sign-in, admission, all nine saved programmes, the source library, saved audio, sign-out and protected-route denial. The final transfer preserved all nine SQL tables, including 11 resources and 73 jobs, plus 10 stored objects. Counts are a cutover snapshot, not permanent limits. Private restore verification and background retention also passed; see the parent `output/public-release/` for exact evidence.
 
+The root address opens the learning studio. Lanternbound runs at `/rpg.html`; existing `/?rpg=…&hash=…` chapter links redirect there while preserving their parameters.
+
 ## Authentication and permissions
 
 `/account.html` uses NoCodeBackend email/password and enabled methods from `/api/auth-providers`. The maintained Account component supplies account, password and session controls through a same-origin server proxy. Secrets stay on the server. Authentication uses HTTP-only cookies; production cookies require HTTPS. Mutating APIs check Origin and content type.
@@ -60,4 +62,4 @@ The old host must return HTTP 410 for learner and write APIs before the final ex
 - Scheduled operations: existing `mosaic-retention.timer`, `mosaic-alerts.timer` and `mosaic-backup.timer`. The independent 20i Baldur-outage monitor is unchanged. Encrypted recovery archives retain their existing seven-day expiry.
 - Gateway responses preserve session cookies, deletion/reset markers and security headers. A private temporary stream buffers each bounded response before delivery, so a failed upstream transfer returns an error rather than a partial successful recording.
 
-The public test used one administrator and up to four parallel read requests. API peak memory was about 43 MB during the initial journey; the service limit is 1 GB. This is evidence of modest pilot load, not a general capacity guarantee. External learner/educator evaluation and remaining physical-device tests remain separate launch work.
+The initial migration test used one administrator and up to four parallel reads. The larger exercise on 4 November tested separate learner identities, real cloud saves and stored audio through the public gateway. No sustained learner-capacity recommendation passed: NoCodeBackend session checks returned HTTP 429 at five, ten and twenty active learners, while Baldur retained CPU and memory headroom. Resolve that provider limit before treating this as ready for a concurrent cohort. See [capacity evidence and deployed fixes](CAPACITY.md). External learner/educator evaluation and physical-device testing remain separate work.

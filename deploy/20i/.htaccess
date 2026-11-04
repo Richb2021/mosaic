@@ -1,6 +1,9 @@
 Options -Indexes
 DirectoryIndex index.html
 RewriteEngine On
+RewriteCond %{QUERY_STRING} (^|&)rpg= [NC]
+RewriteRule ^$ /rpg.html [R=302,L]
+RewriteRule ^rpg/?$ rpg.html [L]
 RewriteRule ^api/ api.php [L]
 RewriteRule ^studio/?$ studio.html [L]
 RewriteRule ^account/?$ account.html [L]
