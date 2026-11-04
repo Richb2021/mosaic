@@ -13,7 +13,7 @@ export function propBoxes(p){
  if(VARIETY_PROPS[p.asset])return [box(VARIETY_PROPS[p.asset])];
  if(p.asset==='arch')return [[-1,0,.7,.8],[1,0,.7,.8]].map(box);
  if(p.asset==='bridge')return [[0,-.64,3.4,.12],[0,.64,3.4,.12]].map(box);
- if(p.asset==='works_bridge')return [[-2.15,0,.18,5.4],[2.15,0,.18,5.4]].map(box);
+ if(p.asset==='works_bridge')return [[-2.15,0,.18,5.4],[2.15,0,.18,5.4],[-2.6,0,.3,8.5],[2.6,0,.3,8.5]].map(box); // hand rails, then the side girders
  const dims=BASES[p.asset];return dims?[box([0,0,...dims])]:[];
 }
 export function solidProps(map){
@@ -21,7 +21,7 @@ export function solidProps(map){
  for(const p of map.props){if(map.obstacles.some(b=>Math.abs(b[0]-p.x)<.01&&Math.abs(b[1]-p.z)<.01))continue;obstacles.push(...propBoxes(p))}
  return {...map,obstacles};
 }
-const ENTITY_BASES={pedestal:[1.8,1.8],chest:[1.16,.82],room_hearth:[2.1,1.2],room_chair:[.7,.7],works_console:[1.8,1.2],works_beetle:[2.4,2.5],works_sentry:[1.4,1.4],works_heart:[3,2.8]};
+const ENTITY_BASES={pedestal:[1.8,1.8],chest:[1.16,.82],room_hearth:[2.1,1.2],room_chair:[.7,.7],works_console:[1.8,1.2],works_beetle:[2.74,2.5],works_sentry:[1.7,1.7],works_heart:[3.6,3.6]}; // measured from each model's base
 export function interactionDistance(e){const d=ENTITY_BASES[e.asset];return d?Math.max(1.35,Math.min(...d)/2+.6):1.35}
 export function stateScenery(map,state,completedRooms=new Set()){
  const props=[];

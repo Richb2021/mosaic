@@ -8,7 +8,11 @@ A private test copy at **https://mosaic-staging.24hourcoder.com**. It runs the r
   - Pick a person on `/staging`, or add a new one, which works like a new sign-up with no group yet.
   - There are no passwords, and nothing is sent to NoCodeBackend.
 - **Learner saves:** they go to a staging copy of the learner store (`scripts/staging/learner-store.mjs`). It has the same version rules as NCB and keeps the latest version of each slot.
-- **No AI or audio:** there are no AI or audio provider keys, so generating podcasts, cartoons and new chapters isn't available.
+- **AI and voices:**
+  - Staging has the same Meta (`META_API_KEY`) and Fish Audio keys as live, copied server to server from `~/.config/mosaic/app.env`.
+  - It shares live's provider accounts but has its own lower caps: $5 a day per workspace, $10 a day overall and 20 generations. Live keeps $20, $100 and 50.
+  - The background narration worker (`mosaic-media`) runs for live only, so finished episodes aren't voiced on staging.
+  - NCB, gateway and maintenance secrets are never copied.
 - **Private access:** the whole site needs the staging link. Everything else returns 401, and pages are marked `noindex`.
 
 Everything else, including invites, onboarding, classes, assignments, sharing, the inbox, feedback and data controls, is the live code.

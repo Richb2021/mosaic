@@ -18,10 +18,18 @@ export function clearSegment(map,a,b){
  }
  return true;
 }
+// Moves a blocked position to the nearest free spot in the room's main walkable area, never
+// into a small enclosed pocket (for example behind shelves) that the player couldn't walk out of.
 export function safePosition(map,p){
  if(!blocked(map,p.x,p.z))return {...p};
- const b=limits(map),step=map.step??.5;let best=null,score=Infinity;
- for(let x=b.minX;x<=b.maxX;x+=step)for(let z=b.minZ;z<=b.maxZ;z+=step){const d=(x-p.x)**2+(z-p.z)**2;if(d<score&&!blocked(map,x,z)){score=d;best={x,z}}}
+ const b=limits(map),step=map.step??.5,cells=[],index=new Map(),key=(i,j)=>i+','+j;
+ for(let i=0,x=b.minX;x<=b.maxX;i++,x+=step)for(let j=0,z=b.minZ;z<=b.maxZ;j++,z+=step)if(!blocked(map,x,z)){index.set(key(i,j),cells.length);cells.push({x,z,i,j,group:-1})}
+ const sizes=[];
+ for(const start of cells){if(start.group>=0)continue;const g=sizes.length,queue=[start];start.group=g;let n=0;
+  while(queue.length){const c=queue.pop();n++;for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){const k=index.get(key(c.i+di,c.j+dj));if(k===undefined)continue;const o=cells[k];if(o.group<0&&clearSegment(map,c,o)){o.group=g;queue.push(o)}}}
+  sizes.push(n)}
+ const main=sizes.indexOf(Math.max(...sizes));let best=null,score=Infinity;
+ for(const c of cells){if(c.group!==main)continue;const d=(c.x-p.x)**2+(c.z-p.z)**2;if(d<score){score=d;best={x:c.x,z:c.z}}}
  return best;
 }
 export function findPath(map,start,end,{reach=.51}={}){
