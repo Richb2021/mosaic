@@ -44,7 +44,7 @@ export async function deletionPlan(env,{owner,siteOwner,store,mode,id,now=Date.n
  const derived=jobs.filter(j=>(parse(j.payload).recordType==='creative'||parse(j.payload).voiceTutor===true)&&packs.has(parse(j.payload).packId));
  need(![...selected,...derived].some(j=>parse(j.payload).learnerOwner&&parse(j.payload).learnerOwner!==owner),'Another learner has work derived from this source. They must remove their episodes before this source can be deleted.',409);
  selected.push(...derived);
- const ids=new Set(selected.map(j=>j.id));selected.push(...jobs.filter(j=>['creative-audio','media-render'].includes(parse(j.payload).recordType)&&ids.has(parse(j.payload).scriptId)));
+ const ids=new Set(selected.map(j=>j.id));selected.push(...jobs.filter(j=>['creative-audio','media-render','cartoon-backdrops','backdrop-image'].includes(parse(j.payload).recordType)&&ids.has(parse(j.payload).scriptId)));
  selected=[...new Map(selected.map(j=>[j.id,j])).values()];
  assetIDs.push(...assets.filter(a=>selected.some(j=>j.id===a.script_id||parse(j.payload).assetId===a.id)).map(a=>a.id));
  const sharing=await courseGrantRecords(env,owner,siteOwner),jobIds=new Set(selected.map(j=>j.id));
@@ -246,7 +246,7 @@ export async function dataAPI(req,env,{owner,siteOwner,store,now=()=>Date.now(),
  }
  if(input.action==='download'){
   const asset=await db.one('SELECT * FROM media_assets WHERE id=? AND site_owner=? AND learner_owner=? AND status=?',input.id,siteOwner,owner,'ready');need(asset,'Saved recording not found.',404);const days=parse(state.controls.learner.policy).mediaDays||0;need(!days||asset.created+days*DAY>now(),'This recording has expired. Refresh Your data to clean it up.',410);
-  need(env.BUCKET,'Private media storage is unavailable.',503);const object=await env.BUCKET.get(asset.object_key);need(object,'Saved recording is unavailable.',404);return new Response(object.body,{headers:{'Content-Type':asset.segment===-1?'video/mp4':'audio/mpeg','Cache-Control':'no-store','Content-Disposition':'attachment; filename="'+asset.id+'.mp3"','X-Content-Type-Options':'nosniff'}});
+  need(env.BUCKET,'Private media storage is unavailable.',503);const object=await env.BUCKET.get(asset.object_key);need(object,'Saved recording is unavailable.',404);return new Response(object.body,{headers:{'Content-Type':asset.segment===-1?'video/mp4':asset.segment<=-10?'image/webp':'audio/mpeg','Cache-Control':'no-store','Content-Disposition':'attachment; filename="'+asset.id+(asset.segment===-1?'.mp4':asset.segment<=-10?'.webp':'.mp3')+'"','X-Content-Type-Options':'nosniff'}});
  }
  throw Object.assign(Error('Data action not found.'),{status:404});
 }
