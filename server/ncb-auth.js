@@ -4,11 +4,36 @@ export const noStore=(value,status=200)=>Response.json(value,{status,headers:{'C
 export function checkOrigin(req){if(req.method!=='GET'&&(req.headers.get('origin')!==new URL(req.url).origin||!req.headers.get('content-type')?.startsWith('application/json')))throw Object.assign(Error('Open this form on this site before saving.'),{status:403});}
 export async function readJSON(req,limit=200000){const reader=req.body?.getReader();if(!reader)throw Object.assign(Error('A request body is required.'),{status:400});let length=0,parts=[];try{for(;;){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>limit)throw Object.assign(Error('This request is too large.'),{status:413});parts.push(value)}}finally{await reader.cancel().catch(()=>{})}const bytes=new Uint8Array(length);let offset=0;for(const p of parts){bytes.set(p,offset);offset+=p.length}try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes))}catch{throw Object.assign(Error('Send a valid JSON request.'),{status:400})}}
 export function ncbHeaders(req,env){return {'Content-Type':'application/json','X-Database-Instance':env.NCB_INSTANCE,Authorization:'Bearer '+env.NCB_SECRET_KEY,Cookie:authCookies(req),Origin:new URL(req.url).origin,'User-Agent':req.headers.get('user-agent')||'Lanternbound'};}
+// Each API request checks the sign-in with the account service, ~0.5-1 s away. A confirmed
+// sign-in is kept for 20 s per cookie, and requests that arrive together share one check.
+// Signed-out answers and failures are never kept; any sign-in, sign-up or sign-out clears it.
+export function sessionCache({ttl=20000,max=5000,now=()=>Date.now()}={}){
+ const entries=new Map();
+ const key=async(req,env)=>{const bytes=new TextEncoder().encode(env.NCB_INSTANCE+'|'+authCookies(req));return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');};
+ return {
+  async get(req,env,check){
+   const k=await key(req,env),hit=entries.get(k);
+   if(hit&&(hit.pending||now()-hit.at<ttl))return hit.value.then(u=>u&&{...u});
+   const value=check(),entry={value,pending:true};entries.set(k,entry);
+   try{const user=await value;if(user&&entries.get(k)===entry){entry.pending=false;entry.at=now();entry.value=Promise.resolve(user);while(entries.size>max)entries.delete(entries.keys().next().value);}else if(entries.get(k)===entry)entries.delete(k);return user&&{...user};}
+   catch(error){if(entries.get(k)===entry)entries.delete(k);throw error;}
+  },
+  async remember(req,env,user){if(!user)return;const k=await key(req,env);entries.delete(k);entries.set(k,{value:Promise.resolve(user),pending:false,at:now()});while(entries.size>max)entries.delete(entries.keys().next().value);},
+  async forget(req,env){entries.delete(await key(req,env));},
+  get size(){return entries.size;}
+ };
+}
+const sessions=sessionCache();
 export async function ncbSession(req,env,fetcher=fetch){
  if(!env.NCB_INSTANCE||!env.NCB_SECRET_KEY||!authCookies(req))return null;
+ if(fetcher!==globalThis.fetch)return checkSession(req,env,fetcher);
+ return sessions.get(req,env,()=>checkSession(req,env,fetcher));
+}
+const sessionUser=data=>data?.user&&typeof data.user.id==='string'?{id:data.user.id,name:String(data.user.name||''),email:String(data.user.email||''),emailVerified:data.user.emailVerified===true||data.user.emailverified===true||data.user.emailverified===1}:null;
+async function checkSession(req,env,fetcher){
  const res=await fetcher(BASE+'/get-session?instance='+encodeURIComponent(env.NCB_INSTANCE)+'&disableCookieCache=true',{headers:ncbHeaders(req,env),cache:'no-store',signal:AbortSignal.timeout(12000)});
  if(!res.ok){if(res.status===401)return null;const retry=res.headers.get('retry-after');console.warn(JSON.stringify({event:'ncb_session_failure',status:res.status,...(/^\d{1,6}$/.test(retry||'')?{retryAfterSeconds:Number(retry)}:{})}));throw Object.assign(Error(res.status===429?'The sign-in service is temporarily rate-limited. Your device save is safe; wait a moment and retry.':'Account service is unavailable. Your device save is safe.'),{status:503});}
- const data=await res.json();return data?.user&&typeof data.user.id==='string'?{id:data.user.id,name:String(data.user.name||''),email:String(data.user.email||''),emailVerified:data.user.emailVerified===true||data.user.emailverified===true||data.user.emailverified===1}:null;
+ return sessionUser(await res.json());
 }
 const GET_PATHS=new Set(['get-session','providers']);
 const POST_PATHS=new Set(['sign-in/email','sign-up/email','request-password-reset','reset-password','email-otp/send-verification-otp','sign-in/email-otp','sign-in/social','sign-out']);
@@ -18,6 +43,7 @@ export async function authAPI(req,env,fetcher=fetch){try{
  if(!(req.method==='GET'?GET_PATHS:POST_PATHS).has(path))return noStore({error:'Account route not found.'},404);
  checkOrigin(req);let body;
  if(req.method==='POST'){
+  if(authCookies(req))await sessions.forget(req,env);
   const data=await readJSON(req,16000),fields={
    'sign-in/email':['email','password','rememberMe'],'sign-up/email':['email','password','name'],
    'request-password-reset':['email'],'reset-password':['token','newPassword'],
@@ -34,7 +60,7 @@ export async function authAPI(req,env,fetcher=fetch){try{
  if(path==='sign-out'){const names=new Set(['better-auth.session_token','better-auth.session_data','better-auth.dont_remember','better-auth.account_data',...authCookies(req).split(';').map(s=>s.trim().split('=')[0]).filter(Boolean)]);for(const name of names)headers.append('Set-Cookie',`${name}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${url.protocol==='https:'?'; Secure':''}`);}
  // This lightweight app identity route omits session tokens. The maintained
  // Account component separately receives its documented session/device data.
- if(path==='get-session'){if(!upstream.ok)return noStore({user:null},upstream.status);const d=await upstream.json();return new Response(JSON.stringify({user:d?.user?{id:d.user.id,name:d.user.name,email:d.user.email}:null}),{headers});}
+ if(path==='get-session'){if(!upstream.ok)return noStore({user:null},upstream.status);const d=await upstream.json();if(fetcher===globalThis.fetch)await sessions.remember(req,env,sessionUser(d));return new Response(JSON.stringify({user:d?.user?{id:d.user.id,name:d.user.name,email:d.user.email}:null}),{headers});}
  const data=await upstream.json().catch(()=>({error:'The account service did not return a valid response.'}));
  if(path==='providers'){const p=data.providers||data;return noStore({providers:Object.fromEntries(['email','google','apple','emailOTP','public_signup'].map(k=>[k,p[k]===true||p[k]?.enabled===true]))},upstream.status);}
  delete data.token;delete data.session;return new Response(JSON.stringify(data),{status:upstream.status,headers});

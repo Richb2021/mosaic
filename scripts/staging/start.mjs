@@ -13,8 +13,12 @@ import {mediaWorkerAPI} from '../../server/media-jobs.js';
 import {StagingLearnerStore} from './learner-store.mjs';
 import {seedStaging,SEED_PEOPLE,personaUser} from './seed.mjs';
 import {installMetaRelay} from '../../server/node/meta-relay.mjs';
+import {installDnsCache} from '../../server/node/dns-cache.mjs';
+import {installKeepAliveFetch} from '../../server/node/keepalive-fetch.mjs';
 
 process.umask(0o077);
+if(installDnsCache())console.log('Outbound name lookups are cached.');
+if(installKeepAliveFetch())console.log('Account and progress service connections are kept open.');
 if(installMetaRelay())console.log('Meta API calls go through the UK relay.');
 const root=resolve(process.env.MOSAIC_APP_ROOT||process.cwd()),data=resolve(process.env.MOSAIC_DATA_DIR||resolve(root,'.staging-data'));
 const origin=process.env.MOSAIC_PUBLIC_ORIGIN,key=process.env.STAGING_KEY||'',port=Number(process.env.PORT||3187);
