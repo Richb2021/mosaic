@@ -26,3 +26,10 @@ export function CountUp({value,duration=700}){
  },[value]);
  return <>{shown}</>;
 }
+
+// Status pills with small icons: a tick for completed, a half-moon for in progress, a dashed ring for not played.
+export function StatusPill({state}){
+ const icon=state==='done'?<path d="M4 8.5l2.6 2.6L12 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>:state==='doing'?<><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.6"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></>:<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeDasharray="2.4 2"/>;
+ const text=state==='done'?'Completed':state==='doing'?'In progress':'Not played yet';
+ return <span className={'sc-pill is-'+state}><svg viewBox="0 0 16 16" aria-hidden="true">{icon}</svg>{text}</span>;
+}

@@ -12,6 +12,7 @@ const STICKERS=[['star','Star'],['lantern','Lantern'],['lightbulb','Bright idea'
 const STICKER_ICON={star:'★',lantern:'✦',lightbulb:'☀',heart:'♥',rocket:'➶'};
 const STATUS_LABEL={practised:'Practised',started:'Started','not-started':'Not started'};
 const ago=(ms,verb='Shared')=>{if(!ms)return 'Not shared yet';const d=Math.floor((Date.now()-ms)/86400000);return d<=0?verb+' today':d===1?verb+' yesterday':d<7?verb+' '+d+' days ago':verb+' '+new Date(ms).toLocaleDateString('en-GB',{day:'numeric',month:'short'})};
+const KpiIcon=({children})=><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
 const initials=label=>String(label||'').split(' ').map(w=>w[0]).join('').slice(0,2);
 const pretty=code=>code?code.slice(0,3)+'-'+code.slice(3):'';
 export const shareKey=(kind,unitId,extra='')=>(kind+'-'+unitId+(extra?'-'+extra:'')).replace(/[^A-Za-z0-9:_-]/g,'-').slice(0,80);
@@ -66,10 +67,10 @@ export function TeacherClasses({client,onCourses}){
       <div className="cl-code"><span>Join code</span><strong>{pretty(c.code)}</strong><button onClick={()=>copy(c.code)}>Copy</button><button className="text-button" disabled={busy} onClick={()=>act({action:'code',id:c.id},'New code ready. The old one no longer works.')}>New code</button></div>
      </header>
      <div className="cl-kpis">
-      <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber">✓</span><span>Your chapters to review <small>(all classes)</small></span><b>{o.counts.review}</b></button>
-      <div className="cl-kpi"><span className="cl-kpi-icon is-teal">◆</span><span>Sharing updates{o.counts.partial?' (this page)':''}</span><b>{o.counts.sharing} <small>of {o.counts.partial?o.counts.pageSize:o.counts.learners}</small></b></div>
-      <button className="cl-kpi" onClick={()=>document.getElementById('cl-inbox-h')?.scrollIntoView({behavior:'smooth',block:'start'})}><span className="cl-kpi-icon is-coral">♥</span><span>Waiting in your inbox{o.counts.partial?' (this page)':''} <small>{o.counts.workToReview} work · {o.counts.helpWaiting} help</small></span><b>{o.counts.workToReview+o.counts.helpWaiting}</b></button>
-      <div className="cl-kpi"><span className="cl-kpi-icon is-violet">✎</span><span>Explanations to read</span><b>{o.counts.unread}</b></div>
+      <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber" aria-hidden="true"><KpiIcon><path d="M5 12.5l4.5 4.5L19 7.5"/></KpiIcon></span><span>Your chapters to review <small>(all classes)</small></span><b>{o.counts.review}</b></button>
+      <div className="cl-kpi"><span className="cl-kpi-icon is-teal" aria-hidden="true"><KpiIcon><path d="M12 3l3 6 6 .8-4.5 4.2 1.2 6L12 17l-5.7 3 1.2-6L3 9.8 9 9z"/></KpiIcon></span><span>Sharing updates{o.counts.partial?' (this page)':''}</span><b>{o.counts.sharing} <small>of {o.counts.partial?o.counts.pageSize:o.counts.learners}</small></b></div>
+      <button className="cl-kpi" onClick={()=>document.getElementById('cl-inbox-h')?.scrollIntoView({behavior:'smooth',block:'start'})}><span className="cl-kpi-icon is-coral" aria-hidden="true"><KpiIcon><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></KpiIcon></span><span>Waiting in your inbox{o.counts.partial?' (this page)':''} <small>{o.counts.workToReview} work · {o.counts.helpWaiting} help</small></span><b>{o.counts.workToReview+o.counts.helpWaiting}</b></button>
+      <div className="cl-kpi"><span className="cl-kpi-icon is-violet" aria-hidden="true"><KpiIcon><path d="M4 20l4-1 11-11-3-3L5 16z"/></KpiIcon></span><span>Explanations to read</span><b>{o.counts.unread}</b></div>
      </div>
      <Inbox o={o} client={client} onPatch={patchInbox}/>
      <div className="cl-grid">

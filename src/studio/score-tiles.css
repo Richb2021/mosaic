@@ -47,3 +47,18 @@
  .cl-table .sc-cell{align-items:flex-end;min-width:0}
 }
 @media (max-width:640px) and (prefers-reduced-motion:reduce){.cl-table tr{animation:none}}
+
+/* Polish from the gpt-image-2.5 concepts (4 Nov 2026): glossier tiles, icon pills, kicker pills, tappable cards. */
+.sc-tile{width:14px;height:14px;border-radius:30%;box-shadow:inset 0 3px 0 rgba(255,255,255,.38),inset 0 -3px 0 rgba(0,0,0,.16),0 1px 2px rgba(20,27,52,.18)}
+.sc-tile.is-empty{width:12px;height:12px;box-shadow:none}
+.sc-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;border-radius:99px;padding:3px 10px 3px 7px;white-space:nowrap}
+.sc-pill svg{width:14px;height:14px;flex:none}
+.sc-pill.is-done{background:#E3F4F1;color:var(--ll-teal-ink,#0E7468)}.sc-pill.is-doing{background:var(--ll-amber-soft);color:var(--ll-amber-ink)}.sc-pill.is-none{background:transparent;color:var(--ll-ink-soft);padding-left:0}
+.trail-kicker{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ll-amber-ink);background:var(--ll-amber-soft);border-radius:99px;padding:4px 10px;margin:0 0 6px}
+a.te-card{display:contents;color:inherit;text-decoration:none}
+.trail-extra li.is-link{grid-template-columns:56px minmax(0,1fr) 20px;cursor:pointer}
+.trail-extra .te-go{grid-column:3;grid-row:1/4;width:20px;height:20px;color:var(--ll-ink-soft);transition:transform .2s var(--ll-spring,ease)}
+.trail-extra li.is-link:hover .te-go{transform:translateX(3px);color:var(--ll-ink)}
+.trail-extra li:focus-within{outline:3px solid var(--ll-amber);outline-offset:2px}
+@media (max-width:640px){.cl-table td:first-child{font-family:var(--ll-display);font-size:19px;font-weight:800}}
+.trail-extra a.te-link{color:inherit;text-decoration:none}.trail-extra a.te-link::after{content:'';position:absolute;inset:0;border-radius:18px}.trail-extra li.is-link{position:relative}
