@@ -19,3 +19,4 @@ public/extraction/
 # Portable self-hosted build and private runtime
 portable/
 .mosaic-data/
+portable-staging/

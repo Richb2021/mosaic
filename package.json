@@ -11,7 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "build:portable": "node build.mjs && node scripts/build-portable.mjs",
-    "start:portable": "node portable/server.mjs"
+    "start:portable": "node portable/server.mjs",
+    "build:staging": "node build.mjs && node scripts/staging/build.mjs"
   },
   "dependencies": {
     "@nocodebackend/account-react": "^0.1.9",
