@@ -21,7 +21,7 @@ function LearnerCourse({assignment:g,client,onStart,onReload,onError,onNotice}){
  const current=()=>mounted.current&&identity===client.journal.user?.id;
  async function save(on){if(running.current)return;running.current=true;setBusy(true);setError('');setNotice('');onNotice?.('');try{
   const result=await client.journal.request('course-sharing',{action:'share',id:g.id,revision:g.revision,enabled:on,consentToken:g.consentToken,expectedVersion:g.version,...(on?{updates}:{})});
-  if(!current())return;const message=result.notice||(on?'Your chosen update is shared with '+(g.className?'your teacher for '+g.className:'your current organiser')+'.':'Sharing stopped.');setNotice(message);onNotice?.(message);setEnabled(false);await onReload();
+  if(!current())return;const message=result.notice||(on?'Your chosen update is shared with '+(g.className?'your teacher for '+g.className:'your current organiser')+'.':'Sharing stopped.');if(onNotice)onNotice(message);else setNotice(message); // one confirmation, shown above the listsetEnabled(false);await onReload();
  }catch(e){if(current()){setError(e.message);try{await onReload()}catch{}onError(e.message)}}finally{running.current=false;if(current())setBusy(false)}}
  return <article className="shared-course"><div className="cs-heading"><div><span>{g.className?'FROM YOUR CLASS · '+g.className.toUpperCase():'ASSIGNED COURSE'}</span><h3>{g.title}</h3></div><b className="cs-sharing-state">{g.sharing?'Sharing enabled':'Sharing off'}</b></div>
  {g.settings?.instructions&&<p>{g.settings.instructions}</p>}{g.settings?.dueAt&&<p>Suggested due date: {new Date(g.settings.dueAt).toLocaleString()}. You can continue after this date.</p>}
