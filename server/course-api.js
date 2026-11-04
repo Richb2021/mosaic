@@ -21,7 +21,7 @@ export async function courseAPI(req,env,{owner,siteOwner,store,access,now=()=>Da
   const ids=[...new Set(state.courses.flatMap(c=>[...c.topics.flatMap(t=>t.chapters.map(j=>j.id)),...(c.plan?.links||[]).map(l=>l.id)]))];
   const chapters=[];
   for(let start=0;start<ids.length;start+=50){const batch=ids.slice(start,start+50),rows=await db.all('SELECT * FROM workshop_jobs WHERE owner=? AND id IN ('+batch.map(()=>'?').join(',')+')',siteOwner,...batch);
-   for(const j of rows)if(j?.draft&&!parse(j.payload).recordType){try{const p=validatePlayableContent(JSON.parse(j.draft));chapters.push({id:j.id,title:p.title,status:j.status,hash:await digest(j.draft),template:p.template,packId:p.id});}catch{}}
+   for(const j of rows)if(j?.draft&&!parse(j.payload).recordType){try{const p=validatePlayableContent(JSON.parse(j.draft));chapters.push({id:j.id,title:p.title,status:j.status,hash:await digest(j.draft),template:p.template,packId:p.id,created:j.created,revisionOf:parse(j.payload).revisionOf?.jobId||null});}catch{}}
   }
   return noStore({state,version,resources,chapters,canAuthor:true});
  }

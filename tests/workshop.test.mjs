@@ -168,3 +168,10 @@ test('game story intent survives queue and provider and cannot mutate through a 
  assert.equal((await h.call('jobs',{...input,requestKey:'bad-story',story:{genre:'external-script',interest:''}})).status,400);
  await h.call('jobs/'+created.job.id+'/run',{});assert.deepEqual(h.calls[0].story,input.story);assert.deepEqual(JSON.parse(generationRequest(h.calls[0]).input[1].content).story,input.story);
 });
+test('a balance answer whose explanation uses other numbers is held at publication until the author checks the numbers',async()=>{
+ const h=harness({provider:async job=>{const c=fixture(job);c.challenges.balance.explanation='Sending 7 units to the gardens leaves exactly 5 for homes.';return {content:c,providerId:'fixture-response'}}}),r=await reviewed(h),j=await queued(h,r);
+ const done=(await h.call('jobs/'+j.id+'/run',{})).job;assert.equal(done.status,'review');
+ const refused=await h.call('jobs/'+j.id+'/publish',{confirmed:true,draftHash:done.draftHash});assert.equal(refused.status,409);assert.match(refused.error,/splits 4 and 8.*mentions 7, 5.*Revise a copy/);
+ assert.equal((await h.call('jobs/'+j.id)).job.status,'review');
+ assert.equal((await h.call('jobs/'+j.id+'/publish',{confirmed:true,numbersChecked:true,draftHash:done.draftHash})).job.status,'published');
+});

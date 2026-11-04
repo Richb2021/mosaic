@@ -36,7 +36,7 @@ export async function seedStaging(env,store,now=Date.now()){
  const plan={schemaVersion:1,id:p.id,title:'Living systems',summary:'Two reviewed objectives.',steps,gaps:[]},planDraft=JSON.stringify(plan),planHash=await digest(planDraft);
  const job=(id,status,payload,draft)=>db.run('INSERT INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)',id,identity.siteOwner,id,'staging-seed',status,JSON.stringify(payload),draft,now,now);
  await job(p.id,'plan-approved',p,planDraft);
- const chapters=[];for(let i=0;i<2;i++){const pack={...structuredClone(EXTENDED_PACKS.find(x=>x.template==='quiz-v1')),id:'staging-chapter-pack-'+i,title:i?'Habitats and populations':'Producers and consumers'},draft=JSON.stringify(pack),id='staging-chapter-'+i;
+ const chapters=[];for(let i=0;i<2;i++){const pack={...structuredClone(EXTENDED_PACKS.find(x=>x.id==='riverlight-web-quiz')),id:'staging-chapter-pack-'+i,title:i?'Habitats and populations':'Producers and consumers'},draft=JSON.stringify(pack),id='staging-chapter-'+i;
   await job(id,'published',{goal:steps[i].objective,evidence:source.units,resourceVersions:p.resourceVersions,chapterId:pack.id},draft);chapters.push({id,hash:await digest(draft),pack});}
  course.plan={id:p.id,hash:planHash,links:chapters.map((c,i)=>({objectiveId:steps[i].id,id:c.id,hash:c.hash}))};course.topics[0].chapters=chapters.map(({id,hash})=>({id,hash}));
  await store.write('learner_profiles',identity.owner,'courses',0,{courses:{schemaVersion:1,courses:[course]}},now);

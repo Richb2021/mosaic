@@ -5,6 +5,7 @@ import {resourcePage,resourceSearch,RESOURCE_LIMIT} from './resource-library.js'
 import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
+import {balanceNumberWarning} from '../src/chapter-content.js';
 import {WorkshopError,requireValue,boundedText,safeId,digest,generationRequest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -112,7 +113,10 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    if(method==='POST'&&path[2]==='publish'&&path.length===3){
     const input=await body(req);requireValue(['review','published'].includes(j.status)&&j.draft,'This draft is not ready for review.',409);requireValue(input.confirmed===true&&input.draftHash===await digest(j.draft),'Review the current draft and confirm its sources first.',409);
     const payload=JSON.parse(j.payload);for(const binding of payload.resourceVersions){const r=await resource(binding.id);requireValue(r.status==='reviewed'&&r.checksum===binding.checksum,'A source changed or is no longer reviewed.',409)}
-    const validated=validateGenerated(JSON.parse(j.draft),payload);await run('UPDATE workshop_jobs SET status=?,draft=?,updated=? WHERE id=? AND owner=? AND status=?','published',JSON.stringify(validated),now(),j.id,owner,'review');return json({job:await publicJob(await job(j.id),now())});
+    const validated=validateGenerated(JSON.parse(j.draft),payload),nums=balanceNumberWarning(validated);
+    // A balance answer whose explanation uses other numbers is held until the author fixes or confirms it.
+    requireValue(!nums||input.numbersChecked===true,`Check the numbers in “${nums?.title}”: the expected answer splits ${nums?.answer.join(' and ')}, but the text also mentions ${nums?.odd.join(', ')}. Fix it with Revise a copy, or tick “I've checked the numbers” if they are right.`,409);
+    await run('UPDATE workshop_jobs SET status=?,draft=?,updated=? WHERE id=? AND owner=? AND status=?','published',JSON.stringify(validated),now(),j.id,owner,'review');return json({job:await publicJob(await job(j.id),now())});
    }
   }
   return json({error:'Workshop route not found.'},404);

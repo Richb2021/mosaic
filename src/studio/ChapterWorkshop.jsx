@@ -1,11 +1,15 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {ResourceWorkshop} from '../resource-workshop.js';
 import {currentEvidence} from '../passage-ranking.js';
+import {gameURL} from './client.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Embed the existing reviewed-source pipeline. It owns its request IDs and
 // resumes provider jobs; this wrapper never submits inference independently.
 export function ChapterWorkshop({request,topic,client,onAttach,onClose}){
- const host=useRef(null),[current,setCurrent]=useState(null),[error,setError]=useState(''),[saving,setSaving]=useState(false),[loading,setLoading]=useState(true);
+ const host=useRef(null),[current,setCurrent]=useState(null),[error,setError]=useState(''),[saving,setSaving]=useState(false),[loading,setLoading]=useState(true),[,setCatalog]=useState(0),fetched=useRef(new Set());
+ // A published chapter the viewer can open is in their catalogue; link straight to it.
+ const published=current?.type==='chapter'&&current.value.status==='published'?current.value.id:null,play=published&&client.items.find(i=>i.jobId===published);
+ useEffect(()=>{if(!published||play||fetched.current.has(published))return;fetched.current.add(published);void client.refresh().then(()=>setCatalog(n=>n+1),()=>{})},[published,play]);
  useEffect(()=>{
   let closed=false,modal=null;const root=host.current;
   const render=()=>{if(closed||!modal)return;const focused=root.contains(document.activeElement)?document.activeElement.id:null;
@@ -28,5 +32,5 @@ export function ChapterWorkshop({request,topic,client,onAttach,onClose}){
   }catch(e){setError(e.message)}})();
   return()=>{closed=true;modal=null;workshop.extraction?.abort();clearTimeout(workshop.timer);root.removeEventListener('click',click);root.removeEventListener('change',change);root.removeEventListener('input',change)};
  },[request]);
- return <section className="cw-workshop"><div className="cw-workshop-top"><button onClick={onClose}>{onAttach?'Back to topic':'Back to evidence'}</button><span>{topic.title}</span></div>{error&&<p role="alert" className="message error">{error}</p>}{current&&onAttach&&<div className="cw-attach"><p><strong>{current.value.draft?.title||current.value.title}</strong><br/>Keep this {current.type} with this topic. {request.objectiveId&&current.type==='chapter'&&current.value.status!=='published'?'Publish the reviewed chapter before linking it to this objective.':'Linking it does not publish or assign it.'}</p><button className="primary" disabled={saving||request.objectiveId&&current.type==='chapter'&&current.value.status!=='published'} onClick={async()=>{setSaving(true);setError('');try{await onAttach(current);setCurrent(null);onClose()}catch(e){setError(e.message)}finally{setSaving(false)}}}>Add {current.type} to topic</button></div>}{loading&&!error&&<p role="status">Opening the source workshop…</p>}<div ref={host} aria-busy={loading&&!error}/></section>;
+ return <section className="cw-workshop"><div className="cw-workshop-top"><button onClick={onClose}>{onAttach?'Back to topic':'Back to evidence'}</button><span>{topic.title}</span></div>{error&&<p role="alert" className="message error">{error}</p>}{current&&onAttach&&<div className="cw-attach"><p><strong>{current.value.draft?.title||current.value.title}</strong><br/>Keep this {current.type} with this topic. {request.objectiveId&&current.type==='chapter'&&current.value.status!=='published'?'Publish the reviewed chapter before linking it to this objective.':'Linking it does not publish or assign it.'}</p><button className="primary" disabled={saving||request.objectiveId&&current.type==='chapter'&&current.value.status!=='published'} onClick={async()=>{setSaving(true);setError('');try{await onAttach(current);setCurrent(null);onClose()}catch(e){setError(e.message)}finally{setSaving(false)}}}>Add {current.type} to topic</button></div>}{play&&<p className="cw-play"><a className="button primary" href={gameURL(play)}>Play this chapter</a></p>}{loading&&!error&&<p role="status">Opening the source workshop…</p>}<div ref={host} aria-busy={loading&&!error}/></section>;
 }

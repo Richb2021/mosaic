@@ -1,4 +1,4 @@
-import {leaveClassesOf,addToClass,ownedClass,revokeLearnerClassGrants} from './classes-api.js';
+import {leaveClassesOf,classesOf,addToClass,ownedClass,revokeLearnerClassGrants,classScope} from './classes-api.js';
 import {requestClosure,closureQueue} from './account-closure.js';
 import {maintenanceStatus} from './background-retention.js';
 import {budgetStatus} from './cost-ledger.js';
@@ -55,7 +55,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   const row=await store.latest('learner_profiles',storageOwner,'onboarding');
   const operations=access.admin?{closures:(await closureQueue(env)).map(({userId,siteOwner,...r})=>r),maintenance:await maintenanceStatus(env),paused:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','launch:controls'))?.policy).paused===true,pendingDeletion:(await db.one("SELECT COUNT(*) AS n FROM data_operations WHERE status IN ('preparing','cleanup-pending','provider-pending')")).n}:null;
   const budget=await budgetStatus(env,siteOwner,now());
-  const roster=manages?(access.admin?await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' LIMIT 200"):await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' AND json_extract(policy,'$.manager')=? LIMIT 200",owner)).map(r=>({accountReference:r.scope.slice(13),...parse(r.policy)})):[];
+  const roster=manages?(access.admin?await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' LIMIT 200"):await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' AND json_extract(policy,'$.manager')=? LIMIT 200",owner)).map(r=>{const {withdrawnClasses,...m}=parse(r.policy);return {accountReference:r.scope.slice(13),...m,...(withdrawnClasses?{classesToRestore:withdrawnClasses.length}:{})}}):[];
   return noStore({user:{id:user.id,name:user.name,email:user.email,emailVerified:user.emailVerified===true},accountReference:owner,...access,manages,enabled:env.PILOT_ENABLED==='true',openSignup:env.PILOT_OPEN_SIGNUP==='true',noticeVersion:PILOT_NOTICE,onboarding:row?parse(row.payload).onboarding:null,version:row?.version||0,supportEmail:env.PILOT_SUPPORT_EMAIL||null,roster,operations,budget,closure:parse((await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-close:'+owner))?.policy).status||null});
  }
  need(req.method==='POST','Pilot route not found.',404);need(req.headers.get('X-Mosaic-Learner')===user.id,'Your account changed. Reload before continuing.',401);
@@ -135,7 +135,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(row&&member.role==='learner'&&['active','revoked'].includes(member.status),'Choose an existing learner.',404);
   need(manager.admitted&&(manager.admin||manager.role===(member.context==='family'?'guardian':'teacher')),'Choose an authorised organiser for this setting.',403);
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
-  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,tutorAllowed:false,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,tutorAllowed:false,sharingEpoch:crypto.randomUUID(),withdrawnClasses:undefined}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await leaveClassesOf(env,input.accountReference,member.manager);await revokeLearnerClassGrants(env,input.accountReference);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
@@ -144,19 +144,29 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(manages,'Only an authorised organiser can manage access.',403);
   const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);
   need(member.status==='revoked'&&(access.admin||member.manager===owner),'Choose a withdrawn learner in your group.',403);
-  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'active',sharingEpoch:crypto.randomUUID(),withdrawnClasses:undefined}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await revokeLearnerClassGrants(env,input.accountReference);
-  await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true});
+  // Put them back in the organiser's classes they were in when access was withdrawn (only open ones;
+  // shared work and course grants are not revived). Rows withdrawn before this was recorded have no list.
+  const classes=Array.isArray(member.withdrawnClasses)?{rejoined:[],notRejoined:[]}:null;
+  for(const w of member.withdrawnClasses||[]){
+   const name=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',classScope(w.classId)))?.policy).name;
+   if(await addToClass(env,{classId:w.classId,manager:member.manager,learner:input.accountReference,label:w.label,now:now(),via:'access-restored'}))classes.rejoined.push(name);else if(name)classes.notRejoined.push(name);
+  }
+  await auditEvent(env,scope,'access-restored',{},now());return noStore({restored:true,classes});
  }
  if(input.action==='revoke'){
   need(manages,'Only an authorised organiser can manage access.',403);need(/^[a-f0-9]{64}$/.test(input.accountReference)&&input.accountReference!==owner,'Use the learner’s account support reference.');
   const scope='pilot-member:'+input.accountReference,row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope),member=parse(row?.policy);need(row,'Learner membership not found.',404);need(access.admin||member.manager===owner,'This learner is not in your group.',403);
   need(['active','revoked'].includes(member.status),'This account is closing or already closed.',409);
-  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
+  // Remember the organiser's classes they were in, so restoring access can put them back (a repeat withdrawal keeps the earlier list).
+  const inClasses=await classesOf(env,input.accountReference,member.manager),kept=member.status==='revoked'&&Array.isArray(member.withdrawnClasses)?member.withdrawnClasses:[];
+  const withdrawnClasses=[...kept,...inClasses.filter(x=>!kept.some(k=>k.classId===x.classId))].slice(0,20);
+  const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked',sharingEpoch:crypto.randomUUID(),withdrawnClasses}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
   await leaveClassesOf(env,input.accountReference,member.manager);await revokeLearnerClassGrants(env,input.accountReference);
-  await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true});
+  await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true,leftClasses:inClasses.length});
  }
  if(input.action==='close'){
   need(!access.admin,'Transfer administrator ownership before closing the administrator account.',409);need(input.confirmed===true&&typeof input.confirmEmail==='string'&&input.confirmEmail.trim().toLowerCase()===String(user.email).toLowerCase(),'Confirm your sign-in email before requesting account closure.');

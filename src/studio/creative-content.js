@@ -90,3 +90,6 @@ export function creativeSchema(job){
  }
  return obj({schemaVersion:{type:'integer',enum:[1]},id:{type:'string',enum:[job.id]},kind:{type:'string',enum:[job.kind]},title:str,summary:str,segments:arr(obj({id:str,speaker:{type:'string',enum:SPEAKERS},text:str,sourceRefs:refs,scene:{type:'string',enum:SCENES},action:{type:'string',enum:['talk','think','celebrate']}})),question:obj({prompt:str,answer:str,sourceRefs:refs})});
 }
+// Saved-episode jobs: only video has artwork; audio-only MP3 never shows a style.
+export const MEDIA_STYLES={anime:'Prism anime',paper:'Paper comedy',original:'Field Notes'};
+export const mediaJobLabel=r=>r.format==='mp4'?'MP4 · '+(MEDIA_STYLES[r.style]||r.style):'Podcast MP3';

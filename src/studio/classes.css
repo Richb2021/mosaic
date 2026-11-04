@@ -20,6 +20,11 @@
 .cl-code strong{font-family:var(--ll-display);font-weight:900;font-size:26px;letter-spacing:.06em;color:var(--ll-amber)}
 .cl-code button{min-height:38px;padding:8px 14px}
 .cl-code .text-button{color:var(--ll-amber)}
+.cl-code.is-closed small{color:var(--ll-on-night-soft);font-size:14px}
+.cl-removed{margin-top:14px}
+.cl-removed h4{margin:0 0 4px}
+.cl-removed li{align-items:center}
+.cl-removed li strong{flex:1}
 .cl-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .cl-kpi{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--ll-white);border:1px solid var(--ll-line);border-radius:22px;padding:18px;text-align:left;font-weight:500;color:var(--ll-ink-soft);font-size:14px}
 button.cl-kpi{cursor:pointer}

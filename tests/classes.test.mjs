@@ -220,3 +220,61 @@ test('the teacher sees every opted-in learner; learners see the top ten plus the
  const mine=(await h.classes(learners[11],undefined,'?view=board&id='+c.id)).leaderboard;
  assert.equal(mine.entries.length,10);assert.equal(mine.you.nickname,'Player 11');assert.equal(mine.you.rank,null);
 });
+
+// Calls the pilot (access) API as a user; GET when there is no body.
+const pilotAs=(h,u,body)=>pilotAPI(new Request('https://game.test/api/pilot',{method:body?'POST':'GET',headers:{Origin:'https://game.test','Content-Type':'application/json','X-Mosaic-Learner':u.id},body:body?JSON.stringify(body):undefined}),h.env,{session:async()=>u,store:h.store}).then(async r=>({status:r.status,...await r.json()}));
+
+test('a removed learner cannot rejoin by code, even a new one, until the teacher allows them back', async () => {
+ const h=await setup(),c=(await h.classes(h.teacher,{action:'create',name:'Year 8 History'})).class,ref=await learnerOwner(h.a);
+ await h.classes(h.a,{action:'join',code:c.code});await h.classes(h.b,{action:'join',code:c.code});
+ const a=(await h.classes(h.teacher,undefined,'?view=overview&id='+c.id)).learners.find(l=>l.label==='Amelia H.');
+ assert.equal((await h.classes(h.teacher,{action:'remove',id:c.id,handle:a.handle})).status,200);
+ const back=await h.classes(h.a,{action:'join',code:c.code});assert.equal(back.status,403);assert.match(back.error,/Ask your teacher/);
+ const fresh=(await h.classes(h.teacher,{action:'code',id:c.id})).class;assert.equal((await h.classes(h.a,{action:'join',code:fresh.code})).status,403,'a new code does not undo the removal');
+ assert.equal(await sqlDB(h.env.DB).one('SELECT 1 AS x FROM data_controls WHERE scope=?','class-join-limit:'+ref),null,'a removed learner is not rate-limited for using the right code');
+ const o=await h.classes(h.teacher,undefined,'?view=overview&id='+c.id);
+ assert.deepEqual(o.removed.map(r=>[r.label,r.handle]),[['Amelia H.',a.handle]]);assert.ok(!JSON.stringify(o).includes(ref),'no account reference for removed learners');
+ assert.equal((await h.classes(h.b,{action:'leave',id:c.id})).status,200);assert.equal((await h.classes(h.b,{action:'join',code:fresh.code})).status,200,'leaving by choice is not a removal');
+ assert.equal((await h.classes(h.other,{action:'allow-back',id:c.id,handle:a.handle})).status,403);
+ assert.equal((await h.classes(h.teacher,{action:'allow-back',id:c.id,handle:a.handle})).status,200);
+ assert.equal((await h.classes(h.a,{action:'join',code:fresh.code})).status,200);assert.equal((await h.classes(h.teacher,undefined,'?view=overview&id='+c.id)).removed.length,0);
+ // The removal record is the learner's data: it is exported and deleted with their account.
+ const again=(await h.classes(h.teacher,undefined,'?view=overview&id='+c.id)).learners.find(l=>l.label==='Amelia H.');await h.classes(h.teacher,{action:'remove',id:c.id,handle:again.handle});
+ const {exportClassData}=await import('../server/classes-api.js');assert.equal((await exportClassData(h.env,ref)).removedFrom[0].className,'Year 8 History');
+ await deleteClassData(h.env,ref);assert.equal((await sqlDB(h.env.DB).one("SELECT COUNT(*) AS n FROM data_controls WHERE scope LIKE 'class-removed:%'")).n,0);
+});
+
+test('restoring access puts a learner back in the organiser’s open classes and says which were skipped', async () => {
+ const h=await setup(),d=user('learner-d','Dana Rose'),ref=await learnerOwner(d);
+ const i=await pilotAs(h,h.teacher,{action:'invite',email:d.email,context:'school',managedApproval:true});
+ await pilotAs(h,d,{action:'claim',code:i.code});await pilotAs(h,d,{action:'onboarding',ageBand:'18plus',confirmed:true,noticeVersion:PILOT_NOTICE,expectedVersion:0});
+ const make=async name=>(await h.classes(h.teacher,{action:'create',name})).class,[c1,c2,c3,c4]=[await make('Maths'),await make('History'),await make('Science'),await make('Art')];
+ for(const c of [c1,c2,c3,c4])assert.equal((await h.classes(d,{action:'join',code:c.code})).status,200);
+ const gone=(await h.classes(h.teacher,undefined,'?view=overview&id='+c4.id)).learners[0];await h.classes(h.teacher,{action:'remove',id:c4.id,handle:gone.handle});
+ const revoked=await pilotAs(h,h.teacher,{action:'revoke',accountReference:ref});assert.equal(revoked.status,200);assert.equal(revoked.leftClasses,3);
+ assert.equal((await h.classes(h.teacher,undefined,'?view=overview&id='+c1.id)).counts.learners,0);
+ assert.equal((await pilotAs(h,h.teacher,{action:'revoke',accountReference:ref})).status,200,'a repeat withdrawal keeps the remembered classes');
+ const roster=(await pilotAs(h,h.teacher)).roster.find(m=>m.accountReference===ref);assert.equal(roster.classesToRestore,3);assert.equal(roster.withdrawnClasses,undefined,'class ids stay on the server');
+ await h.classes(h.teacher,{action:'archive',id:c2.id});await h.classes(h.teacher,{action:'delete',id:c3.id,confirmed:true});
+ const restored=await pilotAs(h,h.teacher,{action:'restore-access',accountReference:ref});assert.equal(restored.status,200,JSON.stringify(restored));
+ assert.deepEqual(restored.classes,{rejoined:['Maths'],notRejoined:['History']});
+ assert.deepEqual((await h.classes(d)).joined.map(j=>j.name),['Maths']);
+ const o=await h.classes(h.teacher,undefined,'?view=overview&id='+c1.id);assert.equal(o.counts.learners,1);assert.equal(o.learners[0].label,'Dana R.');
+ assert.equal((await h.classes(h.teacher,undefined,'?view=overview&id='+c4.id)).counts.learners,0,'a class removal still stands');
+ // Rows withdrawn before classes were remembered: the organiser is told to share a code instead.
+ await pilotAs(h,h.teacher,{action:'revoke',accountReference:ref});const db=sqlDB(h.env.DB),row=await db.one('SELECT policy FROM data_controls WHERE scope=?','pilot-member:'+ref),{withdrawnClasses,...legacy}=JSON.parse(row.policy);
+ await db.run('UPDATE data_controls SET policy=? WHERE scope=?',JSON.stringify(legacy),'pilot-member:'+ref);
+ assert.equal((await pilotAs(h,h.teacher,{action:'restore-access',accountReference:ref})).classes,null);
+});
+
+test('an archived class shows no join code, and reopening it issues a fresh one', async () => {
+ const h=await setup(),c=(await h.classes(h.teacher,{action:'create',name:'Year 8 History'})).class;
+ const archived=await h.classes(h.teacher,{action:'archive',id:c.id});assert.equal(archived.class.code,null);
+ assert.equal((await h.classes(h.teacher)).teaching[0].code,null);assert.equal((await h.classes(h.teacher,undefined,'?view=overview&id='+c.id)).class.code,null);
+ assert.equal((await h.classes(h.a,{action:'join',code:c.code})).status,409);
+ assert.equal((await h.classes(h.teacher,{action:'code',id:c.id})).status,409,'no new code while archived');
+ const reopened=(await h.classes(h.teacher,{action:'restore',id:c.id})).class;assert.equal(reopened.archived,false);assert.match(reopened.code,/^[A-HJ-NP-Z2-9]{6}$/);assert.notEqual(reopened.code,c.code);
+ assert.equal((await h.classes(h.a,{action:'join',code:c.code})).status,404,'the old code does not come back');
+ assert.equal((await h.classes(h.a,{action:'join',code:reopened.code})).status,200);
+ assert.equal((await h.classes(h.teacher,{action:'restore',id:c.id})).class.code,reopened.code,'reopening an open class changes nothing');
+});

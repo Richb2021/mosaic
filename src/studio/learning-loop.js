@@ -1,6 +1,8 @@
 // Authored learning rules. The model supplies reviewed questions, never timings or scores.
 export const LOOP_STAGES=['diagnostic','practice','transfer','revisit'];
 export const LOOP_LABELS={diagnostic:'Find your starting point',practice:'Practise the relationship',transfer:'Try a different example',revisit:'Return to the idea'};
+// Readable focus a question tests, for review; older cycles without activityKey show nothing.
+export const questionFocus=(q,activities=[])=>{const a=q?.activityKey&&activities.find(a=>a.key===q.activityKey),t=String(a?.label||a?.prompt||'').trim();return t.length>90?t.slice(0,89).trimEnd()+'…':t};
 const need=(ok,message)=>{if(!ok)throw Object.assign(Error(message),{status:400})};
 const text=(v,max)=>{need(typeof v==='string'&&v.trim().length>0&&v.length<=max,'A learning passage is missing or too long.');return v.trim()};
 const only=(v,keys)=>need(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).every(k=>keys.includes(k)),'Unexpected practice fields.');

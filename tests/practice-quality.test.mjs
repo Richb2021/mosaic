@@ -82,3 +82,11 @@ test('creative API: a rejected generation fails with the reason, edits and appro
  const edit=await call({action:'edit',id:j.id,draftHash:j.draftHash,draft:{...j.draft,questions:j.draft.questions.map(q=>({...q,hint:q.options[q.answer]+' is right.'}))}});assert.equal(edit.status,400);assert.match(edit.error,/Question 1’s hint gives the answer away/);
  const approved=await call({action:'review',id:j.id,draftHash:j.draftHash,confirmed:true});assert.equal(approved.status,200,approved.error);assert.equal(approved.jobs.find(x=>x.id===j.id).status,'published');
 });
+test('cycle review names the focus each question tests; older cycles show nothing; MP3 jobs carry no art style',async()=>{
+ const {questionFocus}=await import('../src/studio/learning-loop.js'),{mediaJobLabel}=await import('../src/studio/creative-content.js');
+ const activities=[{key:'question-0',label:'Why does the river flood in spring?'},{key:'question-1',label:'x'.repeat(200)}];
+ assert.equal(questionFocus({activityKey:'question-0'},activities),'Why does the river flood in spring?');
+ assert.equal(questionFocus({stage:'diagnostic'},activities),'');assert.equal(questionFocus({activityKey:'missing'},activities),'');
+ assert.ok(questionFocus({activityKey:'question-1'},activities).length<=90);
+ assert.equal(mediaJobLabel({format:'mp3',style:'anime'}),'Podcast MP3');assert.equal(mediaJobLabel({format:'mp4',style:'paper'}),'MP4 · Paper comedy');
+});

@@ -34,10 +34,13 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
   await store.write('learner_profiles',owner,'studio',row.version,{studio:{...state,units:state.units.map(u=>u.id===unit.id?next:u)}},now());
  };
  // An approved resource fills its own empty programme step through the same 'choose' save as the programme panel. Existing choices and unchosen formats are left alone; failure leaves the manual choice.
+ // Re-approving an edited resource moves its own step to the new version. A link to another resource, or to an assigned (frozen) copy with the old hash, is never replaced.
  const linkApproved=async(id,hash,kind)=>{try{
   const ids={packId:input.packId,contentHash:input.contentHash},call=async body=>(await connectedProgrammeAPI(new Request(new URL('/api/learning/programme'+(body?'':'?'+new URLSearchParams(ids)),req.url),body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...ids,...body})}:undefined),env,{store,owner,principal,siteOwner,resolve,now})).json();
-  const d=await call(),r=d.resources.find(r=>r.id===id&&r.hash===hash&&r.kind===kind&&!r.assigned);
-  if(r&&d.state.formats.includes(kind)&&!d.state.links.some(l=>l.kind===kind))await call({action:'choose',expectedVersion:d.version,formats:d.state.formats,links:[...d.state.links,{id,hash,kind}]});
+  const d=await call(),r=d.resources.find(r=>r.id===id&&r.hash===hash&&r.kind===kind&&!r.assigned),old=d.state.links.find(l=>l.kind===kind);
+  const stale=old&&old.id===id&&old.hash!==hash&&!d.resources.some(x=>x.id===old.id&&x.hash===old.hash);
+  if(r&&!old&&d.state.formats.includes(kind))await call({action:'choose',expectedVersion:d.version,formats:d.state.formats,links:[...d.state.links,{id,hash,kind}]});
+  else if(r&&stale)await call({action:'choose',expectedVersion:d.version,formats:d.state.formats,links:d.state.links.map(l=>l===old?{id,hash,kind}:l)});
  }catch{}};
  const load=async id=>{need(typeof id==='string'&&id.length<=100,'Choose a saved request.');const j=await one(`SELECT * FROM workshop_jobs WHERE id=? AND owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=?`,id,siteOwner,'creative',owner,input.packId,input.contentHash);need(j,'Creative request not found.',404);return j;};
  const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,story:p.context?.story||null,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};

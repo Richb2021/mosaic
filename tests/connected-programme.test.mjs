@@ -75,3 +75,17 @@ test('approving a resource for an activity outside the programme focus does not 
  assert.equal((await h.call(h.teacher,'learning/creative',{...h.programIdentity,action:'review',id:explore.id,draftHash:explore.hash,confirmed:true})).http,200);
  const v=await h.programme(undefined,h.teacher);assert.equal(v.http,200);assert(!v.state.links.length);assert.equal(v.version,0);
 });
+test('re-approving an edited resource moves its own programme step to the new version, never another resource',async()=>{
+ const h=await fixture(),creative=body=>h.call(h.teacher,'learning/creative',{...h.programIdentity,...body}),podcast=h.resources.find(r=>r.kind==='podcast');
+ await h.db.run("UPDATE workshop_jobs SET status='creative-review' WHERE id LIKE 'connected-%'");
+ const revise=async(id,hash,title)=>{const d=await creative({action:'reopen',id,draftHash:hash});const j=d.jobs.find(j=>j.id===id);assert.equal(j.status,'review');const e=await creative({action:'edit',id,draftHash:j.draftHash,draft:{...j.draft,title}});const next=e.jobs.find(j=>j.id===id);assert.notEqual(next.draftHash,hash);assert.equal((await creative({action:'review',id,draftHash:next.draftHash,confirmed:true})).http,200);return next.draftHash};
+ assert.equal((await creative({action:'review',id:podcast.id,draftHash:podcast.hash,confirmed:true})).http,200);
+ let v=await h.programme(undefined,h.teacher);assert.deepEqual(v.state.links.find(l=>l.kind==='podcast'),{id:podcast.id,hash:podcast.hash,kind:'podcast'});
+ const hash=await revise(podcast.id,podcast.hash,'The missing clue, revised');
+ v=await h.programme(undefined,h.teacher);assert.deepEqual(v.state.links.find(l=>l.kind==='podcast'),{id:podcast.id,hash,kind:'podcast'});
+ const step=v.route.steps.find(s=>s.kind==='podcast');assert.equal(step.unavailable,false);assert.equal(step.resource.hash,hash);
+ // Another podcast's re-approval never takes over the chosen step.
+ const row=await h.db.one('SELECT * FROM workshop_jobs WHERE id=?',podcast.id),p={...JSON.parse(row.payload),id:'connected-podcast-2'},draft=JSON.stringify({...JSON.parse(row.draft),id:p.id});await h.db.run('INSERT INTO workshop_jobs(id,owner,request_key,request_hash,status,payload,draft,created,updated) VALUES(?,?,?,?,?,?,?,?,?)',p.id,row.owner,p.id,'fixture','creative-review',JSON.stringify(p),draft,h.now(),h.now());
+ assert.equal((await creative({action:'review',id:p.id,draftHash:await digest(draft),confirmed:true})).http,200);await revise(p.id,await digest(draft),'A second episode');
+ v=await h.programme(undefined,h.teacher);assert.deepEqual(v.state.links.find(l=>l.kind==='podcast'),{id:podcast.id,hash,kind:'podcast'});
+});

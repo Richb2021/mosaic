@@ -18,6 +18,8 @@ export const codeScope=code=>'class-code:'+code;
 export const memberScope=(id,learner)=>'class-member:'+id+':'+learner;
 export const boardScope=(id,learner)=>'class-board:'+id+':'+learner;
 export const shareScope=(id,learner,key)=>'class-share:'+id+':'+learner+':'+key;
+// A learner the teacher removed can't rejoin by code until the teacher allows them back.
+export const removedScope=(id,learner)=>'class-removed:'+id+':'+learner;
 const joinLimitScope=learner=>'class-join-limit:'+learner;
 
 const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -44,7 +46,8 @@ async function loadClass(db,id){need(idOk(id),'Choose a class.');const row=await
 async function saveClass(db,c,raw,now){const out=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify(c),now,classScope(c.id),raw);need(out.meta.changes===1,'This class changed in another window. Reload and try again.',409)}
 async function members(db,id){return (await db.all("SELECT policy FROM data_controls WHERE scope LIKE ? ORDER BY scope",'class-member:'+id+':%')).map(r=>parse(r.policy)).filter(m=>m.status==='active')}
 async function newCode(db){for(let i=0;i<8;i++){const code=randomCode();if(!await db.one('SELECT 1 AS x FROM data_controls WHERE scope=?',codeScope(code)))return code}need(false,'Could not create a join code. Try again.',503)}
-const publicClass=c=>({id:c.id,name:c.name,code:c.code,created:c.created,archived:!!c.archived,leaderboard:!!c.leaderboard});
+// An archived class has no usable code; reopening it issues a fresh one.
+const publicClass=c=>({id:c.id,name:c.name,code:c.archived?null:c.code,created:c.created,archived:!!c.archived,leaderboard:!!c.leaderboard});
 // Course grants that this class authorised end with the membership.
 async function revokeClassGrants(db,classId,learner=null){
  const rows=await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'course-grant:%' AND json_extract(policy,'$.classId')=?"+(learner?" AND json_extract(policy,'$.learner')=?":''),...(learner?[classId,learner]:[classId]));
@@ -60,18 +63,20 @@ async function removeLearnerRows(db,classId,learner){
 }
 async function removeClass(db,c){
  await revokeClassGrants(db,c.id);
- for(const r of await db.all("SELECT scope FROM data_controls WHERE (scope LIKE ? OR scope LIKE ? OR scope LIKE ?) OR (scope LIKE 'class-code:%' AND json_extract(policy,'$.classId')=?)",'class-member:'+c.id+':%','class-board:'+c.id+':%','class-share:'+c.id+':%',c.id))await db.run('DELETE FROM data_controls WHERE scope=?',r.scope);
+ for(const r of await db.all("SELECT scope FROM data_controls WHERE (scope LIKE ? OR scope LIKE ? OR scope LIKE ? OR scope LIKE ?) OR (scope LIKE 'class-code:%' AND json_extract(policy,'$.classId')=?)",'class-member:'+c.id+':%','class-board:'+c.id+':%','class-share:'+c.id+':%','class-removed:'+c.id+':%',c.id))await db.run('DELETE FROM data_controls WHERE scope=?',r.scope);
  await db.run('DELETE FROM data_controls WHERE scope=?',classScope(c.id));
 }
 
 // An invitation can name one of the organiser's classes; accepting it joins that class.
-export async function addToClass(env,{classId,manager,learner,user,now}){
+// Restoring access uses it too, to put a learner back in the classes they were in.
+export async function addToClass(env,{classId,manager,learner,user,label,now,via='invitation'}){
  if(!env.DB||!idOk(classId))return false;const db=sqlDB(env.DB),row=await db.one('SELECT policy FROM data_controls WHERE scope=?',classScope(classId));
  const c=parse(row?.policy);if(!row||c.owner!==manager||c.archived)return false;
  if(parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',memberScope(c.id,learner)))?.policy).status==='active')return true;
+ if(await db.one('SELECT 1 AS x FROM data_controls WHERE scope=?',removedScope(c.id,learner)))return false;
  const n=(await db.one("SELECT COUNT(*) AS n FROM data_controls WHERE scope LIKE 'class-member:%' AND json_extract(policy,'$.learner')=?",learner))?.n||0;if(n>=20)return false;
- await upsert(db,memberScope(c.id,learner),{classId:c.id,learner,label:displayLabel(user),joined:now,status:'active'},now);
- await auditEvent(env,'learner:'+learner,'class-joined',{via:'invitation'},now);return true;
+ await upsert(db,memberScope(c.id,learner),{classId:c.id,learner,label:label||displayLabel(user),joined:now,status:'active'},now);
+ await auditEvent(env,'learner:'+learner,'class-joined',{via},now);return true;
 }
 export async function ownedClass(env,classId,owner,siteOwner){
  if(!env.DB||!idOk(classId))return null;const c=parse((await sqlDB(env.DB).one('SELECT policy FROM data_controls WHERE scope=?',classScope(classId)))?.policy);
@@ -85,9 +90,15 @@ export async function revokeLearnerClassGrants(env,learner){
 // Removes everything a learner contributed to classes, and classes a teacher owns.
 export async function deleteClassData(env,principal){
  if(!env.DB)return;const db=sqlDB(env.DB);
- for(const r of await db.all("SELECT scope FROM data_controls WHERE (scope LIKE 'class-member:%' OR scope LIKE 'class-board:%' OR scope LIKE 'class-share:%') AND json_extract(policy,'$.learner')=?",principal))await db.run('DELETE FROM data_controls WHERE scope=?',r.scope);
+ for(const r of await db.all("SELECT scope FROM data_controls WHERE (scope LIKE 'class-member:%' OR scope LIKE 'class-board:%' OR scope LIKE 'class-share:%' OR scope LIKE 'class-removed:%') AND json_extract(policy,'$.learner')=?",principal))await db.run('DELETE FROM data_controls WHERE scope=?',r.scope);
  await db.run('DELETE FROM data_controls WHERE scope=?',joinLimitScope(principal));
  for(const r of await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'class:%' AND json_extract(policy,'$.owner')=?",principal))await removeClass(db,parse(r.policy));
+}
+// The organiser's open classes a learner is in, so withdrawing access can remember them for a restore.
+export async function classesOf(env,learner,owner){
+ if(!env.DB||!owner)return [];const db=sqlDB(env.DB),out=[];
+ for(const r of await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'class:%' AND json_extract(policy,'$.owner')=?",owner)){const c=parse(r.policy),m=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',memberScope(c.id,learner)))?.policy);if(m.status==='active')out.push({classId:c.id,label:m.label||''})}
+ return out;
 }
 // When an organiser loses a learner (revoked or transferred), the learner leaves that organiser's classes.
 export async function leaveClassesOf(env,learner,owner){
@@ -100,20 +111,26 @@ export async function expireClassData(env,learner,days,now){
  for(const r of await db.all("SELECT scope FROM data_controls WHERE (scope LIKE 'class-share:%' OR scope LIKE 'class-board:%') AND json_extract(policy,'$.learner')=? AND updated<?",learner,cutoff))await db.run('DELETE FROM data_controls WHERE scope=?',r.scope);
 }
 export async function countClassRows(env,learner){
- if(!env.DB)return 0;return (await sqlDB(env.DB).one("SELECT COUNT(*) AS n FROM data_controls WHERE (scope LIKE 'class-member:%' OR scope LIKE 'class-board:%' OR scope LIKE 'class-share:%') AND json_extract(policy,'$.learner')=?",learner))?.n||0;
+ if(!env.DB)return 0;return (await sqlDB(env.DB).one("SELECT COUNT(*) AS n FROM data_controls WHERE (scope LIKE 'class-member:%' OR scope LIKE 'class-board:%' OR scope LIKE 'class-share:%' OR scope LIKE 'class-removed:%') AND json_extract(policy,'$.learner')=?",learner))?.n||0;
 }
 // A learner's own class data, for Your data › Export.
 export async function exportClassData(env,learner){
- if(!env.DB)return {memberships:[],leaderboard:[],sharedExplanations:[],teaching:[]};
+ if(!env.DB)return {memberships:[],leaderboard:[],sharedExplanations:[],removedFrom:[],teaching:[]};
  const db=sqlDB(env.DB),rows=async pattern=>(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ? AND json_extract(policy,'$.learner')=? ORDER BY scope",pattern,learner)).map(r=>parse(r.policy));
  const name=async id=>parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',classScope(id)))?.policy).name||'Deleted class';
  const memberships=[];for(const m of await rows('class-member:%'))memberships.push({className:await name(m.classId),label:m.label,joined:m.joined});
  const leaderboard=[];for(const b of await rows('class-board:%'))leaderboard.push({className:await name(b.classId),nickname:b.nickname,week:b.week,steps:b.tiles});
  const sharedExplanations=[];for(const s of await rows('class-share:%'))sharedExplanations.push({className:await name(s.classId),title:s.title,text:s.text,shared:s.shared,feedback:s.feedback||null});
  const teaching=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE 'class:%' AND json_extract(policy,'$.owner')=?",learner)).map(r=>{const c=parse(r.policy);return {name:c.name,created:c.created,archived:!!c.archived,leaderboard:!!c.leaderboard}});
- return {memberships,leaderboard,sharedExplanations,teaching};
+ const removedFrom=[];for(const x of await rows('class-removed:%'))removedFrom.push({className:await name(x.classId),removed:x.removed});
+ return {memberships,leaderboard,sharedExplanations,removedFrom,teaching};
 }
 
+// Learners removed from a class, by per-class handle, so the teacher can allow one back.
+async function removedList(db,id){
+ const out=[];for(const r of await db.all("SELECT policy FROM data_controls WHERE scope LIKE ? ORDER BY updated DESC LIMIT 50",'class-removed:'+id+':%')){const x=parse(r.policy);out.push({handle:await handleOf(id,x.learner),label:x.label||'Learner',removed:x.removed})}
+ return out;
+}
 async function leaderboard(db,c,now,me,all=false){
  if(!c.leaderboard)return {enabled:false,entries:[],you:null};
  const week=weekOf(now),active=new Set((await members(db,c.id)).map(m=>m.learner));
@@ -207,7 +224,7 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   return noStore({class:publicClass(c),counts:{learners:all.length,pageStart:start,pageSize:page.length,partial:page.length<all.length,sharing:learners.filter(l=>l.lastShared).length,help:learners.filter(l=>l.help).length,explaining:all.filter(m=>sharers.has(m.learner)).length,explanations:shares.length,unread:shares.filter(s=>!s.feedback).length,review:reviewCount,reviewScope:'workshop',workToReview:inbox.filter(i=>i.kind==='work'&&!i.done).length,helpWaiting:inbox.filter(i=>i.kind==='help'&&!i.done).length},
    learners,inbox,nextCursor:start+20<all.length?String(start+20):null,
    review:review.map(j=>{let d={};try{d=JSON.parse(j.draft||'{}')}catch{}return {id:j.id,title:d.title||'Untitled chapter',template:d.template||null,sources:Array.isArray(d.sources)?d.sources.length:0}}),
-   shares:recent,leaderboard:await leaderboard(db,c,at,null,true)});
+   shares:recent,leaderboard:await leaderboard(db,c,at,null,true),removed:await removedList(db,c.id)});
  }
  if(req.method==='GET'&&input.view==='board'){
   const {c}=await loadClass(db,input.id),isOwner=c.owner===principal&&c.siteOwner===siteOwner;
@@ -261,10 +278,21 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   await upsert(db,codeScope(code),{classId:id},at);await upsert(db,classScope(id),c,at);
   await auditEvent(env,'learner:'+owner,'class-created',{},at);return noStore({class:publicClass(c)});
  }
- if(['rename','archive','restore','code','leaderboard','remove','feedback','delete'].includes(action)){
+ if(['rename','archive','restore','code','leaderboard','remove','allow-back','feedback','delete'].includes(action)){
   need(teaches,'Only teachers can manage classes.',403);const {c,raw}=await ownClass(input.id);
   if(action==='delete'){need(input.confirmed===true,'Confirm that you want to delete this class.');await removeClass(db,c);await auditEvent(env,'learner:'+owner,'class-deleted',{},at);return noStore({deleted:true})}
-  if(action==='remove'){const learner=await resolveHandle(c,input.handle);await removeLearnerRows(db,c.id,learner);await auditEvent(env,'learner:'+owner,'class-member-removed',{},at);return noStore({removed:true})}
+  if(action==='remove'){
+   // Removal sticks: the code (old or new) won't let them back in until the teacher allows it.
+   const learner=await resolveHandle(c,input.handle),m=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',memberScope(c.id,learner)))?.policy);
+   await removeLearnerRows(db,c.id,learner);await upsert(db,removedScope(c.id,learner),{classId:c.id,learner,label:m.label||'Learner',removed:at},at);
+   await auditEvent(env,'learner:'+owner,'class-member-removed',{},at);return noStore({removed:true});
+  }
+  if(action==='allow-back'){
+   need(handleOk(input.handle),'Choose a learner.');let learner=null;
+   for(const r of await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-removed:'+c.id+':%')){const x=parse(r.policy);if(await handleOf(c.id,x.learner)===input.handle)learner=x.learner}
+   need(learner,'That learner can already join this class.',404);await db.run('DELETE FROM data_controls WHERE scope=?',removedScope(c.id,learner));
+   await auditEvent(env,'learner:'+owner,'class-member-allowed-back',{},at);return noStore({allowed:true});
+  }
   if(action==='feedback'){
    need(keyOk(input.key),'Choose a shared explanation.');const learner=await resolveHandle(c,input.handle);
    const scope=shareScope(c.id,learner,input.key),row=await db.one('SELECT policy FROM data_controls WHERE scope=?',scope);need(row,'The learner stopped sharing this explanation.',409);
@@ -276,9 +304,11 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   const next={...c};
   if(action==='rename')next.name=text(input.name,2,60,'Give the class a name of 2 to 60 characters.');
   if(action==='archive')next.archived=true;
-  if(action==='restore')next.archived=false;
+  if(action==='restore'&&!c.archived)return noStore({class:publicClass(c)});
   if(action==='leaderboard'){need(typeof input.enabled==='boolean','Choose on or off.');next.leaderboard=input.enabled}
-  if(action==='code'){
+  // Reopening always issues a fresh code, so a code shared before archiving doesn't silently work again.
+  if(action==='code'||action==='restore'){
+   need(action==='restore'||!c.archived,'Reopen the class to get a new join code.',409);next.archived=false;
    // New code first, then swap it in only if nobody else changed the class; the old code is removed last.
    next.code=await newCode(db);await upsert(db,codeScope(next.code),{classId:c.id},at);
    try{await saveClass(db,next,raw,at)}catch(e){await db.run('DELETE FROM data_controls WHERE scope=?',codeScope(next.code));throw e}
@@ -297,6 +327,8 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   const link=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',codeScope(code)))?.policy);if(!link.classId)return failed('That code doesn’t match a class. Check it with your teacher.',404);
   const {c}=await loadClass(db,link.classId);if(c.archived||c.code!==code)return failed('This class is closed.',409);
   need(c.owner!==principal,'You teach this class.',409);
+  // Not a failed guess (the code is right), so it doesn't count towards the rate limit.
+  need(!await db.one('SELECT 1 AS x FROM data_controls WHERE scope=?',removedScope(c.id,principal)),'Your teacher took you out of this class, so this code won’t add you back. Ask your teacher if you should rejoin.',403);
   const joinedCount=(await db.one("SELECT COUNT(*) AS n FROM data_controls WHERE scope LIKE 'class-member:%' AND json_extract(policy,'$.learner')=?",principal))?.n||0;
   const existing=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',memberScope(c.id,principal)))?.policy);
   if(existing.status!=='active'){need(joinedCount<20,'You can be in up to 20 classes.',409);await upsert(db,memberScope(c.id,principal),{classId:c.id,learner:principal,label:displayLabel(user),joined:at,status:'active'},at)}

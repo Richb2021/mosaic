@@ -87,6 +87,10 @@ test('objective-to-chapter handoff requires the reviewed exact goal, passages an
  const input={type:'link-objective-chapter',courseId:'earth',topicId:'water',objectiveId:'objective-1',id:'chapter',hash,expectedVersion:2};
  await assert.rejects(save(input),/exact evidence/);payload.goal=j.draft.steps[0].objective;await h.db.run('UPDATE workshop_jobs SET payload=?,status=? WHERE id=?',JSON.stringify(payload),'review','chapter');await assert.rejects(save(input),/publish/);
  await h.db.run('UPDATE workshop_jobs SET status=? WHERE id=?','published','chapter');const linked=await (await save(input)).json();assert.equal(linked.state.courses[0].plan.links[0].id,'chapter');assert.equal(linked.state.courses[0].topics[0].chapters[0].hash,hash);
+ // Topic cards can tell a revised copy from its original: the summary carries when it was made and what it revises.
+ const summary=async()=>(await (await courseAPI(new Request('https://test.local/api/learning/courses'),h.env,h.options)).json()).chapters.find(c=>c.id==='chapter');
+ assert.deepEqual([(await summary()).created,(await summary()).revisionOf],[1,null]);
+ await h.db.run('UPDATE workshop_jobs SET payload=? WHERE id=?',JSON.stringify({...payload,revisionOf:{jobId:'original-job',draftHash:'h'}}),'chapter');assert.equal((await summary()).revisionOf,'original-job');
 });
 test('learning gateway rejects mismatched session identity and stale cleanup epoch before planner work',async()=>{
  const {learningAPI}=await import('../server/learning-api.js'),h=await setup(),user={id:'planner-user',email:'planner@example.test',emailVerified:true};
