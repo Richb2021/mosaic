@@ -61,3 +61,9 @@ test('hands GET redirects to the normal fetch but returns them as-is when redire
   const m=await f(s.url+'/r',{redirect:'manual'});assert.equal(m.status,302);assert.equal(m.headers.get('location'),'/elsewhere');
  }finally{f.agent.destroy();await s.close();}
 });
+
+test('warming opens one request per service and ignores failures', async()=>{
+ const {warmConnections}=await import('../server/node/keepalive-fetch.mjs');
+ const seen=[];const results=await warmConnections(async url=>{seen.push(url);if(url.includes('bad'))throw Error('offline');return new Response('x');},['a.example','bad.example']);
+ assert.deepEqual(seen,['https://a.example/','https://bad.example/']);assert.deepEqual(results.map(r=>r.status),['fulfilled','rejected']);
+});

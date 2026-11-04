@@ -95,3 +95,11 @@ test('corrupt stored profile is explicit, cannot create a programme, and is pres
 test('exam dates require a real calendar day',()=>{
  assert.throws(()=>normaliseProfile({examDate:'2027-02-30'}));assert.equal(normaliseProfile({examDate:'2028-02-29'}).examDate,'2028-02-29');
 });
+
+test('an RPG chapter link that is not shared with the learner says so, and network errors keep their message', async()=>{
+ const {resolveAdventureLink}=await import('../src/rpg-launch.js');
+ const search='?rpg=rpg-generated-x&hash=abc';
+ for(const status of [403,404,422])await assert.rejects(resolveAdventureLink(search,[],async()=>{throw Object.assign(Error('This game is available on this device only.'),{status})}),/isn’t available to you\. It may not have been shared with you yet/);
+ await assert.rejects(resolveAdventureLink(search,[],async()=>{throw Error('Cloud progress is unavailable.')}),e=>/Cloud progress is unavailable/.test(e.message)&&!e.chapterLink);
+ await assert.rejects(resolveAdventureLink(search,[],async()=>{throw Object.assign(Error('x'),{status:422})}),e=>e.chapterLink===true);
+});

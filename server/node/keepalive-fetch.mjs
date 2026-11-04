@@ -58,3 +58,9 @@ export function installKeepAliveFetch(env=process.env){
  if(env.MOSAIC_KEEPALIVE_FETCH==='off'||globalThis.fetch.mosaicKeepAlive)return false;
  const wrapped=keepAliveFetch();wrapped.mosaicKeepAlive=true;globalThis.fetch=wrapped;return true;
 }
+
+// Right after a restart the first visitor would pay for name lookups and new connections (about 5-10 s).
+// One harmless request to each service opens a kept connection first; failures are ignored.
+export function warmConnections(fetcher=globalThis.fetch,hosts=[...HOSTS]){
+ return Promise.allSettled(hosts.map(h=>fetcher(`https://${h}/`,{method:'GET',signal:AbortSignal.timeout(15000)}).then(r=>r.arrayBuffer())));
+}
