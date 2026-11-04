@@ -11,8 +11,10 @@ import {learningAPI} from '../../server/learning-api.js';
 import {workshopGateway} from '../../server/workshop-gateway.js';
 import {StagingLearnerStore} from './learner-store.mjs';
 import {seedStaging,SEED_PEOPLE,personaUser} from './seed.mjs';
+import {installMetaRelay} from '../../server/node/meta-relay.mjs';
 
 process.umask(0o077);
+if(installMetaRelay())console.log('Meta API calls go through the UK relay.');
 const root=resolve(process.env.MOSAIC_APP_ROOT||process.cwd()),data=resolve(process.env.MOSAIC_DATA_DIR||resolve(root,'.staging-data'));
 const origin=process.env.MOSAIC_PUBLIC_ORIGIN,key=process.env.STAGING_KEY||'',port=Number(process.env.PORT||3187);
 if(!origin)throw Error('MOSAIC_PUBLIC_ORIGIN is required');if(key.length<32)throw Error('STAGING_KEY must be at least 32 characters');

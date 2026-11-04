@@ -40,7 +40,9 @@ export function storyFit(content,story){
  const count=w=>(all.match(new RegExp('\\b'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length;
  const interestHits=interestWords.reduce((n,w)=>n+count(w),0),interestInOpening=interestWords.some(w=>opening.includes(w));
  const style=styleOf(story),styleWords=style?STORY_STYLES[style].words.filter(w=>all.includes(w)):[];
- const weak=[];if(interestWords.length&&(interestHits<2||!interestInOpening))weak.push('interest');if(style&&styleWords.length<3)weak.push('style');
+ // When the style comes from the interest (Gaming → video game), its touches count as using the interest too.
+ const viaStyle=!!style&&suggestStyle(story?.interest)===style&&styleWords.length>=4,styleInOpening=!!style&&STORY_STYLES[style].words.some(w=>opening.includes(w));
+ const weak=[];if(interestWords.length&&!((interestHits>=2&&interestInOpening)||(viaStyle&&(interestInOpening||styleInOpening))))weak.push('interest');if(style&&styleWords.length<3)weak.push('style');
  return {style,styleLabel:style?STORY_STYLES[style].label:null,interestHits,interestInOpening,styleWords,weak};
 }
 export const STORY_AUDIENCES=Object.freeze({primary:'Primary (about 5–11)',secondary:'Secondary (about 11–16)',adult:'16+ and adults'});

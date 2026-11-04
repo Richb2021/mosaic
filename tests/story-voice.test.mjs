@@ -64,3 +64,11 @@ test('learners can choose the new interests in their profile', async () => {
  const {normaliseProfile}=await import('../src/game-modes/learning-model.js');
  assert.deepEqual(normaliseProfile({interests:['Anime & manga','Gaming','Animals']}).interests,['Anime & manga','Gaming','Animals']);
 });
+
+test('style touches count for the interest when the interest chose the style; game titles are free', async () => {
+ const {storyFit}=await import('../src/story-direction.js');
+ const gaming={title:'The Star Archive',hook:'Level One loads: your player has an empty inventory and a boss waits.',questions:[{prompt:'Unlock the checkpoint.'},{prompt:'Grab the power-up.'}]};
+ assert.deepEqual(storyFit(gaming,{interest:'Gaming'}).weak,[],'video-game writing counts as using Gaming');
+ assert.deepEqual(storyFit({title:'Food webs',hook:'Plants are producers.'},{interest:'Gaming'}).weak,['interest','style']);
+ for(const t of ['quiz-v1','novel-v1','sports-v1','merge-v1'])assert.match(generationRequest(job(t,{genre:'comedy',interest:'Gaming'})).input[0].content,/title that fits the story|should fit the story/,t);
+});

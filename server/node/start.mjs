@@ -2,8 +2,10 @@ import {resolve} from 'node:path';
 import {SQLStore,ObjectStore} from './storage.mjs';
 import {createApp} from './app.mjs';
 import {createHTTPServer} from './http.mjs';
+import {installMetaRelay} from './meta-relay.mjs';
 
 process.umask(0o077);
+if(installMetaRelay())console.log('Meta API calls go through the UK relay.');
 const root=resolve(process.env.MOSAIC_APP_ROOT||process.cwd());
 const data=resolve(process.env.MOSAIC_DATA_DIR||resolve(root,'.mosaic-data'));
 const staticDirectory=resolve(root,'public');
