@@ -10,6 +10,7 @@ import {generationBudget,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} fro
 import {validateUnit,applyUnitAction} from '../src/studio/programme.js';
 import {creativeContext,validateCreative,reviewCreative,integrityResponse,CREATIVE_KINDS} from '../src/studio/creative-content.js';
 import {submitCreative,checkCreative,creativeRequest} from './creative-provider.js';
+import {RETRY_COST_SUFFIX,storyCheckSummary,shouldRetryStory,retryState,retryJob,chooseAfterRetry} from './story-retry.js';
 import {synthesizeSpeech,speechConfiguration} from './media-audio.js';
 import {persistentAudio,AUDIO_RECIPE} from './persistent-audio.js';
 
@@ -43,7 +44,7 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
   else if(r&&stale)await call({action:'choose',expectedVersion:d.version,formats:d.state.formats,links:d.state.links.map(l=>l===old?{id,hash,kind}:l)});
  }catch{}};
  const load=async id=>{need(typeof id==='string'&&id.length<=100,'Choose a saved request.');const j=await one(`SELECT * FROM workshop_jobs WHERE id=? AND owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=?`,id,siteOwner,'creative',owner,input.packId,input.contentHash);need(j,'Creative request not found.',404);return j;};
- const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,story:p.context?.story||null,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};
+ const publicJob=async j=>{const p=JSON.parse(j.payload);return {id:j.id,kind:p.kind,activityKey:p.activityKey,question:p.question,story:p.context?.story||null,storyCheck:p.storyCheck||null,status:j.status.replace(/^creative-/,''),created:j.created,updated:j.updated,error:j.error,local:!!p.local,draft:j.draft?JSON.parse(j.draft):null,draftHash:j.draft?await digest(j.draft):null}};
  const result=async extra=>{const jobs=await all(`SELECT * FROM workshop_jobs WHERE owner=? AND ${KIND}=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? ORDER BY created DESC LIMIT 40`,siteOwner,'creative',owner,input.packId,input.contentHash),selected=extra?.jobId||input.selectedJob||input.id;if(selected&&!jobs.some(j=>j.id===selected))jobs.push(await load(selected));const voiceInputs=await all(`SELECT id,status,draft,payload FROM workshop_jobs WHERE owner=? AND ${LEARNER}=? AND ${PACK}=? AND ${HASH}=? AND json_extract(payload,'$.voiceTutor')=1 ORDER BY created DESC LIMIT 5`,siteOwner,owner,input.packId,input.contentHash);return noStore({voiceInputs:voiceInputs.map(v=>({id:v.id,status:v.status.replace(/^knowledge-/,''),activityKey:JSON.parse(v.payload).activityKey,text:v.draft?JSON.parse(v.draft).text:''})),jobs:await Promise.all(jobs.map(publicJob)),budget:await generationBudget(one,siteOwner,env,now()),audioConfigured:!!env.BUCKET,capabilities,...extra})};
  const reserve=async(payload,requestKey,requestHash,status)=>{
   const budget=await generationBudget(one,siteOwner,env,now());need(!budget.configurationError,budgetMessage(budget),503);need(budget.remaining>0,budgetMessage(budget),429);
@@ -88,10 +89,25 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
  }
  let j=await load(input.id),p=JSON.parse(j.payload);
  need(p.kind==='tutor'?capabilities.canTutor:capabilities.canAuthor,'Ask your organiser to enable the appropriate learning tools.',403);
+ // A weak cartoon or podcast story gets one guided revision; the first draft waits in the job record.
+ const restoreRetry=async(from,reason)=>{const r=p.storyRetry,chosen=chooseAfterRetry(r,null,null);chosen.storyCheck.retry=reason;p={...p,storyRetry:{state:'done',score:r.score},storyCheck:chosen.storyCheck};
+  await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-review',JSON.stringify(reviewCreative(chosen.content,p)),JSON.stringify(p),null,now(),j.id,siteOwner,from)};
  const settle=async(out,from)=>{
-  await finishCost(env,{id:j.id,siteOwner,usage:out.usage,status:out.status,now:now()});
+  const retry=p.storyRetry?.state==='running'?p.storyRetry:null;
+  await finishCost(env,{id:retry?j.id+RETRY_COST_SUFFIX:j.id,siteOwner,usage:out.usage,status:out.status,now:now()});
   const content=out.content?reviewCreative(out.content,p):null,status=content?'review':out.status;need(['review','running','failed','interrupted'].includes(status),'Invalid Muse result.',502);
-  await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-'+status,content?JSON.stringify(content):null,out.providerId||j.provider_id,out.error||null,now(),j.id,siteOwner,from);
+  if(retry&&status!=='running'){const chosen=chooseAfterRetry(retry,content,out.storyCheck||null);p={...p,storyRetry:{state:'done',score:retry.score},storyCheck:chosen.storyCheck};
+   await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-review',JSON.stringify(reviewCreative(chosen.content,p)),JSON.stringify(p),out.providerId||j.provider_id,null,now(),j.id,siteOwner,from);return}
+  const check=content?out.storyCheck||null:null;
+  // Only on a fresh completion: a manual re-check of an old response never creates a new request.
+  if(content&&['creative-running','creative-starting'].includes(from)&&env.META_API_KEY&&shouldRetryStory(env,p,check)){
+   const r=retryState(p,check,content),pending={...p,storyRetry:r},lock=await run('UPDATE workshop_jobs SET status=?,payload=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?','creative-starting',JSON.stringify(pending),out.providerId||j.provider_id,now(),j.id,siteOwner,from);
+   if(!lock.meta.changes)return;p=pending;const next=retryJob(p,r);
+   try{await startCost(env,{id:j.id+RETRY_COST_SUFFIX,siteOwner,learnerOwner:owner,model:MODEL,request:creativeRequest(next),now:now()});return await settle(await provider(next,env.META_API_KEY),'creative-starting')}
+   catch(e){await finishCost(env,{id:j.id+RETRY_COST_SUFFIX,siteOwner,usage:e.usage,status:'unknown',now:now()});return restoreRetry('creative-starting',e.status===429?'The daily generation budget had no room for a revision, so this is the first draft.':'The revision could not be completed, so this is the first draft.')}
+  }
+  if(check)p={...p,storyCheck:storyCheckSummary(check)};
+  await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-'+status,content?JSON.stringify(content):null,JSON.stringify(p),out.providerId||j.provider_id,out.error||null,now(),j.id,siteOwner,from);
  };
  const fail=async(error,from)=>{await finishCost(env,{id:j.id,siteOwner,usage:error.usage,status:'unknown',now:now()});const uncertain=['TypeError','TimeoutError','AbortError'].includes(error.name);await run('UPDATE workshop_jobs SET status=?,error=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?',uncertain?'creative-interrupted':'creative-failed',uncertain?'The submission acknowledgement was lost. No automatic repeat was sent.':error.status?error.message:'The request could not be completed. No automatic repeat was sent.',error.providerId||j.provider_id,now(),j.id,siteOwner,from)};
  if(input.action==='run'){
@@ -101,8 +117,9 @@ export async function creativeAPI(req,env,{store,owner,principal=owner,siteOwner
   try{await startCost(env,{id:j.id,siteOwner,learnerOwner:owner,model:MODEL,request:creativeRequest(p),now:now()});await settle(await provider(p,env.META_API_KEY),'creative-starting')}catch(e){await fail(e,'creative-starting')}return result();
  }
  if(input.action==='check'){
+  if(j.status==='creative-starting'&&now()-j.updated>60000&&p.storyRetry?.fallback){await restoreRetry('creative-starting','The revision request could not be confirmed, so this is the first draft. No further request was sent.');return result()}
   if(j.status==='creative-starting'&&now()-j.updated>60000){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','creative-interrupted','The submission acknowledgement was lost. No automatic repeat was sent.',now(),j.id,siteOwner,j.status);return result()}
-  if(['creative-running','creative-interrupted','creative-failed'].includes(j.status)&&j.provider_id)try{const out=await reader(j.provider_id,p,env.META_API_KEY);if(out.status==='running'&&now()-j.created>30*60*1000){out.status='interrupted';out.error='This request has taken more than 30 minutes. Automatic checking has stopped. Check this saved request later; no replacement was sent.';}await settle(out,j.status)}catch(e){if([410,422].includes(e.status))await fail(e,j.status);else throw e}return result();
+  if(['creative-running','creative-interrupted','creative-failed'].includes(j.status)&&j.provider_id)try{const out=await reader(j.provider_id,p,env.META_API_KEY);if(out.status==='running'&&now()-j.created>30*60*1000){out.status='interrupted';out.error='This request has taken more than 30 minutes. Automatic checking has stopped. Check this saved request later; no replacement was sent.';}await settle(out,j.status)}catch(e){if([410,422].includes(e.status)){if(p.storyRetry?.state==='running'){await finishCost(env,{id:j.id+RETRY_COST_SUFFIX,siteOwner,usage:e.usage,status:'unknown',now:now()});await restoreRetry(j.status,'The revision came back unusable, so this is the first draft.')}else await fail(e,j.status)}else throw e}return result();
  }
  need(p.kind!=='tutor'&&!p.local,'Tutor replies cannot be edited or approved as reviewed content.');need(j.draft&&input.draftHash===await digest(j.draft),'The script changed. Reload before making this change.',409);
  if(input.action==='edit'){

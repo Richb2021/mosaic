@@ -6,6 +6,8 @@ import {startCost,finishCost} from './cost-ledger.js';
 import {generationBudget,generationLimit,GENERATION_ROWS,GENERATION_WINDOW_MS,budgetMessage} from './workshop-budget.js';
 import {evidencePacket} from '../src/evidence-selection.js';
 import {balanceNumberWarning} from '../src/chapter-content.js';
+import {scoreStory} from '../src/story-quality.js';
+import {RETRY_COST_SUFFIX,storyCheckSummary,shouldRetryStory,retryState,retryJob,chooseAfterRetry} from './story-retry.js';
 import {WorkshopError,requireValue,boundedText,safeId,digest,generationRequest,extractResource,selectEvidence,callWonder,readWonder,validateGenerated,MODEL,TEMPLATE_IDS} from './content-service.js';
 
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -13,7 +15,7 @@ async function body(req){const reader=req.body?.getReader();requireValue(reader,
 const publicResource=r=>{const p=JSON.parse(r.payload);return {id:r.id,title:r.title,checksum:r.checksum,status:r.status,created:r.created,units:p.units,provenance:p.provenance||null,original:p.original||null}};
 const BACKGROUND_LIMIT=30*60*1000;
 const overdueMessage='This request has taken more than 30 minutes. Its Meta response may still finish; check this saved request again to recover it. No replacement generation was sent.';
-const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,story:JSON.parse(r.payload).story||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
+const publicJob=async (r,at=Date.now())=>({id:r.id,status:r.status==='starting'&&at-r.updated>60000?'interrupted':r.status,created:r.created,updated:r.updated,error:r.error,goal:JSON.parse(r.payload).goal,topicId:JSON.parse(r.payload).topicId,template:JSON.parse(r.payload).template||'underlight-v1',coverage:JSON.parse(r.payload).coverage||null,storyCheck:JSON.parse(r.payload).storyCheck||null,story:JSON.parse(r.payload).story||null,model:MODEL,revisionOf:JSON.parse(r.payload).revisionOf||null,draft:r.draft?JSON.parse(r.draft):null,draftHash:r.draft?await digest(r.draft):null});
 
 export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder,defer=()=>{},now=()=>Date.now(),owner=null,learnerOwner=null,fetcher=fetch}={}){
  try{
@@ -26,12 +28,30 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
   if(path[0]==='knowledge')return await knowledgeAPI(req,env,{owner,learnerOwner,now,fetcher});
   const resource=async id=>{const r=await one('SELECT * FROM workshop_resources WHERE id=? AND owner=?',id,owner);requireValue(r,'Resource not found.',404);return r};
   const job=async id=>{const j=await one('SELECT * FROM workshop_jobs WHERE id=? AND owner=?',id,owner);requireValue(j&&!JSON.parse(j.payload).recordType,'This chapter hasn’t been shared with you. Ask your teacher to assign it, then open it from Today.',404);return j};
-  const sweepStarting=()=>run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
+  // A weak story gets one guided revision; the first draft waits in the job record until then.
+  const restoreRetry=async(j,from,reason)=>{const p=JSON.parse(j.payload),r=p.storyRetry,chosen=chooseAfterRetry(r,null,null);chosen.storyCheck.retry=reason;
+   await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','review',JSON.stringify(validateGenerated(chosen.content,p)),JSON.stringify({...p,storyRetry:{state:'done',score:r.score},storyCheck:chosen.storyCheck}),null,now(),j.id,owner,from);return job(j.id)};
+  const sweepStarting=async()=>{
+   for(const r of await all('SELECT * FROM workshop_jobs WHERE owner=? AND status=? AND updated<?',owner,'starting',now()-60000))if(JSON.parse(r.payload).storyRetry?.fallback)await restoreRetry(r,'starting','The revision request could not be confirmed, so this is the first draft. No further request was sent.');
+   return run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE owner=? AND status=? AND updated<?','interrupted','The submission acknowledgement was lost. It may have used API credits; no automatic retry was sent.',now(),owner,'starting',now()-60000);
+  };
   const settle=async(j,result,from)=>{
-   await finishCost(env,{id:j.id,siteOwner:owner,usage:result.usage,status:result.status,now:now()});
-   const content=result.content?validateGenerated(result.content,JSON.parse(j.payload)):null,status=content?'review':result.status;
+   const p=JSON.parse(j.payload),retry=p.storyRetry?.state==='running'?p.storyRetry:null;
+   await finishCost(env,{id:retry?j.id+RETRY_COST_SUFFIX:j.id,siteOwner:owner,usage:result.usage,status:result.status,now:now()});
+   const content=result.content?validateGenerated(result.content,p):null,status=content?'review':result.status;
    requireValue(['review','running','failed','interrupted'].includes(status),'Invalid generation result.',502);
-   await run('UPDATE workshop_jobs SET status=?,draft=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?',status,content?JSON.stringify(content):null,result.providerId||j.provider_id,result.error||null,now(),j.id,owner,from);
+   if(retry&&status!=='running'){const chosen=chooseAfterRetry(retry,content,content?(result.storyCheck||scoreStory(content,{story:p.story})):null);
+    await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','review',JSON.stringify(validateGenerated(chosen.content,p)),JSON.stringify({...p,storyRetry:{state:'done',score:retry.score},storyCheck:chosen.storyCheck}),result.providerId||j.provider_id,null,now(),j.id,owner,from);return job(j.id)}
+   const check=content?(result.storyCheck||scoreStory(content,{story:p.story})):null;
+   // Only on a fresh completion: a manual re-check of an old response never creates a new request.
+   if(content&&['running','starting'].includes(from)&&env.META_API_KEY&&shouldRetryStory(env,p,check)){
+    const r=retryState(p,check,content),lock=await run('UPDATE workshop_jobs SET status=?,payload=?,provider_id=?,updated=? WHERE id=? AND owner=? AND status=?','starting',JSON.stringify({...p,storyRetry:r}),result.providerId||j.provider_id,now(),j.id,owner,from);
+    if(!lock.meta.changes)return job(j.id);
+    const locked=await job(j.id),next=retryJob(p,r);
+    try{await startCost(env,{id:j.id+RETRY_COST_SUFFIX,siteOwner:owner,learnerOwner,model:MODEL,request:generationRequest(next),now:now()});return await settle(locked,await provider(next,env.META_API_KEY),'starting')}
+    catch(e){await finishCost(env,{id:j.id+RETRY_COST_SUFFIX,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});return restoreRetry(locked,'starting',e.status===429?'The daily generation budget had no room for a revision, so this is the first draft.':'The revision could not be completed, so this is the first draft.')}
+   }
+   await run('UPDATE workshop_jobs SET status=?,draft=?,payload=?,provider_id=?,error=?,updated=? WHERE id=? AND owner=? AND status=?',status,content?JSON.stringify(content):null,JSON.stringify(check?{...p,storyCheck:storyCheckSummary(check)}:p),result.providerId||j.provider_id,result.error||null,now(),j.id,owner,from);
    return job(j.id);
   };
   const syncJob=async j=>{
@@ -39,7 +59,7 @@ export async function workshopAPI(req,env,{provider=callWonder,reader=readWonder
    // adapter repair. It never creates a new inference request.
    if(!['running','interrupted','failed'].includes(j.status)||!j.provider_id)return j;
    try{const result=await reader(j.provider_id,JSON.parse(j.payload),env.META_API_KEY);if(result.status==='running'&&now()-j.created>BACKGROUND_LIMIT){result.status='interrupted';result.error=overdueMessage}return await settle(j,result,j.status)}
-   catch(e){await finishCost(env,{id:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});if(e.status===422||e.status===410){await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
+   catch(e){const retrying=JSON.parse(j.payload).storyRetry?.state==='running';await finishCost(env,{id:retrying?j.id+RETRY_COST_SUFFIX:j.id,siteOwner:owner,usage:e.usage,status:'unknown',now:now()});if(e.status===422||e.status===410){if(retrying)return restoreRetry(j,j.status,'The revision came back unusable, so this is the first draft.');await run('UPDATE workshop_jobs SET status=?,error=?,updated=? WHERE id=? AND owner=? AND status=?','failed',e.message,now(),j.id,owner,j.status);return job(j.id)}throw e}
   };
   if(method==='GET'&&path.join('/')==='resources')return json(await resourcePage({all},owner,url.searchParams));
   if(method==='GET'&&path.join('/')==='search')return json(await resourceSearch({all},owner,url.searchParams));

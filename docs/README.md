@@ -12,7 +12,7 @@ The application [README](../README.md) is the current feature overview. Earlier 
 - [Knowledge imports, collections and connected programmes](KNOWLEDGE-PROGRAMME.md)
 - [Adaptive support and voice tutor](ADAPTIVE-VOICE.md)
 - [Explore and richer assessment](EXPLORE-AND-ASSESSMENT.md)
-- [Story direction](STORY-DIRECTION.md), [podcasts](PODCAST.md), [cartoons](CARTOON.md) and [cartoon performance](CARTOON-PERFORMANCE.md)
+- [Story direction](STORY-DIRECTION.md), [story craft and quality checks](STORY-CRAFT.md), [podcasts](PODCAST.md), [cartoons](CARTOON.md) and [cartoon performance](CARTOON-PERFORMANCE.md)
 - [Export, deletion and retention](MEDIA-LIFECYCLE.md)
 - [Teacher review and resilient media jobs](PRODUCTION-TEACHING.md)
 - [Monitoring and recovery](LAUNCH-OPERATIONS.md)

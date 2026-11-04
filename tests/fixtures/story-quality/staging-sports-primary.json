@@ -1,0 +1,228 @@
+{
+ "story": {
+  "genre": "comedy",
+  "interest": "Football",
+  "audience": "primary"
+ },
+ "storyVersion": null,
+ "draft": {
+  "schemaVersion": 1,
+  "template": "sports-v1",
+  "id": "generated-30d8809c-e164-407a-b20e-16f5f99c3d5f",
+  "topicId": "web",
+  "revision": 1,
+  "title": "The Riverlight Cup: Pippa's Anywhere-Kick Comeback",
+  "subtitle": "At the Riverlight ground, Pippa Boot's proud Rovers line up against Rafa Rumble's Bracken United — two kind captains, a",
+  "hook": "Football at the Riverlight Cup is in joyful chaos, as Pippa Boot's overconfident Anywhere Kick sends the ball thudding into the lettuce patch before kick-off! Commentator Tess Lark shrieks with laughter, rival captain Rafa Rumble grins his catchphrase, 'Chase the bounce, win the bounce!', and both teams must rebuild their passing plan before the first possession. Pippa wants the Cup for Riverlight Rovers. Rafa wants it for Bracken United. Their mistaken Anywhere Kick keeps dropping the ball among plants, rabbits and a very patient fox toy on the training pitch. Each possession asks them to choose the next food-web link. When they spot how eating links show energy moving, they turn a soggy, b",
+  "questions": [
+   {
+    "prompt": "Possession One: Tess Lark cries, “The ball is back from the lettuce!” Pippa wants to start the Rovers move with the producers. Who are the producers?",
+    "options": [
+     {
+      "label": "Plants",
+      "feedback": "Touchline call: yes — plants take the producer role in this example, so start the move there."
+     },
+     {
+      "label": "Rabbits",
+      "feedback": "Warm try: rabbits are eaters here, because rabbits eat plants, so they are not the starting producers."
+     },
+     {
+      "label": "Foxes",
+      "feedback": "Good hustle: foxes are later eaters, because foxes eat rabbits, so they do not start this move."
+     }
+    ],
+    "solution": 0,
+    "explanation": "The supported link is that “Plants are producers.”",
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ]
+   },
+   {
+    "prompt": "Possession Two: Rafa performs three keepy-uppies, loses one sock to a puddle, and shouts, “Chase the bounce, win the bounce!” Which choice shows the rabbit's eating job?",
+    "options": [
+     {
+      "label": "The rabbit makes the plant link start",
+      "feedback": "Coach's call: that puts the rabbit in the producer seat, but the eating link starts with plants."
+     },
+     {
+      "label": "The rabbit eats plants",
+      "feedback": "Touchline call: yes — the rabbit eats the plant, so it is one of the eating players in this link."
+     },
+     {
+      "label": "The rabbit eats foxes",
+      "feedback": "Near miss: the fox link comes later, because foxes eat rabbits, not plants in this example."
+     }
+    ],
+    "solution": 1,
+    "explanation": "The supported link is that “Rabbits eat plants,” so the rabbit is an eater in this link.",
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ]
+   },
+   {
+    "prompt": "Possession Three: Pippa draws a huge arrow on the tactics board. It flops over like a tired scarf. The arrow goes from a plant to a rabbit. What does it show?",
+    "options": [
+     {
+      "label": "It shows where the rabbit lives",
+      "feedback": "Good chase: that would point to where the rabbit sleeps, but this arrow is about the eating link."
+     },
+     {
+      "label": "It shows which team scores",
+      "feedback": "Warm try: teams matter in the match, but this arrow follows the plant-to-rabbit link."
+     },
+     {
+      "label": "It shows energy transfer from plant to rabbit",
+      "feedback": "Touchline call: yes — that arrow shows energy moving from plant to rabbit."
+     }
+    ],
+    "solution": 2,
+    "explanation": "The supported idea is that “An arrow from a plant to a rabbit shows energy transfer.”",
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ]
+   },
+   {
+    "prompt": "Possession Four: Bracken United build a wobbly cardboard fox to block the lane. Rafa peeks from behind its ear. Which link comes after rabbits eat plants?",
+    "options": [
+     {
+      "label": "The fox eats rabbits",
+      "feedback": "Touchline call: yes — rabbits eat plants, and foxes eat rabbits, so the fox link follows the rabbit link."
+     },
+     {
+      "label": "The fox is eaten by plants",
+      "feedback": "Near miss: that reverses the later link, because the given link is foxes eating rabbits."
+     },
+     {
+      "label": "The fox eats leaves only",
+      "feedback": "Good hustle: leaves are not the link here; the chain uses rabbits eating plants and foxes eating rabbits."
+     }
+    ],
+    "solution": 0,
+    "explanation": "The supported links are that “Rabbits eat plants” and “Foxes eat rabbits,” placing the fox after the rabbit in the chain.",
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ]
+   },
+   {
+    "prompt": "Possession Five: Tess gasps, “Rovers need the full chain, not the Anywhere Kick!” Which order follows the eating links from the start?",
+    "options": [
+     {
+      "label": "Fox, then rabbit, then plant",
+      "feedback": "Warm try: that order puts an eater first, but plants are producers and start this chain."
+     },
+     {
+      "label": "Plant, then rabbit, then fox",
+      "feedback": "Touchline call: yes — plant first, then the rabbit that eats plants, then the fox that eats rabbits. That is the comeback order!"
+     },
+     {
+      "label": "Plant, then fox, then rabbit",
+      "feedback": "Near miss: the rabbit link comes before the fox link, because foxes eat rabbits."
+     }
+    ],
+    "solution": 1,
+    "explanation": "The supported chain is that “Plants are producers,” “Rabbits eat plants,” and “Foxes eat rabbits.”",
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ]
+   },
+   {
+    "prompt": "Possession Six: The ball rolls to the rabbit burrows by the touchline. Pippa must pick the right words for the last pass. Which pairing is right?",
+    "options": [
+     {
+      "label": "Habitat means a group of the same species; population means one sleeping place",
+      "feedback": "Good chase: that choice swaps the words; a whole group of the same species is the population idea."
+     },
+     {
+      "label": "Habitat means a team shirt; population means a football pitch",
+      "feedback": "Warm try: both halves need swapping — place links to habitat, and same-species group links to population."
+     },
+     {
+      "label": "Habitat means a place where an organism lives; population means a group of the same species in an area",
+      "feedback": "Touchline call: yes — habitat is the living place, and population is the same-species group in an area. Final-whistle thinking!"
+     }
+    ],
+    "solution": 2,
+    "explanation": "The supported contrast is that “A habitat is a place where an organism lives,” while “A population is a group of organisms of the same species living in an area.”",
+    "sourceRefs": [
+     "source-5882849a5040-2"
+    ]
+   }
+  ],
+  "teamName": "Riverlight Rovers",
+  "opponentName": "Bracken United",
+  "debrief": {
+   "question": "Explain in your own words how energy moves from a plant to a rabbit and then to a fox, using the eating links in your answer.",
+   "explanation": "Tell a teammate how energy moves from a plant to a rabbit and then to a fox, using the eating links in your answer.",
+   "sourceRefs": [
+    "source-5882849a5040-1",
+    "source-5882849a5040-2"
+   ]
+  },
+  "sources": [
+   {
+    "id": "source-5882849a5040-1",
+    "title": "Food webs: reviewed classroom notes",
+    "locator": "Paragraph 1",
+    "excerpt": "Plants are producers. Rabbits eat plants. Foxes eat rabbits. An arrow from a plant to a rabbit shows energy transfer."
+   },
+   {
+    "id": "source-5882849a5040-2",
+    "title": "Food webs: reviewed classroom notes",
+    "locator": "Paragraph 2",
+    "excerpt": "A habitat is a place where an organism lives. A population is a group of organisms of the same species living in an area."
+   }
+  ],
+  "learningMap": [
+   {
+    "id": "concept-1",
+    "objective": "Identify plants as producers from the example.",
+    "activityKeys": [
+     "question-0"
+    ],
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ],
+    "prerequisites": []
+   },
+   {
+    "id": "concept-2",
+    "objective": "Explain that rabbits eat plants and an arrow from a plant to a rabbit shows energy transfer.",
+    "activityKeys": [
+     "question-1",
+     "question-2"
+    ],
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ],
+    "prerequisites": [
+     "concept-1"
+    ]
+   },
+   {
+    "id": "concept-3",
+    "objective": "Order the eating links as plants, then rabbits, then foxes, because rabbits eat plants and foxes eat rabbits.",
+    "activityKeys": [
+     "question-3",
+     "question-4"
+    ],
+    "sourceRefs": [
+     "source-5882849a5040-1"
+    ],
+    "prerequisites": [
+     "concept-2"
+    ]
+   },
+   {
+    "id": "concept-4",
+    "objective": "Tell apart a habitat, where an organism lives, from a population, a group of organisms of the same species living in an area.",
+    "activityKeys": [
+     "question-5"
+    ],
+    "sourceRefs": [
+     "source-5882849a5040-2"
+    ],
+    "prerequisites": []
+   }
+  ]
+ }
+}

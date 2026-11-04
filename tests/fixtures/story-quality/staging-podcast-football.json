@@ -1,0 +1,152 @@
+{
+ "story": {
+  "genre": "comedy",
+  "interest": "Football"
+ },
+ "storyVersion": 2,
+ "draft": {
+  "schemaVersion": 2,
+  "id": "creative-f0b45c8f-e036-408c-8c41-f68309e18ddf",
+  "kind": "podcast",
+  "title": "Last-Minute Loop: The Food-Web Cup Final",
+  "summary": "Mira and Kit race to fix a backwards food-web tactic board before the Food-Web Cup final. Kit's fox-first plan flops in training, but flipping the arrows into a producer-led loop gives them a last-minute winning play.",
+  "story": {
+   "genre": "comedy",
+   "interest": "Football",
+   "premise": "Friends Mira and Kit, both in their early twenties, must fix a six-card food-web tactic board minutes before their original club's Food-Web Cup final against the Riverside rivals.",
+   "want": "Mira wants a tactic that holds together under pressure; Kit wants his bold fox-centred formation to win them the cup.",
+   "stakes": "Lose the final to their rivals, or rebuild the board correctly before kick-off with only the six cards they already have.",
+   "obstacle": "Kit's overconfident first board points every arrow at the fox, reversing food-to-eater energy flow and collapsing their training friendly.",
+   "turn": "Kit realises the arrows were backwards: they follow energy from food to eater, so the whole formation must start with producers and loop back through decomposition.",
+   "payoff": "In the final minute they run the corrected loop — producer to primary consumer to secondary consumer, with nutrients returning to producers — and score the winning goal.",
+   "learningConnection": "The winning tactic is a source-supported food web: producers make food by photosynthesis, arrows follow energy from food to eater through primary and secondary consumers, omnivores eat plants and animals, and decomposition returns nutrients to producers. The football passing analogy is fictional framing only; it represents energy transfer, not literal passing."
+  },
+  "segments": [
+   {
+    "id": "segment-1",
+    "speaker": "guide",
+    "text": "Ten minutes to the Food-Web Cup final, Kit, and our tactic board is blank while the Riverside rivals are already doing laps!",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "city",
+    "action": "talk",
+    "beat": "hook"
+   },
+   {
+    "id": "segment-2",
+    "speaker": "learner",
+    "text": "Relax, I have pointed every arrow at the fox. Hungriest player gets all the passes — that is a winning formation, right?",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "city",
+    "action": "talk",
+    "beat": "hook"
+   },
+   {
+    "id": "segment-3",
+    "speaker": "guide",
+    "text": "Our training friendly says otherwise. We fed everyone backwards, lost possession, and the whole web fell apart in midfield.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "garden",
+    "action": "talk",
+    "beat": "setback"
+   },
+   {
+    "id": "segment-4",
+    "speaker": "learner",
+    "text": "Wait, flip it? If arrows follow energy from the food to the eater, the grass passes to the rabbit, not the other way round?",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "garden",
+    "action": "think",
+    "beat": "discovery"
+   },
+   {
+    "id": "segment-5",
+    "speaker": "guide",
+    "text": "Exactly, and grass starts the move — photosynthesis lets plants make food using light, so they are our producers.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "garden",
+    "action": "talk",
+    "beat": "discovery"
+   },
+   {
+    "id": "segment-6",
+    "speaker": "learner",
+    "text": "Then rabbits are primary consumers because they eat producers. My fox plan had our striker trying to eat the ball.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "garden",
+    "action": "talk",
+    "beat": "discovery"
+   },
+   {
+    "id": "segment-7",
+    "speaker": "guide",
+    "text": "And foxes are secondary consumers when they feed on primary consumers, while a bear eating plants and animals is an omnivore.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "garden",
+    "action": "talk",
+    "beat": "discovery"
+   },
+   {
+    "id": "segment-8",
+    "speaker": "learner",
+    "text": "Right, rebuild with only our six cards. Last card down: decomposition returns nutrients to the producers, so the move loops back to grass.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "city",
+    "action": "talk",
+    "beat": "choice"
+   },
+   {
+    "id": "segment-9",
+    "speaker": "guide",
+    "text": "Use that loop for the final play? If one link changes, those connected feeding relationships shift and it affects everyone else.",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "city",
+    "action": "talk",
+    "beat": "choice"
+   },
+   {
+    "id": "segment-10",
+    "speaker": "learner",
+    "text": "Final minute — grass to rabbit, rabbit to fox, nutrients back to grass! Goal! The loop beat the rivals right at the whistle!",
+    "sourceRefs": [
+     "river-foodweb"
+    ],
+    "scene": "city",
+    "action": "celebrate",
+    "beat": "payoff"
+   }
+  ],
+  "question": {
+   "prompt": "Your turn after that final: our board has algae, a small fish and a heron. I have started it — algae make food using light. Predict who is the primary consumer, where the first arrow points, and why.",
+   "answer": "Algae are the producers because photosynthesis lets plants make food using light. The small fish is the primary consumer because primary consumers eat producers, so the arrow points from algae to the small fish, following energy from food to eater. The heron is the secondary consumer because secondary consumers feed on primary consumers.",
+   "sourceRefs": [
+    "river-foodweb"
+   ]
+  },
+  "sources": [
+   {
+    "id": "river-foodweb",
+    "title": "Riverlight food-web notes — authored from NOAA",
+    "locator": "What is a food web?; Producers; Consumers",
+    "excerpt": "Photosynthesis lets plants make food using light. Primary consumers eat producers; secondary consumers eat primary consumers. Omnivores eat plants and animals. Food-web arrows follow energy from food to eater. Webs show connected feeding relationships; changes can affect other organisms. Decomposition returns nutrients to producers. Study-card combinations below assemble representations, not living organisms."
+   }
+  ]
+ }
+}
