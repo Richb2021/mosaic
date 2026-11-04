@@ -1,1 +1,46 @@
-*{box-sizing:border-box}body{margin:0;background:#1d2c43;color:#f1f2e9;font-family:Trebuchet MS,Arial,sans-serif}button,input{font:inherit}button,a{touch-action:manipulation}a{color:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #f0c972;outline-offset:4px}.account-nav{height:80px;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;border-bottom:1px solid #78929e50}.account-nav>a{font-family:Georgia,serif;font-size:24px;text-decoration:none}.account-nav nav{display:flex;align-items:center;gap:24px}.account-layout{min-height:calc(100svh - 80px);display:grid;grid-template-columns:1.1fr 1fr;background:linear-gradient(90deg,#14273790,#14273720),url('/game-modes/art/room-workshop.webp') left center/cover}.account-story{padding:9vh 6vw;display:flex;flex-direction:column;justify-content:center;background:#16243e80}.account-story h1{font:500 clamp(40px,5vw,74px)/1.08 Georgia,serif;max-width:10ch;margin:26px 0}.account-story p{font-size:18px;line-height:1.7;max-width:36ch}.account-story a{margin-top:24px;align-self:flex-start;text-underline-offset:6px}.account-mark{color:#e4c48c}.account-panel{align-self:center;margin:48px 6vw 48px 2vw;padding:40px;background:#1d2c43f5;border:1px solid #9ab3bd70;border-top:4px solid #d4b074;box-shadow:0 18px 60px #0b152b70}.account-panel h2{font:500 32px/1.2 Georgia,serif;margin:0 0 26px}.account-panel p{line-height:1.6}.account-panel label{display:grid;gap:8px;margin:18px 0;color:#dce7e7}.account-panel input{width:100%;background:#12213a;border:1px solid #8594a5;border-radius:3px;padding:13px;color:white}.account-primary{display:block;text-align:center;background:#e4c48c;color:#182943;border:1px solid #e4c48c;padding:14px 20px;border-radius:3px;font-weight:700;text-decoration:none;width:100%;cursor:pointer}.account-primary:disabled{opacity:.65}.account-methods{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.account-methods button{border:0;background:transparent;color:#e4c48c;padding:8px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.account-feedback{color:#f6d899}.account-note{font-size:13px;color:#adbfcd}.account-panel .account-feedback:empty{display:none}@media(max-width:700px){.account-nav{padding:0 20px}.account-nav>a{font-size:20px}.account-nav nav{gap:12px}.account-layout{grid-template-columns:1fr}.account-story{padding:36px 24px}.account-story h1{font-size:40px;max-width:14ch;margin:12px 0}.account-story p{font-size:16px}.account-story .account-mark,.account-story>a{display:none}.account-panel{margin:0 16px 32px;padding:28px 22px}.account-panel h2{font-size:28px}}
+/* Account and sign-in: Lantern Light. Lamp-lit scene on the left, cream sign-in panel on the right. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--ll-night);color:var(--ll-on-night);font-family:var(--ll-body)}
+button,input{font:inherit}
+button,a{touch-action:manipulation}
+a{color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--ll-amber);outline-offset:4px}
+.account-nav{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,5vw);background:var(--ll-night);border-bottom:1px solid rgba(251,246,236,.08)}
+.account-nav>a{display:flex;align-items:center;gap:12px;font-family:var(--ll-display);font-weight:900;font-size:28px;text-decoration:none;color:var(--ll-on-night)}
+.account-nav>a .ll-mark{font-size:30px}
+.account-nav nav{display:flex;align-items:center;gap:22px;font-weight:700;font-size:15px}
+.account-nav nav a{text-decoration:none}
+.account-nav nav a:hover{color:var(--ll-amber)}
+.account-layout{min-height:calc(100svh - 76px);display:grid;grid-template-columns:1.1fr 1fr;background:linear-gradient(90deg,rgba(20,27,52,.96) 0%,rgba(20,27,52,.7) 50%,rgba(20,27,52,.35) 100%),url('/game-modes/art/room-quay.webp') left center/cover}
+.account-story{position:relative;padding:9vh 6vw;display:flex;flex-direction:column;justify-content:center}
+.account-story::after{content:"";position:absolute;right:4vw;bottom:5vh;width:170px;height:200px;background:url('/brand/fox-wave.webp') no-repeat center bottom/contain;pointer-events:none}
+.account-story h1{font-family:var(--ll-display);font-weight:900;font-size:clamp(42px,5vw,72px);line-height:1.02;letter-spacing:-.01em;max-width:11ch;margin:22px 0;text-wrap:balance}
+.account-story p{font-size:18px;line-height:1.65;max-width:36ch;color:var(--ll-on-night-soft)}
+.account-story a{margin-top:24px;align-self:flex-start;text-underline-offset:6px;font-weight:700;color:var(--ll-amber)}
+.account-mark{color:var(--ll-amber);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase}
+.account-panel{align-self:center;margin:48px 6vw 48px 2vw;padding:40px;background:var(--ll-cream);color:var(--ll-ink);border-radius:28px;box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.account-panel h2{font-family:var(--ll-display);font-weight:900;font-size:36px;line-height:1.1;margin:0 0 24px}
+.account-panel p{line-height:1.6;color:var(--ll-ink-soft)}
+.account-panel label{display:grid;gap:8px;margin:18px 0;color:var(--ll-ink);font-weight:700;font-size:14px}
+.account-panel input{width:100%;background:var(--ll-white);border:1.5px solid #D8CCB3;border-radius:14px;padding:13px 14px;color:var(--ll-ink);min-height:52px}
+.account-primary{display:block;text-align:center;background:var(--ll-amber);color:var(--ll-ink);border:0;padding:15px 22px;border-radius:999px;font-weight:700;font-size:17px;text-decoration:none;width:100%;cursor:pointer;box-shadow:0 5px 0 var(--ll-amber-deep);transition:transform .15s var(--ll-spring)}
+.account-primary:hover{background:#FFC266}
+.account-primary:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ll-amber-deep)}
+.account-primary:disabled{opacity:.65}
+.account-methods{display:flex;gap:16px;flex-wrap:wrap;margin-top:22px}
+.account-methods button,.account-panel a:not(.account-primary){border:0;background:transparent;color:var(--ll-violet-ink);padding:8px 0;cursor:pointer;text-decoration:underline;text-underline-offset:4px;font-weight:700}
+.account-feedback{color:var(--ll-coral-ink)}
+.account-note{font-size:14px;color:var(--ll-ink-soft)}
+.account-panel .account-feedback:empty{display:none}
+@media(max-width:900px){.account-story::after{display:none}}
+@media(max-width:700px){.account-nav{padding:0 20px}
+.account-nav>a{font-size:22px}
+.account-nav nav{gap:14px}
+.account-layout{grid-template-columns:1fr}
+.account-story{padding:36px 24px}
+.account-story h1{font-size:40px;max-width:14ch;margin:12px 0}
+.account-story p{font-size:16px}
+.account-story .account-mark,.account-story>a{display:none}
+.account-panel{margin:0 16px 32px;padding:28px 22px}
+.account-panel h2{font-size:30px}}
+@media (prefers-reduced-motion:reduce){.account-primary{transition:none}}

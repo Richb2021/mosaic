@@ -33,7 +33,7 @@ async function reviewedRoute(env,{owner,siteOwner,store,courseId,planHash}){
  }
  return {courseId,title:course.title,planId:job.id,planHash:hash,sources:p.resourceVersions||[],steps};
 }
-async function readSharedReport(env,store,g,now){
+export async function readSharedReport(env,store,g,now){
  const db=sqlDB(env.DB);
  try{return await withGrantLease(env,g,now,async state=>{
   if(!await activeCourseGrant(env,g)||!(await grantChapters(env,g)).length)return {state:'unavailable'};

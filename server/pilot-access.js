@@ -1,3 +1,4 @@
+import {leaveClassesOf} from './classes-api.js';
 import {requestClosure,closureQueue} from './account-closure.js';
 import {maintenanceStatus} from './background-retention.js';
 import {budgetStatus} from './cost-ledger.js';
@@ -110,6 +111,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(input.manager!==input.accountReference,'A learner cannot manage their own access.');
   const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,manager:input.manager,tutorAllowed:false,sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
+  await leaveClassesOf(env,input.accountReference,member.manager);
   await auditEvent(env,scope,'organiser-changed',{},now());return noStore({reassigned:true});
  }
  if(input.action==='restore-access'){
@@ -126,6 +128,7 @@ export async function pilotAPI(req,env,{session=ncbSession,store=new NCBStore(en
   need(['active','revoked'].includes(member.status),'This account is closing or already closed.',409);
   const changed=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify({...member,status:'revoked',sharingEpoch:crypto.randomUUID()}),now(),scope,row.policy);
   need(changed.meta.changes===1,'Access changed. Reload the learner list.',409);
+  await leaveClassesOf(env,input.accountReference,member.manager);
   await auditEvent(env,scope,'access-revoked',{},now());return noStore({revoked:true});
  }
  if(input.action==='close'){

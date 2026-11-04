@@ -1,0 +1,58 @@
+/* Lantern Light: shared Mosaic tokens, fonts and small components.
+   Imported first by every page bundle so all pages share one look.
+   Fonts are licensed via Envato Elements for this site only (see /fonts/lantern/LICENCE.txt). */
+@font-face{font-family:"Bumble";font-weight:700;font-display:swap;src:url(/fonts/lantern/GCBumble-Bold.woff2) format("woff2")}
+@font-face{font-family:"Bumble";font-weight:800;font-display:swap;src:url(/fonts/lantern/GCBumble-ExtraBold.woff2) format("woff2")}
+@font-face{font-family:"Bumble";font-weight:900;font-display:swap;src:url(/fonts/lantern/GCBumble-Black.woff2) format("woff2")}
+@font-face{font-family:"Arturm";font-weight:400;font-display:swap;src:url(/fonts/lantern/GCarturm-Regular.woff2) format("woff2")}
+@font-face{font-family:"Arturm";font-weight:500;font-display:swap;src:url(/fonts/lantern/GCarturm-Medium.woff2) format("woff2")}
+@font-face{font-family:"Arturm";font-weight:700;font-display:swap;src:url(/fonts/lantern/GCarturm-Bold.woff2) format("woff2")}
+@font-face{font-family:"Planner Notes";font-weight:400;font-display:swap;src:url(/fonts/lantern/PlannerNotes.woff2) format("woff2")}
+
+:root{
+  --ll-night:#141B34;--ll-night-2:#1C2547;--ll-dusk:#26305A;
+  --ll-cream:#FBF6EC;--ll-paper:#F3EBDB;--ll-well:#E9E0CC;--ll-white:#FFFFFF;
+  --ll-ink:#141B34;--ll-ink-soft:#4A5275;--ll-line:#E2D8C4;
+  --ll-on-night:#FBF6EC;--ll-on-night-soft:#C9CCDB;
+  --ll-amber:#FFB547;--ll-amber-deep:#E8912A;--ll-amber-soft:rgba(255,181,71,.16);
+  --ll-teal:#2BB8A6;--ll-coral:#FF7A59;--ll-violet:#8B7CF6;
+  --ll-teal-ink:#0E7468;--ll-coral-ink:#B5402A;--ll-violet-ink:#5B4BC4;--ll-amber-ink:#8A5300;
+  --ll-display:"Bumble","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --ll-body:"Arturm","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --ll-hand:"Planner Notes","Comic Neue","Segoe Print",cursive;
+  --ll-radius:18px;--ll-radius-lg:26px;
+  --ll-spring:cubic-bezier(.2,.9,.3,1.2);
+}
+
+/* Brand mark: four tilted tiles. Markup: <span class="ll-mark"><i></i><i></i><i></i><i></i></span> */
+.ll-mark{display:inline-grid;grid-template-columns:repeat(2,.56em);gap:.08em;transform:rotate(-7deg);flex:none}
+.ll-mark i{width:.56em;height:.56em;border-radius:.16em;display:block;box-shadow:inset 0 .06em 0 rgba(255,255,255,.3)}
+.ll-mark i:nth-child(1){background:var(--ll-amber)}
+.ll-mark i:nth-child(2){background:var(--ll-teal)}
+.ll-mark i:nth-child(3){background:var(--ll-coral)}
+.ll-mark i:nth-child(4){background:var(--ll-violet)}
+
+/* Lantern loader: replaces spinners. Markup: <span class="ll-loader" aria-hidden="true"><i></i><i></i><i></i><i></i></span> */
+.ll-loader{position:relative;display:inline-block;width:28px;height:28px;flex:none;vertical-align:middle}
+.ll-loader i{position:absolute;width:12px;height:12px;border-radius:4px;animation:ll-orbit 1.6s var(--ll-spring) infinite}
+.ll-loader i:nth-child(1){background:var(--ll-amber);left:0;top:0}
+.ll-loader i:nth-child(2){background:var(--ll-teal);right:0;top:0;animation-delay:.1s}
+.ll-loader i:nth-child(3){background:var(--ll-coral);left:0;bottom:0;animation-delay:.2s}
+.ll-loader i:nth-child(4){background:var(--ll-violet);right:0;bottom:0;animation-delay:.3s}
+@keyframes ll-orbit{0%,100%{transform:scale(1) rotate(0)}40%{transform:scale(.55) rotate(90deg)}70%{transform:scale(1.08) rotate(90deg)}}
+
+/* Mosaic tile progress. Markup: <div class="ll-tiles"><span class="ll-tile is-read"></span>… */
+.ll-tiles{display:grid;grid-template-columns:repeat(var(--ll-cols,6),minmax(0,1fr));gap:6px}
+.ll-tile{aspect-ratio:1;border-radius:28%;background:var(--ll-well);box-shadow:inset 0 2px 5px rgba(20,27,52,.08)}
+.ll-tile.is-read,.ll-tile.is-play,.ll-tile.is-explain,.ll-tile.is-new{box-shadow:inset 0 3px 0 rgba(255,255,255,.3),inset 0 -4px 0 rgba(0,0,0,.14)}
+.ll-tile.is-read{background:var(--ll-teal)}
+.ll-tile.is-play{background:var(--ll-coral)}
+.ll-tile.is-explain{background:var(--ll-violet)}
+.ll-tile.is-new{background:var(--ll-amber);animation:ll-drop .7s var(--ll-spring) both}
+@keyframes ll-drop{0%{transform:translateY(-36px) rotate(-14deg) scale(.8);opacity:0}60%{transform:translateY(2px) scale(1.06,.92);opacity:1}100%{transform:none}}
+
+/* Hand-written note: one per screen at most, never for instructions. */
+.ll-note{font-family:var(--ll-hand);font-size:1.5em;line-height:1.1;color:var(--ll-coral-ink);transform:rotate(-3deg);display:inline-block}
+
+@media (prefers-reduced-motion:reduce){.ll-loader i,.ll-tile.is-new{animation:none}}
+.reduce-motion .ll-loader i,.reduce-motion .ll-tile.is-new{animation:none}

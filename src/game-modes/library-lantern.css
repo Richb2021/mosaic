@@ -1,0 +1,50 @@
+/* Lantern Light for the game library page only. Scoped to #game-library and the
+   library dialogs so the game screens keep their own art direction. */
+#game-library{background:var(--ll-night);color:var(--ll-on-night);font-family:var(--ll-body);font-size:16px;min-height:100vh}
+#game-library a{color:var(--ll-on-night)}
+.library-heading{max-width:none;padding:18px max(20px,4vw);border-bottom:1px solid rgba(251,246,236,.08);background:var(--ll-night)}
+.library-brand{display:flex;align-items:center;gap:12px;font:900 28px/1 var(--ll-display);color:var(--ll-on-night)!important}
+.library-brand .ll-mark{font-size:30px}
+.library-heading nav{gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:15px;font-weight:700}
+.library-heading nav a,.library-heading button{color:var(--ll-on-night-soft)!important;background:transparent;border:0;border-radius:999px;padding:9px 14px;text-decoration:none;font:700 15px var(--ll-body)}
+.library-heading nav a:hover,.library-heading button:hover{background:rgba(251,246,236,.08);color:var(--ll-on-night)!important}
+.library-intro{padding:44px 4vw 26px;display:flex;flex-direction:column;gap:10px}
+.library-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ll-amber)}
+.library-intro h1{font:900 clamp(36px,4.4vw,58px)/1.04 var(--ll-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.library-intro p{color:var(--ll-on-night-soft);font-size:18px}
+.game-posters{gap:24px}
+.game-poster{border:0;background:var(--ll-cream);color:var(--ll-ink);border-radius:26px;overflow:hidden;transition:transform .25s var(--ll-spring),box-shadow .25s}
+.game-poster:hover{transform:translateY(-4px);box-shadow:0 18px 36px rgba(0,0,0,.35),0 0 0 3px var(--ll-amber)}
+.poster-art{height:250px;padding:24px}
+.poster-art:before{background:linear-gradient(transparent 35%,rgba(20,27,52,.92))}
+.poster-type{align-self:flex-start;background:rgba(20,27,52,.8);color:var(--ll-on-night);font:700 13px var(--ll-body);border-radius:999px;padding:6px 12px}
+.poster-art h2{font:900 38px/1.05 var(--ll-display);color:var(--ll-on-night);margin:10px 0 0}
+.poster-content{padding:18px 24px 24px}
+.poster-content p{color:var(--ll-ink-soft);font-size:16px;min-height:0}
+.poster-content label{color:var(--ll-ink);font:700 14px var(--ll-body);margin:14px 0 8px}
+.poster-content select{background:var(--ll-white);border:1.5px solid #D8CCB3;color:var(--ll-ink);border-radius:14px;padding:12px 14px;font:16px var(--ll-body);min-height:50px}
+.poster-actions{flex-wrap:wrap}
+.poster-actions button,.poster-actions a{border:1.5px solid var(--ll-line);background:var(--ll-white);color:var(--ll-ink)!important;border-radius:999px;padding:11px 18px;font:700 15px var(--ll-body);text-decoration:none}
+.poster-actions .primary,#game-library .rpg-play-link{background:var(--ll-amber);border-color:var(--ll-amber);color:var(--ll-ink)!important;box-shadow:0 4px 0 var(--ll-amber-deep)}
+#game-library .rpg-play-link{display:inline-block;border-radius:999px;padding:12px 22px;font-weight:700;text-decoration:none}
+.library-foot{border-top:1px solid rgba(251,246,236,.08)}
+.library-foot h2{font:800 24px var(--ll-display)}
+.library-foot p{color:var(--ll-on-night-soft)}
+.library-notice{color:var(--ll-amber)!important}
+.modes-library .panel{background:var(--ll-cream);color:var(--ll-ink);border:0;border-radius:26px;box-shadow:0 30px 80px rgba(0,0,0,.5);font-family:var(--ll-body)}
+.modes-library h2,.modes-library h3{font-family:var(--ll-display);font-weight:800;color:var(--ll-ink)}
+.modes-library .modal-close{color:var(--ll-ink)}
+.modes-library input:not([type=checkbox]),.modes-library select,.modes-library textarea{background:var(--ll-white);border:1.5px solid #D8CCB3;color:var(--ll-ink);border-radius:14px}
+.modes-library button{background:var(--ll-white);border:1.5px solid var(--ll-line);color:var(--ll-ink);border-radius:999px;font-weight:700}
+.modes-library button.primary{background:var(--ll-amber);border-color:var(--ll-amber);color:var(--ll-ink)}
+.modes-library input[type=checkbox]{accent-color:var(--ll-ink)}
+.modes-library .workshop-notice{border-left:0;background:var(--ll-paper);border-radius:14px}
+.modes-library .resource-status,.modes-library summary{color:var(--ll-violet-ink)}
+.modes-library .resource-row small,.modes-library blockquote footer{color:var(--ll-ink-soft)}
+.modes-library blockquote{border-left:3px solid var(--ll-teal);background:var(--ll-paper);border-radius:0 12px 12px 0}
+@media (prefers-reduced-motion:reduce){.game-poster{transition:none}}
+@media (max-width:760px){
+  .library-heading{flex-direction:column;align-items:flex-start;gap:12px}
+  .library-heading nav{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;width:100%;justify-content:flex-start;gap:4px;padding-bottom:4px;scrollbar-width:none}
+  .library-heading nav a,.library-heading nav button{white-space:nowrap;background:rgba(251,246,236,.06)}
+}
