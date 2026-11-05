@@ -147,3 +147,15 @@ button.cl-kpi{cursor:pointer}
 .cl-inbox .cl-pick button[aria-pressed="true"]{background:var(--ll-amber-soft);border-color:var(--ll-amber)}
 @media (max-width:600px){.cl-inbox-item .cl-ex-head{flex-wrap:wrap}}
 .cl-kpi span small{display:block}
+/* Invite pupils, disabled-button hints and the teacher-verification notice. */
+.cl-hint{font-size:13px;color:var(--ll-ink-soft);font-weight:500}
+.cl-join .cl-hint,.cl-join .cl-join-note{flex-basis:100%}
+.cl-invite-open{margin-top:10px}
+.cl-invite label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px;margin:0}
+.cl-invite label small{font-weight:400;color:var(--ll-ink-soft)}
+.cl-invite label.check{flex-direction:row;align-items:flex-start;gap:10px;font-weight:500}
+.cl-invite textarea,.cl-invite input:not([type=checkbox]),.cl-invite select{border-radius:14px;border:1.5px solid #D8CCB3;padding:10px 12px;font:15px var(--ll-body);color:var(--ll-ink);background:var(--ll-white);width:100%;box-sizing:border-box}
+.cl-invite-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cl-invite-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cl-inline-link{padding:0!important;min-height:0!important;display:inline;font:inherit;text-decoration:underline}
+@media(max-width:760px){.cl-invite-fields{grid-template-columns:1fr}}

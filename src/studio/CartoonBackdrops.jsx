@@ -24,7 +24,7 @@ export function CartoonBackdrops({job,client,onChange=()=>{}}){
  if(!data)return error?<section className="background-media"><h4>Backdrops made for this story</h4><p role="alert">{error}</p></section>:null;
  const cost=data.scenes.length*data.costPerImageUsd,approved=set?.status==='approved',ready=set&&Object.values(set.scenes).some(s=>s.attempts[s.chosen]?.status==='ready');
  return <section className="background-media cartoon-backdrops"><h4>Backdrops made for this story</h4>
-  <p>Muse Image paints one backdrop for each setting this episode uses ({data.scenes.length}), so a story about the subject is set there. Each picture costs about ${data.costPerImageUsd.toFixed(2)} (about ${cost.toFixed(2)} for this episode) and counts toward your daily generation allowance. You can remake each one once. Learners only see them after you approve; any scene without one keeps the standard setting.</p>
+  <p>The AI paints one backdrop for each setting this episode uses ({data.scenes.length}), so a story about the subject is set there. Each picture costs about ${data.costPerImageUsd.toFixed(2)} (about ${cost.toFixed(2)} for this episode) and counts toward your daily generation allowance. You can remake each one once. Learners only see them after you approve; any scene without one keeps the standard setting.</p>
   {!data.enabled&&<p role="status">Story backdrops are switched off for this site. The standard settings are used.</p>}
   {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}
   <label>Art style<select value={style} disabled={!!busy} onChange={e=>{setStyle(e.target.value);setChecked(false)}}>{Object.entries(data.styles).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>

@@ -1,4 +1,6 @@
 import {sqlDB,DAY,parse,need} from './data-control.js';
+import {readAllowance,publicAllowance,ALLOWANCE_HINT,TYPICAL_GENERATION_USD} from './allowance.js';
+import {generationBudget} from './workshop-budget.js';
 // Official list prices verified 1 November 2026 (Muse Image: 4 November 2026, flat $0.01 per returned image). These are estimates, not bills.
 export function costRates(env){
  const value=(key,fallback)=>env[key]===undefined?fallback:/^\d+(\.\d+)?$/.test(String(env[key]))&&Number(env[key])<=1000000?Number(env[key]):null;
@@ -35,11 +37,20 @@ export function reservedCost(model,request,rates){
  throw Object.assign(Error('Unpriced provider request is disabled.'),{status:503});
 }
 const allocationSQL="MAX(COALESCE(estimate_micros,0),CASE WHEN status='measured' THEN 0 ELSE COALESCE(json_extract(rates,'$.reservedMicros'),10000000) END)";
+export const GLOBAL_LIMIT_MESSAGE='The app’s daily AI limit for everyone has been reached. It resets at midnight UTC. Saved activities, recordings and manual edits remain available. No provider request was sent.';
+export const PERSONAL_LIMIT_MESSAGE='Your daily AI budget is fully allocated. Saved activities, recordings and manual edits remain available. No provider request was sent. '+ALLOWANCE_HINT;
 export async function budgetStatus(env,siteOwner,now=Date.now()){
  let limits;try{limits=budgetLimits(env)}catch{return {configured:false,limitUsd:0,allocatedUsd:0,remainingUsd:0,notice:'Generation budget configuration needs attention. Saved learning and data controls remain available.'}}
- const start=Math.floor(now/DAY)*DAY,db=sqlDB(env.DB);
+ const start=Math.floor(now/DAY)*DAY,db=sqlDB(env.DB),allowance=await readAllowance(db.one,siteOwner,now);
+ const limit=allowance?Math.max(Math.round(allowance.dailyUsd*1e6),limits.personal):limits.personal;
  const personal=await db.one(`SELECT COALESCE(SUM(${allocationSQL}),0) AS n FROM cost_receipts WHERE site_owner=? AND created>=?`,siteOwner,start);
- return {limitUsd:limits.personal/1e6,allocatedUsd:personal.n/1e6,remainingUsd:Math.max(0,limits.personal-personal.n)/1e6,resetsAt:start+DAY};
+ const everyone=await db.one(`SELECT COALESCE(SUM(${allocationSQL}),0) AS n FROM cost_receipts WHERE created>=?`,start);
+ // An allowance never lifts the app-wide cap, so what is left is the smaller of the two.
+ const globalLeft=Math.max(0,limits.global-everyone.n),remaining=Math.min(Math.max(0,limit-personal.n),globalLeft);
+ let generations=null;try{const g=await generationBudget(db.one,siteOwner,env,now);generations={limit:g.limit,used:g.used,remaining:g.remaining,nextAvailableAt:g.nextAvailableAt}}catch{}
+ const enforced=env.PILOT_ENABLED==='true',byCost=Math.floor(remaining/1e6/TYPICAL_GENERATION_USD+1e-9);
+ const aboutGenerations=generations?enforced?Math.min(generations.remaining,byCost):generations.remaining:enforced?byCost:null;
+ return {limitUsd:limit/1e6,allocatedUsd:personal.n/1e6,remainingUsd:remaining/1e6,resetsAt:start+DAY,appLimitReached:globalLeft<=0,allowance:publicAllowance(allowance),generations,aboutGenerations};
 }
 export async function startCost(env,{id,siteOwner,learnerOwner=null,model,request,now=Date.now()}){
  const db=sqlDB(env.DB),prior=await db.one('SELECT site_owner FROM cost_receipts WHERE id=?',id);
@@ -49,9 +60,14 @@ export async function startCost(env,{id,siteOwner,learnerOwner=null,model,reques
  need(controls.paused!==true,'New generation is paused by the administrator. Saved activities and recordings remain available.',503);
  if(!enforced){await db.run('INSERT OR IGNORE INTO cost_receipts(id,site_owner,learner_owner,model,status,rates,created,updated) VALUES(?,?,?,?,?,?,?,?)',id,siteOwner,learnerOwner,model,'submitted',JSON.stringify(rates),now,now);return;}
  const reserved=reservedCost(model,request,rates);need(reserved!==null,'Provider prices are unavailable. No request was sent.',503);
- const limits=budgetLimits(env),start=Math.floor(now/DAY)*DAY;
- const result=await db.run(`INSERT OR IGNORE INTO cost_receipts(id,site_owner,learner_owner,model,status,rates,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COALESCE(SUM(${allocationSQL}),0) FROM cost_receipts WHERE site_owner=? AND created>=?)+?<=? AND (SELECT COALESCE(SUM(${allocationSQL}),0) FROM cost_receipts WHERE created>=?)+?<=?`,id,siteOwner,learnerOwner,model,'submitted',JSON.stringify({...rates,reservedMicros:reserved}),now,now,siteOwner,start,reserved,limits.personal,start,reserved,limits.global);
- need(result.meta.changes===1,'The daily generation budget is fully allocated. Saved activities, recordings and manual edits remain available. No provider request was sent.',429);
+ const limits=budgetLimits(env),start=Math.floor(now/DAY)*DAY,allowance=await readAllowance(db.one,siteOwner,now);
+ // An unexpired allowance only ever raises this person's daily limit; the app-wide cap below is unchanged.
+ const personal=allowance?Math.max(Math.round(allowance.dailyUsd*1e6),limits.personal):limits.personal;
+ const result=await db.run(`INSERT OR IGNORE INTO cost_receipts(id,site_owner,learner_owner,model,status,rates,created,updated) SELECT ?,?,?,?,?,?,?,? WHERE (SELECT COALESCE(SUM(${allocationSQL}),0) FROM cost_receipts WHERE site_owner=? AND created>=?)+?<=? AND (SELECT COALESCE(SUM(${allocationSQL}),0) FROM cost_receipts WHERE created>=?)+?<=?`,id,siteOwner,learnerOwner,model,'submitted',JSON.stringify({...rates,reservedMicros:reserved}),now,now,siteOwner,start,reserved,personal,start,reserved,limits.global);
+ if(result.meta.changes!==1){
+  const everyone=await db.one(`SELECT COALESCE(SUM(${allocationSQL}),0) AS n FROM cost_receipts WHERE created>=?`,start);
+  need(false,everyone.n+reserved>limits.global?GLOBAL_LIMIT_MESSAGE:PERSONAL_LIMIT_MESSAGE,429);
+ }
 }
 export async function finishCost(env,{id,siteOwner,usage=null,status='unknown',now=Date.now()}){
  const db=sqlDB(env.DB),receipt=await db.one('SELECT * FROM cost_receipts WHERE id=? AND site_owner=?',id,siteOwner);if(!receipt)return;

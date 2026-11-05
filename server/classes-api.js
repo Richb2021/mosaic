@@ -6,7 +6,8 @@
 import {readJSON,noStore} from './ncb-auth.js';
 import {sqlDB,parse,need,DAY,auditEvent} from './data-control.js';
 import {activeCourseGrant,grantChapters,classAssignable} from './course-grants.js';
-import {admission} from './pilot-access.js';
+import {admission,canAdmitMinors} from './pilot-access.js';
+import {distinctLabels} from '../src/learner-labels.js';
 import {readSharedReport,readHelpSeen} from './course-sharing-api.js';
 import {workScope,feedbackSlot} from './teacher-review.js';
 import {assignedScores,scoreSummary} from './assigned-scores.js';
@@ -41,6 +42,14 @@ const randomId=()=>[...crypto.getRandomValues(new Uint8Array(8))].map(b=>b.toStr
 const upsert=(db,scope,value,now)=>db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',scope,JSON.stringify(value),now);
 // Teachers see a per-class handle, never the learner's account reference.
 const handleOf=async(classId,learner)=>(await digest('class-handle:'+classId+':'+learner)).slice(0,32);
+// The name a teacher knows each learner by: the label they typed when they invited them, else the class label
+// (the learner's display name). Clashing names get " · 2" and so on. Never an email or account reference.
+export const UNDER18_CODE_NOTICE='Pupils under 18 join with a personal invitation from their teacher.';
+async function classLabels(db,all,principal){
+ const own=new Map((await db.all("SELECT scope,policy FROM data_controls WHERE scope LIKE 'pilot-member:%' AND json_extract(policy,'$.manager')=?",principal)).map(r=>[r.scope.slice(13),parse(r.policy).label||'']));
+ const names=distinctLabels(all.map(m=>({label:own.get(m.learner)||m.label,joined:m.joined})));
+ return new Map(all.map((m,i)=>[m.learner,names[i]]));
+}
 
 async function loadClass(db,id){need(idOk(id),'Choose a class.');const row=await db.one('SELECT policy FROM data_controls WHERE scope=?',classScope(id));need(row,'Class not found.',404);return {c:parse(row.policy),raw:row.policy}}
 async function saveClass(db,c,raw,now){const out=await db.run('UPDATE data_controls SET policy=?,updated=? WHERE scope=? AND policy=?',JSON.stringify(c),now,classScope(c.id),raw);need(out.meta.changes===1,'This class changed in another window. Reload and try again.',409)}
@@ -202,11 +211,11 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   need(teaches,'Only teachers can open a class overview.',403);const {c}=await ownClass(input.id);
   const all=await members(db,c.id),start=Math.max(0,Number.parseInt(input.cursor||'0',10)||0),page=all.slice(start,start+20);
   const shares=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-share:'+c.id+':%')).map(r=>parse(r.policy));
-  const sharers=new Set(shares.map(s=>s.learner));
+  const sharers=new Set(shares.map(s=>s.learner)),labels=await classLabels(db,all,principal);
   const courses=await readCourses(env,store,db,principal,siteOwner,page,at),learners=[],inbox=[];
   for(const m of page){
    const mine=courses.get(m.learner)||[],r=summarise(mine),own=shares.filter(s=>s.learner===m.learner),times=[r.updated,...own.map(s=>s.shared)].filter(Boolean);
-   const handle=await handleOf(c.id,m.learner),label=m.label||'Learner';
+   const handle=await handleOf(c.id,m.learner),label=labels.get(m.learner)||'Learner';
    learners.push({handle,label,joined:m.joined,group:groupOf(await admission(env,m.learner),principal),scores:mine.length?scoreSummary(mine.map(x=>x.scores||{steps:[]})):null,lastShared:times.length?Math.max(...times):null,latest:r.latest||null,help:!!r.help,explanations:own.length,unread:own.filter(s=>!s.feedback).length});
    // The inbox: work learners submitted for feedback, and help they asked for. "Done" means you replied or marked it seen.
    for(const x of mine){
@@ -217,7 +226,6 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   inbox.sort((a,b)=>a.done-b.done||b.at-a.at);
   const review=await db.all("SELECT id,draft FROM workshop_jobs WHERE owner=? AND status='review' ORDER BY updated DESC LIMIT 5",siteOwner);
   const reviewCount=(await db.one("SELECT COUNT(*) AS n FROM workshop_jobs WHERE owner=? AND status='review'",siteOwner))?.n||0;
-  const labels=new Map(all.map(m=>[m.learner,m.label]));
   const recent=[];for(const s of shares.sort((a,b)=>b.shared-a.shared).slice(0,20))recent.push({handle:await handleOf(c.id,s.learner),label:labels.get(s.learner)||'Learner',key:s.key,title:s.title,text:s.text,shared:s.shared,feedback:s.feedback||null});
   await auditEvent(env,'learner:'+owner,'class-overview-viewed',{},at);
   // Course-report counts are read for this page only; explanation counts cover the whole class.
@@ -236,7 +244,7 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   // left out so they can't be matched to names, and nothing here is a mark.
   need(teaches,'Only teachers can export a class.',403);const {c}=await ownClass(input.id);
   need(!input.cursor||handleOk(input.cursor),'Invalid export page.');
-  const all=[];for(const m of await members(db,c.id))all.push({...m,handle:await handleOf(c.id,m.learner)});
+  const all=[],everyone=await members(db,c.id),labels=await classLabels(db,everyone,principal);for(const m of everyone)all.push({...m,label:labels.get(m.learner),handle:await handleOf(c.id,m.learner)});
   all.sort((a,b)=>a.handle.localeCompare(b.handle));
   const rest=input.cursor?all.filter(m=>m.handle>input.cursor):all,page=rest.slice(0,20);
   const shares=(await db.all("SELECT policy FROM data_controls WHERE scope LIKE ?",'class-share:'+c.id+':%')).map(r=>parse(r.policy));
@@ -327,6 +335,9 @@ export async function classesAPI(req,env,{owner,principal,siteOwner,store,access
   const link=parse((await db.one('SELECT policy FROM data_controls WHERE scope=?',codeScope(code)))?.policy);if(!link.classId)return failed('That code doesn’t match a class. Check it with your teacher.',404);
   const {c}=await loadClass(db,link.classId);if(c.archived||c.code!==code)return failed('This class is closed.',409);
   need(c.owner!==principal,'You teach this class.',409);
+  // Under-18s (and anyone whose age range isn't recorded) can't use a code to reach a teacher the administrator hasn't verified.
+  // Not a failed guess, so it doesn't count towards the rate limit.
+  if(access.ageBand!=='18plus')need(canAdmitMinors(await admission(env,c.owner)),UNDER18_CODE_NOTICE,403);
   // Not a failed guess (the code is right), so it doesn't count towards the rate limit.
   need(!await db.one('SELECT 1 AS x FROM data_controls WHERE scope=?',removedScope(c.id,principal)),'Your teacher took you out of this class, so this code won’t add you back. Ask your teacher if you should rejoin.',403);
   const joinedCount=(await db.one("SELECT COUNT(*) AS n FROM data_controls WHERE scope LIKE 'class-member:%' AND json_extract(policy,'$.learner')=?",principal))?.n||0;
