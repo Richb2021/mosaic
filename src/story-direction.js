@@ -111,6 +111,18 @@ export const AUDIENCE_SUSPENSE=Object.freeze({
  secondary:'Suspense for secondary: real rivalry and stakes, a reversal or twist the learner can see coming if they read the clues, and dramatic irony where the learner knows something a character does not.',
  adult:'Suspense for adults: sharper consequences and trade-offs, an uncomfortable dilemma, dry understatement instead of exclamation marks, and an ending that respects ambiguity.',
 });
+// The learner's weak spot becomes the story's turning point: a character makes that exact mistake,
+// it fails where everyone can see, and the learned idea fixes it. The learner is never singled out.
+export const WEAK_SPOT_RULE='WEAK SPOT AS THE TURNING POINT: if the learner details below name a difficulty, misconception or point to revisit that relates to this topic, the early try-fail attempt is exactly that mistaken idea, made confidently by a character (never the learner, never described as anyone\'s weakness), it fails visibly, and the discovery and payoff fix it with the evidence, said in plain words. If nothing relevant is named, use the most tempting misconception the evidence warns against or that a beginner would make. Name the mistaken idea in mistake.';
+export const WEAK_SPOT_SOURCES=Object.freeze({game:'Learner details: learnerContext.',creative:'Learner details: learner.focus and each adaptation pointToRevisit (feedback on a recent answer that differed from the reviewed one).'});
+// Only text that sounds like a difficulty counts; "Year 8, getting started" names none.
+const DIFFICULTY=/\b(struggl\w*|confus\w*|mix(?:es|ing)? up|muddl\w*|difficult\w*|hard time|finds? [^.]{0,40}hard|misconceptions?|forget\w*|weak\w*|trouble|thinks? that|believes?|mistak\w*|wrongly|unsure|not sure|keeps? (?:getting|thinking|saying)|gets? [^.]{0,30}wrong)\b/i;
+export function weakSpotTarget({level,focus,adaptation}={}){
+ const parts=[];if(typeof focus==='string'&&focus.trim())parts.push(focus.trim());
+ for(const a of Array.isArray(adaptation)?adaptation:[])if(typeof a?.pointToRevisit==='string'&&a.pointToRevisit.trim())parts.push(a.pointToRevisit.trim());
+ if(typeof level==='string'&&DIFFICULTY.test(level))parts.push(level.trim());
+ return parts.length?parts.join(' ').slice(0,600):null;
+}
 // Cartoons and podcasts have no audience picker, so the learner's stage sets the band.
 export function audienceFromStage(stage){
  const s=String(stage||'').toLowerCase();
@@ -122,11 +134,11 @@ export function audienceFromStage(stage){
 // Games return a storyArc plan alongside the game. The server checks it against the player text.
 export function storyArcBrief(template){
  const keys={'underlight-v1':'route, balance, transfer','adventure-v1':'workshop, woods, archive, sequence, repair, decision','quiz-v1':'question-0 to question-7','sports-v1':'question-0 to question-5','novel-v1':'scene-0 to scene-5','town-v1':'council-0 to council-3','economy-v1':'council-0 to council-5','draft-v1':'each scenario id in order','merge-v1':'order-0 to order-2'}[template];
- return `Also return storyArc, a plan the server checks and players never see: dramaticQuestion (one "will/can…?" question the hook raises), stakes (what is lost if they fail), clock (the in-story deadline), payoff (how the learned idea wins at the end), and beats in play order (${keys}), each with activity, learning (the idea that resolves it) and openLoop (the exact last sentence of that activity's player text that leaves the next question open; leave the final beat's openLoop as its resolution line).`;
+ return `Also return storyArc, a plan the server checks and players never see: dramaticQuestion (one "will/can…?" question the hook raises), stakes (what is lost if they fail), clock (the in-story deadline), mistake (the mistaken idea a character tries first, and who), payoff (how the learned idea wins at the end), and beats in play order (${keys}), each with activity, learning (the idea that resolves it) and openLoop (the exact last sentence of that activity's player text that leaves the next question open; leave the final beat's openLoop as its resolution line).`;
 }
 export function storyCraft(template,story){
  const audience=AUDIENCE_GUIDE[story?.audience]||'Audience: pitch humour and stakes to the learner context given.';
- return `STORY CRAFT (apply after every rule above; rules win if they conflict). ${VOICE_CARDS[template]||''} ${styleDirection(story)} ${LEARNING_IN_PLOT} ${ANTICIPATION} ${FORMAT_ARCS[template]||''} ${audience} ${AUDIENCE_SUSPENSE[story?.audience]||''} ${PLAYER_TEXT_RULE}`;
+ return `STORY CRAFT (apply after every rule above; rules win if they conflict). ${VOICE_CARDS[template]||''} ${styleDirection(story)} ${LEARNING_IN_PLOT} ${ANTICIPATION} ${WEAK_SPOT_RULE} ${WEAK_SPOT_SOURCES.game} ${FORMAT_ARCS[template]||''} ${audience} ${AUDIENCE_SUSPENSE[story?.audience]||''} ${PLAYER_TEXT_RULE}`;
 }
 
 // How many of the chapter's source passages the game actually uses (cites somewhere in play).

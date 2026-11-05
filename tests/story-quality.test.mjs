@@ -215,3 +215,30 @@ test('a countdown that tightens through the second half counts as rising stakes'
  c.questions.forEach((q,i)=>{q.prompt=`${12-2*i} minutes left! ${q.prompt}`});c.questions.at(-1).prompt='Last possession, one minute left! '+c.questions.at(-1).prompt;
  assert.equal(scoreStory(c,{story}).criteria.stakes,2);
 });
+
+test('the learner’s weak spot becomes the story’s first mistake, is checked, and earns the revision if missed',async()=>{
+ const {weakSpotTarget,WEAK_SPOT_RULE}=await import('../src/story-direction.js');const {weakSpotUse}=await import('../src/story-quality.js');
+ assert.equal(weakSpotTarget({level:'Year 8, getting started'}),null,'a plain level names no weak spot');
+ assert.match(weakSpotTarget({level:'Year 4, keeps getting arrow direction wrong'}),/arrow direction/);
+ assert.match(weakSpotTarget({focus:'mixing up producers and consumers',adaptation:[{pointToRevisit:'That puts the rabbit in the producer seat.'},{pointToRevisit:null}]}),/producers and consumers.*rabbit in the producer seat/);
+ // Prompts carry the rule and the plan asks for the mistake, for games and for episodes.
+ const evidence=[{id:'source-1',title:'Notes',locator:'Paragraph 1',excerpt:'Plants are producers. Rabbits are consumers that eat plants. Arrows point from food to eater.'}];
+ const game=generationRequest({chapterId:'g',topicId:'t',goal:'Food webs',level:'Year 4, keeps pointing arrows at the food',evidence,template:'quiz-v1',story:{genre:'comedy',interest:'Football',audience:'primary'}});
+ assert.ok(game.input[0].content.includes(WEAK_SPOT_RULE));assert.ok(game.text.format.schema.properties.storyArc.required.includes('mistake'));
+ const ep=creativeRequest({id:'e',kind:'podcast',storyVersion:2,context:{evidence,story:{genre:'comedy',interest:'Football'},learner:{focus:'mixing up producers and consumers'}}});
+ assert.ok(ep.input[0].content.includes(WEAK_SPOT_RULE));assert.ok(ep.text.format.schema.properties.story.required.includes('mistake'));
+ // The check: used, missed, or not about this material.
+ const q=grippingQuiz();q.sources=[{id:'s',excerpt:'Plants are producers. Rabbits are consumers. Arrows show energy moving from food to eater.'}];
+ q.questions[0].options[q.questions[0].solution].feedback='Juno points every arrow at the food, the seal buzzes and slams shut — energy moves from food to eater, so the arrows were backwards!';
+ assert.equal(weakSpotUse(q,'keeps pointing arrows at the food','Juno points arrows at the food').used,true);
+ assert.equal(weakSpotUse(grippingQuiz(),'mixes up producers and consumers',null).relevant,false,'water quiz: this weak spot is about other material');
+ const missed=structuredClone(q);missed.questions[0].options[missed.questions[0].solution].feedback='The seal clicks open. But the next seal is dark — what is behind it?';
+ const m=weakSpotUse(missed,'thinks rabbits are producers','');assert.equal(m.relevant,true);assert.equal(m.used,false);
+ assert.equal(weakSpotUse(q,null,null),null,'no weak spot named, nothing expected');
+ // A missed weak spot earns the one revision even when the story otherwise scores well, and is fixed first.
+ const strong={score:14,coreZero:[],criteria:{},fixes:[],arc:{dramaticQuestion:'Q?'},weakSpot:{target:'x',relevant:true,used:false}};
+ assert.ok(shouldRetryStory({},{},strong));const r=retryState({},strong,{title:'first'});assert.equal(r.fixes[0].criterion,'weakSpot');
+ assert.deepEqual(chooseAfterRetry(r,{title:'second'},{score:13,coreZero:[],fixes:[],weakSpot:{used:true}}).content,{title:'second'},'fixing the weak spot is worth one point');
+ assert.deepEqual(chooseAfterRetry(r,{title:'second'},{score:12,coreZero:[],fixes:[],weakSpot:{used:true}}).content,{title:'first'},'but not two');
+ assert.ok(!shouldRetryStory({},{},{...strong,weakSpot:{target:'x',relevant:false,used:null}}),'an unrelated weak spot never costs a revision');
+});

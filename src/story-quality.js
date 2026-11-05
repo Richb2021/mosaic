@@ -179,20 +179,36 @@ function norm(s){return String(s||'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').
 
 // ---- The storyArc plan the model returns alongside the game (never shown to players) ----------
 const STR=max=>({type:'string',minLength:1,maxLength:max});
-export const STORY_ARC_SCHEMA=Object.freeze({type:'object',additionalProperties:false,required:['dramaticQuestion','stakes','clock','beats','payoff'],properties:{
- dramaticQuestion:STR(200),stakes:STR(300),clock:STR(200),payoff:STR(400),
+export const STORY_ARC_SCHEMA=Object.freeze({type:'object',additionalProperties:false,required:['dramaticQuestion','stakes','clock','mistake','beats','payoff'],properties:{
+ dramaticQuestion:STR(200),stakes:STR(300),clock:STR(200),mistake:STR(300),payoff:STR(400),
  beats:{type:'array',minItems:1,maxItems:12,items:{type:'object',additionalProperties:false,required:['activity','learning','openLoop'],properties:{activity:STR(60),learning:STR(240),openLoop:STR(240)}}},
 }});
 export function validateStoryArc(raw){
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return null;
  const t=(v,n)=>typeof v==='string'&&v.trim()?v.trim().slice(0,n):'';
- const arc={dramaticQuestion:t(raw.dramaticQuestion,200),stakes:t(raw.stakes,300),clock:t(raw.clock,200),payoff:t(raw.payoff,400),beats:(Array.isArray(raw.beats)?raw.beats:[]).slice(0,12).map(b=>({activity:t(b?.activity,60),learning:t(b?.learning,240),openLoop:t(b?.openLoop,240)})).filter(b=>b.activity&&b.openLoop)};
+ const arc={dramaticQuestion:t(raw.dramaticQuestion,200),stakes:t(raw.stakes,300),clock:t(raw.clock,200),mistake:t(raw.mistake,300),payoff:t(raw.payoff,400),beats:(Array.isArray(raw.beats)?raw.beats:[]).slice(0,12).map(b=>({activity:t(b?.activity,60),learning:t(b?.learning,240),openLoop:t(b?.openLoop,240)})).filter(b=>b.activity&&b.openLoop)};
  return arc.dramaticQuestion?arc:null;
 }
 
 // The plan (story, storyArc) is never shown to players, and the reflection (question, debrief) is
 // where the brief allows an analogy's limits to be stated, so neither is scrubbed or penalised.
 const NOT_SCRUBBED=['sources','learningMap','storyArc','story','question','debrief'];
+// ---- The learner's weak spot ------------------------------------------------------------------
+// Does the story's early mistake take on the learner's weak spot? Compares word stems, so it is a
+// check that the topic of the mistake matches, not a judgement of how well it is handled. It is
+// only expected when the weak spot relates to this material.
+const stems=s=>new Set(keyWords(s).map(w=>w.slice(0,5)));
+export function weakSpotUse(content,target,mistake){
+ if(!target)return null;
+ const want=stems(target),material=stems(join((content?.sources||[]).map(x=>x.excerpt),(content?.learningMap||[]).map(x=>x.objective),playerText(content)));
+ const relevant=[...want].filter(w=>material.has(w));
+ if(relevant.length<Math.min(2,want.size))return {target:target.slice(0,200),relevant:false,used:null};
+ const beats=storyView(content).beats,early=stems(join(content?.hook,content?.segments?.slice(0,Math.ceil(content.segments.length*0.6)).map(x=>x.text),beats.slice(0,Math.ceil(beats.length*0.6)).flatMap(b=>[b.text,b.after]),mistake));
+ const hits=relevant.filter(w=>early.has(w)).length;
+ return {target:target.slice(0,200),relevant:true,used:hits>=Math.min(2,relevant.length)};
+}
+export const WEAK_SPOT_FIX={criterion:'weakSpot',label:'Weak spot as the turning point',why:'the early mistake does not take on the learner\'s weak spot',fix:'Make the early try-fail mistake exactly the difficulty named in the learner details, made confidently by a character, failing visibly, then fixed by the evidence; never say it is anyone\'s weakness. Name it in mistake.'};
+
 // ---- Deterministic repair ---------------------------------------------------------------------
 // Only safe edits: remove disclaimer sentences from player text, and put the model's own planned
 // open loops and dramatic question into the text when it forgot to. Each edit is kept only if the

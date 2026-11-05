@@ -21,6 +21,17 @@ Each technique is written into the prompt, and each one has a check (next sectio
 
 Existing rules stay in force and win any conflict: learning drives the plot (`LEARNING_IN_PLOT`), interest and style must shape the story (`styleDirection`), audience voice (`AUDIENCE_GUIDE`), no disclaimers in player text (`PLAYER_TEXT_RULE`), Mira and Kit are adults in their early twenties, and characters are always original.
 
+## The learner's weak spot is the turning point
+
+The early "try, fail, learn" mistake is the learner's own difficulty, when one is known and relates to the material: a character confidently makes exactly that mistake, it fails visibly, and the learned idea fixes it. The learner is never singled out; it is just the character's mistake. Otherwise the model uses the most tempting misconception for a beginner.
+
+| Format | Where the weak spot comes from |
+|---|---|
+| Cartoons and podcasts | The learner's "Areas for extra help" (`learner.focus`) and feedback on a recent answer that differed from the reviewed one (`adaptation[].pointToRevisit`). Both were already in the request; nothing new is sent. |
+| Games and RPG chapters | Only the learner description the author types (for example "keeps pointing arrows at the food"). A plain level such as "Year 8, getting started" names no weak spot. The learner record is not sent. |
+
+The plan names it (`storyArc.mistake` for games, `story.mistake` for episodes). `weakSpotUse` checks that the weak spot's key words appear in the early part of the story; if a relevant weak spot was clearly not used, that alone earns the one guided revision, and a revision that fixes it wins even at one point lower overall. A weak spot about other material never costs a revision.
+
 ## By format
 
 The arc has to fit each format's fixed structure. These are the `FORMAT_ARCS` in the prompt; "after a correct answer" names the exact field the learner sees, which is where the open loop goes and where repair writes it.

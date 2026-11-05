@@ -1,5 +1,5 @@
-import {GAME_STORY_BRIEF,storyBrief,storyCraft,storyArcBrief} from '../src/story-direction.js';
-import {STORY_ARC_SCHEMA,validateStoryArc,scoreStory,repairStory} from '../src/story-quality.js';
+import {GAME_STORY_BRIEF,storyBrief,storyCraft,storyArcBrief,weakSpotTarget} from '../src/story-direction.js';
+import {STORY_ARC_SCHEMA,validateStoryArc,scoreStory,repairStory,weakSpotUse} from '../src/story-quality.js';
 import {metaUsage} from './cost-ledger.js';
 import {LEARNING_MAP_SCHEMA,repairLearningMap} from '../src/learning-map.js';
 import {evidencePacket} from '../src/evidence-selection.js';
@@ -77,7 +77,8 @@ function revisionMessages(job){
 export function checkStory(content,job,arc){
  const repaired=repairStory(content,{arc,validate:c=>validateGenerated(structuredClone(c),job)});
  const report=scoreStory(repaired.content,{story:job.story,arc});
- return {content:repaired.content,storyCheck:{...report,repairs:repaired.notes,arc:arc||null}};
+ const weakSpot=weakSpotUse(repaired.content,weakSpotTarget({level:job.level}),arc?.mistake);
+ return {content:repaired.content,storyCheck:{...report,repairs:repaired.notes,arc:arc||null,...(weakSpot?{weakSpot}:{})}};
 }
 export function validateGenerated(raw,job){
  const template=templateOf(job),validator=templateValidator(template);requireValue(TEMPLATE_IDS.includes(template)&&typeof validator==='function','Unknown game format.');const c=validator(raw);
