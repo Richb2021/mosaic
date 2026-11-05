@@ -4,6 +4,18 @@ Mosaic turns reviewed learning material into a connected programme of games, Exp
 
 **Live:** [mosaic.richardbatt.com](https://mosaic.richardbatt.com) · [NoCodeBackend sign-in](https://mosaic.richardbatt.com/account.html). Static assets run on 20i; the Node.js API and private file storage run on Baldur. The old Sites host is retired. See [deployment and access](docs/DEPLOYMENT.md).
 
+
+## Licence and third-party assets
+
+The Mosaic code is released under the [MIT licence](LICENSE).
+
+Some assets used by the live site are licensed for use in Mosaic only and are **not included in this repository**:
+
+- **Fonts:** GC Bumble, GC Arturm and Planner Notes (Envato Elements). These go in `public/fonts/lantern/`. Without them, pages fall back to system fonts.
+- **3D models:** the Polyfork kit models (`public/assets/polyfork_*.glb`, see `public/assets/polyfork-manifest.json`). The 3D RPG needs your own licensed copies, or replacement models with the same names.
+
+Other bundled assets keep their own licences, for example the open-font licences in `public/fonts/` and the lip-sync licences in `public/lip-sync/v1/licenses/`.
+
 ## What is implemented
 
 | Area | Current behaviour |
