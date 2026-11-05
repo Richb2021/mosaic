@@ -2,7 +2,7 @@
 
 Every AI-written story in Mosaic (RPG chapters, game-library games, cartoons and podcasts) should make the learner want to know what happens next, and make the learning the only way to find out. This page lists the techniques we use, where they come from, how each format and age band applies them, and how the server checks and fixes a weak story.
 
-Code: prompts in `src/story-direction.js` (`ANTICIPATION`, `FORMAT_ARCS`, `AUDIENCE_SUSPENSE`, `storyArcBrief`), checks and repairs in `src/story-quality.js`, the one guided retry in `server/story-retry.js`.
+Learners and authors never see a score: the checks run behind the scenes so every story arrives already strengthened. Code: prompts in `src/story-direction.js` (`ANTICIPATION`, `FORMAT_ARCS`, `AUDIENCE_SUSPENSE`, `storyArcBrief`), checks and repairs in `src/story-quality.js`, the one guided retry in `server/story-retry.js`.
 
 ## The techniques
 
@@ -77,12 +77,12 @@ Grades: **strong** 13+, **good** 10–12, **needs work** 7–9, **weak** under 7
 
 Games return a `storyArc` with the game: `dramaticQuestion`, `stakes`, `clock`, `payoff`, and per beat the `learning` that resolves it and the `openLoop` line. Cartoons and podcasts add `dramaticQuestion` and `clock` to their existing story outline. The plan is kept beside the game in the job record, never inside the playable game, so every existing validator, player and published game is unchanged.
 
-### Repair, retry, warn — never drop
+### Repair and retry, behind the scenes — never drop
 
 1. **Safe repair** (always): remove disclaimer sentences from player text (never from the reflection or debrief, where an analogy's limits belong), add the model's own planned dramatic question to a hook with no goal, and add its own planned open loop to a beat that forgot it. Each edit is kept only if the game still passes its validator.
 2. **One guided retry** (only if the repaired story still scores under 10, or a core criterion is 0): the first draft goes back to the same model with the exact fixes. It has its own cost receipt (`<job>:story-retry`) inside the same daily caps, and is skipped if the budget is full. Operators can turn it off with `STORY_RETRY=off`.
-3. **Keep the better draft**: the revision wins only if it scores higher. If it fails, times out, scores lower or can't be sent, the first draft goes to review with a note saying so.
-4. **Warn the author**: the review screen shows "Story quality: good (12/16). To strengthen: …", scored live from the draft being reviewed, plus what the server already fixed.
+3. **Keep the better draft**: the revision wins only if it scores higher. If it fails, times out, scores lower or can't be sent, the first draft goes to review as normal.
+4. **Recorded, not shown**: the score, repairs and revision note are kept in the job record (`storyCheck`) for operators; review screens don't show them (owner decision, 4 Nov 2026). `storyQualityNotice` still exists if a line is wanted again.
 
 A generation is never silently dropped or rejected for story quality.
 

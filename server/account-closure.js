@@ -12,6 +12,8 @@ export async function requestClosure(env,{owner,siteOwner,user,store,now}){
  need(['active','revoked','closing'].includes(member.status),'Only an existing member can request learning-account closure.',403);
  if(saved.status==='provider-pending')return {status:'provider-pending'};
  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',memberScope,JSON.stringify({...member,status:'closing'}),now());
+ // An allowance request holds the person's name and email for the administrator; closing removes it and any allowance.
+ await db.run('DELETE FROM data_controls WHERE scope IN (?,?)','allowance-request:'+siteOwner,'allowance:'+siteOwner);
  const record={...saved,userId:user.id,siteOwner,requestedAt:saved.requestedAt||now(),status:'cleaning'};
  await db.run('INSERT INTO data_controls(scope,policy,updated) VALUES(?,?,?) ON CONFLICT(scope) DO UPDATE SET policy=excluded.policy,updated=excluded.updated',scope,JSON.stringify(record),now());
  // Register even a member who never opened learning: saved cleanup must resume

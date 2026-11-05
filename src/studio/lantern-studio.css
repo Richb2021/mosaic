@@ -233,3 +233,13 @@ details>summary{font-weight:700}
 .trail-explanation{background:var(--ll-cream);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
 .trail-explanation p{margin:0;color:var(--ll-ink);font-size:15px}
 .trail-explanation small{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ll-violet-ink)}
+/* Today's AI allowance, one plain line in the nav */
+.nav-allowance{display:flex;flex-direction:column;gap:2px;color:var(--ll-on-night-soft);font-size:12.5px;line-height:1.45;text-decoration:none;border-radius:12px}
+.nav-allowance:hover span{color:var(--ll-on-night);text-decoration:underline;text-underline-offset:3px}
+.nav-allowance b{color:var(--ll-amber);font-size:12.5px}
+.nav-allowance.is-used span{color:var(--ll-on-night)}
+.nav-allowance:focus-visible{outline:3px solid var(--ll-amber);outline-offset:2px}
+@media (min-width:1024px){.nav-allowance{margin-top:auto;padding:10px 12px}.nav-allowance+.account-link{margin-top:6px}}
+@media (max-width:1023px){.studio-nav{flex-wrap:wrap}.nav-allowance{order:3;flex-basis:100%;flex-direction:row;flex-wrap:wrap;column-gap:10px;padding:0 0 10px;font-size:12px}}
+.allowance-used{font-size:13px;line-height:1.6;margin:8px 0;color:var(--ll-ink-soft,#4A5275)}.allowance-used .allowance-link{display:inline;margin:0}
+.nav-allowance-when{white-space:nowrap}

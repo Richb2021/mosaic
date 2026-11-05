@@ -57,6 +57,8 @@ export async function maintenanceAPI(req,env,{store=new NCBStore(env),now=()=>Da
   await db.run("DELETE FROM data_controls WHERE scope LIKE 'pilot-invite:%' AND json_extract(policy,'$.expires')<?",start);
   await db.run("DELETE FROM data_controls WHERE scope LIKE 'pilot-member:%' AND json_extract(policy,'$.status')='closed' AND updated<?",start-30*DAY);
   await db.run("DELETE FROM data_controls WHERE scope LIKE 'pilot-close:%' AND json_extract(policy,'$.status')='complete' AND updated<?",start-30*DAY);
+  await db.run("DELETE FROM data_controls WHERE scope LIKE 'allowance:%' AND json_extract(policy,'$.expires')<?",start-30*DAY);
+  await db.run("DELETE FROM data_controls WHERE scope LIKE 'allowance-request:%' AND json_extract(policy,'$.status')!='open' AND updated<?",start-30*DAY);
   result.status=result.failed||result.pending?'attention':'complete';
   await auditEvent(env,scope,'background-retention',result,now());
  }finally{await db.run('UPDATE data_controls SET operation=NULL WHERE scope=? AND operation=?',scope,runId);}

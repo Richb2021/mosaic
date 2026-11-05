@@ -1,0 +1,13 @@
+/* Teacher verification notice and invitation links: shared by Welcome and Studio › Classes. Lantern Light tokens. */
+.ti-verify{background:var(--ll-amber-soft);border:1.5px solid var(--ll-amber);border-radius:18px;padding:14px 18px;display:flex;flex-direction:column;gap:6px}
+.ti-verify p{margin:0;font-size:15px}
+.ti-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ti-muted{font-size:14px;color:var(--ll-ink-soft);margin:0}
+.ti-links{background:var(--ll-paper);border-radius:18px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ti-links-head b{flex:1;min-width:12em}
+.ti-links ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.ti-links li{display:grid;grid-template-columns:minmax(0,14em) minmax(0,1fr) auto;align-items:center;gap:8px;font-size:14px;border-top:1px solid var(--ll-line);padding-top:6px}
+.ti-links li span{overflow-wrap:anywhere}
+.ti-links input{font-size:13px;min-height:38px;margin:0;padding:6px 10px;border-radius:10px;border:1.5px solid #D8CCB3;background:var(--ll-white);width:100%;box-sizing:border-box}
+.ti-quiet{background:var(--ll-white)!important;color:var(--ll-ink)!important;box-shadow:none!important;border:1.5px solid var(--ll-line)!important;min-height:38px!important;padding:6px 14px!important;font-size:13px!important}
+@media(max-width:640px){.ti-links li{grid-template-columns:1fr auto}.ti-links li span{grid-column:1/-1}}

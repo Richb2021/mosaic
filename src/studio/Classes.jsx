@@ -5,6 +5,7 @@ import {HelpSeen} from './HelpSeen.jsx';
 import {FeedbackStarters,addStarter} from './feedback-starters.jsx';
 import {classCSV,exportName} from './class-export.js';
 import {ScoreTiles,NotPlayed,CountUp} from './score-tiles.jsx';
+import {VerifyNotice,InviteLinks,AGE_BANDS,UNDER18_CODE_NOTICE,canInvitePupils,inviteBody,parseInviteLines,pilotRequest} from '../teacher-invites.jsx';
 
 // Classes: teachers see one dashboard per class; learners join with a code and choose
 // what to share. Nothing here is a grade, and "not shared" is never shown as inactive.
@@ -35,7 +36,12 @@ function Board({board,compact}){
 export function TeacherClasses({client,onCourses}){
  const {data,error,load,setError}=useClasses(client);
  const [selected,setSelected]=useState(null),[overview,setOverview]=useState(null),[name,setName]=useState(''),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[cursor,setCursor]=useState('0');
- const open=async(id,c='0')=>{setSelected(id);setCursor(c);setOverview(null);try{setOverview(await client.journal.request('classes?view=overview&id='+id+'&cursor='+c))}catch(e){setError(e.message)}};
+ // Pilot status: whether this teacher may invite pupils under 18 (the administrator verifies self-signed-up teachers).
+ const [pilot,setPilot]=useState(null),[inviting,setInviting]=useState(false),[invited,setInvited]=useState(null);
+ const loadPilot=()=>pilotRequest(client.journal.user?.id).then(setPilot).catch(()=>setPilot(null));
+ useEffect(()=>{if(client.journal.user)loadPilot()},[client.journal.user?.id]);
+ const askVerify=async()=>{setBusy(true);setError('');try{await pilotRequest(client.journal.user.id,{action:'verify-request'});setNotice('Verification requested. The organiser will review it.');await loadPilot()}catch(e){setError(e.message)}finally{setBusy(false)}};
+ const open=async(id,c='0')=>{if(id!==selected){setInviting(false);setInvited(null)}setSelected(id);setCursor(c);setOverview(null);try{setOverview(await client.journal.request('classes?view=overview&id='+id+'&cursor='+c))}catch(e){setError(e.message)}};
  const act=async(body,message)=>{setBusy(true);setError('');setNotice('');try{const r=await client.journal.request('classes',body);if(message)setNotice(message);const d=await load();if(body.action==='create'&&r.class)await open(r.class.id);else if(selected&&body.action!=='delete')await open(selected,cursor);if(body.action==='delete'){setSelected(null);setOverview(null)}return r}catch(e){setError(e.message)}finally{setBusy(false)}};
  useEffect(()=>{if(!selected&&data?.teaching?.length)open(data.teaching[0].id)},[data]);
  // After a reply from the inbox, update that one item here rather than re-reading every learner's reports.
@@ -57,16 +63,19 @@ export function TeacherClasses({client,onCourses}){
     {!data?<p className="cl-muted"><span className="ll-loader" aria-hidden="true"><i/><i/><i/><i/></span> Loading…</p>:!data.teaching.length?<p className="cl-muted">No classes yet. Create your first one below.</p>:
      <ul>{data.teaching.map(t=><li key={t.id}><button className={'cl-class'+(t.id===selected?' is-on':'')} aria-current={t.id===selected?'true':undefined} onClick={()=>open(t.id)}><span>{t.name}</span><small>{t.learners} {t.learners===1?'learner':'learners'}{t.archived?' · archived':''}</small></button></li>)}</ul>}
     <form className="cl-create" onSubmit={e=>{e.preventDefault();if(name.trim().length>=2)act({action:'create',name}, 'Class created. Share the join code with your learners.').then(()=>setName(''))}}>
-     <label htmlFor="cl-new">New class</label><input id="cl-new" value={name} maxLength={60} placeholder="e.g. Year 8 History" onChange={e=>setName(e.target.value)}/><button className="primary" disabled={busy||name.trim().length<2}>Create class</button>
+     <label htmlFor="cl-new">New class</label><input id="cl-new" value={name} maxLength={60} placeholder="e.g. Year 8 History" aria-describedby="cl-new-hint" onChange={e=>setName(e.target.value)}/><button className="primary" disabled={busy||name.trim().length<2}>Create class</button>
+     {name.trim().length<2&&<small id="cl-new-hint" className="cl-hint">{name.trim()?'Use at least 2 characters for the class name.':'Type a class name of at least 2 characters.'}</small>}
     </form>
    </aside>
    <section className="cl-main">
     {!selected?<div className="empty-state"><h2>Create a class to get a join code</h2><p>Learners type the code in Me › Classes. You choose whether the class has a leaderboard.</p></div>:!o?<p className="cl-muted"><span className="ll-loader" aria-hidden="true"><i/><i/><i/><i/></span> Opening class…</p>:<>
      <header className="cl-head">
-      <div><h2>{c.name}</h2><p>{o.counts.learners} {o.counts.learners===1?'learner':'learners'}{c.archived?' · archived, no new joins':''}</p></div>
-      {c.code?<div className="cl-code"><span>Join code</span><strong>{pretty(c.code)}</strong><button onClick={()=>copy(c.code)}>Copy</button><button className="text-button" disabled={busy} onClick={()=>act({action:'code',id:c.id},'New code ready. The old one no longer works.')}>New code</button></div>:
+      <div><h2>{c.name}</h2><p>{o.counts.learners} {o.counts.learners===1?'learner':'learners'}{c.archived?' · archived, no new joins':''}</p>{!c.archived&&<button className="primary cl-invite-open" aria-expanded={inviting} onClick={()=>{setInviting(!inviting);setInvited(null)}}>{inviting?'Close invitations':'Invite pupils'}</button>}</div>
+      {c.code?<div className="cl-code"><span>Join code</span><strong>{pretty(c.code)}</strong><button onClick={()=>copy(c.code)}>Copy</button><button className="text-button" disabled={busy} onClick={()=>{if(window.confirm?.('Make a new code? Pupils who haven’t joined yet will need the new code.')!==false)act({action:'code',id:c.id},'New code ready. The old one no longer works.')}}>New code</button></div>:
        <div className="cl-code is-closed"><span>Join code</span><small>None while archived. Reopening gives the class a new code.</small></div>}
      </header>
+     {pilot&&!canInvitePupils(pilot)&&<VerifyNotice state={pilot} busy={busy} onAsk={askVerify}/>}
+     {inviting&&!c.archived&&(invited?<InviteLinks result={invited} onDone={()=>{setInvited(null);setInviting(false)}}/>:<InvitePupils key={c.id} cls={c} pilot={pilot} userId={client.journal.user.id} onSent={r=>{setInvited(r);setNotice('')}} onError={setError}/>)}
      <div className="cl-kpis">
       <button className="cl-kpi" onClick={onCourses}><span className="cl-kpi-icon is-amber" aria-hidden="true"><KpiIcon><path d="M5 12.5l4.5 4.5L19 7.5"/></KpiIcon></span><span>Your chapters to review <small>(all classes)</small></span><b>{o.counts.review}</b></button>
       <div className="cl-kpi"><span className="cl-kpi-icon is-teal" aria-hidden="true"><KpiIcon><path d="M12 3l3 6 6 .8-4.5 4.2 1.2 6L12 17l-5.7 3 1.2-6L3 9.8 9 9z"/></KpiIcon></span><span>Sharing updates{o.counts.partial?' (this page)':''}</span><b>{o.counts.sharing} <small>of {o.counts.partial?o.counts.pageSize:o.counts.learners}</small></b></div>
@@ -77,7 +86,7 @@ export function TeacherClasses({client,onCourses}){
      <div className="cl-grid">
       <section className="cl-card" aria-labelledby="cl-mosaic-h">
        <div className="cl-card-head"><h3 id="cl-mosaic-h">Class mosaic</h3><span>Latest shared update</span></div>
-       {!o.learners.length?<p className="cl-muted">{c.code?<>No one has joined yet. Share the code <b>{pretty(c.code)}</b>.</>:'No one is in this class.'}</p>:<div className="cl-mosaic">{o.learners.map(l=><span key={l.handle} title={l.label+' · '+ago(l.lastShared)} className={'cl-tile '+(l.help?'is-help':l.latest==='practised'?'is-practised':l.latest==='started'||l.lastShared?'is-started':'is-quiet')}>{initials(l.label)}</span>)}</div>}
+       {!o.learners.length?<p className="cl-muted">{c.code?<>No one has joined yet. Adults can use the code <b>{pretty(c.code)}</b>. {UNDER18_CODE_NOTICE}</>:'No one is in this class.'}</p>:<div className="cl-mosaic">{o.learners.map(l=><span key={l.handle} title={l.label+' · '+ago(l.lastShared)} className={'cl-tile '+(l.help?'is-help':l.latest==='practised'?'is-practised':l.latest==='started'||l.lastShared?'is-started':'is-quiet')}>{initials(l.label)}</span>)}</div>}
        <div className="cl-legend"><span><i className="is-practised"/>Practised</span><span><i className="is-started"/>Started or shared</span><span><i className="is-help"/>Asked for help</span><span><i className="is-quiet"/>Not sharing</span></div>
        <p className="cl-muted">Learners choose what to share. These are their own updates, not grades. Not sharing is never shown as inactive.</p>
       </section>
@@ -88,8 +97,8 @@ export function TeacherClasses({client,onCourses}){
      </div>
      <section className="cl-card" aria-labelledby="cl-learners-h">
       <div className="cl-card-head"><h3 id="cl-learners-h">Learners</h3><span>{o.counts.partial?'Showing '+(o.counts.pageStart+1)+'–'+(o.counts.pageStart+o.counts.pageSize)+' of '+o.counts.learners:o.counts.learners+' in this class'}</span><button className="text-button" disabled={busy||!o.counts.learners} onClick={download} title="A spreadsheet of what learners chose to share with you. Leaderboard nicknames are left out.">Download spreadsheet (CSV)</button></div>
-      <div className="cl-assign"><p><b>Set work for the whole class.</b> Open a course, then choose <i>Assign to a whole class</i>. Learners marked “Managed elsewhere” are skipped.</p><button className="text-button" onClick={onCourses}>Open Courses</button></div>
-      {!o.learners.length?<p className="cl-muted">Nobody yet.</p>:<div className="cl-table-wrap"><table className="cl-table"><thead><tr><th>Learner</th><th>Last update shared</th><th>Latest</th><th>Scores</th><th>Explanations</th><th><span className="cl-sr">Actions</span></th></tr></thead><tbody>
+      <div className="cl-assign"><p><b>Set work for the whole class.</b> In <button type="button" className="text-button cl-inline-link" onClick={onCourses}>Courses</button>, open a course and choose <i>Open course route</i>, then <i>Assign to class</i> at the bottom. Learners marked “Managed elsewhere” are skipped.</p><button className="text-button" onClick={onCourses}>Open Courses</button></div>
+      {!o.learners.length?<p className="cl-muted">Nobody yet. {c.archived?'':<>Use <i>Invite pupils</i> above. {UNDER18_CODE_NOTICE}</>}</p>:<div className="cl-table-wrap"><table className="cl-table"><thead><tr><th>Learner</th><th>Last update shared</th><th>Latest</th><th>Scores</th><th>Explanations</th><th><span className="cl-sr">Actions</span></th></tr></thead><tbody>
        {o.learners.map(l=><tr key={l.handle}><td><span className="cl-avatar">{initials(l.label)}</span>{l.label}{l.group==='class'&&<span className="cl-chip is-code" title="Joined with the class code. Class assignments reach them while they stay in the class.">Joined by code</span>}{l.group==='elsewhere'&&<span className="cl-chip is-elsewhere" title="Their school or family organiser manages their access, so class assignments skip them. Ask the administrator to move them to your group.">Managed elsewhere</span>}{l.help&&<span className="cl-chip is-help">Asked for help</span>}</td><td data-label="Last update shared">{ago(l.lastShared)}</td><td data-label="Latest">{l.latest?STATUS_LABEL[l.latest]:'—'}</td><td data-label="Scores">{!l.scores||!l.scores.total?'—':!l.scores.played?<NotPlayed/>:<span className="sc-cell"><ScoreTiles firstTry={l.scores.firstTry} answered={l.scores.answered} help={l.scores.help}/><small>{l.scores.firstTry}/{l.scores.answered} right first time · {l.scores.completed}/{l.scores.total} games done</small></span>}</td><td data-label="Explanations">{l.explanations?l.explanations+(l.unread?' · '+l.unread+' new':''):'—'}</td><td><button className="text-button danger" disabled={busy} onClick={()=>{if(window.confirm?.('Remove '+l.label+' from '+c.name+'? Their shared explanations and leaderboard entry for this class are removed, and they can’t rejoin with the join code unless you allow them back.')!==false)act({action:'remove',id:c.id,handle:l.handle},l.label+' removed. They can’t rejoin with the join code, even a new one, unless you choose Allow back under Removed learners.')}}>Remove</button></td></tr>)}
       </tbody></table></div>}
       {o.learners.some(l=>l.scores?.played)&&<p className="sc-legend"><span><i className="is-first"/>Right first time</span><span><i className="is-help"/>Help used</span><span><i className="is-retry"/>Took another try</span><span>Scores come from the games you assigned.</span></p>}
@@ -109,6 +118,28 @@ export function TeacherClasses({client,onCourses}){
    </section>
   </div>
  </div>;
+}
+
+// Invite pupils into this class: paste emails, choose the age range, add an optional label. It uses the same
+// invitation action as Welcome (so the teacher-verification gate and consent rules apply) and shows the links to copy.
+function InvitePupils({cls,pilot,userId,onSent,onError}){
+ const pupilsOk=canInvitePupils(pilot);
+ const [text,setText]=useState(''),[ageBand,setAgeBand]=useState(pupilsOk?'13to17':'18plus'),[label,setLabel]=useState(''),[approved,setApproved]=useState(false),[busy,setBusy]=useState(false);
+ useEffect(()=>{if(!pupilsOk&&ageBand!=='18plus')setAgeBand('18plus')},[pupilsOk]);
+ const lines=parseInviteLines(text),minor=ageBand!=='18plus',bad=lines.filter(l=>!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(l.email));
+ const why=!lines.length?'Paste at least one email address.':lines.length>30?'Up to 30 emails at a time.':bad.length?'Check: '+bad.slice(0,2).map(l=>l.email).join(', '):(minor||pilot?.role==='guardian')&&!approved?'Confirm the school or guardian approval first.':'';
+ const send=async e=>{e.preventDefault();if(why)return;setBusy(true);onError('');try{const r=await pilotRequest(userId,inviteBody({lines,ageBand,label:label.trim(),classId:cls.id,approved,role:pilot?.role}));onSent(r.invites?r:{...r,email:lines[0].email})}catch(err){onError(err.message)}finally{setBusy(false)}};
+ return <form className="cl-card cl-invite" onSubmit={send} aria-labelledby="cl-invite-h">
+  <div className="cl-card-head"><h3 id="cl-invite-h">Invite pupils to {cls.name}</h3><span>Each person gets a personal link. No email is sent.</span></div>
+  <label>Emails <small>· one per line, up to 30. Add a name after a comma if you like: <i>ray@school.org, Ray Smith</i></small><textarea rows={4} value={text} maxLength={8000} autoComplete="off" spellCheck={false} onChange={e=>setText(e.target.value)}/></label>
+  <div className="cl-invite-fields">
+   <label>Age range<select value={ageBand} onChange={e=>setAgeBand(e.target.value)}>{AGE_BANDS.map(([v,l])=><option key={v} value={v} disabled={v!=='18plus'&&!pupilsOk}>{l}{v!=='18plus'&&!pupilsOk?' · needs verification':''}</option>)}</select></label>
+   <label>Label <small>· optional</small><input value={label} maxLength={lines.length>1?80:60} placeholder={lines.length>1?'A group, e.g. Set 2':'A name you’ll recognise'} onChange={e=>setLabel(e.target.value)}/></label>
+   <label>Class<select value={cls.id} disabled><option value={cls.id}>{cls.name}</option></select></label>
+  </div>
+  {minor||pilot?.role==='guardian'?<label className="check"><input type="checkbox" checked={approved} onChange={e=>setApproved(e.target.checked)}/> I have verified the school or guardian’s authority and their approval for this pupil’s managed access.</label>:<p className="cl-muted">Adults sign up as themselves and confirm they are 18 or over. They join {cls.name} when they accept.</p>}
+  <div className="cl-invite-actions"><button className="primary" disabled={busy||!!why}>{busy?'Making links…':lines.length>1?'Create '+Math.min(lines.length,30)+' invitations':'Create invitation'}</button>{why&&<small className="cl-hint">{why}</small>}</div>
+ </form>;
 }
 
 // The inbox: work learners sent for feedback and help they asked for, newest first, waiting items on top.
@@ -162,6 +193,7 @@ export function LearnerClasses({client,onChange}){
    <label htmlFor="cl-code" className="cl-sr">Class code</label>
    <input id="cl-code" className="cl-code-input" value={code} maxLength={7} autoComplete="off" spellCheck={false} placeholder="ABC-234" onChange={e=>setCode(e.target.value.toUpperCase())}/>
    <button className="primary" disabled={busy||code.replace(/[^A-Za-z0-9]/g,'').length!==6}>Join class</button>
+   {code.replace(/[^A-Za-z0-9]/g,'').length!==6&&<small className="cl-hint">{code?'A class code has 6 letters and numbers.':'Enter the 6-character code to join.'}</small>}
   </form>
   {data&&!data.joined.length&&<p className="cl-muted">You're not in a class yet.</p>}
   {(data?.joined||[]).map(j=><section key={j.id} className="cl-card cl-joined" aria-labelledby={'cl-j-'+j.id}>
@@ -178,7 +210,7 @@ function LeaderboardOptIn({j,busy,board,onSave}){
  return <div className="cl-optin">
   <div className="cl-optin-row"><div><strong>Class leaderboard</strong><p className="cl-muted">Shows your nickname and the steps you took this week. Steps are effort, not scores. Your real name is never shown.</p></div>
    {j.optIn?<button disabled={busy} onClick={()=>onSave(false)}>Leave leaderboard</button>:null}</div>
-  {!j.optIn&&<form className="cl-nick" onSubmit={e=>{e.preventDefault();onSave(true,nick)}}><label htmlFor={'nick-'+j.id}>Nickname</label><input id={'nick-'+j.id} value={nick} maxLength={20} placeholder="e.g. River Fox" onChange={e=>setNick(e.target.value)}/><button className="primary" disabled={busy||nick.trim().length<2}>Join leaderboard</button></form>}
+  {!j.optIn&&<form className="cl-nick" onSubmit={e=>{e.preventDefault();onSave(true,nick)}}><label htmlFor={'nick-'+j.id}>Nickname</label><input id={'nick-'+j.id} value={nick} maxLength={20} placeholder="e.g. River Fox" onChange={e=>setNick(e.target.value)}/><button className="primary" disabled={busy||nick.trim().length<2}>Join leaderboard</button>{nick.trim().length<2&&<small className="cl-hint">Choose a nickname of at least 2 characters.</small>}</form>}
   {j.optIn&&<Board board={board}/>}
  </div>;
 }
