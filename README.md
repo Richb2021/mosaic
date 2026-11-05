@@ -1,89 +1,119 @@
-# Mosaic · personalised learning and Lanternbound games
+# Mosaic: learning, made yours
 
-Mosaic turns reviewed learning material into a connected programme of games, Explore lessons, practice, podcasts, cartoons and tutoring. Lanternbound is its 3D JRPG; this repository now contains the wider platform as well as the game.
+Mosaic turns a teacher's reviewed learning material into games, stories, cartoons, podcasts and practice. Each one is personalised to the learner's interests and age, and every fact can be traced back to a reviewed source.
 
-**Live:** [mosaic.richardbatt.com](https://mosaic.richardbatt.com) · [NoCodeBackend sign-in](https://mosaic.richardbatt.com/account.html). Static assets run on 20i; the Node.js API and private file storage run on Baldur. The old Sites host is retired. See [deployment and access](docs/DEPLOYMENT.md).
+It's built on Meta's **Muse Wonder** (text) and **Muse Image** (pictures) through the Meta Model API, for the Meta Global AI Developer Hackathon (theme: *Build for Your World*).
 
+- **Live app:** https://mosaic.richardbatt.com
+- **Game library (no sign-in needed):** https://mosaic.richardbatt.com/modes.html
+- **3D RPG, Lanternbound:** https://mosaic.richardbatt.com/rpg.html
+
+---
+
+## The problem
+
+Learners switch off when lessons don't connect to them. Teachers don't have time to rewrite every lesson for 30 different interests and reading levels, and most AI tools invent facts, which a teacher can't trust.
+
+## What Mosaic does
+
+**For teachers**
+- Add your own material (notes, a PDF, Word, slides or a web page) and review it. Mosaic generates only from passages you've reviewed, and every activity cites them.
+- Turn a course goal into a route of objectives, then prepare an activity for each one in any format below.
+- Nothing reaches learners until a person approves it.
+- Create classes, invite pupils, and assign courses or chapters.
+- See scores on the games you assigned (right first time, help used, retries), plus an inbox of work and help requests and a CSV export.
+
+**For learners**
+- Today shows what's next, the Trail shows everything done so far, and learners can choose to share updates with their teacher.
+- Activities are written around their interests (anime, football, gaming, animals and more), in a story style they pick, at the right reading level.
+- They can play, revisit, ask for a hint, and export or delete their data at any time.
+
+### Formats
+| Format | What it is |
+| --- | --- |
+| **Lanternbound (3D RPG)** | Explore a world, then an "Underlight" chapter generated for the lesson: puzzles, battles and a boss, where the learning is how you win |
+| **Game library** | Quiz expedition, tactical football, visual novel, 2D adventure, crafting, town and business simulation, economic strategy |
+| **Explore lessons** | Interactive investigations with experiments, graphs and worked reasoning |
+| **Question cycles** | Four-stage adaptive practice spread across the learning focuses, with hints that never give the answer away |
+| **Cartoons and podcasts** | Narrated episodes with Mira and Kit, with backdrops painted by Muse Image for the subject, and a downloadable MP4 or MP3 |
+
+## How Meta's models are used
+
+| Model | Used for | Where in the code |
+| --- | --- | --- |
+| **Muse Wonder** (`muse-wonder-1.0`, Responses API) | Course plans, RPG chapters, all game formats, Explore lessons, question cycles, cartoon and podcast scripts, tutor replies, search suggestions | `server/content-service.js`, `server/creative-provider.js`, `server/course-plan-provider.js`, `src/story-direction.js` |
+| **Muse Image** (1.0) | Subject-specific cartoon backdrops in the episode's art style (game art is in progress) | `server/cartoon-backdrops.js`, `docs/CARTOON-BACKDROPS.md` |
+
+Every generation uses **structured JSON output** with a strict schema. The server then:
+1. **Checks the facts and numbers:** it validates every citation against the reviewed passages, repairs learning-map links, and checks answers and numbers before a person reviews anything.
+2. **Scores the story:** it scores the craft against an 8-part rubric (hook, dramatic question, stakes, ticking clock, open loops between learning beats, payoff and more; see `src/story-quality.js` and `docs/STORY-CRAFT.md`). A clearly weak story gets one guided rewrite.
+3. **Writes for the learner:** the prompt carries the learner's age band, interests, chosen style (11 styles) and the weak spot to practise. The weak spot becomes the story's early mistake.
+
+Measured result: across 8 real generations, the average story-craft score rose from **9.4/16 to 14.5/16**.
+
+## Safety, privacy and cost
+- **Under-18s:** they join only through a personal invitation from a teacher the organiser has verified, and the invitation needs the school's or guardian's approval. Open sign-up is for adults (18+).
+- **Your data:** learners can export or delete their data, and sharing with a teacher is their choice. Teachers see scores only on the work they assigned.
+- **Cost:** every AI call reserves its estimated cost before it's sent, against a per-person daily limit and an app-wide daily cap. The administrator can pause all generation, and can give individual people a higher allowance (for example judges) for a set time. A typical game costs about $0.09; a Muse Image backdrop costs $0.01.
+- **No hidden switches:** Mosaic never silently swaps to another model or provider.
+
+## Try it
+1. **No account:** open the [game library](https://mosaic.richardbatt.com/modes.html) or the [RPG](https://mosaic.richardbatt.com/rpg.html). The included games are free to play.
+2. **As a teacher:** sign up, then on Welcome choose **"I'm a teacher (18+)"**. You can create courses and classes straight away. Inviting under-18 pupils unlocks once the organiser verifies you.
+3. **As an adult learner:** choose **"Start learning on my own (18+)"**.
+4. **Need more AI generations?** Use **Ask for more** on the Welcome page. Judges can ask for a judge allowance.
+
+## How it's built
+```
+Browser (React Studio, Three.js RPG, game library)
+   │  static files: UK web host (20i)
+   ▼
+/api/* ──► small PHP gateway ──► Cloudflare tunnel ──► Node.js server (our own Linux box)
+                                                         ├─ SQLite: app data, cost ledger, jobs
+                                                         ├─ NoCodeBackend: sign-in and learner records
+                                                         ├─ Meta Model API (via a UK relay)
+                                                         └─ Fish Audio: narration and transcription
+Background worker: renders narrated MP4/MP3 episodes
+```
+- Meta's API refuses requests from the server's region, so calls go through a small authenticated relay on the UK host (`deploy/20i/meta-relay.php`, `docs/META-RELAY.md`).
+- Keep-alive connections and DNS caching cut signed-in page loads from 10–17 s to about 4 s (`server/node/keepalive-fetch.mjs`, `server/node/dns-cache.mjs`).
+
+## Run it locally
+Requires Node 22.23 or newer.
+```sh
+npm ci
+npm run dev          # http://127.0.0.1:8878
+npm test             # 780+ behavioural tests
+npm run build        # production build
+```
+The included games work without any keys. Sign-in, AI generation, narration and private storage need server settings, which are described in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) and [docs/STAGING.md](docs/STAGING.md). Keys are never committed.
+
+## Repository guide
+| Location | Purpose |
+| --- | --- |
+| `src/studio/` | The Studio: courses, classes, programme, creative learning, Explore, cycles, Your data |
+| `src/game-modes/` | Game library templates and built-in example packs |
+| `src/main.js`, `src/world.js`, `src/engine.js` | The 3D RPG |
+| `src/story-direction.js`, `src/story-quality.js` | Story styles, audience voice and the story-craft checker |
+| `server/` | API, validation, cost ledger and allowances, classes, sharing, media jobs, provider adapters |
+| `server/node/` | Node server start-up, Meta relay, DNS cache and keep-alive connections |
+| `scripts/staging/` | Private staging copy with test people |
+| `tests/` | Behavioural tests |
+| `docs/` | Feature docs ([index](docs/README.md)) |
+
+## Honest limits
+- **Content quality:** story and learning quality are checked by rules and by human review. A valid citation doesn't prove a lesson is educationally right, which is why a person approves everything.
+- **Not yet done:**
+  - formal accessibility conformance testing
+  - testing with assistive technology on physical devices
+  - an independent classroom evaluation
+- **Scale:** load has been tested at small scale only; see [docs/CAPACITY.md](docs/CAPACITY.md).
 
 ## Licence and third-party assets
-
 The Mosaic code is released under the [MIT licence](LICENSE).
 
 Some assets used by the live site are licensed for use in Mosaic only and are **not included in this repository**:
-
 - **Fonts:** GC Bumble, GC Arturm and Planner Notes (Envato Elements). These go in `public/fonts/lantern/`. Without them, pages fall back to system fonts.
-- **3D models:** the Polyfork kit models (`public/assets/polyfork_*.glb`, see `public/assets/polyfork-manifest.json`). The 3D RPG needs your own licensed copies, or replacement models with the same names.
+- **3D models:** the Polyfork kit models (`public/assets/polyfork_*.glb`, see `public/assets/polyfork-manifest.json`). The RPG needs your own licensed copies, or replacement models with the same names.
 
 Other bundled assets keep their own licences, for example the open-font licences in `public/fonts/` and the lip-sync licences in `public/lip-sync/v1/licenses/`.
-
-## What is implemented
-
-| Area | Current behaviour |
-| --- | --- |
-| Personal learning | Goals, level, interests, difficulties, exam/context, time and accessibility preferences; saved programmes; support suggestions from recorded answers and help used; learner overrides. |
-| Knowledge library | Up to 500 sources per workspace; paged browsing, ranked passage search, reviewed collections, optional original files, versioned evidence and scoped sharing. Text, PDF, Word, slides, captions, spreadsheets, permitted websites and explicit transcription have bounded import paths. |
-| Games | Nine validated templates: 3D RPG, 2D adventure, subject draft, town/business simulation, economic strategy, visual novel, quiz expedition, tactical football and merge/crafting. |
-| Explore and assessment | Interactive investigations, numerical and short-answer work, worked reasoning, rubric-guided writing, first-response evidence and later revisits. Written reasoning is not automatically a grade. |
-| Creative learning | Source-bound podcasts and animated cartoons with reusable art, action/prop staging and lip sync; private saved narration; transcripts and source references. |
-| Tutor | Muse guidance and optional voice input; editable transcription before submission; spoken replies saved for replay. Managed learners require organiser permission. |
-| Accounts and teaching | NoCodeBackend sign-in, verified-email invitations, age-band onboarding, individual/school/family permissions, teacher review, assignments and revocable sharing. |
-| Data and operations | Owner-bound saves, version conflicts, export, deletion, retention, cost/request limits, media jobs, monitoring and recovery tooling. Identity closure has an operator completion step. |
-
-Generation uses **Meta `muse-wonder-1.0` in Standard mode**. Fish handles transcription and speech. There is no silent model substitution. Reviewed evidence is selected before generation; deterministic validation and exact citations precede human review and publication. The model supplies bounded content, never executable game rules or arbitrary asset URLs.
-
-Support adapts from recorded responses and learner choices, not a fixed “learning style”. Game wins and XP do not establish mastery. A valid citation or schema does not establish educational correctness.
-
-## Open the application
-
-- `/account.html` — NoCodeBackend sign-in and account controls.
-- `/welcome.html` — invitations, onboarding and learning-group management.
-- `/studio` — personal programme, sources, courses, creative learning and Your data.
-- `/modes.html` — all game formats, including guest examples.
-- `/` — the personal learning studio.
-- `/rpg.html` — the Lanternbound JRPG.
-- `/cartoons.html` — authored cartoon artwork/player examples, not a personal library.
-
-See [measured public capacity and operating limits](docs/CAPACITY.md) before inviting a concurrent cohort.
-
-Included games can be played as a guest. A new login does not grant access to another person's content or automatically authorise a school/family account. Private features require membership and onboarding. See [permissions](docs/PILOT-LAUNCH.md).
-
-In the RPG, move with WASD/arrows or click a destination; use E or click an object to interact. The menu contains reachable destinations, requests, the map, settings and save journal. Choose Mira or Ren as the lead. Linked regions, interiors, shops, side requests and Underlight Works share authored mechanics across topic packs. See [settlements](docs/SETTLEMENTS.md) and [Underlight Works](docs/UNDERLIGHT-WORKS.md).
-
-## Develop and verify
-
-Use Node 22.23 or newer. From this directory:
-
-```sh
-npm ci
-npm run dev
-```
-
-The local address is normally `http://127.0.0.1:8878`. Included games do not need provider keys. Accounts, generation and private storage need the [server configuration](docs/DEPLOYMENT.md); an unconfigured preview is not proof those features work. Do not copy production learner data into a casual preview.
-
-```sh
-npm test
-npm run build
-```
-
-The hosting migration passed **639 tests**, the production and portable builds, a real public NCB login/library/programme/media/sign-out journey and an isolated storage restore. Public testing used the existing administrator account, with at most four concurrent read requests; this is not a classroom capacity result. Evidence is in `output/public-release/` in the parent workspace.
-
-The preceding adaptive-voice acceptance passed 632 tests. Real NoCodeBackend, Muse and Fish journeys covered uploaded material, review, gameplay, practice, adaptive support and saved tutor speech. Those provider tests used local application storage; the published preview separately passed a read-only browser check. Evidence is in the parent workspace's `output/adaptive-voice/`.
-
-Physical microphone capture, physical mobile/assistive-technology sessions, independent educator/learner evaluation, an independent code audit and a larger production-like load exercise remain outstanding. This is a working platform with bounded evidence, not a claim of universal subject coverage, classroom-scale capacity or accessibility conformance.
-
-## Repository guide
-
-| Location | Purpose |
-| --- | --- |
-| `src/studio/` | Programme, knowledge, assessment, creative learning and voice UI |
-| `src/game-modes/` | Eight illustrated/simulation templates and shared learning model |
-| `src/main.js`, `src/world.js`, `src/engine.js` | RPG UI, rendering/movement and deterministic rules |
-| `server/` | Provider adapters, authentication, ownership, validation, lifecycle and operations |
-| `app/api/` | Existing Worker HTTP entry points |
-| `public/` | Browser assets, authored examples, game art and provenance |
-| `drizzle/` | Application SQL migrations |
-| `tests/`, `evaluation/` | Behavioural regression and educational evaluation fixtures |
-| `scripts/operations/` | Media workers, monitoring, backup and acceptance tools |
-| `docs/` | [Documentation index](docs/README.md) and bounded milestone records |
-
-This directory is its own Git repository. The parent Hackathon workspace holds research, plans, editable art, evidence, scripts and `task-state.json`. Private book/course resources are design references, not a product corpus. See [art direction](docs/ART-DIRECTION.md), [asset contracts](docs/ASSET-CONTRACT.md) and [collision/asset documentation](docs/ASSETS-AND-COLLISION.md). Licensed embedded assets are not a standalone asset pack.
